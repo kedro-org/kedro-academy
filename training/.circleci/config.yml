@@ -1,0 +1,45 @@
+version: 2.1
+
+executors:
+  py38:
+    docker:
+      - image: circleci/python:3.8
+
+commands:
+  setup_requirements:
+    description: Setup requirements
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - checkout
+      - run: |
+          sudo chown -R circleci:circleci /usr/local/bin
+          sudo chown -R circleci:circleci /usr/local/lib/<< parameters.python_version >>/site-packages
+          sudo pip install -r test_requirements.txt
+
+jobs:
+  security_scan:
+    executor: py38
+    steps:
+      - setup_requirements:
+          python_version: "python3.8"
+      - run:
+          command: bandit -ll -r .
+  lint:
+    executor: py38
+    description: Lint the project
+    steps:
+      - setup_requirements:
+          python_version: "python3.8"
+      - run:
+          command: |
+            isort -rc .
+            black .
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint
+      - security_scan

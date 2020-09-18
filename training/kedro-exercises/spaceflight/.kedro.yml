@@ -1,1 +1,6 @@
 context_path: kedro_tutorial.run.ProjectContext
+project_name: "{{ kedro_tutorial.project_name }}"
+project_version: "{{ kedro_tutorial.kedro_version }}"
+package_name: "{{ kedro_tutorial.python_package }}"
+hooks:
+  - {{ kedro_tutorial.python_package }}.hooks.project_hooks

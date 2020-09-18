@@ -28,9 +28,7 @@
 
 from setuptools import find_packages, setup
 
-entry_point = (
-    "kedro-tutorial = kedro_tutorial.run:run_package"
-)
+entry_point = "kedro-tutorial = kedro_tutorial.run:run_package"
 
 
 # get the dependencies and installs
@@ -59,7 +57,7 @@ setup(
             "recommonmark==0.5.0",
             "sphinx-autodoc-typehints==1.6.0",
             "sphinx_copybutton==0.2.5",
-            "jupyter_client>=5.1.0, <6.0",
+            "jupyter_client>=5.1.0, <7.0",
             "tornado>=4.2, <6.0",
             "ipykernel>=4.8.1, <5.0",
         ]
