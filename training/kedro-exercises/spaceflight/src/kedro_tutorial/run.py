@@ -28,24 +28,14 @@
 
 """Application entry point."""
 from pathlib import Path
-from typing import Dict
 
 from kedro.context import KedroContext, load_context
-from kedro.pipeline import Pipeline
-
-from kedro_tutorial.pipeline import create_pipelines
 
 
 class ProjectContext(KedroContext):
     """Users can override the remaining methods from the parent class here,
     or create new ones (e.g. as required by plugins)
     """
-
-    project_name = "kedro-tutorial"
-    project_version = "0.16.4"
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
 
 
 def run_package():

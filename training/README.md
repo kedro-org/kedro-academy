@@ -1,6 +1,6 @@
 # Kedro Training
 
-This repository contains training materials that will teach you how to use [Kedro](https://github.com/quantumblacklabs/kedro/). This content is based on the [Spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) using Kedro 0.15.9 specified in our documentation.
+This repository contains training materials that will teach you how to use [Kedro](https://github.com/quantumblacklabs/kedro/). This content is based on the [Spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) using Kedro 0.16.5 specified in our documentation.
 
 ## Scenario
 
@@ -11,7 +11,7 @@ Our project will be based on the following scenario:
 
 This tutorial covers:
  - Project setup
- - [Setting up a new Kedro project](docs/project-setup.md#creating-a-new-kedro-project)
+ - [Setting up a new Kedro project](docs/04_new_project.md)
  - Using the Data Catalog to connect to data sources
  - Creating, running and visualising a pipeline
  - Advanced functionality in Kedro

@@ -30,15 +30,15 @@ The following lists software that Kedro integrates with; however, during trainin
 Please use this checklist to make sure you have everything necessary to participate in the Kedro training.
 
 - [ ] You have [Python 3 (either 3.6, 3.7 or 3.8)](https://www.python.org/downloads/) installed on your laptop
-- [ ] You have Anaconda or an [alternative](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-training/docs/02_virtual-environment.md) virtual environment manager
+- [ ] You have Anaconda or an [alternative](https://github.com/quantumblacklabs/kedro-training/blob/master/docs/02_virtual-environment.md) virtual environment manager
 - [ ] You have [a code editor](#text-editors-and-ides) installed for writing Python code
 - [ ] You have a [command line](#command-line) installed
 
 Having completed the above checklist, make sure that you are able to execute the following commands in your Terminal:
 - [ ]  `python --version` or `python3 --version` returns a correct Python version (either 3.6, 3.7 or 3.8).
-- [ ] Download the [Kedro training repository](https://github.com/quantumblacklabs/kedro-examples) by following [these instructions](https://stackoverflow.com/questions/2751227/how-to-download-source-in-zip-format-from-github).
+- [ ] Download the [Kedro training repository](https://github.com/quantumblacklabs/kedro-training) by following [these instructions](https://stackoverflow.com/questions/2751227/how-to-download-source-in-zip-format-from-github).
 
-- [ ] `conda create --name=kedro-environment python=3.6 -y && conda activate kedro-environment` creates an virtual environment called `kedro-environment` and activates the environment (you can find how to do this with `venv` or `pipenv` in [here](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-training/docs/02_virtual-environment.md)).
+- [ ] `conda create --name=kedro-environment python=3.6 -y && conda activate kedro-environment` creates an virtual environment called `kedro-environment` and activates the environment (you can find how to do this with `venv` or `pipenv` in [here](https://github.com/quantumblacklabs/kedro-training/blob/master/docs/02_virtual-environment.md)).
 
 - [ ] `pip install kedro` installs Kedro in your conda environment.
 

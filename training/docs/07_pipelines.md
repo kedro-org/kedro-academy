@@ -676,7 +676,7 @@ Kedro-Viz shows you how your Kedro data pipelines are structured. With Kedro-Viz
  - Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
  - Search for nodes and datasets
 
- You should already have `kedro-viz` installed according to these instructions [**here**](https://github.com/quantumblack/kedro-training/blob/master/docs/project-setup.md#kedro-install).
+ You should already have `kedro-viz` installed according to these instructions [**here**](https://kedro.readthedocs.io/en/stable/03_tutorial/06_visualise_pipeline.html).
 
 ### Using `kedro-viz`
 
