@@ -154,8 +154,9 @@ Example of `conf/local/credentials.yml`:
 
 ```yaml
 dev_s3:
-  aws_access_key_id: token
-  aws_secret_access_key: key
+  client_kwargs:
+    aws_access_key_id: key
+    aws_secret_access_key: secret
 ```
 
 Example of the dataset using those credentials defined in `conf/base/catalog.yml`:
