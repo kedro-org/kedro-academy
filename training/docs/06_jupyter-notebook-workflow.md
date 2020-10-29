@@ -69,8 +69,10 @@ Next, you need to reload Kedro variables by calling `%reload_kedro` line magic i
 Finally, you can save the data by executing the following command:
 
 ```python
+import pandas
 my_dict = {"key1": "some_value", "key2": None}
-context.catalog.save("my_dataset", my_dict)
+df = pandas.DataFrame([my_dict])
+context.catalog.save("my_dataset", df)
 ```
 
 ### Using parameters
