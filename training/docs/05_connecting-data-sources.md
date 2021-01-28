@@ -100,7 +100,7 @@ shuttles:
 If you want to check whether Kedro loads the data correctly, open a `kedro ipython` session and run:
 
 ```python
-context.catalog.load('companies').head()
+catalog.load('companies').head()
 ```
 
 This will load the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`, and show you the first five rows of the dataset. It is loaded into a `pandas` DataFrame and you can play with it as you wish.

@@ -1,6 +1,6 @@
 # Create a new project
 
-To create a Kedro project using the _interactive_ mode, run:
+Create a new project in your current working directory:
 
 ```bash
 kedro new
@@ -8,113 +8,18 @@ kedro new
 
 This will ask you to specify:
 1. Project name - you can call it `Kedro Training`
-2. Repository name - accept the default
-3. Python package name - accept the default
-4. Whether you want an example pipeline to be generated for you - type in `N`
+2. Repository name - accept the default by pressing the `Enter` key
+3. Python package name - accept the default by pressing the `Enter` key
 
-Alternatively, a Kedro project can be created in _non-interactive_ mode by calling
+Change your working directory so that you are in your newly created project folder with:
 
 ```bash
-kedro new -c `<config.yml>`
+cd kedro-training
 ```
-
-where `<config.yml>` is a path to a YAML file with the following:
-
-```yaml
-output_dir: ~/code  # this directory must exist
-project_name: Kedro Training
-repo_name: kedro-training
-python_package: kedro_training
-include_example: true
-```
-
-This might be useful when you want to programmatically create your project as part of environment configuration or continuous integration script, for example.
 
 ## Project structure
 
-Once you have successfully run `kedro new`, you should get the following project structure:
-
-<details>
-<summary><b>CLICK TO EXPAND</b></summary>
-
-```console
-kedro-training
-├── README.md
-├── conf
-│   ├── README.md
-│   ├── base
-│   │   ├── catalog.yml
-│   │   ├── credentials.yml
-│   │   ├── logging.yml
-│   │   └── parameters.yml
-│   └── local
-├── data
-│   ├── 01_raw
-│   ├── 02_intermediate
-│   ├── 03_primary
-│   ├── 04_features
-│   ├── 05_model_input
-│   ├── 06_models
-│   ├── 07_model_output
-│   └── 08_reporting
-├── docs
-│   └── source
-│       ├── conf.py
-│       └── index.rst
-├── kedro_cli.py
-├── logs
-│   └── journals
-├── notebooks
-├── setup.cfg
-└── src
-    ├── kedro_training
-    │   ├── __init__.py
-    │   ├── nodes
-    │   │   └── __init__.py
-    │   ├── pipeline.py
-    │   ├── pipelines
-    │   │   └── __init__.py
-    │   └── run.py
-    ├── requirements.txt
-    ├── setup.py
-    └── tests
-        ├── __init__.py
-        └── test_run.py
-```
-</details>
-
-This structure may seem overwhelming at the first glance, but rest assured that you will master it very quickly. Also please bear in mind that this structure intends to fit most analytics projects and is a result of the lessons learned from a number of QuantumBlack's analytics studies. Therefore certain sections may not be applicable for your specific use cases. In the next section we will break down those components into 3 categories:
-1. _core_ components that are essential for Kedro project
-2. the ones that are _nice to have_, so we strongly recommend using them
-3. _non-essential_ components that can be amended / removed without breaking the project
-
-### Folder structure
-
-| Folder      | Description                                                                                                                                                                                                                                                                                                                                                                                                         | Priority      |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `conf`      | The `conf` directory is the place where all your project configuration is located. Kedro has a powerful built-in mechanism for loading configuration. Using `conf` encourages a clear and strict separation between project code and configuration.                                                                                                                                                                 | Core          |
-| `data`      | A place to store _local_ project data according to a suggested [Data Engineering Convention](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention). For production workloads we do not recommend storing data locally, but rather utilising cloud storage (AWS S3, Azure Blob Storage), distributed file storage or database interfaces through Kedro's Data Catalog | Non-essential |
-| `docs`      | `docs` is where your auto-generated project documentation is saved                                                                                                                                                                                                                                                                                                                                                  | Nice to have  |
-| `logs`      | A directory for your Kedro pipeline execution logs                                                                                                                                                                                                                                                                                                                                                                  | Nice to have  |
-| `notebooks` | Kedro supports a Jupyter workflow, that allows you to experiment and iterate quickly on your models. `notebooks` is the folder where you can store your Jupyter Notebooks                                                                                                                                                                                                                                           | Nice to have  |
-| `src`       | Source directory that contains all your pipeline code                                                                                                                                                                                                                                                                                                                                                               | Core          |
-
-#### `src` folder
-
-Source folder by default contains the following components:
-1. Your Kedro project Python package - `kedro_training` in this case
-2. `tests` folder with example unit tests; newly generated projects are preconfigured to run these tests using the [pytest framework](https://docs.pytest.org/en/stable/)
-3. `requirements.txt` file that contains all Python package dependencies
-4. `setup.py` - used by [Python Distutils](https://docs.python.org/3/library/distutils.html) for packaging the project
-
-### Python package
-
-A Kedro project is generated in the form of a [Python package](https://packaging.python.org/tutorials/packaging-projects/). Here are the most important building blocks:
-
-1. `nodes/` - a sub-package containing global nodes, i.e. nodes that are applicable to any pipeline
-2. `pipelines/` - a sub-package containing modular pipelines
-3. `pipeline.py` - a master pipeline that helps you assemble sub-pipelines found in `pipelines/`
-4. `run.py` - contains the `ProjectContext` definition, the backbone of Kedro project architecture and the main application entry point
+The [project structure](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html#project-directory-structure) is explained in the Kedro documentation. 
 
 ## Running Kedro commands
 
