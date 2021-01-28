@@ -46,7 +46,7 @@ As mentioned earlier in the project overview section, `KedroContext` represents 
 You can load a dataset defined in your `conf/base/catalog.yml`, by simply executing the following:
 
 ```python
-df = context.catalog.load("companies")
+df = catalog.load("companies")
 df.head()
 ```
 
