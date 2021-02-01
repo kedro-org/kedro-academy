@@ -47,7 +47,7 @@
 #
 import re
 
-from kedro.cli.utils import find_stylesheets
+from kedro.framework.cli.utils import find_stylesheets
 from recommonmark.transform import AutoStructify
 
 from kedro_tutorial import __version__ as release
@@ -189,7 +189,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "kedro_tutorial", "kedro_tutorial Documentation", [author], 1,)
+    (
+        master_doc,
+        "kedro_tutorial",
+        "kedro_tutorial Documentation",
+        [author],
+        1,
+    )
 ]
 
 # -- Options for Texinfo output ----------------------------------------------
