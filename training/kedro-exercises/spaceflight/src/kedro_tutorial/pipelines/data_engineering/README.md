@@ -13,7 +13,7 @@ This modular pipeline preprocesses the raw data (`preprocessing_companies` and `
 |      |                    |
 | ---- | ------------------ |
 | Type | `pandas.DataFrame` |
-| Description | Source data about the companies provide the space shuttles |
+| Description | Source data about the companies that provide the space shuttles |
 
 ### `shuttles`
 
