@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@
 
 from setuptools import find_packages, setup
 
-entry_point = "kedro-tutorial = kedro_tutorial.run:run_package"
+entry_point = (
+    "spaceflight = kedro_tutorial.run:run_package"
+)
 
 
 # get the dependencies and installs
@@ -52,14 +54,15 @@ setup(
         "docs": [
             "sphinx>=1.6.3, <2.0",
             "sphinx_rtd_theme==0.4.1",
+            "docutils",
             "nbsphinx==0.3.4",
             "nbstripout==0.3.3",
-            "recommonmark==0.5.0",
+            "recommonmark==0.7.1",
             "sphinx-autodoc-typehints==1.6.0",
             "sphinx_copybutton==0.2.5",
             "jupyter_client>=5.1.0, <7.0",
-            "tornado>=4.2, <6.0",
-            "ipykernel>=4.8.1, <5.0",
+            "tornado~=6.1",
+            "ipykernel~=5.3",
         ]
     },
 )

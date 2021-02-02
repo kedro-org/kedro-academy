@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,18 +38,19 @@ To run the tests, run ``kedro test``.
 from pathlib import Path
 
 import pytest
-
-from kedro_tutorial.run import ProjectContext
+from kedro.framework.context import KedroContext
 
 
 @pytest.fixture
 def project_context():
-    return ProjectContext(str(Path.cwd()))
+    return KedroContext(
+        package_name="kedro_tutorial", project_path=Path.cwd()
+    )
 
 
+# The tests below are here for the demonstration purpose
+# and should be replaced with the ones testing the project
+# functionality
 class TestProjectContext:
-    def test_project_name(self, project_context):
-        assert project_context.project_name == "kedro_tutorial"
-
-    def test_project_version(self, project_context):
-        assert project_context.project_version == "0.16.5"
+    def test_package_name(self, project_context):
+        assert project_context.package_name == "kedro_tutorial"

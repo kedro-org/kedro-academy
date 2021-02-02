@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@
 #
 import re
 
-from kedro.cli.utils import find_stylesheets
+from kedro.framework.cli.utils import find_stylesheets
 from recommonmark.transform import AutoStructify
 
 from kedro_tutorial import __version__ as release
@@ -55,7 +55,7 @@ from kedro_tutorial import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "kedro_tutorial"
-copyright = "2020, QuantumBlack Visual Analytics Limited"
+copyright = "2021, QuantumBlack Visual Analytics Limited"
 author = "QuantumBlack"
 
 # The short X.Y version.
@@ -189,7 +189,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "kedro_tutorial", "kedro_tutorial Documentation", [author], 1,)
+    (
+        master_doc,
+        "kedro_tutorial",
+        "kedro_tutorial Documentation",
+        [author],
+        1,
+    )
 ]
 
 # -- Options for Texinfo output ----------------------------------------------
