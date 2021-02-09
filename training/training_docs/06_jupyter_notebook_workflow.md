@@ -74,6 +74,7 @@ Navigate to the `notebooks` folder of your Kedro project and create a new notebo
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
 * `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
+* `session` (`KedroSession`) - Session data (static and dynamic) for the Kedro run.
 * `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
