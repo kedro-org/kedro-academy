@@ -6,7 +6,7 @@ You can find further information about [how to add support for custom datasets](
 
 ## Contributing a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 
