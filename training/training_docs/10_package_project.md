@@ -50,4 +50,4 @@ We also support [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflo
 
 
 ### Next section
-[Go to the next section](./11_configuration.md)
+_[Go to the next section](./11_configuration.md)_
