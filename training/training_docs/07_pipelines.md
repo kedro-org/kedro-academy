@@ -591,5 +591,4 @@ kedro run --runner=ThreadRunner
 
 
 
-[Go to the next page](./08_visualisation.md)_
-
+_[Go to the next page](./08_visualisation.md)_
