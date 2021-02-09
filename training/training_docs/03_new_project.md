@@ -44,29 +44,25 @@ In the text, we assume that you create an empty project and follow the flow of t
 
 However, you may prefer to get up and running more swiftly so we provide the full spaceflights example project as a [Kedro starter](https://kedro.readthedocs.io/en/stable/02_get_started/06_starters.html). 
 
-If you decide to create the example project fully populated with code, navigate to your chosen working directory and run the following:
+Follow one or other of these instructions to create the project:
 
-```bash
-kedro new --starter=spaceflights
-```
+* If you decide to create the example project fully populated with code, navigate to your chosen working directory and run the following: `kedro new --starter=spaceflights`
 
-This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights) so you can follow the tutorial without any of the copy/pasting.
+     - Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Training`**, and that your project is in a sub-folder in your working directory that was created by `kedro new`, named `kedro-training`.
 
-----
+     - Keep the default names for the `repo_name` and `python_package` when prompted.
 
-If you prefer to create an empty tutorial and cut and paste the code to follow along with the steps, you should instead run the following to [create a new empty Kedro project](https://kedro.readthedocs.io/en/stable/02_get_started/04_new_project.html#create-a-new-project-interactively) using the default interactive prompts:
+    - The project will be populated with the template code from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights). It means that you can follow the tutorial without any of the copy/pasting.
 
-```bash
-kedro new
-```
+* If you prefer to create an empty tutorial and cut and paste the code to follow along with the steps, you should instead run the following to [create a new empty Kedro project](https://kedro.readthedocs.io/en/stable/02_get_started/04_new_project.html#create-a-new-project-interactively) using the default interactive prompts: `kedro new`
 
-Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Training`**.
+     - Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Training`**, and that your project is in a sub-folder in your working directory that was created by `kedro new`, named `kedro-training`.
 
-Keep the default names for the `repo_name` and `python_package` when prompted.
+    - Keep the default names for the `repo_name` and `python_package` when prompted.
 
 
 ### Project structure
-Take a few minutes to familiarise yourself with the [Kedro project structure](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html#project-directory-structure) by exploring the contents of `kedro-training` folder.
+Take a few minutes to familiarise yourself with the [Kedro project structure](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html#project-directory-structure) by exploring the contents of the `kedro-training` folder that you created from either of the steps you chose above.
 
 
 ## Configure the project
