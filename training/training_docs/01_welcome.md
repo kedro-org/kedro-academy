@@ -21,9 +21,7 @@ Welcome! We are so pleased you are starting your Kedro journey.
 
 ## Before your training session
 
-These training materials assume some level of technical understanding.
-
-To optimise your experience and learn the most you can from the Kedro training, please review the following and then take a look at the [prerequisites page](./02_prerequisites.md) to get the necessary software, including Kedro, installed and running before your training session. 
+These training materials assume some level of technical understanding, such as knowledge of Python and use of a command line interface. To optimise your experience and learn the most you can from the Kedro training, please review the following and then take a look at the [prerequisites page](./02_prerequisites.md) to get the necessary software, including Kedro, installed and running before your training session. 
 
 ## Prerequisite knowledge: Python, YAML and the CLI
 

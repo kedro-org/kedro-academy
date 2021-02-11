@@ -20,8 +20,7 @@ Follow the official [Kedro prerequisites documentation](https://kedro.readthedoc
 
 A clean install of Kedro is designed to be lightweight. If you later need additional tools, it is possible to install them later.
 
->**Note**: If you encounter any problems, please engage Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
-
+>**Note**: If you encounter any problems, please engage Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro), or refer to the [Kedro.Community Discourse channel](https://discourse.kedro.community/) that is managed by Kedroids all over the world.
 
 ## Code editor
 There are many code editors to choose from. Here are some we recommend:
