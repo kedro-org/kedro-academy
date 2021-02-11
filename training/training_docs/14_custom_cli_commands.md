@@ -26,7 +26,7 @@ cli.add_command(custom)
 
 Once you have made the modification, if you run `kedro -h` in your terminal, you see the new `custom` group.
 
-![](../img/custom_command.png)
+![](./images/custom_command.png)
 
 Run the custom command:
 
@@ -40,5 +40,5 @@ $ kedro custom to-json
 
 The only possible way to extend an existing command is to create a new custom command as described in the previous section.
 
-### Next section
-[Go to the next section](./15_plugins.md)
+_[Go to the next page](./15_plugins.md)_
+

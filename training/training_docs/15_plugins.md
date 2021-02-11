@@ -141,7 +141,7 @@ The following conditions must be true for Airflow to run your pipeline:
 ## Process
 
 1. Run `kedro airflow create` to generate a DAG file for your project.
-2. If needed, customize the DAG file as described [below](https://github.com/quantumblacklabs/kedro-airflow/blob/master/README.md#customization).
+2. If needed, customize the DAG file.
 3. Run `kedro airflow deploy` which will copy the DAG file from the `airflow_dags` folder in your Kedro project into the `dags` folder in the Airflow home directory.
 
 > *Note:* The generated DAG file will be placed in `$AIRFLOW_HOME/dags/` when `kedro airflow deploy` is run, where `AIRFLOW_HOME` is an environment variable. If the environment variable is not defined, Kedro-Airflow will create `~/airflow` and `~/airflow/dags` (if required) and copy the DAG file into it.
@@ -150,6 +150,6 @@ If you need more customisation for Airflow, you can find more information in the
 
 Once `dags` folder is created, you can perform airflow commands. For example, you could run `airflow initdb` to initialise the Airflow SQLite database `airflow.db` under `$AIRFLOW_HOME/dags/`, or `airflow webserver` to start Flask server for Airflow UI as follows:
 
-![Airflow UI](../img/airflow_ui.png)
+![Airflow UI](./images/airflow_ui.png)
 
 You can find more details about Airflow command in their [documentation](https://airflow.apache.org/howto/index.html).
