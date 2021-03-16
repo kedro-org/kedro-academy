@@ -1,4 +1,4 @@
-tasks:
+tsks:
   - init: pip install -r spaceflights-completed/src/requirements.txt
     command: |
       cd spaceflights-jupyter 
@@ -7,3 +7,4 @@ tasks:
 
 ports:
   - port: 8888
+    onOpen: ignore
