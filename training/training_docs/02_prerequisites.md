@@ -1,7 +1,7 @@
 # Training prerequisites
 
 ## Github account
-In order to access the training environment you **must** have a Github account. If you do not have one already then it is quick and easy to [join](https://github.com/join).
+In order to access the training environment you **must** have a Github account. If you do not have one already then [it is quick and easy to join](https://github.com/join).
 
 ## Python knowledge
 
@@ -18,8 +18,8 @@ You should also:
 ## Command line
 
 The course will require basic use of the command line. You should be familiar with:
-  -  `cd` to navigate directories
-  -  `ls` to list files and directories
+  - `cd` to navigate directories
+  - `ls` to list files and directories
 
 >**Note**: If you have any problems or questions in any of the above checklist, please contact an instructor and resolve the issues before the training.
 
