@@ -21,6 +21,6 @@ The course will require basic use of the command line. You should be familiar wi
   - `cd` to navigate directories
   - `ls` to list files and directories
 
->**Note**: If you have any problems or questions in any of the above checklist, please contact an instructor and resolve the issues before the training.
+**Note**: If you have any problems or questions in any of the above checklist, please contact an instructor and resolve the issues before the training.
 
 _[Go to the next page](./03_new_project.md)_
