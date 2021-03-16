@@ -1,4 +1,4 @@
-tsks:
+tasks:
   - init: pip install -r spaceflights-completed/src/requirements.txt
     command: cd spaceflights-jupyter && jupyter lab --ip='*' --NotebookApp.token='' --NotebookApp.password=''
     name: jupyter
