@@ -5,14 +5,13 @@ In order to access the training environment you **must** have a Github account. 
 
 ## Python knowledge
 
-You should be familiar with Python basics. [Take a look at this tutorial to confirm that you are comfortable with](https://docs.python.org/3/tutorial/):
+You should be familiar with Python basics. [Take a look at this tutorial](https://docs.python.org/3/tutorial/) to confirm that you are comfortable with:
   - Functions, loops and conditional statements
   - Common data structures including lists, dictionaries and tuples
   - Modules (e.g how to use `__init__.py`; relative and absolute imports)
 
 You should also:
   - Understand the basics of [dependency management with `requirements.txt`](https://pip.pypa.io/en/latest/user_guide/#requirements-files)
-  - Know about [Python modules](https://docs.python.org/3/tutorial/modules.html) 
   - Have some familiarity with [Python data science libraries](https://towardsdatascience.com/top-10-python-libraries-for-data-science-cd82294ec266), especially `pandas` and `scikit-learn`
   - Understand how to use [Jupyter Notebook/Lab](https://www.dataquest.io/blog/jupyter-notebook-tutorial/)
 
