@@ -7,7 +7,7 @@ These training materials assume some level of technical understanding, such as k
 
 ## What you'll cover
 
-* [Training prerequisites](./02_prerequisites.md) :arrow_left:  **Read this before training starts**
+* :arrow_right: [Training prerequisites](./02_prerequisites.md) :arrow_left:  **Read this before training starts**
 * [Create a new Kedro project](./03_new_project.md)
 * [Project dependencies](./04_dependencies.md)
 * [Add a data source](./05_connect_data_sources.md)
