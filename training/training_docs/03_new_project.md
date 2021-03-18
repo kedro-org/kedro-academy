@@ -2,16 +2,16 @@
 
 This section mirrors the [spaceflights tutorial in the Kedro documentation](https://kedro.readthedocs.io/en/stable/03_tutorial/01_spaceflights_tutorial.html). 
 
-As we work with the spaceflights tutorial, will follow these steps:
+As we work with the spaceflights tutorial, we will follow these steps:
 
 ### 1. Set up the project template
 
 * Create a new project with `kedro new`
+* Install project dependencies with `kedro install`
 * Configure the following in the `conf` folder:
 	* Logging
 	* Credentials
 	* Any other sensitive / personal content
-* Install project dependencies with `kedro install`
 
 ### 2. Set up the data
 
@@ -52,9 +52,9 @@ Follow one or other of these instructions to create the project:
 
      - Keep the default names for the `repo_name` and `python_package` when prompted.
 
-    - The project will be populated with the template code from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights). It means that you can follow the tutorial without any of the copy/pasting.
+    - The project will be populated with the template code from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights). This means that you can follow the tutorial without any of the copy/pasting.
 
-* If you prefer to create an empty tutorial and cut and paste the code to follow along with the steps, you should instead run the following to [create a new empty Kedro project](https://kedro.readthedocs.io/en/stable/02_get_started/04_new_project.html#create-a-new-project-interactively) using the default interactive prompts: `kedro new`
+* If you prefer to create an empty tutorial and copy and paste the code to follow along with the steps, you should instead run `kedro new` to [create a new empty Kedro project](https://kedro.readthedocs.io/en/stable/02_get_started/04_new_project.html#create-a-new-project-interactively).
 
      - Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Training`**, and that your project is in a sub-folder in your working directory that was created by `kedro new`, named `kedro-training`.
 
@@ -81,11 +81,9 @@ dev_s3:
 ```
 
 
-For security reasons, we strongly recommend not committing any credentials or other secrets to the Version Control System. By default any file inside the `conf` folder (and subfolders) in your Kedro project containing `credentials` word in its name will be ignored and not committed to your repository.
+For security reasons, we strongly recommend not committing any credentials or other secrets to the Version Control System. By default any file inside the `conf` folder (and subfolders) in your Kedro project containing `credentials` in its name will be ignored and not committed to your repository.
 
-Please bear it in mind when you start working with Kedro project that you have cloned from GitHub, for example, as you might need to configure required credentials first. 
-
->**Note**: If you maintain a project, you should document how to configure any required credentials in your project's documentation.
+> Note: If you maintain a project, you should document how to configure any required credentials in your project's documentation.
 
 The Kedro documentation lists some [best practices to avoid leaking confidential data](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html#what-best-practice-should-i-follow-to-avoid-leaking-confidential-data).
 

@@ -32,8 +32,8 @@ exit()
 To test the IPython session, load a dataset defined in your `conf/base/catalog.yml`, by simply executing the following:
 
 ```python
-df = catalog.load("companies")
-df.head()
+companies = catalog.load("companies")
+companies.head()
 ```
 
 #### Dataset versioning
@@ -73,9 +73,9 @@ Navigate to the `notebooks` folder of your Kedro project and create a new notebo
 
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
+* `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`, but it's only created at startup time, whereas `context.catalog` is rebuilt everytime.
 * `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
-* `session` (`KedroSession`) - Session data (static and dynamic) for the Kedro run.
-* `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `session` (`KedroSession`) - Kedro session that orchestrates the run
 * `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
 ## How to use `context`
@@ -90,17 +90,14 @@ With `context`, you can access the following variables and methods:
 - `context.project_name` (`str`) - Project folder name
 - `context.catalog` (`DataCatalog`) - An instance of DataCatalog
 - `context.config_loader` (`ConfigLoader`) - An instance of ConfigLoader
-- `context.pipeline` (`Pipeline`) - Defined pipeline
+- `context.pipeline` (`Pipeline`) - The `__default__` pipeline
 
 ### Run the pipeline
 
-If you wish to run the whole main pipeline within a notebook cell, you can do so by instantiating a `Session`:
+If you wish to run the whole main pipeline within a notebook cell, you can do so by running:
 
 ```python
-from kedro.framework.session import KedroSession
-
-with KedroSession.create("<your-kedro-project-package-name>") as session:
-    session.run()
+session.run()
 ```
 
 The command runs the nodes from your default project pipeline in a sequential manner.
@@ -169,17 +166,19 @@ You can also specify the following optional arguments for `session.run()`:
 +---------------+----------------+-------------------------------------------------------------------------------+
 | to_nodes      | Iterable[str]  | A list of node names which should be used as an end point                     |
 +---------------+----------------+-------------------------------------------------------------------------------+
-| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |
+| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |                 |
++---------------+----------------+-------------------------------------------------------------------------------+
+| to_outputs    | Iterable[str]  | A list of dataset names which should be used as an end point                  |
 +---------------+----------------+-------------------------------------------------------------------------------+
 | load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp)         |
 |               |                | for loading - this applies to the versioned datasets only                     |
 +---------------+----------------+-------------------------------------------------------------------------------+
 | pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
-|               |                | by register_pipelines function from src/<package_name>/hooks.py               |
+|               |                | by register_pipelines function from src/<package_name>/pipeline_registry.py   |
 +---------------+----------------+-------------------------------------------------------------------------------+
 ```
 
-This list of options is fully compatible with the list of CLI options for the `kedro run` command. In fact, `kedro run` is calling `context.run()` behind the scenes.
+This list of options is fully compatible with the list of CLI options for the `kedro run` command. In fact, `kedro run` is calling `session.run()` behind the scenes.
 
 
 ## Global variables
@@ -199,7 +198,9 @@ def reload_kedro(project_path, line=None):
         context = session.load_context()
         parameters = context.params
         # ...
-        logging.info("Defined global variable `context`, `session`, `catalog` and `parameters`")
+        logging.info(
+            "Defined global variable `context`, `session`, `catalog` and `parameters`"
+        )
     except:
         pass
 ```
@@ -315,6 +316,8 @@ context = session.load_context()
 To reload these variables at any point (e.g., if you update `catalog.yml`), use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
 
 ![reload kedro line magic graphic](./images/jupyter_notebook_loading_context.png)
+
+Note that if you want to pass an argument to `reload_kedro` line magic function, you should call like a normal Python function (e.g `reload_kedro(extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn't work).
 
 If the `KEDRO_ENV` environment variable is specified, the startup script loads that environment, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [Kedro configuration documentation](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#additional-configuration-environments).
 

@@ -3,11 +3,11 @@ Welcome! We are so pleased you are starting your Kedro journey.
 
 ## Before your training session
 
-These training materials assume some level of technical understanding, such as knowledge of Python and use of a command line interface. To optimise your experience and learn the most you can from the Kedro training, please take a look at the [prerequisites page](./02_prerequisites.md) before your training session. 
+These training materials assume some level of technical understanding, such as knowledge of Python and the use of a command line interface. To optimise your experience and learn the most you can from the Kedro training, please take a look at the [prerequisites](./02_prerequisites.md) before your training session. 
 
 ## What you'll cover
 
-* :arrow_right: [Training prerequisites](./02_prerequisites.md) :arrow_left:  **Read this before training starts**
+* [Training prerequisites](./02_prerequisites.md) :arrow_left:  **Read this before training starts**
 * [Create a new Kedro project](./03_new_project.md)
 * [Project dependencies](./04_dependencies.md)
 * [Add a data source](./05_connect_data_sources.md)
