@@ -1,7 +1,5 @@
 # Kedro Training
 
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/AntonyMilneQB/kedro-training)
-
 This repository contains training materials that will teach you how to use [Kedro](https://github.com/quantumblacklabs/kedro/). This content is based on the standard [spaceflights tutorial described in the Kedro documentation](https://kedro.readthedocs.io/en/stable/03_tutorial/01_spaceflights_tutorial.html). 
 
 The training documentation was most recently updated against Kedro 0.17.2 in March 2021.
