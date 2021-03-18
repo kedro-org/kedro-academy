@@ -56,7 +56,8 @@ export KEDRO_ENV=test
 > *Note*: If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
 ## Templating configuration
-Kedro also provides an extension (`TemplatedConfigLoader`) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
+Kedro also provides an extension (`TemplatedConfigLoader`) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`. 
+To apply templating to your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
