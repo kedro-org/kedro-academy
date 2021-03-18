@@ -12,7 +12,7 @@ isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.17.0
+kedro==0.17.2
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=2.5 # Produces test coverage reports
 pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest
@@ -30,10 +30,10 @@ The dependencies above may be sufficient for some projects, but for the spacefli
 pip install kedro[pandas.CSVDataSet,pandas.ExcelDataSet]
 ```
 
-Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.0` with the following (your version of Kedro may be different):
+Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.2` with the following (your version of Kedro may be different):
 
 ```text
-kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.0
+kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.2
 ```
 
 Then run the following:
@@ -42,7 +42,7 @@ Then run the following:
 kedro build-reqs
 ```
 
-[`kedro build-reqs`](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html#build-the-project-s-dependency-tree) takes `requirements.in` file (or `requirements.txt` if it does not yet exist), resolves all package versions and 'freezes' them by putting pinned versions back into `requirements.txt`. It significantly reduces the chances of dependencies issues due to downstream changes as you would always install the same package versions.
+[`kedro build-reqs`](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html#build-the-project-s-dependency-tree) takes the `requirements.in` file (or `requirements.txt` if it does not yet exist), resolves all package versions and 'freezes' them by putting pinned versions back into `requirements.txt`. This significantly reduces the chances of dependencies issues due to downstream changes as you would always install the same package versions.
 
 
 You can find out more about [how to work with project dependencies](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies.html) in the Kedro project documentation. 
