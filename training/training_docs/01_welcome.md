@@ -3,13 +3,13 @@ Welcome! We are so pleased you are starting your Kedro journey.
 
 ## What you'll cover
 
-* [Training prerequisites](./02_prerequisites.md) << Read this before training starts
+* :arrow_right: [Training prerequisites](./02_prerequisites.md) :arrow_left:  **Read this before training starts**
 * [Create a new Kedro project](./03_new_project.md)
 * [Project dependencies](./04_dependencies.md)
 * [Add a data source](./05_connect_data_sources.md)
 * [Jupyter notebook workflow](./06_jupyter_notebook_workflow.md)
 * [Kedro pipelines](./07_pipelines.md)
-* [Pipeline visualisatopm](./08_visualisation.md)
+* [Pipeline visualisation](./08_visualisation.md)
 * [Versioning](./09_versioning.md)
 * [Package your project](./10_package_project.md)
 * [Configuration](./11_configuration.md)

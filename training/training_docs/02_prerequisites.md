@@ -78,4 +78,3 @@ If you are able to complete all of the above, you are ready for the training!
 
 _[Go to the next page](./03_new_project.md)_
 
-

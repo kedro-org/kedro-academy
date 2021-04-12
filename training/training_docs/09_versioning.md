@@ -13,9 +13,9 @@ master_table:
   versioned: true
 ```
 
-The `DataCatalog` will create a versioned `CSVDataSet` called `master_table`. The actual csv file location will look like `data/03_primary/master_table.csv/<version>/master_table.csv`, where the first `/master_table.csv/` is a directory and `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
+The `DataCatalog` will create a versioned `CSVDataSet` called `master_table`. The actual csv file location will be `data/03_primary/master_table.csv/<version>/master_table.csv`, where the first `/master_table.csv/` is a directory and `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
-With the similar way, you can version your machine learning model. Enable versioning for `regressor` as follow:
+In a similar way, you can version your machine learning model. Enable versioning for `regressor` as follow:
 
 ```yaml
 regressor:
@@ -24,12 +24,12 @@ regressor:
   versioned: true
 ```
 
-This will save versioned pickle models everytime you run the pipeline.
+This will save versioned pickle models every time you run the pipeline.
 
 > *Note:* The list of the datasets supporting versioning can be find in [the documentation](https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#supported-datasets).
 
 ## Loading a versioned dataset
-By default, the `DataCatalog` will load the latest version of the dataset. However, you can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
+By default, the `DataCatalog` will load the latest version of the dataset. However, you can run the pipeline with a particular versioned dataset with `--load-version` flag as follows:
 
 ```bash
 kedro run --load-version="master_table:YYYY-MM-DDThh.mm.ss.sssZ"
