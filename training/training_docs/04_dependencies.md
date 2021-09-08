@@ -47,14 +47,12 @@ kedro build-reqs
 
 You can find out more about [how to work with project dependencies](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies.html) in the Kedro project documentation. 
 
-## `kedro install`
+## Install the project-specific dependencies
 
 To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
-kedro install
+pip install -r src/requirements.txt
 ```
-
-This command is roughly equivalent to `pip install -r src/requirements.txt`, however `kedro install` is a bit smarter on Windows when it needs to upgrade its version. It also makes sure that the dependencies are always installed in the same virtual environment as Kedro.
 
 _[Go to the next page](./05_connect_data_sources.md)_
