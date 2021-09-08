@@ -7,7 +7,7 @@ As we work with the spaceflights tutorial, we will follow these steps:
 ### 1. Set up the project template
 
 * Create a new project with `kedro new`
-* Install project dependencies with `kedro install`
+* Install project dependencies with `pip install -r src/requirements.txt`
 * Configure the following in the `conf` folder:
 	* Logging
 	* Credentials
