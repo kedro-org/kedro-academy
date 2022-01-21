@@ -24,7 +24,7 @@ kedro/extras/datasets/image
 
 3. The dataset should be accompanied by full test coverage in `tests/extras/datasets`.
 
-4. Make a pull request against the `master` branch of [Kedro's Github repository](https://github.com/kedro-org/kedro).
+4. Make a pull request against the `main` branch of [Kedro's Github repository](https://github.com/kedro-org/kedro).
 
 
 _[Go to the next page](./14_custom_cli_commands.md)_
