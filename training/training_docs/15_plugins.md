@@ -55,7 +55,7 @@ kedro to-json
 
 # Kedro-Docker
 
-Configuring a Docker container environment may become complex and tedious. [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker) significantly simplifies this process and reduces it to 2 steps:
+Configuring a Docker container environment may become complex and tedious. [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) significantly simplifies this process and reduces it to 2 steps:
 
 ## How do I install Kedro-Docker?
 
@@ -114,7 +114,7 @@ For example:
 
 # Kedro-Airflow
 
-Kedro is not a workflow scheduler. Kedro makes it easy to prototype your data pipeline, while Airflow is a complementary framework that is great at managing deployment, scheduling, monitoring and alerting. A Kedro pipeline is like a machine that builds a car part. While Airflow tells the different Kedro machines to switch on or off to work together to produce a car. We have built a [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow/) plugin, providing faster prototyping time and reducing the barriers to entry associated with moving pipelines to Airflow.
+Kedro is not a workflow scheduler. Kedro makes it easy to prototype your data pipeline, while Airflow is a complementary framework that is great at managing deployment, scheduling, monitoring and alerting. A Kedro pipeline is like a machine that builds a car part. While Airflow tells the different Kedro machines to switch on or off to work together to produce a car. We have built a [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) plugin, providing faster prototyping time and reducing the barriers to entry associated with moving pipelines to Airflow.
 
 [Apache Airflow](https://github.com/apache/airflow) is a tool for orchestrating complex workflows and data processing pipelines. The Kedro-Airflow plugin can be used for:
 - Rapid pipeline creation in the prototyping phase. You can write Python functions in Kedro without worrying about schedulers, daemons, services or having to recreate the Airflow DAG file.
@@ -146,7 +146,7 @@ The following conditions must be true for Airflow to run your pipeline:
 
 > *Note:* The generated DAG file will be placed in `$AIRFLOW_HOME/dags/` when `kedro airflow deploy` is run, where `AIRFLOW_HOME` is an environment variable. If the environment variable is not defined, Kedro-Airflow will create `~/airflow` and `~/airflow/dags` (if required) and copy the DAG file into it.
 
-If you need more customisation for Airflow, you can find more information in the [README](https://github.com/quantumblacklabs/kedro-airflow).
+If you need more customisation for Airflow, you can find more information in the [README](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow).
 
 Once `dags` folder is created, you can perform airflow commands. For example, you could run `airflow initdb` to initialise the Airflow SQLite database `airflow.db` under `$AIRFLOW_HOME/dags/`, or `airflow webserver` to start Flask server for Airflow UI as follows:
 

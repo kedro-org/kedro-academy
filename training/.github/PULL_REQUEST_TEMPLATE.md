@@ -6,7 +6,7 @@
 
 ## Checklist
 
-- [ ] Read the [contributing](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) guidelines
+- [ ] Read the [contributing](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md) guidelines
 - [ ] Opened this PR as a 'Draft Pull Request' if it is work-in-progress
 - [ ] Updated the documentation to reflect the code changes
 - [ ] Added tests to cover my changes
