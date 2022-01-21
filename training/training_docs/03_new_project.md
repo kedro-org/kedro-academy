@@ -52,7 +52,7 @@ Follow one or other of these instructions to create the project:
 
      - Keep the default names for the `repo_name` and `python_package` when prompted.
 
-    - The project will be populated with the template code from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights). This means that you can follow the tutorial without any of the copy/pasting.
+    - The project will be populated with the template code from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights). This means that you can follow the tutorial without any of the copy/pasting.
 
 * If you prefer to create an empty tutorial and copy and paste the code to follow along with the steps, you should instead run `kedro new` to [create a new empty Kedro project](https://kedro.readthedocs.io/en/stable/02_get_started/04_new_project.html#create-a-new-project-interactively).
 
