@@ -1,7 +1,7 @@
 
 ## Visualise your pipeline
 
-[Kedro Viz](https://github.com/quantumblacklabs/kedro-viz) shows you how your Kedro data pipelines are structured. You can use it to:
+[Kedro Viz](https://github.com/kedro-org/kedro-viz) shows you how your Kedro data pipelines are structured. You can use it to:
 
  - See how your datasets and Python functions (nodes) are resolved in Kedro so that you can understand how your data pipeline is built
  - Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
@@ -22,7 +22,7 @@ This command will run a server on http://127.0.0.1:4141 and will open up your vi
 
 ### Examples of `kedro-viz`
 
- - You can have a look at a retail ML use case [**here**](https://quantumblacklabs.github.io/kedro-viz/)
+ - You can have a look at a retail ML use case [**here**](https://kedro-org.github.io/kedro-viz/)
  - And an example of this Spaceflights pipeline [**here**](https://medium.com/@QuantumBlack/demystifying-machine-learning-complexity-through-visualisation-11a9d73db3c5)
 
 _[Go to the next page](./09_versioning.md)_

@@ -30,7 +30,7 @@ There are many code editors to choose from. Here are some we recommend:
 - [Atom](https://atom.io/)
 
 ## Kedro training code
-Download the [Kedro training repository](https://github.com/quantumblacklabs/kedro-training) by following [these instructions](https://stackoverflow.com/questions/2751227/how-to-download-source-in-zip-format-from-github).
+Download the [Kedro training repository](https://github.com/kedro-org/kedro-training) by following [these instructions](https://stackoverflow.com/questions/2751227/how-to-download-source-in-zip-format-from-github).
 
 ## Git (optional)
 
