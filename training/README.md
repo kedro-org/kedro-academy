@@ -1,10 +1,10 @@
 # Kedro Training
 
-This repository contains training materials that will teach you how to use [Kedro](https://github.com/kedro-org/kedro). This content is based on the standard [spaceflights tutorial described in the Kedro documentation](https://kedro.readthedocs.io/en/stable/tutorial/spaceflights_tutorial.html).
+This repository contains legacy materials used previously for basic [Kedro](https://github.com/kedro-org/kedro) training. The content is based on the standard [spaceflights tutorial described in the Kedro documentation](https://kedro.readthedocs.io/en/stable/tutorial/spaceflights_tutorial.html).
 
 The training documentation was most recently updated against Kedro 0.17.2 in March 2021.
 
-To get started, navigate to the [training_docs](./training_docs/01_welcome.md) to see what is covered in the training, and how to ensure you get the most out of the time you set aside for it.
+To get started, navigate to [training_docs](./training_docs/01_welcome.md) to see what is covered.
 
 > **Note**
 > These materials come from https://github.com/kedro-org/kedro-training, now archived.
