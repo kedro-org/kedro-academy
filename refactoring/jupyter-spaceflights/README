@@ -1,0 +1,6 @@
+Run the notebooks to predict price of spaceflights from companies, reviews and shuttles input data
+
+You'll need to have sklearn version 0.24 or above installed
+
+Use these features to get R^2 of 0.462 on test set:
+["engines", "passenger_capacity", "crew", "d_check_complete", "moon_clearance_complete", "iata_approved", "company_rating", "review_scores_rating"]
