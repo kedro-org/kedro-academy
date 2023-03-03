@@ -1,4 +1,5 @@
-# kedro-academy
-This repository will initially be used for example code and exercises.
+# Kedro Academy 🎓
 
-The first exercise will be a basic example of how to use GitHub and Git.
+This repository contains learning materials about Kedro curated by the Kedro team.
+
+Browse the different directories for further information.
