@@ -1,6 +1,6 @@
 # Environment and dependencies
 
-Your client is trying to run a very old code delivered by a former colleague, but they're unable to do so.
+Your client is trying to run very old code delivered by a former colleague, but they're unable to get it working.
 
 **Install the necessary dependencies for the script to work, without changing the code**.
 

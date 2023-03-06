@@ -1,6 +1,6 @@
 # Use configuration
 
-You were given some code that reads a bunch of files and applies some basic preprocessing.
+You were given some code that reads a set of files and applies some basic preprocessing.
 
 **Move hardcoded paths and magic numbers to a configuration file.**
 
