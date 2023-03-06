@@ -29,11 +29,11 @@ Finally! That was a bit frustrating but at least an `errorbars.png` appears in t
 
 ### Declare the dependencies
 
-Create a `requirements.txt` file with the dependencies you have to install. To verify that it works:
+Create a `requirements.txt` file on the same level as this `README.md` file with the dependencies you have to install. To verify that it works:
 
 1. Deactivate the environment running `deactivate`
 2. Delete the old environment with `rm -rf .venv`
 3. Create a new one with the command given above
 4. Add the dependencies to `requirements.txt`
 5. Install those dependencies with `pip install -r requirements.txt`
-6. Repeat until the script works again
+6. Verify that the script works, and if it doesn't, repeat the steps 4 and 5
