@@ -1,0 +1,14 @@
+image: gitpod/workspace-python-3.10:2023-03-06-18-43-51
+
+tasks:
+- name: install-mamba
+  init: |
+    pyenv install mambaforge-22.9.0-2
+    pyenv uninstall -f 3.8.16 || true
+  command: |
+    pyenv global mambaforge-22.9.0-2
+
+github:
+  prebuilds:
+    # explicitly enable prebuilds for the main branch
+    main: true
