@@ -4,10 +4,10 @@ Your client is trying to run very old code delivered by a former colleague, but 
 
 **Install the necessary dependencies for the script to work, without changing the code**.
 
-> **Note**:
-> This assumes a Python 3.7 environment.
-
 ## Steps
+
+1. Create a new conda/mamba environment called `dependencies37` with Python 3.7.
+2. Activate it and proceed with the following steps.
 
 ### Create and activate a virtual environment
 
