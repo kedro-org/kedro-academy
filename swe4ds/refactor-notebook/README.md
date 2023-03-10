@@ -2,6 +2,11 @@
 
 You are given a script that produces a series of plots in the `outputs` directory. Refactor it to make it more modular and maintainable.
 
+## Setup
+
+1. Create a new conda/mamba environment called `refactor310` with Python 3.10.
+2. Activate it and proceed with the following steps.
+
 ## Steps
 
 Follow these steps one by one. After completing each and before going to the next, verify that the script runs successfully, and that the images in `output` are properly generated. If you get stuck, have a look at `hints.md` (but only as a last resort!)
