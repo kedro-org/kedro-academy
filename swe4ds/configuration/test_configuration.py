@@ -1,6 +1,12 @@
 import pytest
 
-from main import load_yaml
+from yaml import load, SafeLoader
+
+
+def load_yaml(path):
+    with open(path) as fh:
+        contents = load(fh, Loader=SafeLoader)
+    return contents
 
 
 def test_shuttles_includes_adjust_factor():
