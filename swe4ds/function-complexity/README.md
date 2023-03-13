@@ -8,6 +8,12 @@ The script contains a working solution to [Problem 4](https://projecteuler.net/p
 
 Refactor it into functions that have 1 responsibility.
 
+## Setup
+
+1. Create a new conda/mamba environment called `functions310` with Python 3.10.
+2. Activate the environment and install `pytest` on it.
+3. Execute `pytest` to verify that none of the tests pass.
+
 ## Steps
 
 1. Create a function `is_palindrome` that receives an integer and returns `True` or `False` depending on whether the number is a palindrome or not

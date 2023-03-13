@@ -4,6 +4,12 @@ You were given some code that reads a set of files and applies some basic prepro
 
 **Move hardcoded paths and magic numbers to a configuration file.**
 
+## Setup
+
+1. Create a new conda/mamba environment called `configuration310` with Python 3.10.
+2. Activate the environment and install `pytest` on it.
+3. Execute `pytest` to verify that none of the tests pass.
+
 ## Steps
 
 1. Observe that some absolute paths have been included in the script. Probably they worked on the author's computer, but not anymore. Move the data files to a `data/` directory, and make the paths relative.
