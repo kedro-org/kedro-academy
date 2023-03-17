@@ -19,7 +19,7 @@ Refactor it into functions that have 1 responsibility.
 1. Create a function `is_palindrome` that receives an integer and returns `True` or `False` depending on whether the number is a palindrome or not
 2. Write a function `filter_palindromes` that receives a sequence of numbers and returns a sequence containing only the numbers that are palindromes (use `is_palindrome` for it).
 3. Write a function `numbers_with_n_digits` that receives an integer representing the number of digits and returns a sequence of all positive numbers with that number of digits.
-4. Write a function `max_palindromes_with_n_digits` that receives an integer representing the number of digits and returns the maximum palindrome made from the product of two numbers with that number of digits (hence the solution of Problem 4).
+4. Write a function `max_palindrome_product_with_n_digits` that receives an integer representing the number of digits and returns the maximum palindrome made from the product of two numbers with that number of digits (hence the solution of Problem 4).
 
 Remember to document all functions with a docstring!
 

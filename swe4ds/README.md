@@ -5,10 +5,10 @@ Exercises for the Software Engineering for Data Scientists course.
 ## How to create a new virtual environment
 
 ```bash
-conda env create -n {env_name} python={python_version} --channel conda-forge
+conda create -n {env_name} python={python_version} --channel conda-forge
 ```
 
-For example: `conda env create -n kedro310 python=3.10 --channel conda-forge`.
+For example: `conda create -n kedro310 python=3.10 --channel conda-forge`.
 
 **Notes**:
 
