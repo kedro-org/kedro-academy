@@ -26,5 +26,5 @@ To load a YAML file:
 import yaml
 
 with open("file.yaml") as fh:
-    content = yaml.load(fh, Loader=SafeLoader)
+    content = yaml.load(fh, Loader=yaml.SafeLoader)
 ```
