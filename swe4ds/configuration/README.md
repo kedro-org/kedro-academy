@@ -17,3 +17,14 @@ You were given some code that reads a set of files and applies some basic prepro
 3. Notice that each dataset has an `index_col`. Include them in the `catalog.yaml` file and adjust the script accordingly.
 4. Finally, observe that there's a magic number that adjusts the shuttle prices (could be a currency conversion factor or anything else). Move that constant to a `metadata` key inside the corresponding dataset, and adjust the code accordingly.
 5. (Extra) What if at some point we decide to use Parquet files instead of CSV ones (highly recommended)? We would like to parametrize the dataset type in the configuration file too, but right now the script has `pd.read_csv` calls hardcoded. Include a `type: pandas.CSVDataSet` or `type: pandas.ExcelDataSet` in `catalog.yaml`, and modify the code so that it uses this `type` to decide what function call to use. _By the way, this is what Kedro does for you transparently!_
+
+## Cheatsheet
+
+To load a YAML file:
+
+```python
+import yaml
+
+with open("file.yaml") as fh:
+    content = yaml.load(fh, Loader=SafeLoader)
+```
