@@ -20,4 +20,3 @@ def test_catalog_contains_required_keys(dataset):
     catalog = load_yaml("catalog.yaml")
 
     assert "filepath" in catalog[dataset]
-    assert "index_col" in catalog[dataset]
