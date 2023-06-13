@@ -1,6 +1,6 @@
-# Cheatsheet for Software Engineering for Data Scientists
+# Introduction to Software Engineering principles for Data Scientists
 
-Exercises for the Software Engineering for Data Scientists course.
+Materials for the course.
 
 ## How to create a new virtual environment
 
