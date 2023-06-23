@@ -1,0 +1,12 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "logging_hooks"
+authors = [{name = "Juan Luis Cano", email = "juan_luis_cano@mckinsey.com"}]
+readme = "README.md"
+dynamic = ["version", "description"]
+
+[project.entry-points."kedro.hooks"]
+logging_hooks = "logging_hooks.plugin:hooks"
