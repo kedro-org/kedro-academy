@@ -1,7 +1,2 @@
 image:
   file: .gitpod.Dockerfile
-
-github:
-  prebuilds:
-    # explicitly enable prebuilds for the main branch
-    main: true
