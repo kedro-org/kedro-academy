@@ -1,0 +1,8 @@
+flit
+ipython
+kedro~=0.18.14
+kedro-datasets[pandas,polars]>=1.3.0
+kedro-viz
+pandas
+polars
+scikit-learn
