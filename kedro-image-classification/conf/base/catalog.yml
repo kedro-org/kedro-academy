@@ -1,0 +1,74 @@
+# Here you can define all your data sets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+ships:
+  type: partitions.PartitionedDataset
+  path: data/01_raw/shipsnet/shipsnet
+  dataset:
+    type: pillow.ImageDataset
+
+ships_train:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/train_ships.npy
+  
+ships_test:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/test_ships.npy
+
+ships_val:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/val_ships.npy
+
+# "ships_{type}":
+#   type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+#   filepath: data/02_intermediate/{type}.npy
+
+labels_train:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/train_labels.npy
+
+labels_test:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/test_labels.npy
+
+labels_val:
+  type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+  filepath: data/02_intermediate/val_labels.npy
+
+# "labels_{type}":
+#   type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
+#   filepath: data/02_intermediate/{type}_labels.npy
+
+fitted_model:
+  type: tensorflow.TensorFlowModelDataset
+  filepath: data/06_models/fitted_model.keras
+
+history:
+  type: pickle.PickleDataset
+  filepath: data/06_models/history.pkl
+
+accuracy_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/accuracy_plot.json
+
+loss_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/loss_plot.json
+
+# "{type}_plot":
+#   type: plotly.JSONDataset
+#   filepath: data/08_reporting/{type}_plot.json
+
+# accuracy_plot:
+#   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+#   dataset:
+#     type: plotly.JSONDataset
+#     filepath: data/08_reporting/accuracy_plot.json
+
+# loss_plot:
+#   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+#   dataset:
+#     type: plotly.JSONDataset
+#     filepath: data/08_reporting/loss_plot.json
