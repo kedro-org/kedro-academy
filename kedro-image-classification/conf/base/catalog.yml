@@ -53,15 +53,13 @@ history:
   type: pickle.PickleDataset
   filepath: data/06_models/history.pkl
 
-  accuracy_plot:
+accuracy_plot:
   type: plotly.JSONDataset
   filepath: data/08_reporting/accuracy_plot.json
-  credentials: minio_credentials
 
 loss_plot:
   type: plotly.JSONDataset
   filepath: data/08_reporting/loss_plot.json
-  credentials: minio_credentials
 
 
 # accuracy_plot:
