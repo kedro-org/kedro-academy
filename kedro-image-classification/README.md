@@ -14,7 +14,8 @@ pip install -r requirements.txt
 ## Setup Minio (optional)
 1. Spin up MinIO:
 
-```$ docker compose up -d 
+```
+$ docker compose up -d 
 ```
 2. Create a `data` bucket:
 
