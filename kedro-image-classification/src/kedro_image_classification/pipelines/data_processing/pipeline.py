@@ -4,8 +4,7 @@ generated using Kedro 0.19.8
 """
 
 from kedro.pipeline import Pipeline, node, pipeline
-
-from .nodes import convert_to_np, split_train_test_val
+from .nodes import convert_to_np, split_train_test_val, preview_train_data
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -23,5 +22,10 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs=["ships_train", "ships_val", "ships_test", "labels_train", "labels_val", "labels_test"],
                 name="split_train_test_val",
             ),
-
+            node(
+                func=preview_train_data,
+                inputs=["ships_train", "labels_train"],
+                outputs="preview_train_data",
+                name="preview_train_data",
+            )
         ])

@@ -11,6 +11,44 @@ pip install -r requirements.txt
 ```
 3. Download the [dataset from Kaggle](https://www.kaggle.com/datasets/rhammell/ships-in-satellite-imagery) and place it in the `data/01_raw` directory
 
+## Setup Minio (optional)
+1. Spin up MinIO:
+
+```
+$ docker compose up -d 
+```
+2. Create a `data` bucket:
+
+```
+$ mc alias set myminio http://127.0.0.1:9010 minioadmin minioadmin
+$ mc mb myminio/data
+```
+
+3. Add to local/credentials.yml
+```
+minio_credentials:
+    key: minioadmin
+    secret: minioadmin
+    client_kwargs:
+        endpoint_url: http://127.0.0.1:9010
+```
+
+4. Update `catalog.py` datasets:
+
+```
+accuracy_plot:
+  type: plotly.JSONDataset
+  filepath: s3://data/08_reporting/accuracy_plot.json
+  credentials: minio_credentials
+
+loss_plot:
+  type: plotly.JSONDataset
+  filepath: s3://data/08_reporting/loss_plot.json
+  credentials: minio_credentials
+```
+
+
+
 ## Part 1: Introduction to the project and Kedro concepts
 
 For the first part of the tutorial, we'll be going through the raw data science code and see how to refactor it to make it more modular and reusable. We'll also start using Kedro as a library to explore and process the data with the help of `DataCatalog` and `OmegaConfigLoader` components.
