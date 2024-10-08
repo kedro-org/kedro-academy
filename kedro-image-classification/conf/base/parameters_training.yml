@@ -4,6 +4,6 @@
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/0.19.8/configuration/parameters.html
 
-epochs: 10
+epochs: 2
 batch_size: 16
 input_shape: [80, 80, 3]

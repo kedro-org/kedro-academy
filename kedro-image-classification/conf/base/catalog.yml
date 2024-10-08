@@ -49,6 +49,10 @@ fitted_model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/06_models/fitted_model.keras
 
+# fitted_model:
+#   type: kedro_mlflow.io.models.MlflowModelTrackingDataset 
+#   flavor: mlflow.keras
+
 history:
   type: pickle.PickleDataset
   filepath: data/06_models/history.pkl
@@ -87,3 +91,6 @@ loss_plot:
 #   dataset:
 #     type: plotly.JSONDataset
 #     filepath: data/08_reporting/loss_plot.json
+
+# accuracy:
+#   type: kedro_mlflow.io.metrics.MlflowMetricDataset
