@@ -37,6 +37,10 @@ labels_val:
   type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
   filepath: data/02_intermediate/val_labels.npy
 
+preview_train_data:
+  type: matplotlib.MatplotlibWriter
+  filepath: data/02_intermediate/preview_ships_data.png
+
 # "labels_{type}":
 #   type: kedro_image_classification.datasets.numpy_dataset.NumpyDataset
 #   filepath: data/02_intermediate/{type}_labels.npy
@@ -49,13 +53,26 @@ history:
   type: pickle.PickleDataset
   filepath: data/06_models/history.pkl
 
-accuracy_plot:
+  accuracy_plot:
   type: plotly.JSONDataset
   filepath: data/08_reporting/accuracy_plot.json
+  credentials: minio_credentials
 
 loss_plot:
   type: plotly.JSONDataset
   filepath: data/08_reporting/loss_plot.json
+  credentials: minio_credentials
+
+
+# accuracy_plot:
+#   type: plotly.JSONDataset
+#   filepath: s3://data/08_reporting/accuracy_plot.json
+#   credentials: minio_credentials
+
+# loss_plot:
+#   type: plotly.JSONDataset
+#   filepath: s3://data/08_reporting/loss_plot.json
+#   credentials: minio_credentials
 
 # "{type}_plot":
 #   type: plotly.JSONDataset
