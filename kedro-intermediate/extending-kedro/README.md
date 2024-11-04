@@ -1,100 +1,54 @@
-# extending-kedro
+# Extending Kedro through hooks and plugins
 
-[![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
+The goal is to add custom hooks that log extra information during the execution of a pipeline.
 
-## Overview
+## In-tree hooks
 
-This is your new Kedro project, which was generated using `kedro 0.19.9`.
+1. Create a new Kedro project using the `spaceflights` starter, install the dependencies from `requirements.txt`, and verify that `kedro run` runs without problems.
+2. Create a `hooks.py` file inside the source directory and add a `NodeLoggingHooks` class with a `before_node_run` hook that logs the number of inputs for the node at `WARNING` level:
 
-Take a look at the [Kedro documentation](https://docs.kedro.org) to get started.
+```python
+...
 
-## Rules and guidelines
+class NodeLoggingHooks:
 
-In order to get the best out of the template:
-
-* Don't remove any lines from the `.gitignore` file we provide
-* Make sure your results can be reproduced by following a [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention)
-* Don't commit data to your repository
-* Don't commit any credentials or your local configuration to your repository. Keep all your credentials and local configuration in `conf/local/`
-
-## How to install dependencies
-
-Declare any dependencies in `requirements.txt` for `pip` installation.
-
-To install them, run:
-
-```
-pip install -r requirements.txt
+    # ...
+    def before_node_run(self, ...):
+        logger.warning("About to run node: %s", ...)
 ```
 
-## How to run your Kedro pipeline
+3. Register that hook in `settings.py` using the `HOOKS` variable.
+4. Execute `kedro run --pipeline=data_processing` and verify that you see three new lines of logs.
 
-You can run your Kedro project with:
+## Out-of-tree hooks through plugins
 
-```
-kedro run
-```
+1. Create a new empty directory called `kedro-custom-hook` _outside of `spaceflights`_.
+2. Create a new Python library in that directory, including a `pyproject.toml` and the corresponding source directory.
 
-## How to test your Kedro project
-
-Have a look at the files `src/tests/test_run.py` and `src/tests/pipelines/data_science/test_pipeline.py` for instructions on how to write your tests. Run the tests as follows:
+To create the `pyproject.toml` file you can use `uv init`:
 
 ```
-pytest
+$ uv init --lib -p 3.11
 ```
 
-To configure the coverage threshold, look at the `.coveragerc` file.
+3. Add another hook class to `src/kedro_custom_hook/__init__.py` with this structure:
 
-## Project dependencies
+```python
+class PipelineLoggingHooks:
 
-To see and update the dependency requirements for your project use `requirements.txt`. You can install the project requirements with `pip install -r requirements.txt`.
+    # ...
+    def before_pipeline_run(self, run_params, pipeline):
+        logger.error("About to run pipeline with nodes: %s", ...)
 
-[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 
-## How to work with Kedro and notebooks
-
-> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `catalog`, `context`, `pipelines` and `session`.
->
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
-
-### Jupyter
-To use Jupyter notebooks in your Kedro project, you need to install Jupyter:
-
-```
-pip install jupyter
+hooks = PipelineLoggingHooks()
 ```
 
-After installing Jupyter, you can start a local notebook server:
+4. Add the appropriate entry points in `pyproject.toml`:
 
-```
-kedro jupyter notebook
-```
-
-### JupyterLab
-To use JupyterLab, you need to install it:
-
-```
-pip install jupyterlab
+```toml
+[project.entry-points."kedro.hooks"]
+custom_kedro_hook = ...
 ```
 
-You can also start JupyterLab:
-
-```
-kedro jupyter lab
-```
-
-### IPython
-And if you want to run an IPython session:
-
-```
-kedro ipython
-```
-
-### How to ignore notebook output cells in `git`
-To automatically strip out all output cell contents before committing to `git`, you can use tools like [`nbstripout`](https://github.com/kynan/nbstripout). For example, you can add a hook in `.git/config` with `nbstripout --install`. This will run `nbstripout` before anything is committed to `git`.
-
-> *Note:* Your output cells will be retained locally.
-
-## Package your Kedro project
-
-[Further information about building project documentation and packaging your project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html)
+5. Install the code with `uv pip install -e /path/to/kedro-custom-hook` and run the pipeline again to check that the logs appear
