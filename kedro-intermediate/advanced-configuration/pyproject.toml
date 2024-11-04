@@ -1,0 +1,32 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "advanced_configuration"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = [ "dependencies", "version",]
+
+[project.scripts]
+advanced-configuration = "advanced_configuration.__main__:main"
+
+[tool.kedro]
+package_name = "advanced_configuration"
+project_name = "advanced-configuration"
+kedro_init_version = "0.19.9"
+tools = [ "Data Structure",]
+example_pipeline = "True"
+source_dir = "src"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic.dependencies]
+file = "requirements.txt"
+
+[tool.setuptools.dynamic.version]
+attr = "advanced_configuration.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
