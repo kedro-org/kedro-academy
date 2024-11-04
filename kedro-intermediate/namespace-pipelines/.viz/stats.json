@@ -1,0 +1,1 @@
+{"model_input_table": {"rows": 6027, "columns": 27, "file_size": 212183}, "active_modelling_pipeline.X_train": {"rows": 4821, "columns": 8}, "active_modelling_pipeline.X_test": {"rows": 1206, "columns": 8}, "candidate_modelling_pipeline.X_train": {"rows": 4821, "columns": 4}, "candidate_modelling_pipeline.X_test": {"rows": 1206, "columns": 4}}

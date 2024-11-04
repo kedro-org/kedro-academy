@@ -1,0 +1,17 @@
+[project]
+name = "kedro-custom-hook"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Juan Luis Cano Rodríguez", email = "juan_luis_cano@mckinsey.com" }
+]
+requires-python = ">=3.11"
+dependencies = ["kedro"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.entry-points."kedro.hooks"]
+custom_kedro_hook = "kedro_custom_hook:hooks"
