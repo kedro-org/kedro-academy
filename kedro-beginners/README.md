@@ -104,6 +104,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 func=preprocess_companies,
                 inputs="companies",
                 outputs="preprocessed_companies",
+                name="preprocess_companies_node",  # Notice the `name=`!
             )
         ]
     )
@@ -233,3 +234,85 @@ Now GitHub Actions will execute `kedro run` every time you push to the main bran
 
 - Tweak the conditions so that this runs on a regular cadence (for example 5 minutes to see the effect).
   _Hint: Keyword is "cron"_.
+
+### 4. Databricks Asset Bundles integration
+
+First, authenticate to your Databricks instance using the Databricks CLI:
+
+```
+$ databricks configure --token
+Databricks host: https://...
+Personal access token: *****...
+```
+
+Verify that it worked:
+
+```
+$ databricks fs ls dbfs:/
+Shared
+Volume
+Volumes
+databricks-datasets
+...
+```
+
+Now, install [`kedro-databricks`](https://pypi.org/project/kedro-databricks/):
+
+```
+$ uv add kedro-databricks
+```
+
+Initialise the `kedro-databricks` configuration:
+
+```
+$ uv run kedro databricks init
+...
+Please select your cloud provider:
+1. Azure
+2. AWS
+3. GCP
+ [1]: 1
+...
+INFO     Creating databricks configuration: Wrote databricks.yml
+INFO     Creating bundle override configuration: Wrote conf/base/databricks.yml
+...
+```
+
+Then, create the bundle:
+
+```
+$ uv run databricks bundle
+...
+INFO     Create Asset Bundle Resources: Databricks resources successfully generated.
+INFO     Writing resource 'spacelights': Wrote resources/spacelights.yml
+INFO     Writing resource 'spacelights_data_processing': Wrote resources/spacelights_data_processing.yml
+...
+```
+
+Next, deploy it:
+
+```
+$ uv run kedro databricks deploy
+```
+
+> [!NOTE]
+> Sometimes the logs will say `ERROR` even if the underlying command was successful,
+> see [this issue](https://github.com/JenspederM/kedro-databricks/issues/97).
+
+And finally, execute it:
+
+```
+$ databricks bundle run
+Run URL: ...
+
+... "[dev ...] spacelights_data_processing" RUNNING
+...
+```
+
+> [!NOTE]
+> If you get a permission error here because you cannot create new clusters,
+> follow [these instructions] to use an existing one instead.
+
+[these instructions]: https://docs.kedro.org/en/stable/deployment/databricks/databricks_ide_databricks_asset_bundles_workflow.html#running-a-databricks-job-using-an-existing-cluster
+
+Seat back and relax while your Kedro pipeline should execute on Databricks!
