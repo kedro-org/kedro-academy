@@ -4,8 +4,8 @@
 
 1. First steps with Kedro, library components
 2. Framework and template, CLI usage, VS Code extension
-2. Simple production deployments with GitHub Actions
-3. Databricks integration with kedro-databricks
+3. Simple production deployments with GitHub Actions
+4. Databricks Asset Bundles integration with `kedro-databricks`
 
 ## Guide
 
