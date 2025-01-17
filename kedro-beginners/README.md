@@ -183,3 +183,53 @@ Kedro does this for you behind the scenes.
   [the `kedro-datasets` API documentation].
 
 [the `kedro-datasets` API documentation]: https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-6.0.0/api/kedro_datasets.html
+
+### 3. Simple production deployments with GitHub Actions
+
+Create a new GitHub repository, and push the contents:
+
+```
+$ git remote add origin ...@github.com:.../kedro-beginners-demo-....git
+  git branch -M main
+  git push -u origin main
+```
+
+Navigate to the "Actions" tab. You will see some suggested templates.
+Locate the "Python application" one and click Configure
+to use that as a template.
+
+The steps should look like this:
+
+```yaml
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.11"
+    - name: Run Kedro pipeline
+      run: |
+        uv run --frozen kedro run -p data_processing
+```
+
+Now GitHub Actions will execute `kedro run` every time you push to the main branch!
+
+> [!WARNING]
+> If your `uv.lock` refers to a private artifactory, you will have to deal with authentication.
+> For example, you can create a `.netrc` file:
+> ```
+> - name: Create .netrc file
+>   run: |
+>     echo "machine ${{ secrets.ARTIFACTORY_DOMAIN }}" >> ~/.netrc
+>     echo "  login ${{ secrets.ARTIFACTORY_USER }}" >> ~/.netrc
+>     echo "  password ${{ secrets.ARTIFACTORY_PASS }}" >> ~/.netrc
+> ```
+
+#### Exercise
+
+- Tweak the conditions so that this runs on a regular cadence (for example 5 minutes to see the effect).
+  _Hint: Keyword is "cron"_.
