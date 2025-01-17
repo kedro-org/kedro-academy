@@ -190,7 +190,7 @@ Kedro does this for you behind the scenes.
 Create a new GitHub repository, and push the contents:
 
 ```
-$ git remote add origin ...@github.com:.../kedro-beginners-demo-....git
+$ git remote add origin ...@github.com:.../kedro-beginners-....git
   git branch -M main
   git push -u origin main
 ```
