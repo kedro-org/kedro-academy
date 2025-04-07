@@ -265,7 +265,7 @@ resources:
                     package_name: spaceflights
                     entry_point: spaceflights
                     parameters:
-                    - --pipeline
+                    - --nodes
                     - train_evaluation.linear_regression.evaluate_model
                     - --conf-source
                     - ${workspace.file_path}/conf
