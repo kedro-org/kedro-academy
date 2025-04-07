@@ -79,22 +79,6 @@ resources:
                 libraries:
                 -   whl: ../dist/*.whl
                 existing_cluster_id: 0327-113653-sw9v617d
-            -   task_key: ingestion_prm_spine_table_clone
-                depends_on:
-                -   task_key: ingestion_combine_step
-                python_wheel_task:
-                    package_name: spaceflights
-                    entry_point: spaceflights
-                    parameters:
-                    - --nodes
-                    - ingestion.prm_spine_table_clone
-                    - --conf-source
-                    - ${workspace.file_path}/conf
-                    - --env
-                    - dev
-                libraries:
-                -   whl: ../dist/*.whl
-                existing_cluster_id: 0327-113653-sw9v617d
             job_clusters:
             -   job_cluster_key: default
                 new_cluster:

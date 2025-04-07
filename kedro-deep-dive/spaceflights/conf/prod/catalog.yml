@@ -174,13 +174,6 @@ y_test:
   type: pandas.CSVDataset
   filepath: file://${_file_path}/data/08_model_input/y_test.csv
 
-ingestion.prm_spine_table_clone:
-  type: pandas.ParquetDataset
-  filepath: file://${_file_path}/data/08_model_input/prm_spine_table_clone.pq
-  metadata:
-    kedro-viz:
-      layer: primary
-
 feature_engineering.feat_static_features:
   type: pandas.CSVDataset
   filepath: file://${_file_path}/data/08_model_input/feat_static_features.csv
