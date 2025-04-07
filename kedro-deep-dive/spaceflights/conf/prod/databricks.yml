@@ -1,0 +1,13 @@
+default:
+  job_clusters:
+  - job_cluster_key: default
+    new_cluster:
+      data_security_mode: USER_ISOLATION
+      node_type_id: Standard_DS3_v2
+      num_workers: 2
+      spark_env_vars:
+        KEDRO_LOGGING_CONFIG: \${workspace.file_path}/conf/logging.yml
+      spark_version: 15.4.x-scala2.12
+  tasks:
+  - existing_cluster_id: 0326-125320-azyqytom
+    task_key: default
