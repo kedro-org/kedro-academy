@@ -1,0 +1,25 @@
+feature_engineering:
+  feature:
+    static:
+      - engines
+      - passenger_capacity
+      - crew
+      - d_check_complete
+      - moon_clearance_complete
+      - iata_approved
+      - company_rating
+      - review_scores_rating
+      - price
+    derived:
+      - column_a: number_of_reviews
+        column_b: total_fleet_count
+        numpy_method: divide
+        conjunction: over # {column_a}_{over}_{column_b}
+      - column_a: number_of_reviews
+        column_b: total_fleet_count
+        numpy_method: divide
+        conjunction: over
+      - column_a: reviews_per_month
+        column_b: company_rating
+        numpy_method: multiply
+        conjunction: by

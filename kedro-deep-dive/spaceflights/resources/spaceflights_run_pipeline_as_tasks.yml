@@ -1,0 +1,76 @@
+resources:
+    jobs:
+        spaceflights_run_pipelines_as_tasks:
+            name: spaceflights_run_pipelines_as_tasks
+            tasks:
+            -   task_key: data_ingestion
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --pipeline
+                    - data_ingestion
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: feature_engineering
+                depends_on:
+                -   task_key: data_ingestion
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --pipeline
+                    - feature_engineering
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: modelling_stage
+                depends_on:
+                -   task_key: feature_engineering
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --pipeline
+                    - modelling_stage
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_stage
+                depends_on:
+                -   task_key: modelling_stage
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --pipeline
+                    - reporting_stage
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12
