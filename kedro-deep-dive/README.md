@@ -20,3 +20,10 @@ We've extended this and added additional workflows to show:
 
 This is meant to be a hands-on, simple example for those looking to understand and implement Kedro in a production-like setting.
 
+## Other Useful links 
+- [How to group nodes on Kedro?](https://docs.kedro.org/en/stable/deployment/nodes_grouping.html)
+- [Modifying a run](https://docs.kedro.org/en/stable/development/commands_reference.html#modifying-a-kedro-run)
+- Kedro GenAI related dataset
+    - [HuggingFace](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets.huggingface.HFDataset.html)
+    - [LangChain](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental.langchain.ChatOpenAIDataset.html)
+  
