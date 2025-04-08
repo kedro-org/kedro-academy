@@ -24,6 +24,6 @@ This is meant to be a hands-on, simple example for those looking to understand a
 - [How to group nodes on Kedro?](https://docs.kedro.org/en/stable/deployment/nodes_grouping.html)
 - [Modifying a run](https://docs.kedro.org/en/stable/development/commands_reference.html#modifying-a-kedro-run)
 - Kedro GenAI related dataset
-    - [HuggingFace] (https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets.huggingface.HFDataset.html)
-    - [LangChain] (https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental.langchain.ChatOpenAIDataset.html)
+    - [HuggingFace](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets.huggingface.HFDataset.html)
+    - [LangChain](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental.langchain.ChatOpenAIDataset.html)
   
