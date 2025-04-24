@@ -33,6 +33,7 @@ pip install -r requirements.txt
 Create a `credentials.yml` file and place it in the `conf/local/` directory with the following format:
 ```yaml
 openai:
+  # openai_api_base is optional
   openai_api_base: <openai-api-base>
   openai_api_key: <openai-api-key>
 ```
