@@ -1,0 +1,112 @@
+{
+    "datetime": "2024-10-31",
+    "user": "U051XN6QR7X",
+    "name": "jannik_wiedenhaupt",
+    "real_name": "Jannik Wiedenhaupt",
+    "text": "When using BigQuery Datasets how do you define a default dataset project wide?",
+    "reply_count": 12,
+    "reply_users_count": 3,
+    "reply_users": [
+        "U03R8FW4HUZ",
+        "U07F68EN11B",
+        "U051XN6QR7X"
+    ],
+    "replies": [
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730427832.233759",
+            "datetime": "2024-10-31",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "So you can define defaults this way \n<https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html|https://docs.kedro.org/en/stable/data/kedro_dataset_factories.html>\n\nBut I would encourage Ibis these days over any of the pandas datadets when working with sql"
+        },
+        {
+            "user": "U07F68EN11B",
+            "ts": "1730446952.957759",
+            "datetime": "2024-11-01",
+            "name": "laurens",
+            "real_name": "Laurens Vijnck",
+            "text": "<@U051XN6QR7X> Are you referring to `dataset` in this case as a Kedro or BigQuery concept? If you like to use a default BigQuery dataset project wide, you can set that via a global.\n\n```# Globals.yml\nbq_dataset: dataset_name_here```\n```# Catalog.yaml\ndataset:\n  type: YouBigQuereBigQueryTableDatasetHere\n  dataset: ${globals:bq_dataset}\n  table: nodes\n  filepath: ${globals:paths.int}/rtx_kg2/nodes\n  save_args:\n    mode: overwrite\n    labels:\n      kg: rtx_kg2\n      git_sha: ${globals:git_sha}```\nWe have a custom implementation of a BigQuery dataset that uses Spark under the hood, but registers the table in BigQuery as an external dataset for interactive analysis. Happy to share if that helps you."
+        },
+        {
+            "user": "U051XN6QR7X",
+            "ts": "1730470254.352149",
+            "datetime": "2024-11-01",
+            "name": "jannik_wiedenhaupt",
+            "real_name": "Jannik Wiedenhaupt",
+            "text": "Thank you Laurens, that's what I was looking for!"
+        },
+        {
+            "user": "U07F68EN11B",
+            "ts": "1730470605.116369",
+            "datetime": "2024-11-01",
+            "name": "laurens",
+            "real_name": "Laurens Vijnck",
+            "text": "```class BigQueryTableDataset(SparkDataset):\n    \"\"\"Implementation fo a BigQueryTableDataset.\n\n    The class delegates dataset save and load invocations to the native SparkDataset\n    and registers the dataset into BigQuery through External Data Configuration.\n    \"\"\"\n\n    def __init__(  # noqa: PLR0913\n        self,\n        *,\n        filepath: str,\n        project_id: str,\n        dataset: str,\n        table: str,\n        identifier: str,\n        file_format: str,\n        load_args: dict[str, Any] = None,\n        save_args: dict[str, Any] = None,\n        version: Version = None,\n        credentials: dict[str, Any] = None,\n        metadata: dict[str, Any] = None,\n        **kwargs,\n    ) -&gt; None:\n        \"\"\"Creates a new instance of ``BigQueryTableDataset``.\n\n        Args:\n            project_id: project identifier.\n            dataset: Name of the BigQuery dataset.\n            table: name of the table.\n            identifier: unique identfier of the table.\n            file_format: file format to use\n            load_args: Arguments to pass to the load method.\n            save_args: Arguments to pass to the save\n            version: Version of the dataset.\n            credentials: Credentials to connect to the Neo4J instance.\n            metadata: Metadata to pass to neo4j connector.\n            kwargs: Keyword Args passed to parent.\n        \"\"\"\n        self._project_id = project_id\n        self._path = filepath\n        self._format = file_format\n        self._labels = save_args.pop(\"labels\", {})\n\n        self._table = self._sanitize_name(f\"{table}_{identifier}\")\n        self._dataset_id = f\"{self._project_id}.{self._sanitize_name(dataset)}\"\n\n        self._client = bigquery.Client(project=self._project_id)\n\n        super().__init__(\n            filepath=filepath,\n            file_format=file_format,\n            save_args=save_args,\n            load_args=load_args,\n            credentials=credentials,\n            version=version,\n            metadata=metadata,\n            **kwargs,\n        )\n\n    def _load(self) -&gt; Any:\n        SparkHooks._initialize_spark()\n        return super()._load()\n\n    def _save(self, data: DataFrame) -&gt; None:\n        # Invoke saving of the underlying spark dataset\n        super()._save(data)\n\n        # Ensure dataset exists\n        self._create_dataset()\n\n        # Create external table\n        external_config = bigquery.ExternalConfig(self._format.upper())\n        external_config.source_uris = [f\"{self._path}/*.{self._format}\"]\n\n        # Register the external table\n        table = bigquery.Table(f\"{self._dataset_id}.{self._table}\")\n        table.labels = self._labels\n        table.external_data_configuration = external_config\n        table = self._client.create_table(table, exists_ok=False)\n\n    def _create_dataset(self) -&gt; str:\n        try:\n            self._client.get_dataset(self._dataset_id)\n            print(f\"Dataset {self._dataset_id} already exists\")\n        except exceptions.NotFound:\n            print(f\"Dataset {self._dataset_id} is not found, will attempt creating it now.\")\n\n            # Dataset doesn't exist, so let's create it\n            dataset = bigquery.Dataset(self._dataset_id)\n            # dataset.location = \"US\"  # Specify the location, e.g., \"US\" or \"EU\"\n\n            dataset = self._client.create_dataset(dataset, timeout=30)\n            print(f\"Created dataset {self._project_id}.{dataset.dataset_id}\")\n\n    @staticmethod\n    def _sanitize_name(name: str) -&gt; str:\n        \"\"\"Function to sanitise BigQuery table or dataset identifiers.\n\n        Args:\n            name: str\n        Returns:\n            Sanitized name\n        \"\"\"\n        return re.sub(r\"[^a-zA-Z0-9_]\", \"_\", str(name))```"
+        },
+        {
+            "user": "U07F68EN11B",
+            "ts": "1730470646.864499",
+            "datetime": "2024-11-01",
+            "name": "laurens",
+            "real_name": "Laurens Vijnck",
+            "text": "This is an implementation that loads and saves the table as a plain dataset, but registers in BigQuery for exploratory analysis (which is more cost effective than storing in BQ directly depending on your data access patterns)"
+        },
+        {
+            "user": "U051XN6QR7X",
+            "ts": "1730470673.358759",
+            "datetime": "2024-11-01",
+            "name": "jannik_wiedenhaupt",
+            "real_name": "Jannik Wiedenhaupt",
+            "text": "Thank you!"
+        },
+        {
+            "user": "U051XN6QR7X",
+            "ts": "1730470747.689449",
+            "datetime": "2024-11-01",
+            "name": "jannik_wiedenhaupt",
+            "real_name": "Jannik Wiedenhaupt",
+            "text": "<@U03R8FW4HUZ> What is the advantage of ibis? Since there are no bigquery specific ibis datasets in kedro, I am assuming you just configure the ibis.TableDataset?"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730471579.383619",
+            "datetime": "2024-11-01",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "Yeah ibis generates sql behind the scenes so there is minimal infrastructure overhead and also the same code works with 20+ alternative backends "
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730471609.115339",
+            "datetime": "2024-11-01",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "I also like the idea of using BigQuery in prod, but duckdb in dev"
+        },
+        {
+            "user": "U07F68EN11B",
+            "ts": "1730471687.388689",
+            "datetime": "2024-11-01",
+            "name": "laurens",
+            "real_name": "Laurens Vijnck",
+            "text": "yeah I think that's quite cool and I think it kinda depends on ur pipeline setup. We have a base `env` that uses Spark datasets all over the place, and then a `cloud`  env that uses the dataset above to move some stuff to BigQuery (so we don't really use BQ as a query engine)."
+        },
+        {
+            "user": "U051XN6QR7X",
+            "ts": "1730478343.134929",
+            "datetime": "2024-11-01",
+            "name": "jannik_wiedenhaupt",
+            "real_name": "Jannik Wiedenhaupt",
+            "text": "On a similar note, how do you guys provide parameters in sql queries? It seems like the GBQQueryDataset doesn't have the option compared to pandas.SQLQueryDataset"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730478768.572799",
+            "datetime": "2024-11-01",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "&gt; On a similar note, how do you guys provide parameters in sql queries? It seems like the GBQQueryDataset doesn't have the option compared to pandas.SQLQueryDataset\nThis is another argument for Ibis, you'll have to write a custom dataset to do that"
+        }
+    ]
+}

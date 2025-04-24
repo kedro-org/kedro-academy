@@ -1,0 +1,22 @@
+{
+    "datetime": "2024-10-31",
+    "user": "U07TVC269E1",
+    "name": "shu-chun.wu",
+    "real_name": "Shu-Chun Wu",
+    "text": "Hi, I just want to run \"kedro catalog list\", then I got this error below:\n```NotSupportedError: deterministic=True requires SQLite 3.8.3 or higher```\nWhich library with which version should I install?",
+    "reply_count": 1,
+    "reply_users_count": 1,
+    "reply_users": [
+        "U05HCE5P866"
+    ],
+    "replies": [
+        {
+            "user": "U05HCE5P866",
+            "ts": "1730386507.938759",
+            "datetime": "2024-10-31",
+            "name": "laura_couto",
+            "real_name": "Laura Couto",
+            "text": "Hey <@U07TVC269E1>, what version of SQLite are you using? The error message seems to be pointing out that you are trying to use a feature available only on  version 3.8.3 or higher."
+        }
+    ]
+}

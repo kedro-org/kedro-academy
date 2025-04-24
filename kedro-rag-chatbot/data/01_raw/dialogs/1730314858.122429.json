@@ -1,0 +1,51 @@
+{
+    "datetime": "2024-10-30",
+    "user": "U051XN6QR7X",
+    "name": "jannik_wiedenhaupt",
+    "real_name": "Jannik Wiedenhaupt",
+    "text": "Hey team, is there any way to pass async functions to nodes?",
+    "reply_count": 5,
+    "reply_users_count": 2,
+    "reply_users": [
+        "U03R8FW4HUZ",
+        "U051XN6QR7X"
+    ],
+    "replies": [
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730316047.881379",
+            "datetime": "2024-10-30",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "I don't think we've ever had this question before"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730316056.180239",
+            "datetime": "2024-10-30",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "if you do it what error do you get?"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730316156.272599",
+            "datetime": "2024-10-30",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "I think you need to do introduce a custom runner which you can do with\n\n```kedro run --runner class.path.of.your.AsyncRunner ```\n"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1730316190.788189",
+            "datetime": "2024-10-30",
+            "name": "joel.schwarzmann",
+            "real_name": "datajoely",
+            "text": "ChatGPT has suggested this which feels sensible, essentially `await`ing certain functions rather than just executing them:\n\n```import asyncio\n\nclass SequentialAsyncRunner(AbstractRunner):\n    \"\"\"``SequentialAsyncRunner`` is an ``AbstractRunner`` implementation that \n    can be used to run the ``Pipeline`` asynchronously.\n    \"\"\"\n\n    async def _run(\n        self,\n        pipeline: Pipeline,\n        catalog: CatalogProtocol,\n        hook_manager: PluginManager,\n        session_id: str | None = None,\n    ) -&gt; None:\n        \"\"\"The method implementing sequential pipeline running asynchronously.\n\n        Args:\n            pipeline: The ``Pipeline`` to run.\n            catalog: An implemented instance of ``CatalogProtocol`` from which to fetch data.\n            hook_manager: The ``PluginManager`` to activate hooks.\n            session_id: The id of the session.\n\n        Raises:\n            Exception: in case of any downstream node failure.\n        \"\"\"\n        if not self._is_async:\n            <http://self._logger.info|self._logger.info>(\n                \"Using synchronous mode for loading and saving data. Use the --async flag \"\n                \"for potential performance gains. <https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously>\"\n            )\n\n        nodes = pipeline.nodes\n        done_nodes = set()\n\n        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))\n\n        for exec_index, node in enumerate(nodes):\n            try:\n                if asyncio.iscoroutinefunction(node.func):\n                    # Await the async function\n                    await run_node(node, catalog, hook_manager, self._is_async, session_id)\n                else:\n                    # Run as normal if the function is synchronous\n                    run_node(node, catalog, hook_manager, self._is_async, session_id)\n                \n                done_nodes.add(node)\n            except Exception:\n                self._suggest_resume_scenario(pipeline, done_nodes, catalog)\n                raise\n\n            # Decrement load counts and release any datasets we've finished with\n            for dataset in node.inputs:\n                load_counts[dataset] -= 1\n                if load_counts[dataset] &lt; 1 and dataset not in pipeline.inputs():\n                    catalog.release(dataset)\n            for dataset in node.outputs:\n                if load_counts[dataset] &lt; 1 and dataset not in pipeline.outputs():\n                    catalog.release(dataset)\n\n            <http://self._logger.info|self._logger.info>(\n                \"Completed %d out of %d tasks\", exec_index + 1, len(nodes)\n            )```"
+        },
+        {
+            "user": "U051XN6QR7X",
+            "ts": "1730426314.299689"
+        }
+    ]
+}
