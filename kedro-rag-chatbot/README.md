@@ -19,8 +19,8 @@ See the demo on [YouTube](https://www.youtube.com/watch?v=rgmANk-QwYg).
 
 ### 1. Clone the Repository
 ```console
-https://github.com/ElenaKhaustova/kedro-rag-chatbot.git
-cd kedro-rag-chatbot
+git clone https://github.com/kedro-org/kedro-academy.git
+cd kedro-academy/kedro-rag-chatbot
 ```
 
 ### 2. Install Dependencies
