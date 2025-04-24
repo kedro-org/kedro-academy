@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a99dca25-9f1e-460c-922b-06fb333b6b49" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/conf/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/conf/base/catalog.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/conf/base/parameters.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/conf/local/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/conf/logging.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1668593238.365499.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1723456344.830079.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1729013184.677309.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1729703351.211699.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730314858.122429.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730316949.927929.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730384302.869589.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730410090.056049.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730426342.539259.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730475638.984459.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/dialogs/1730488989.312079.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/01_raw/system_prompt.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/02_intermediate/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/03_primary/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/04_feature/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/05_model_input/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/06_models/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/07_model_output/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/data/08_reporting/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/docs/source/conf.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/docs/source/index.rst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/pyproject.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/__main__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/datasets/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/datasets/vector_store_dataset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipeline_registry.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/agent_rag/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/agent_rag/nodes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/agent_rag/pipeline.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/create_vector_store/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/create_vector_store/nodes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/pipelines/create_vector_store/pipeline.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kedro-rag-chatbot/src/kedro_rag_chatbot/settings.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2wB0WV7sg2M46tLV9qvQ1xvx6PV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/elena_khaustova/Projects/kedro-academy/kedro-rag-chatbot",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a99dca25-9f1e-460c-922b-06fb333b6b49" name="Changes" comment="" />
+      <created>1745499692211</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745499692211</updated>
+      <workItem from="1745499693553" duration="285000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
