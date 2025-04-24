@@ -29,7 +29,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 func=create_chat_prompt,
                 inputs=["system_prompt"],
                 outputs="chat_prompt",
-                name="crete_chat_prompt_node",
+                name="create_chat_prompt_node",
             ),
             node(
                 func=create_agent,
