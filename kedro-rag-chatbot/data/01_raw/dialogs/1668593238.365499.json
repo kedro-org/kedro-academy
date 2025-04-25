@@ -26,7 +26,7 @@
         {
             "user": "U0464GXQNLV",
             "ts": "1668593616.935929",
-            "datetime": "2022-11-16", ,
+            "datetime": "2022-11-16",
             "text": "I have 2 nodes in my pipelines:\n• Node 1: Does some processing and saves a parquet file on S3\n• Node 2: has a sql query as input. The sql query creates an external table in snowflake that uses that saved parquet file\nSo, node 2 depends on node 1 but not in an explicit way (the input of node 2 is not dependent on the output of node 1)"
         },
         {

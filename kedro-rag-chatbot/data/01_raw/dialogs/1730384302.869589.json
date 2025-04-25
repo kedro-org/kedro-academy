@@ -11,7 +11,7 @@
         {
             "user": "U05HCE5P866",
             "ts": "1730386507.938759",
-            "datetime": "2024-10-31", ,
+            "datetime": "2024-10-31",
             "text": "Hey <@U07TVC269E1>, what version of SQLite are you using? The error message seems to be pointing out that you are trying to use a feature available only on  version 3.8.3 or higher."
         }
     ]
