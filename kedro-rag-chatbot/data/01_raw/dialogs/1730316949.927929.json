@@ -1,8 +1,6 @@
 {
     "datetime": "2024-10-30",
     "user": "U07MTLZ6FKM",
-    "name": "akshata_patel",
-    "real_name": "Akshata Patel",
     "text": "Good afternoon team,\nQQ: any quick way to get the runtime(in secs) of a pipeline - both in case of success and failure?",
     "reply_count": 2,
     "reply_users_count": 2,
@@ -15,16 +13,12 @@
             "user": "U0421KY00DQ",
             "ts": "1730319009.865239",
             "datetime": "2024-10-30",
-            "name": "ian_whalen",
-            "real_name": "Ian Whalen",
             "text": "This hook example might be useful to you: <https://docs.kedro.org/en/stable/hooks/examples.html#add-observability-to-your-pipeline>"
         },
         {
             "user": "U07MTLZ6FKM",
             "ts": "1730319212.028369",
             "datetime": "2024-10-30",
-            "name": "akshata_patel",
-            "real_name": "Akshata Patel",
             "text": "Thanks Ian!"
         }
     ]

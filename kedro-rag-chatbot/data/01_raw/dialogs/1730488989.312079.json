@@ -1,8 +1,6 @@
 {
     "datetime": "2024-11-01",
     "user": "U0756JQ2A8L",
-    "name": "sebitas.alejo",
-    "real_name": "Sebastian Sarasti",
     "text": "Is there a way to add args during Kedro pipeline execution from terminal? \n\nI mean, something like this \n\nkedro run —parameter==01",
     "reply_count": 2,
     "reply_users_count": 1,
@@ -14,16 +12,12 @@
             "user": "U05HCE5P866",
             "ts": "1730489869.757889",
             "datetime": "2024-11-01",
-            "name": "laura_couto",
-            "real_name": "Laura Couto",
             "text": "See if this helps you <@U0756JQ2A8L>"
         },
         {
             "user": "U05HCE5P866",
             "ts": "1730489870.673919",
-            "datetime": "2024-11-01",
-            "name": "laura_couto",
-            "real_name": "Laura Couto",
+            "datetime": "2024-11-01", ,
             "text": "<https://docs.kedro.org/en/stable/configuration/parameters.html>"
         }
     ]

@@ -1,8 +1,6 @@
 {
     "datetime": "2024-10-31",
     "user": "U060G104E4S",
-    "name": "hugo",
-    "real_name": "Hugo Rebeix",
     "text": "Hey Kedro!\nWe are migrating to the latest versions of `kedro` and `kedro-datasets` and we are confused with the new `geopandas.GenericDataset`\nWe have an error that suggests problems with dependencies but we did install the specific group of kedro-datasets using pip. We checked the source code and the class is defined. Geopandas is installed too.\nHere's the dataset in the catalog:\n```renab_geoloc_vul:\n  filepath: data/vectors/renab/renab_vul_geoloc.geojson\n  type: geopandas.GenericDataset\n  versioned: false```\nHere's the error:\n```DatasetError: An exception occurred when parsing config for dataset 'renab_geoloc_vul': You can only set the value of existing options. Please see the documentation on how to install relevant dependencies for kedro_datasets.geopandas.GenericDataset:\n<https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#install-dependencies-related-to-the-data-catalog>```\nCan you help please ? :pray:",
     "reply_count": 2,
     "reply_users_count": 2,
@@ -15,16 +13,12 @@
             "user": "U05HCE5P866",
             "ts": "1730466134.217059",
             "datetime": "2024-11-01",
-            "name": "laura_couto",
-            "real_name": "Laura Couto",
             "text": "Hi, <@U060G104E4S>, have you tried running it on a fresh environment, just to make sure it's a dependency issue and not an environment issue?"
         },
         {
             "user": "U060G104E4S",
             "ts": "1730476999.012149",
             "datetime": "2024-11-01",
-            "name": "hugo",
-            "real_name": "Hugo Rebeix",
             "text": "Hi, I think it's been done by my colleague! I'll check with him. Thanks for answering. Will update here"
         }
     ]
