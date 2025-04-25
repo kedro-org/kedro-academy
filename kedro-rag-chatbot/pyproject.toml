@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "kedro_rag_chatbot"
 readme = "README.md"
 dynamic = ["dependencies", "version"]
+requires-python = ">=3.11"
 
 [project.scripts]
 kedro-rag-chatbot = "kedro_rag_chatbot.__main__:main"
