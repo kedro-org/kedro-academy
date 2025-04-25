@@ -1,0 +1,77 @@
+{
+    "datetime": "2022-11-16",
+    "user": "U0464GXQNLV",
+    "text": "Hello everyone,\n\nIs there a way to force a pipeline to run its nodes in the order they are declared within the pipeline ?\n\nI know that I can create a dummy output just to force one node to run after another but I’d like to know if there is a better way to accomplish this\n\nThanks",
+    "reply_count": 12,
+    "reply_users_count": 4,
+    "reply_users": [
+        "U045L91RV9D",
+        "U0464GXQNLV",
+        "U03R8FW4HUZ",
+        "U046KEJNGJ3"
+    ],
+    "replies": [
+        {
+            "user": "U045L91RV9D",
+            "ts": "1668593369.333689",
+            "datetime": "2022-11-16",
+            "text": "Why do you need ordering other than topologically sorted one?"
+        },
+        {
+            "user": "U045L91RV9D",
+            "ts": "1668593381.298689",
+            "datetime": "2022-11-16",
+            "text": "You can always implement custom runner btw"
+        },
+        {
+            "user": "U0464GXQNLV",
+            "ts": "1668593616.935929",
+            "datetime": "2022-11-16",
+            "text": "I have 2 nodes in my pipelines:\n• Node 1: Does some processing and saves a parquet file on S3\n• Node 2: has a sql query as input. The sql query creates an external table in snowflake that uses that saved parquet file\nSo, node 2 depends on node 1 but not in an explicit way (the input of node 2 is not dependent on the output of node 1)"
+        },
+        {
+            "user": "U0464GXQNLV",
+            "ts": "1668593704.184899",
+            "datetime": "2022-11-16",
+            "text": "I feel that this should be added as an example of a <https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/pipeline_introduction.html#bad-pipelines|bad pipeline> in the documentation :sweat_smile:"
+        },
+        {
+            "user": "U045L91RV9D",
+            "ts": "1668593760.874389",
+            "datetime": "2022-11-16",
+            "text": "It would be safer to return some metadata (e.g. a path to the parquet file saved on s3) from node 1 and use it as an input to the node 2"
+        },
+        {
+            "user": "U0464GXQNLV",
+            "ts": "1668594189.771309",
+            "datetime": "2022-11-16",
+            "text": "I think that is what I’m going to do :+1:"
+        },
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1668608502.409909",
+            "datetime": "2022-11-16",
+            "text": "Yeah fake ‘pass through’ nodes are the way to do this if you really need, but topological should get you most of the way"
+        },
+        {
+            "user": "U046KEJNGJ3",
+            "ts": "1669190683.012839"
+        },
+        {
+            "user": "U045L91RV9D",
+            "ts": "1669190758.373339"
+        },
+        {
+            "user": "U046KEJNGJ3",
+            "ts": "1669190884.215089"
+        },
+        {
+            "user": "U045L91RV9D",
+            "ts": "1669190900.789219"
+        },
+        {
+            "user": "U046KEJNGJ3",
+            "ts": "1669190943.803479"
+        }
+    ]
+}

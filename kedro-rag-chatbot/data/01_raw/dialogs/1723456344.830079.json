@@ -1,0 +1,38 @@
+{
+    "datetime": "2024-08-12",
+    "user": "U0613NH0Z7V",
+    "text": "Hello,\nDoes kedro allow more than one  `catalog.yaml`  files in the same kedro project? If so, how does kedro behave if there are multiple `catalog.yaml` files?",
+    "reply_count": 4,
+    "reply_users_count": 3,
+    "reply_users": [
+        "U03RKAPUR16",
+        "U0613NH0Z7V",
+        "U05JMSKG6MT"
+    ],
+    "replies": [
+        {
+            "user": "U03RKAPUR16",
+            "ts": "1723458038.394079",
+            "datetime": "2024-08-12",
+            "text": "Hi <@U0613NH0Z7V>! Thanks for your question. Let me see if I can help you:\n• Yes, Kedro allows more than one `catalog.yaml`, and the same pattern applies to any other configuration file like `parameters.yaml` \n• You have a few ways to do this: \n    ◦ Start each file with `catalog` e.g. `catalog_pipeline_1.yaml` and `catalog_pipeline_2.yaml`\n    ◦ Or put the files into a folder called `catalog` e.g. `catalog/pipeline_1.yaml` and `catalog/pipeline_2.yaml` \nHere's where this is detailed in the documentation: <https://docs.kedro.org/en/stable/configuration/configuration_basics.html#configuration-file-names>\n\nAnd you can see which configuration files allow you to do this: <https://docs.kedro.org/en/stable/configuration/configuration_basics.html#configuration-patterns>"
+        },
+        {
+            "user": "U0613NH0Z7V",
+            "ts": "1723459426.233069",
+            "datetime": "2024-08-12",
+            "text": "Thanks a lot <@U03RKAPUR16> ! This helps"
+        },
+        {
+            "user": "U05JMSKG6MT",
+            "ts": "1723483278.034149",
+            "datetime": "2024-08-12",
+            "text": "<@U0613NH0Z7V> What I like to do on every Kedro project is to split catalog by layers. As Kedro data folder by default consists of `01_raw`, `02_intermediate` etc, I create one YAML file per layer and then Kedro config loader merges them automatically."
+        },
+        {
+            "user": "U0613NH0Z7V",
+            "ts": "1723490643.852969",
+            "datetime": "2024-08-12",
+            "text": "Thanks <@U05JMSKG6MT> !! "
+        }
+    ]
+}
