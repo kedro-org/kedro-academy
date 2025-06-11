@@ -1,3 +1,11 @@
+# Kedro Databricks
+.databricks
+conf/dev/**
+!conf/dev/.gitkeep
+# Kedro Databricks
+.databricks
+conf/dev/**
+!conf/dev/.gitkeep
 ##########################
 # KEDRO PROJECT
 

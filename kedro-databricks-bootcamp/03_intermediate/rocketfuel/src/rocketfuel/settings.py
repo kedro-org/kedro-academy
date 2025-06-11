@@ -48,7 +48,7 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 # Keyword arguments to pass to the `CONFIG_LOADER_CLASS` constructor.
 CONFIG_LOADER_ARGS = {
     "base_env": "base",
-    "default_run_env": "local",
+    "default_run_env": "databricks",
     "custom_resolvers": {
         "kedro_root": find_kedro_root,
     },

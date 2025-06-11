@@ -36,7 +36,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "preprocessed_companies",
                     "preprocessed_reviews",
                 ],
-                outputs="model_input_table",
+                outputs="model_input_table@spark",
                 name="create_model_input_table_node",
             ),
         ]

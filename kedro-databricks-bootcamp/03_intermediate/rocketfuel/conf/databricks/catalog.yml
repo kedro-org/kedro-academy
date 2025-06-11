@@ -1,6 +1,32 @@
+# companies_raw:
+#   type: spark.SparkDataset
+#   filepath: file://${kedro_root:}/data/01_raw/companies.csv
+#   file_format: csv
+#   load_args:
+#     header: True
+#     inferSchema: True
+
+# reviews_raw:
+#   type: spark.SparkDataset
+#   filepath: file://${kedro_root:}/data/01_raw/reviews.csv
+#   file_format: csv
+#   load_args:
+#     header: True
+#     inferSchema: True
+
+# shuttles_raw:
+#   type: pandas.ExcelDataset
+#   filepath: file://${kedro_root:}/data/01_raw/shuttles.xlsx
+#   load_args:
+#     engine: openpyxl
+
+
+_uc_catalog: aza-databricks-1c21b85-catalog
+_uc_schema: rocketfuel
+
 companies_raw:
   type: spark.SparkDataset
-  filepath: file://${kedro_root:}/data/01_raw/companies.csv
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/companies.csv
   file_format: csv
   load_args:
     header: True
@@ -8,7 +34,7 @@ companies_raw:
 
 reviews_raw:
   type: spark.SparkDataset
-  filepath: file://${kedro_root:}/data/01_raw/reviews.csv
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/reviews.csv
   file_format: csv
   load_args:
     header: True
@@ -16,6 +42,21 @@ reviews_raw:
 
 shuttles_raw:
   type: pandas.ExcelDataset
-  filepath: file://${kedro_root:}/data/01_raw/shuttles.xlsx
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/shuttles.xlsx
   load_args:
     engine: openpyxl
+
+
+# load_data.companies_raw:
+#   type: pandas.CSVDataset
+#   filepath: data/01_raw/companies.csv
+
+# load_data.reviews_raw:
+#   type: pandas.CSVDataset
+#   filepath: data/01_raw/reviews.csv
+
+# load_data.shuttles_raw:
+#   type: pandas.ExcelDataset
+#   filepath: data/01_raw/shuttles.xlsx
+#   load_args:
+#     engine: openpyxl

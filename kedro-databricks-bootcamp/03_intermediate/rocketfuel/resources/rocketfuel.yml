@@ -1,0 +1,123 @@
+resources:
+    jobs:
+        rocketfuel:
+            name: rocketfuel
+            tasks:
+            -   task_key: create_model_input_table_node
+                depends_on:
+                -   task_key: preprocess_companies_node
+                -   task_key: preprocess_reviews_node
+                -   task_key: preprocess_shuttles_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - create_model_input_table_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: evaluate_model_node
+                depends_on:
+                -   task_key: split_data_node
+                -   task_key: train_model_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - evaluate_model_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: preprocess_companies_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - preprocess_companies_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: preprocess_reviews_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - preprocess_reviews_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: preprocess_shuttles_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - preprocess_shuttles_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: split_data_node
+                depends_on:
+                -   task_key: create_model_input_table_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - split_data_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            -   task_key: train_model_node
+                depends_on:
+                -   task_key: split_data_node
+                python_wheel_task:
+                    package_name: rocketfuel
+                    entry_point: rocketfuel
+                    parameters:
+                    - --nodes
+                    - train_model_node
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - databricks
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0326-111443-pvaijoec
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12

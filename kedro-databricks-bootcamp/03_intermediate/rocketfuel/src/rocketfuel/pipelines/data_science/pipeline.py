@@ -8,7 +8,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=split_data,
-                inputs=["model_input_table", "params:model_options"],
+                inputs=["model_input_table@pandas", "params:model_options"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
@@ -24,5 +24,5 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs=None,
                 name="evaluate_model_node",
             ),
-        ]
+        ], namespace="ds", inputs={"model_input_table@pandas"}, outputs={"regressor"}
     )
