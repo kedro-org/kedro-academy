@@ -13,6 +13,10 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 # from rocketfuel.debugging_hooks import PDBPipelineDebugHook
 # HOOKS = (PDBPipelineDebugHook(),)
 
+# For Node Timer Hook
+# from rocketfuel.node_timer_hooks import NodeTimerHook
+# HOOKS = (NodeTimerHook(),)
+
 # Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
