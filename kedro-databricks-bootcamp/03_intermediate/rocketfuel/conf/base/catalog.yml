@@ -62,6 +62,7 @@ shuttles:
   database: ${_uc_schema}
   table: shuttles
   write_mode: overwrite
+  dataframe_type: pandas
 
 preprocessed_companies:
   type: databricks.ManagedTableDataset
