@@ -14,3 +14,4 @@ databricks-connect
 databricks-sdk
 
 pip
+setuptools<81  # https://setuptools.pypa.io/en/latest/pkg_resources.html
