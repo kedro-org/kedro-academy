@@ -62,7 +62,6 @@ shuttles:
   database: ${_uc_schema}
   table: shuttles
   write_mode: overwrite
-  dataframe_type: pandas
 
 preprocessed_companies:
   type: databricks.ManagedTableDataset
@@ -93,4 +92,5 @@ model_input_table:
   write_mode: overwrite
 
 regressor:
-  ...
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn
