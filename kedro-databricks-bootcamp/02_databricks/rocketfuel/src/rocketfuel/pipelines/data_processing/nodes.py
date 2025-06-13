@@ -41,11 +41,6 @@ def preprocess_companies(companies: SparkDataFrame) -> SparkDataFrame:
     return companies
 
 
-def load_shuttles_to_csv(shuttles: pd.DataFrame) -> pd.DataFrame:
-    """Load shuttles to csv because it's not possible to load excel directly into spark."""
-    return shuttles
-
-
 def preprocess_shuttles(shuttles: SparkDataFrame) -> SparkDataFrame:
     """Preprocesses the data for shuttles.
 
