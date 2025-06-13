@@ -12,7 +12,10 @@ dependencies = [
     "jupyterlab>=3.0",
     "notebook",
     "kedro==0.19.10",
-    "kedro-datasets[pandas-exceldataset, spark, databricks]==7.0.0",
+    "kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=7.0.0",
+    # This will pull pyspark and as such it conflicts with databricks-connect,
+    # see https://github.com/kedro-org/kedro-plugins/issues/1100
+    # kedro-datasets[spark-sparkdataset],
     "kedro-viz>=6.7.0",
     "scikit-learn~=1.5.1"
 ]
