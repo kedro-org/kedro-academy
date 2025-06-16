@@ -2,7 +2,6 @@ from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
     create_model_input_table,
-    load_shuttles_to_csv,
     preprocess_companies,
     preprocess_reviews,
     preprocess_shuttles,
@@ -13,12 +12,6 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=load_shuttles_to_csv,
-                inputs="shuttles_excel",
-                outputs="shuttles@csv",
-                name="load_shuttles_to_csv_node",
-            ),
-            node(
                 func=preprocess_companies,
                 inputs="companies",
                 outputs="preprocessed_companies",
@@ -26,7 +19,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=preprocess_shuttles,
-                inputs="shuttles@spark",
+                inputs="shuttles",
                 outputs="preprocessed_shuttles",
                 name="preprocess_shuttles_node",
             ),
@@ -43,7 +36,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "preprocessed_companies",
                     "preprocessed_reviews",
                 ],
-                outputs="model_input_table@spark",
+                outputs="model_input_table",
                 name="create_model_input_table_node",
             ),
         ]
