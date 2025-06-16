@@ -20,3 +20,16 @@ class PDBPipelineDebugHook:
 
         # Drop you into a post mortem debugging session
         pdb.post_mortem(traceback_object)
+
+
+class PDBNodeDebugHook:
+    @hook_impl
+    def on_node_error(self):
+        # We don't need the actual exception since it is within this stack frame
+        _, _, traceback_object = sys.exc_info()
+
+        #  Print the traceback information for debugging ease
+        traceback.print_tb(traceback_object)
+
+        # Drop you into a post mortem debugging session
+        pdb.post_mortem(traceback_object)
