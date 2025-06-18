@@ -54,3 +54,8 @@ CONFIG_LOADER_ARGS = {
 # from kedro.io import DataCatalog
 # DATA_CATALOG_CLASS = DataCatalog
 
+import mlflow
+
+# This workaround is needed with serverless compute, see official answer at
+# https://community.databricks.com/t5/machine-learning/using-datbricks-connect-with-serverless-compute-and-mlflow/m-p/97604#M3764
+mlflow.tracking._model_registry.utils._get_registry_uri_from_spark_session = lambda: "databricks-uc"
