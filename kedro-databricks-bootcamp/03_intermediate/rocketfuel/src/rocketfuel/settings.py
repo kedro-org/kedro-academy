@@ -35,31 +35,12 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 from pathlib import Path
 
 from kedro.config import OmegaConfigLoader  # noqa: E402
-
-
-def find_kedro_root():
-    from kedro.utils import _find_kedro_project
-
-    try:
-        current_dir = Path(__file__).resolve().parent
-    except NameError:
-        current_dir = Path.cwd()
-
-    project_root = _find_kedro_project(current_dir)
-    if project_root is None:
-        raise ValueError("Kedro project root not found. Ensure you are in a Kedro project directory.")
-
-    return str(project_root)
-
-
 CONFIG_LOADER_CLASS = OmegaConfigLoader
+
 # Keyword arguments to pass to the `CONFIG_LOADER_CLASS` constructor.
 CONFIG_LOADER_ARGS = {
     "base_env": "base",
     "default_run_env": "local",
-    "custom_resolvers": {
-        "kedro_root": find_kedro_root,
-    },
     "config_patterns": {
         "spark": ["spark*", "spark*/**"],
     },
@@ -73,9 +54,3 @@ CONFIG_LOADER_ARGS = {
 # from kedro.io import DataCatalog
 # DATA_CATALOG_CLASS = DataCatalog
 
-
-import mlflow
-
-# This workaround is needed with serverless compute, see official answer at
-# https://community.databricks.com/t5/machine-learning/using-datbricks-connect-with-serverless-compute-and-mlflow/m-p/97604#M3764
-mlflow.tracking._model_registry.utils._get_registry_uri_from_spark_session = lambda: "databricks-uc"
