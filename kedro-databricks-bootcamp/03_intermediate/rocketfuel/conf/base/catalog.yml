@@ -39,8 +39,31 @@
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
 # https://docs.kedro.org/en/stable/data/data_catalog.html
 
-_uc_catalog: aza-databricks-b9b7aae-catalog
-_uc_schema: rocketfuel
+_uc_catalog: #your catalog location
+_uc_schema: #your schema location
+
+companies_raw:
+  type: spark.SparkDataset
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/companies.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+
+reviews_raw:
+  type: spark.SparkDataset
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/reviews.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+
+# This dataset should ideally go into local/catalog.yml
+shuttles_raw:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl
 
 companies:
   type: databricks.ManagedTableDataset
