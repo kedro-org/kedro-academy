@@ -18,7 +18,7 @@ Video: https://www.youtube.com/live/Az_6UKqbznw?si=L7A1xWPmKSfFSGj3
 > At the time of writing, `kedro-mlflow` is still not compatible with Kedro 1.0,
 > see https://github.com/Galileo-Galilei/kedro-mlflow/pull/658
 
-## 2. Data and pipeline versioning with Kedro and DVC
+## 2. Data and pipeline versioning with Kedro and DVC
 
 Documentation: https://docs.kedro.org/en/0.19.14/integrations/kedro_dvc_versioning.html
 
