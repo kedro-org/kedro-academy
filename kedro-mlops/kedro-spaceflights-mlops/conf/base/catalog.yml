@@ -89,6 +89,5 @@ model_input_table@pandas:
   filepath: data/03_primary/model_input_table.parquet
 
 regressor:
-  type: pickle.PickleDataset
-  filepath: data/06_models/regressor.pickle
-  versioned: true
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn
