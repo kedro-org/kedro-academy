@@ -21,7 +21,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             node(
                 func=create_model_input_table,
                 inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                outputs="model_input_table",
+                outputs="model_input_table@polars",
                 name="create_model_input_table_node",
             ),
         ]
