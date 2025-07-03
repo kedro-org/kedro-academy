@@ -1,0 +1,6 @@
+server:
+  mlflow_tracking_uri: http://192.168.1.138:5010
+
+tracking:
+  experiment:
+    name: kedro_spaceflights_mlops-airflow
