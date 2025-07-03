@@ -6,6 +6,8 @@
    - Kedro on Airflow
    - Kedro on GitHub CI
 
+![Kedro and MLOps](img/kedro-snowflake-mlops.png)
+
 ## 1. Experiment tracking with Kedro and MLflow
 
 Documentation: https://docs.kedro.org/en/0.19.14/integrations/mlflow.html
