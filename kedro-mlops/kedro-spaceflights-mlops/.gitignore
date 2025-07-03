@@ -22,6 +22,9 @@ data/**
 !data/01_raw/reviews.csv
 !data/01_raw/shuttles.xlsx
 
+# and the model input table
+!data/03_primary/model_input_table.parquet
+
 # ignore kedro-viz metadata
 .viz
 
@@ -160,3 +163,6 @@ venv.bak/
 # mlflow local runs
 mlruns/*
 mlflow_runs/*
+
+# Allow .dvc files
+!*.dvc
