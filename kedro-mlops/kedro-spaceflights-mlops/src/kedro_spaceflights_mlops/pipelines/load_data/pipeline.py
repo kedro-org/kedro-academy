@@ -3,7 +3,7 @@ This is a boilerplate pipeline 'load_data'
 generated using Kedro 0.19.14
 """
 
-from kedro.pipeline import node, pipeline, Pipeline
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import _noop
 

@@ -25,6 +25,7 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 
 from pathlib import Path
 
+
 def find_kedro_root():
     from kedro.utils import _find_kedro_project
 
@@ -35,9 +36,12 @@ def find_kedro_root():
 
     project_root = _find_kedro_project(current_dir)
     if project_root is None:
-        raise ValueError("Kedro project root not found. Ensure you are in a Kedro project directory.")
+        raise ValueError(
+            "Kedro project root not found. Ensure you are in a Kedro project directory."
+        )
 
     return str(project_root)
+
 
 # Class that manages how configuration is loaded.
 from kedro.config import OmegaConfigLoader  # noqa: E402
@@ -45,15 +49,15 @@ from kedro.config import OmegaConfigLoader  # noqa: E402
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 # Keyword arguments to pass to the `CONFIG_LOADER_CLASS` constructor.
 CONFIG_LOADER_ARGS = {
-      "base_env": "base",
-      "default_run_env": "local",
-      "custom_resolvers": {
-            "kedro_root": find_kedro_root,
-      },
-#       "config_patterns": {
-#           "spark" : ["spark*/"],
-#           "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
-#       }
+    "base_env": "base",
+    "default_run_env": "local",
+    "custom_resolvers": {
+        "kedro_root": find_kedro_root,
+    },
+    #       "config_patterns": {
+    #           "spark" : ["spark*/"],
+    #           "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+    #       }
 }
 
 # Class that manages Kedro's library components.

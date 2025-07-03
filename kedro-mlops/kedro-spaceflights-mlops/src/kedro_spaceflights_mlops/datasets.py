@@ -1,12 +1,13 @@
 import polars as pl
-
 from kedro.io import AbstractDataset
 
 
 class SimplePolarsDatabaseDataset(AbstractDataset):
     """A simple dataset to read and write from a Snowflake database using Polars."""
 
-    def __init__(self, *, uri: str, table_name: str, engine: str = "adbc", save_args=None):
+    def __init__(
+        self, *, uri: str, table_name: str, engine: str = "adbc", save_args=None
+    ):
         self.uri = uri
         self.table_name = table_name
         self.engine = engine
