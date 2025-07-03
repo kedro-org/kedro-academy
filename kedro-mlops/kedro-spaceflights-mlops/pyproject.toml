@@ -41,11 +41,13 @@ dev = [
     "jupyterlab>=3.0",
     "notebook",
     "kedro[jupyter]~=0.19.14",
+    "kedro-airflow>=0.10.0",
     "kedro-viz>=6.7.0",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest~=7.2",
-    "ruff~=0.1.8"
+    "ruff~=0.1.8",
+    "dvc>=3.60.1",
 ]
 
 [tool.setuptools.dynamic]
