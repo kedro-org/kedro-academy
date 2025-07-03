@@ -79,6 +79,8 @@ docstring-code-format = true
 [tool.ruff]
 line-length = 88
 show-fixes = true
+
+[tool.ruff.lint]
 select = [
     "F",   # Pyflakes
     "W",   # pycodestyle
