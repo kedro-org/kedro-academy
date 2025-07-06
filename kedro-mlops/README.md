@@ -35,3 +35,8 @@ Video: https://www.youtube.com/live/C4N71-NtY00?si=Wn3hPH6x4aPRHtQ3 (Airflow par
 ### Kedro on GitHub Actions
 
 (TBC)
+
+# Resources
+
+- https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning
+- https://isabelizimm.me/posts/2024-04-05_learn-mlops/
