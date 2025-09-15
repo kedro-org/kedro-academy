@@ -1,0 +1,17 @@
+ipython>=8.10
+jupyterlab>=3.0
+notebook
+kedro~=1.0.0
+kedro-datasets[pandas-sqltabledataset,pandas-sqlquerydataset]
+langsmith
+langgraph
+langgraph-prebuilt
+langchain-community
+langchain-core
+langchain-openai
+langfuse
+opik
+pandas
+questionary
+scikit-learn
+SQLAlchemy
