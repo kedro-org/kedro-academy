@@ -45,10 +45,10 @@ class LangfuseTraceDataset(AbstractDataset):
         """
         if self._mode == "langchain":
             from langfuse.langchain import CallbackHandler
-            return CallbackHandler()
+            return CallbackHandler(public_key=self._credentials["public_key"])
         elif self._mode == "openai":
             from langfuse.openai import OpenAI
-            return OpenAI()
+            return OpenAI(api_key=self._credentials["api_key"])
         else:
             return Langfuse(
                 public_key=self._credentials["public_key"],
