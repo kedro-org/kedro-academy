@@ -47,22 +47,26 @@ intent_prompt_langfuse:
   prompt_name: "intent-classifier"
   prompt_type: "chat"
   credentials: langfuse_credentials
-  sync_policy: local      # local|remote|strict
+  sync_policy: remote      # local|remote|strict
   mode: langchain         # langchain|sdk
+  load_args:
+    version: 15
+  save_args:
+    labels: ["testgoldagain"]
 
 # Example: Load specific version, save with labels
-intent_prompt_versioned:
-  type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
-  filepath: data/intent_detection/prompts/intent_prompt_v3.json
-  prompt_name: "intent-classifier"
-  prompt_type: "chat"
-  credentials: langfuse_credentials
-  sync_policy: remote
-  mode: langchain
-  load_args:
-    version: 3
-  save_args:
-    labels: ["backup", "v3.0"]
+# intent_prompt_versioned:
+#   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+#   filepath: data/intent_detection/prompts/intent_prompt_v3.json
+#   prompt_name: "intent-classifier"
+#   prompt_type: "chat"
+#   credentials: langfuse_credentials
+#   sync_policy: local
+#   mode: langchain
+#   load_args:
+#     version: 3
+#   save_args:
+#     labels: ["backup", "v3.0"]
 
 # --- Langfuse Tracing ---
 intent_tracer_langfuse:
