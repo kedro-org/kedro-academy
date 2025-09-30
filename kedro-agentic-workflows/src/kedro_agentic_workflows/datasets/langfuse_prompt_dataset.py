@@ -29,27 +29,62 @@ def _get_content(data: str | list) -> str:
 
 
 class LangfusePromptDataset(AbstractDataset):
-    """
-    Kedro dataset for managing prompts with Langfuse versioning.
+    """Kedro dataset for managing prompts with Langfuse versioning and synchronization.
 
-    Behavior:
-    - On save: writes prompt JSON to disk and creates/updates it in Langfuse.
-    - On load: syncs based on sync_policy, ensures reproducibility.
-    - Returns LangChain `ChatPromptTemplate` (langchain mode) or raw Langfuse object (sdk mode).
+    This dataset provides seamless integration between local prompt files (JSON/YAML) 
+    and Langfuse prompt management, supporting version control, labeling, and 
+    different synchronization policies.
+
+    On save: writes prompt to local file and creates new version in Langfuse.
+    On load: synchronizes based on sync_policy and returns LangChain ChatPromptTemplate 
+    (langchain mode) or raw Langfuse object (sdk mode).
 
     Sync policies:
     - local: local file takes precedence (default)
-    - remote: Langfuse version takes precedence (errors if remote doesn't exist)
+    - remote: Langfuse version takes precedence 
     - strict: error if local and remote differ
-    
-    Version/Label support (via load_args):
-    - Default (no load_args): Uses latest version (handles first-time loading gracefully)
-    - load_args: {version: 3}: Load specific version number
-    - load_args: {label: "staging"}: Load version pointed to by label  
-    - Cannot specify both version and label (Langfuse will raise ValueError)
-    
-    Save configuration (via save_args):
-    - save_args: {labels: ["staging", "v2.1"]}: Assign labels to new versions
+
+    Examples:
+        Using catalog YAML configuration:
+        
+        ```yaml
+        intent_prompt:
+          type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+          filepath: data/prompts/intent.json
+          prompt_name: "intent-classifier"
+          prompt_type: "chat"
+          credentials: langfuse_credentials
+          sync_policy: local
+          mode: langchain
+          load_args:
+            label: "production"
+          save_args:
+            labels: ["staging", "v2.1"]
+        ```
+
+        Using Python API:
+
+        ```python
+        from kedro_agentic_workflows.datasets.langfuse_prompt_dataset import LangfusePromptDataset
+
+        # Basic usage
+        dataset = LangfusePromptDataset(
+            filepath="data/prompts/intent.json",
+            prompt_name="intent-classifier",
+            credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "..."}
+        )
+
+        # Load and use prompt
+        prompt_template = dataset.load()
+        formatted = prompt_template.format(user_input="Hello world")
+
+        # Save new version with labels
+        chat_prompt = [
+            {"type": "chatmessage", "role": "system", "content": "You are helpful."},
+            {"type": "chatmessage", "role": "human", "content": "{input}"}
+        ]
+        dataset.save(chat_prompt)
+        ```
     """
 
     def __init__(
@@ -133,51 +168,22 @@ class LangfusePromptDataset(AbstractDataset):
         self._file_dataset = None
 
     def _describe(self) -> dict[str, Any]:
-        """
-        Return a description of the dataset for Kedro's internal use.
-        
-        This method is called by Kedro's catalog system to get metadata about
-        the dataset for logging and debugging purposes.
-        
+        """Return a description of the dataset for Kedro's internal use.
+
         Returns:
-            dict: Dictionary containing dataset description with keys:
-                - filepath: Path to the local prompt file
-                - prompt_name: Name of the prompt in Langfuse
-                
-        Examples:
-            >>> dataset._describe()
-            {'filepath': PosixPath('prompts/intent.json'), 'prompt_name': 'intent-classifier'}
+            Dictionary containing dataset description with filepath and prompt_name.
         """
         return {"filepath": self._filepath, "prompt_name": self._prompt_name}
 
     @property
     def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
-        """
-        Get appropriate Kedro dataset based on file extension (cached).
-        
-        Dynamically imports and returns the correct dataset type based on the file
-        extension of the configured filepath. Uses lazy imports to avoid unnecessary
-        dependencies while maintaining proper type checking through TYPE_CHECKING imports.
-        
-        The dataset instance is cached after first access for performance optimization.
-        
+        """Get appropriate Kedro dataset based on file extension (cached).
+
         Returns:
-            JSONDataset: For .json files
-            YAMLDataset: For .yaml/.yml files
-            
+            JSONDataset for .json files, YAMLDataset for .yaml/.yml files.
+
         Raises:
-            NotImplementedError: If file extension is not supported
-            
-        Examples:
-            >>> # For a dataset with filepath="prompts/intent.json"
-            >>> dataset = self.file_dataset
-            >>> type(dataset).__name__
-            'JSONDataset'
-            
-            >>> # For a dataset with filepath="prompts/intent.yaml" 
-            >>> dataset = self.file_dataset
-            >>> type(dataset).__name__
-            'YAMLDataset'
+            NotImplementedError: If file extension is not supported.
         """
         if self._file_dataset is None:
             if self._filepath.suffix.lower() in ['.yaml', '.yml']:
@@ -193,47 +199,16 @@ class LangfusePromptDataset(AbstractDataset):
                 )
         return self._file_dataset
 
-    def save(self, data: str) -> None:
-        """
-        Save prompt data to local file and create new version in Langfuse.
-        
-        This method performs a two-step save operation:
-        1. Saves the prompt data to the local file using appropriate format (JSON/YAML)
-        2. Creates a new prompt version in Langfuse with optional labeling
-        
-        The save operation respects the save_args configuration for automatic labeling
-        of new prompt versions.
-        
+    def save(self, data: Union[str, list]) -> None:
+        """Save prompt data to local file and create new version in Langfuse.
+
         Args:
-            data: The prompt content to save. Can be string or structured data
-                 depending on the prompt type and file format.
-                 
+            data: The prompt content to save. Can be string for text prompts
+                or list of message dictionaries for chat prompts.
+
         Raises:
-            NotImplementedError: If file extension is not supported
-            LangfuseError: If Langfuse API call fails
-            FileNotFoundError: If parent directory cannot be created
-            
-        Examples:
-            >>> # Save a simple text prompt
-            >>> dataset.save("You are a helpful assistant.")
-            
-            >>> # Save a chat prompt (list of messages)
-            >>> chat_prompt = [
-            ...     {"role": "system", "content": "You are a helpful assistant."},
-            ...     {"role": "user", "content": "{{user_input}}"}
-            ... ]
-            >>> dataset.save(chat_prompt)
-            
-            >>> # With auto-labeling (if save_args contains labels)
-            >>> # This will create a new version and assign specified labels
-            >>> dataset_with_labels = LangfusePromptDataset(
-            ...     filepath="prompts/intent.json",
-            ...     prompt_name="intent-classifier",
-            ...     credentials=creds,
-            ...     save_args={"labels": ["staging", "v2.1"]}
-            ... )
-            >>> dataset_with_labels.save("New prompt content")
-            # Creates version and assigns "staging" and "v2.1" labels
+            NotImplementedError: If file extension is not supported.
+            ValueError: If Langfuse API call fails or invalid data format.
         """
         self._filepath.parent.mkdir(parents=True, exist_ok=True)
         self.file_dataset.save(data)
@@ -251,18 +226,11 @@ class LangfusePromptDataset(AbstractDataset):
         self._langfuse.create_prompt(**create_kwargs)
 
     def _build_get_kwargs(self) -> dict[str, Any]:
-        """
-        Build kwargs for fetching prompt from Langfuse based on load_args.
-        
-        Respects user's specified version/label from load_args configuration.
-        Defaults to "latest" label if no specific version or label is specified.
-        
+        """Build kwargs for fetching prompt from Langfuse based on load_args.
+
         Returns:
-            dict: Kwargs dictionary for langfuse.get_prompt() with keys:
-                - name: The prompt name
-                - type: The prompt type
-                - version (int, optional): Specific version number if specified
-                - label (str, optional): Specific label if specified, defaults to "latest"
+            Kwargs dictionary for langfuse.get_prompt() with name, type, and 
+            optional version or label parameters.
         """
         get_kwargs = {"name": self._prompt_name, "type": self._prompt_type}
         if self._load_args.get("label") is not None:
@@ -274,20 +242,19 @@ class LangfusePromptDataset(AbstractDataset):
         return get_kwargs
 
     def _sync_strict_policy(
-        self, local_data: str | None, langfuse_prompt: Any | None
+        self, local_data: Union[str, list, None], langfuse_prompt: Any | None
     ) -> Any:
-        """
-        Handle strict sync policy - error if local and remote differ or either is missing.
-        
+        """Handle strict sync policy - error if local and remote differ.
+
         Args:
-            local_data: Content from local file, None if file doesn't exist
-            langfuse_prompt: Langfuse prompt object, None if not found remotely
-            
+            local_data: Content from local file, None if file doesn't exist.
+            langfuse_prompt: Langfuse prompt object, None if not found remotely.
+
         Returns:
-            Any: Langfuse prompt object if sync is successful
-            
+            Langfuse prompt object if sync is successful.
+
         Raises:
-            ValueError: If either local_data or langfuse_prompt is missing, or if they differ
+            ValueError: If either local_data or langfuse_prompt is missing, or if they differ.
         """
         if not local_data or not langfuse_prompt:
             raise ValueError(
@@ -304,10 +271,21 @@ class LangfusePromptDataset(AbstractDataset):
             )
         return langfuse_prompt
 
-    def _normalize_message_types(self, prompt_data):
-        # TODO: When langfuse returns prompt response, it sends the type as message
-        # Not sure how else to fix this
-        """Convert 'message' type to 'chatmessage' for chat prompts."""
+    # TODO: When langfuse returns prompt response, it sends the type as message
+    # Not sure how else to fix this
+    def _normalize_message_types(self, prompt_data: Union[str, list]) -> Union[str, list]:
+        """Convert 'message' type to 'chatmessage' for chat prompts.
+        
+        Langfuse returns prompts with 'message' type, but local storage 
+        standardizes on 'chatmessage' for consistency.
+
+        Args:
+            prompt_data: The prompt data from Langfuse (string or list of messages).
+
+        Returns:
+            The normalized prompt data with 'message' types converted to 'chatmessage'
+            for chat prompts, unchanged for other prompt types.
+        """
         if self._prompt_type == "chat" and isinstance(prompt_data, list):
             for msg in prompt_data:
                 if isinstance(msg, dict) and msg.get("type") == "message":
