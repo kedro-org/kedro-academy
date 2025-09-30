@@ -304,6 +304,16 @@ class LangfusePromptDataset(AbstractDataset):
             )
         return langfuse_prompt
 
+    def _normalize_message_types(self, prompt_data):
+        # TODO: When langfuse returns prompt response, it sends the type as message
+        # Not sure how else to fix this
+        """Convert 'message' type to 'chatmessage' for chat prompts."""
+        if self._prompt_type == "chat" and isinstance(prompt_data, list):
+            for msg in prompt_data:
+                if isinstance(msg, dict) and msg.get("type") == "message":
+                    msg["type"] = "chatmessage"
+        return prompt_data
+
     def _sync_remote_policy(
         self, local_data: str | None, langfuse_prompt: Any | None
     ) -> Any:
@@ -327,7 +337,8 @@ class LangfusePromptDataset(AbstractDataset):
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
             self._filepath.parent.mkdir(parents=True, exist_ok=True)
-            self.file_dataset.save(langfuse_prompt.prompt)
+            normalized_prompt = self._normalize_message_types(langfuse_prompt.prompt)
+            self.file_dataset.save(normalized_prompt)
         return langfuse_prompt
 
     def _sync_local_policy(
@@ -363,7 +374,8 @@ class LangfusePromptDataset(AbstractDataset):
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
             self._filepath.parent.mkdir(parents=True, exist_ok=True)
-            self.file_dataset.save(langfuse_prompt.prompt)
+            normalized_prompt = self._normalize_message_types(langfuse_prompt.prompt)
+            self.file_dataset.save(normalized_prompt)
             return langfuse_prompt
 
         raise FileNotFoundError(
