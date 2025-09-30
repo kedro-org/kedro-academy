@@ -1,9 +1,13 @@
 import json
 import hashlib
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Union, TYPE_CHECKING
 
 from kedro.io import AbstractDataset
+
+if TYPE_CHECKING:
+    from kedro_datasets.json import JSONDataset
+    from kedro_datasets.yaml import YAMLDataset
 from langchain.prompts import ChatPromptTemplate
 from langfuse import Langfuse
 
@@ -58,21 +62,61 @@ class LangfusePromptDataset(AbstractDataset):
         mode: Literal["langchain", "sdk"] = "langchain",
         load_args: dict[str, Any] | None = None,
         save_args: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         """
+        Initialize LangfusePromptDataset for managing prompts with Langfuse versioning.
+        
+        This dataset provides seamless integration between local prompt files (JSON/YAML) 
+        and Langfuse prompt management, supporting version control, labeling, and 
+        different synchronization policies.
+        
         Args:
-            filepath: Local JSON file path for storing prompt.
+            filepath: Local file path for storing prompt. Supports .json, .yaml, .yml extensions.
             prompt_name: Unique identifier for the prompt in Langfuse.
-            prompt_type: Either "chat" or "text".
+            prompt_type: Type of prompt - "chat" for conversation or "text" for single prompts.
             credentials: Dict with Langfuse credentials {public_key, secret_key, host}.
-            sync_policy: How to handle conflicts - "local", "remote", or "strict".
-            mode: Return type - "langchain" for ChatPromptTemplate or "sdk" for raw object.
+            sync_policy: How to handle conflicts between local and remote:
+                - "local": Local file takes precedence (default)
+                - "remote": Langfuse version takes precedence 
+                - "strict": Error if local and remote differ
+            mode: Return type for load() method:
+                - "langchain": Returns ChatPromptTemplate object (default)
+                - "sdk": Returns raw Langfuse prompt object
             load_args: Dict with loading parameters. Supported keys:
                 - version (int): Specific version number to load
-                - label (str): Specific label to load
-                Note: Langfuse SDK handles defaults and validation. Cannot specify both version and label.
+                - label (str): Specific label to load (e.g., "production", "staging")
+                Note: Cannot specify both version and label simultaneously.
             save_args: Dict with saving parameters. Supported keys:
                 - labels (list[str]): List of labels to assign to new prompt versions
+        
+        Examples:
+            >>> # Basic usage with default settings
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "..."}
+            ... )
+            
+            >>> # Load specific version with remote-first policy
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.yaml",
+            ...     prompt_name="intent-classifier", 
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"version": 3}
+            ... )
+            
+            >>> # Auto-label new versions when saving
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     save_args={"labels": ["staging", "v2.1"]}
+            ... )
+        
+        Raises:
+            ValueError: If credentials are missing required keys.
+            NotImplementedError: If filepath has unsupported extension.
         """
         self._filepath = Path(filepath)
         self._prompt_name = prompt_name
@@ -87,19 +131,107 @@ class LangfusePromptDataset(AbstractDataset):
         self._load_args = load_args or {}
         self._save_args = save_args or {}
 
-    def _describe(self):
+    def _describe(self) -> dict[str, Any]:
+        """
+        Return a description of the dataset for Kedro's internal use.
+        
+        This method is called by Kedro's catalog system to get metadata about
+        the dataset for logging and debugging purposes.
+        
+        Returns:
+            dict: Dictionary containing dataset description with keys:
+                - filepath: Path to the local prompt file
+                - prompt_name: Name of the prompt in Langfuse
+                
+        Examples:
+            >>> dataset._describe()
+            {'filepath': PosixPath('prompts/intent.json'), 'prompt_name': 'intent-classifier'}
+        """
         return {"filepath": self._filepath, "prompt_name": self._prompt_name}
+
+    def _get_file_dataset(self) -> Union[JSONDataset, YAMLDataset]:
+        """
+        Get appropriate Kedro dataset based on file extension.
+        
+        Dynamically imports and returns the correct dataset type based on the file
+        extension of the configured filepath. Uses lazy imports to avoid unnecessary
+        dependencies while maintaining proper type checking through TYPE_CHECKING imports.
+        
+        Returns:
+            JSONDataset: For .json files
+            YAMLDataset: For .yaml/.yml files
+            
+        Raises:
+            NotImplementedError: If file extension is not supported
+            
+        Examples:
+            >>> # For a dataset with filepath="prompts/intent.json"
+            >>> dataset = self._get_file_dataset()
+            >>> type(dataset).__name__
+            'JSONDataset'
+            
+            >>> # For a dataset with filepath="prompts/intent.yaml" 
+            >>> dataset = self._get_file_dataset()
+            >>> type(dataset).__name__
+            'YAMLDataset'
+        """
+        if self._filepath.suffix.lower() in ['.yaml', '.yml']:
+            from kedro_datasets.yaml import YAMLDataset
+            return YAMLDataset(filepath=str(self._filepath))
+        elif self._filepath.suffix.lower() in ['.json']:
+            from kedro_datasets.json import JSONDataset
+            return JSONDataset(filepath=str(self._filepath))
+        else:
+            raise NotImplementedError(
+                f"Unsupported file extension '{self._filepath.suffix}'. "
+                f"Supported formats: .json, .yaml, .yml"
+            )
 
     def save(self, data: str) -> None:
         """
-        Save prompt to local JSON and push to Langfuse.
-        If prompt already exists in Langfuse, a new version is created.
+        Save prompt data to local file and create new version in Langfuse.
         
-        Uses save_args for additional parameters like labels.
+        This method performs a two-step save operation:
+        1. Saves the prompt data to the local file using appropriate format (JSON/YAML)
+        2. Creates a new prompt version in Langfuse with optional labeling
+        
+        The save operation respects the save_args configuration for automatic labeling
+        of new prompt versions.
+        
+        Args:
+            data: The prompt content to save. Can be string or structured data
+                 depending on the prompt type and file format.
+                 
+        Raises:
+            NotImplementedError: If file extension is not supported
+            LangfuseError: If Langfuse API call fails
+            FileNotFoundError: If parent directory cannot be created
+            
+        Examples:
+            >>> # Save a simple text prompt
+            >>> dataset.save("You are a helpful assistant.")
+            
+            >>> # Save a chat prompt (list of messages)
+            >>> chat_prompt = [
+            ...     {"role": "system", "content": "You are a helpful assistant."},
+            ...     {"role": "user", "content": "{{user_input}}"}
+            ... ]
+            >>> dataset.save(chat_prompt)
+            
+            >>> # With auto-labeling (if save_args contains labels)
+            >>> # This will create a new version and assign specified labels
+            >>> dataset_with_labels = LangfusePromptDataset(
+            ...     filepath="prompts/intent.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     save_args={"labels": ["staging", "v2.1"]}
+            ... )
+            >>> dataset_with_labels.save("New prompt content")
+            # Creates version and assigns "staging" and "v2.1" labels
         """
         self._filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(self._filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        file_dataset = self._get_file_dataset()
+        file_dataset.save(data)
 
         create_kwargs = {
             "name": self._prompt_name,
@@ -117,8 +249,54 @@ class LangfusePromptDataset(AbstractDataset):
         self, local_data: str | None, langfuse_prompt: Any | None
     ) -> Any:
         """
-        Ensure local file and Langfuse prompt are consistent based on sync_policy.
-        Returns latest Langfuse prompt after synchronization.
+        Synchronize local file and Langfuse prompt based on configured sync policy.
+        
+        This is the core synchronization logic that handles conflicts between local
+        and remote prompt versions according to the specified sync_policy.
+        
+        Args:
+            local_data: Content from local file, None if file doesn't exist
+            langfuse_prompt: Langfuse prompt object, None if not found remotely
+            
+        Returns:
+            Any: Langfuse prompt object after synchronization
+            
+        Raises:
+            ValueError: 
+                - In strict mode: if local and remote differ or either is missing
+                - In remote mode: if remote prompt doesn't exist
+            FileNotFoundError: If neither local nor remote prompt exists
+            
+        Sync Policy Behavior:
+            - "local" (default): Local file takes precedence
+                * Local exists, remote missing → push local to Langfuse
+                * Local exists, remote differs → update Langfuse with local
+                * Local missing, remote exists → download remote to local
+                
+            - "remote": Langfuse version takes precedence  
+                * Remote exists → always use remote, update local if needed
+                * Remote missing → raise ValueError (strict remote policy)
+                
+            - "strict": Error on any mismatch
+                * Both must exist and be identical
+                * Any difference or missing data raises ValueError
+                
+        Examples:
+            >>> # Local-first policy (default)
+            >>> prompt = dataset._sync_with_langfuse(local_data, langfuse_prompt)
+            >>> # Returns langfuse_prompt, potentially updated from local_data
+            
+            >>> # Remote-first policy - will error if remote doesn't exist
+            >>> try:
+            ...     prompt = dataset._sync_with_langfuse(None, None)
+            ... except ValueError as e:
+            ...     print(f"Remote policy requires remote prompt: {e}")
+            
+            >>> # Strict policy - will error if any mismatch
+            >>> try:
+            ...     prompt = dataset._sync_with_langfuse(local_data, langfuse_prompt)
+            ... except ValueError as e:
+            ...     print(f"Strict sync failed: {e}")
         """
         # Handle strict policy
         # Error if: 
@@ -149,8 +327,8 @@ class LangfusePromptDataset(AbstractDataset):
                 )
             if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
                 self._filepath.parent.mkdir(parents=True, exist_ok=True)
-                with open(self._filepath, "w", encoding="utf-8") as f:
-                    json.dump(langfuse_prompt.prompt, f, indent=2)
+                file_dataset = self._get_file_dataset()
+                file_dataset.save(langfuse_prompt.prompt)
             return langfuse_prompt
            
         # Default local-first policy
@@ -181,8 +359,8 @@ class LangfusePromptDataset(AbstractDataset):
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
             self._filepath.parent.mkdir(parents=True, exist_ok=True)
-            with open(self._filepath, "w", encoding="utf-8") as f:
-                json.dump(langfuse_prompt.prompt, f, indent=2)
+            file_dataset = self._get_file_dataset()
+            file_dataset.save(langfuse_prompt.prompt)
             return langfuse_prompt
 
         raise FileNotFoundError(
@@ -191,8 +369,63 @@ class LangfusePromptDataset(AbstractDataset):
 
     def load(self) -> ChatPromptTemplate | Any:
         """
-        Load prompt with synchronization logic.
-        Returns LangChain `ChatPromptTemplate`.
+        Load prompt from Langfuse with local file synchronization.
+        
+        This method performs the complete load workflow:
+        1. Attempts to fetch prompt from Langfuse using configured version/label
+        2. Loads local file if it exists
+        3. Synchronizes local and remote versions based on sync_policy
+        4. Returns prompt in the format specified by mode parameter
+        
+        The method respects load_args for version/label specification and handles
+        various sync scenarios automatically.
+        
+        Returns:
+            ChatPromptTemplate: If mode="langchain" (default)
+                Ready-to-use LangChain prompt template with variable substitution
+            Any: If mode="sdk"
+                Raw Langfuse prompt object with full API access
+                
+        Raises:
+            ValueError: Based on sync_policy conflicts (see _sync_with_langfuse)
+            FileNotFoundError: If no prompt found locally or in Langfuse
+            NotImplementedError: If file extension is not supported
+            LangfuseError: If Langfuse API calls fail
+            
+        Examples:
+            >>> # Load with default settings (production label, langchain mode)
+            >>> prompt_template = dataset.load()
+            >>> formatted = prompt_template.format(user_input="Hello world")
+            
+            >>> # Load specific version in SDK mode
+            >>> dataset_v3 = LangfusePromptDataset(
+            ...     filepath="prompts/intent.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     mode="sdk",
+            ...     load_args={"version": 3}
+            ... )
+            >>> langfuse_prompt = dataset_v3.load()
+            >>> print(f"Version: {langfuse_prompt.version}")
+            >>> print(f"Labels: {langfuse_prompt.labels}")
+            
+            >>> # Load from staging environment
+            >>> staging_dataset = LangfusePromptDataset(
+            ...     filepath="prompts/staging.yaml",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"label": "staging"}
+            ... )
+            >>> prompt = staging_dataset.load()
+            
+            >>> # Handle different prompt types
+            >>> if dataset._prompt_type == "chat":
+            ...     # Chat prompts return templates with message formatting
+            ...     messages = prompt.format_messages(user_input="test")
+            ... else:
+            ...     # Text prompts return simple string templates
+            ...     text = prompt.format(user_input="test")
         """
         try:
             langfuse_prompt = self._langfuse.get_prompt(
@@ -206,8 +439,8 @@ class LangfusePromptDataset(AbstractDataset):
 
         local_data = None
         if self._filepath.exists():
-            with open(self._filepath, "r", encoding="utf-8") as f:
-                local_data = json.load(f)
+            file_dataset = self._get_file_dataset()
+            local_data = file_dataset.load()
 
         langfuse_prompt = self._sync_with_langfuse(local_data, langfuse_prompt)
 
