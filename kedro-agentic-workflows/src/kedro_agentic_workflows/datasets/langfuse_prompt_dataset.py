@@ -37,6 +37,15 @@ class LangfusePromptDataset(AbstractDataset):
     - local: local file takes precedence (default)
     - remote: Langfuse version takes precedence (errors if remote doesn't exist)
     - strict: error if local and remote differ
+    
+    Version/Label support (via load_args):
+    - Default (no load_args): Uses "production" label
+    - load_args: {version: 3}: Load specific version number
+    - load_args: {label: "staging"}: Load version pointed to by label  
+    - Cannot specify both version and label (Langfuse will raise ValueError)
+    
+    Save configuration (via save_args):
+    - save_args: {labels: ["staging", "v2.1"]}: Assign labels to new versions
     """
 
     def __init__(
@@ -47,6 +56,8 @@ class LangfusePromptDataset(AbstractDataset):
         prompt_type: Literal["chat", "text"] = "text",
         sync_policy: Literal["local", "remote", "strict"] = "local",
         mode: Literal["langchain", "sdk"] = "langchain",
+        load_args: dict[str, Any] | None = None,
+        save_args: dict[str, Any] | None = None,
     ):
         """
         Args:
@@ -56,6 +67,12 @@ class LangfusePromptDataset(AbstractDataset):
             credentials: Dict with Langfuse credentials {public_key, secret_key, host}.
             sync_policy: How to handle conflicts - "local", "remote", or "strict".
             mode: Return type - "langchain" for ChatPromptTemplate or "sdk" for raw object.
+            load_args: Dict with loading parameters. Supported keys:
+                - version (int): Specific version number to load
+                - label (str): Specific label to load
+                Note: Langfuse SDK handles defaults and validation. Cannot specify both version and label.
+            save_args: Dict with saving parameters. Supported keys:
+                - labels (list[str]): List of labels to assign to new prompt versions
         """
         self._filepath = Path(filepath)
         self._prompt_name = prompt_name
@@ -67,6 +84,8 @@ class LangfusePromptDataset(AbstractDataset):
         )
         self._sync_policy = sync_policy
         self._mode = mode
+        self._load_args = load_args or {}
+        self._save_args = save_args or {}
 
     def _describe(self):
         return {"filepath": self._filepath, "prompt_name": self._prompt_name}
@@ -75,16 +94,24 @@ class LangfusePromptDataset(AbstractDataset):
         """
         Save prompt to local JSON and push to Langfuse.
         If prompt already exists in Langfuse, a new version is created.
+        
+        Uses save_args for additional parameters like labels.
         """
         self._filepath.parent.mkdir(parents=True, exist_ok=True)
         with open(self._filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
-        self._langfuse.create_prompt(
-            name=self._prompt_name,
-            prompt=data,
-            type=self._prompt_type,
-        )
+        create_kwargs = {
+            "name": self._prompt_name,
+            "prompt": data,
+            "type": self._prompt_type,
+        }
+        
+        # Add labels from save_args if specified
+        if "labels" in self._save_args:
+            create_kwargs["labels"] = self._save_args["labels"]
+            
+        self._langfuse.create_prompt(**create_kwargs)
 
     def _sync_with_langfuse(
         self, local_data: str | None, langfuse_prompt: Any | None
@@ -132,7 +159,10 @@ class LangfusePromptDataset(AbstractDataset):
                 # Push local to Langfuse
                 self.save(local_data)
                 return self._langfuse.get_prompt(
-                    self._prompt_name, type=self._prompt_type, label="latest"
+                    self._prompt_name, 
+                    type=self._prompt_type, 
+                    version=self._load_args.get("version"),
+                    label=self._load_args.get("label")
                 )
 
             # If mismatch → update Langfuse with local
@@ -141,7 +171,10 @@ class LangfusePromptDataset(AbstractDataset):
             ):
                 self.save(local_data)
                 return self._langfuse.get_prompt(
-                    self._prompt_name, type=self._prompt_type, label="latest"
+                    self._prompt_name, 
+                    type=self._prompt_type, 
+                    version=self._load_args.get("version"),
+                    label=self._load_args.get("label")
                 )
             return langfuse_prompt
 
@@ -163,7 +196,10 @@ class LangfusePromptDataset(AbstractDataset):
         """
         try:
             langfuse_prompt = self._langfuse.get_prompt(
-                self._prompt_name, type=self._prompt_type, label="latest"
+                self._prompt_name, 
+                type=self._prompt_type, 
+                version=self._load_args.get("version"),
+                label=self._load_args.get("label")
             )
         except Exception:
             langfuse_prompt = None
