@@ -72,7 +72,7 @@ intent_prompt_langfuse:
 intent_tracer_langfuse:
   type: kedro_agentic_workflows.datasets.langfuse_trace_dataset.LangfuseTraceDataset
   credentials: langfuse_credentials
-  mode: langchain     # or openai or sdk
+  mode: langchain     # langchain | openai | sdk
 
 # intent_prompt_opik:
 #   type: kedro_agentic_workflows.datasets.opik_prompt_dataset.PromptDataset
