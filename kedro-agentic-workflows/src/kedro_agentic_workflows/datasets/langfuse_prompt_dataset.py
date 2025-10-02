@@ -254,7 +254,6 @@ class LangfusePromptDataset(AbstractDataset):
                 or list of message dictionaries for chat prompts.
 
         Raises:
-            NotImplementedError: If file extension is not supported.
             ValueError: If Langfuse API call fails or invalid data format.
         """
         self._filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -337,7 +336,7 @@ class LangfusePromptDataset(AbstractDataset):
 
         Returns:
             New prompt data with message types converted according to _MESSAGE_TYPE_MAP
-            for chat prompts, unchanged for other prompt types for now.
+            for chat prompts, unchanged for other prompt types.
         """
         if self._prompt_type == "chat" and isinstance(prompt_data, list):
             # Return new list instead of mutating input
@@ -455,10 +454,11 @@ class LangfusePromptDataset(AbstractDataset):
         Load prompt from Langfuse with local file synchronization.
         
         This method performs the complete load workflow:
-        1. Loads local file if it exists
-        2. Attempts to fetch prompt from Langfuse using configured version/label (if specified)
-        3. Synchronizes local and remote versions based on sync_policy
-        4. Returns prompt in the format specified by mode parameter
+        1. Attempts to fetch prompt from Langfuse using configured version/label (if specified)
+        2. Handles network/API errors gracefully with fallback to local synchronization
+        3. Loads local file if it exists
+        4. Synchronizes local and remote versions based on sync_policy
+        5. Returns prompt in the format specified by mode parameter
         
         The method respects load_args for version/label specification and handles
         various sync scenarios automatically, including first-time loading scenarios.
@@ -473,7 +473,10 @@ class LangfusePromptDataset(AbstractDataset):
             ValueError: Based on sync_policy conflicts (see _sync_with_langfuse)
             FileNotFoundError: If no prompt found locally or in Langfuse
             NotImplementedError: If file extension is not supported
-            LangfuseError: If Langfuse API calls fail
+            
+        Note:
+            Network errors (ConnectionError, TimeoutError) are handled gracefully
+            with warning logs and fallback to local file synchronization.
             
         Examples:
             >>> # Load with default settings (latest version, langchain mode)
