@@ -52,7 +52,7 @@ intent_prompt_langfuse:
   load_args:
     version: 15
   save_args:
-    labels: ["testgoldagain"]
+    labels: ["test"]
 
 # Example: Load specific version, save with labels
 # intent_prompt_versioned:
