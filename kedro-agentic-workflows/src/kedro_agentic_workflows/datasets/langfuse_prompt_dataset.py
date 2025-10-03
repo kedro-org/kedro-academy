@@ -22,7 +22,8 @@ _MESSAGE_TYPE_MAP = {
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 
 # Required credentials for Langfuse authentication
-REQUIRED_CREDENTIALS = {"public_key", "secret_key", "host"}
+REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -83,11 +84,18 @@ class LangfusePromptDataset(AbstractDataset):
         ```python
         from kedro_agentic_workflows.datasets.langfuse_prompt_dataset import LangfusePromptDataset
 
-        # Basic usage
+        # Basic usage (using default Langfuse cloud)
         dataset = LangfusePromptDataset(
             filepath="data/prompts/intent.json",
             prompt_name="intent-classifier",
-            credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "..."}
+            credentials={"public_key": "pk_...", "secret_key": "sk_..."}
+        )
+        
+        # With custom host
+        dataset = LangfusePromptDataset(
+            filepath="data/prompts/intent.json",
+            prompt_name="intent-classifier",
+            credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "https://custom.langfuse.com"}
         )
 
         # Load and use prompt
@@ -102,35 +110,6 @@ class LangfusePromptDataset(AbstractDataset):
         dataset.save(chat_prompt)
         ```
     """
-
-    def _validate_init_params(
-        self, 
-        filepath: str, 
-        credentials: dict[str, Any]
-    ) -> None:
-        """Validate initialization parameters.
-        
-        Args:
-            filepath: File path to validate for supported extensions.
-            credentials: Credentials dictionary to validate for required keys.
-            
-        Raises:
-            ValueError: If credentials are missing required keys.
-            NotImplementedError: If filepath has unsupported extension.
-        """
-        # Validate credentials
-        missing = REQUIRED_CREDENTIALS - credentials.keys()
-        if missing:
-            raise ValueError(f"Missing required credentials: {missing}")
-        
-        # Validate file extension
-        file_path = Path(filepath)
-        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
-            raise NotImplementedError(
-                f"Unsupported file extension '{file_path.suffix}'. "
-                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-            )
-
     def __init__(
         self,
         filepath: str,
@@ -153,7 +132,8 @@ class LangfusePromptDataset(AbstractDataset):
             filepath: Local file path for storing prompt. Supports .json, .yaml, .yml extensions.
             prompt_name: Unique identifier for the prompt in Langfuse.
             prompt_type: Type of prompt - "chat" for conversation or "text" for single prompts.
-            credentials: Dict with Langfuse credentials {public_key, secret_key, host}.
+            credentials: Dict with Langfuse credentials. Required: {public_key, secret_key}. 
+                Optional: {host} (defaults to Langfuse cloud if not provided).
             sync_policy: How to handle conflicts between local and remote:
                 - "local": Local file takes precedence (default)
                 - "remote": Langfuse version takes precedence 
@@ -169,11 +149,18 @@ class LangfusePromptDataset(AbstractDataset):
                 - labels (list[str]): List of labels to assign to new prompt versions
         
         Examples:
-            >>> # Basic usage with default settings
+            >>> # Basic usage with default settings (using Langfuse cloud)
             >>> dataset = LangfusePromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
-            ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "..."}
+            ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}
+            ... )
+            
+            >>> # With custom host
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "https://custom.langfuse.com"}
             ... )
             
             >>> # Load specific version with remote-first policy
@@ -214,6 +201,49 @@ class LangfusePromptDataset(AbstractDataset):
         self._save_args = save_args or {}
         self._file_dataset = None
 
+    def _validate_init_params(
+        self, 
+        filepath: str, 
+        credentials: dict[str, Any]
+    ) -> None:
+        """Validate initialization parameters.
+        
+        Validates that required credentials (public_key, secret_key) are present
+        and not empty. Optional credentials (host) are validated only if provided.
+        
+        Args:
+            filepath: File path to validate for supported extensions.
+            credentials: Credentials dictionary to validate for required keys.
+            
+        Raises:
+            ValueError: If required credentials are missing or empty, or if
+                optional credentials are provided but empty.
+            NotImplementedError: If filepath has unsupported extension.
+        """  
+        # Validate required keys
+        for key in REQUIRED_LANGFUSE_CREDENTIALS:
+            if key not in credentials:
+                raise ValueError(f"Missing required Langfuse credential: '{key}'")
+            
+            # Validate that credential is not empty
+            if not credentials[key] or not str(credentials[key]).strip():
+                raise ValueError(f"Langfuse credential '{key}' cannot be empty")
+        
+        # Validate optional keys if present
+        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
+            if key in credentials:
+                # If host is provided, it cannot be empty
+                if not credentials[key] or not str(credentials[key]).strip():
+                    raise ValueError(f"Langfuse credential '{key}' cannot be empty if provided")
+
+        # Validate file extension
+        file_path = Path(filepath)
+        if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
+            raise NotImplementedError(
+                f"Unsupported file extension '{file_path.suffix}'. "
+                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
+            )
+        
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
 
