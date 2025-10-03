@@ -12,12 +12,6 @@ if TYPE_CHECKING:
 from langchain.prompts import ChatPromptTemplate
 from langfuse import Langfuse
 
-
-# Type mapping for normalizing Langfuse message types to local storage conventions
-_MESSAGE_TYPE_MAP = {
-    "message": "chatmessage"
-}
-
 # Supported file extensions for prompt storage
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 
@@ -104,8 +98,8 @@ class LangfusePromptDataset(AbstractDataset):
 
         # Save new version with labels
         chat_prompt = [
-            {"type": "chatmessage", "role": "system", "content": "You are helpful."},
-            {"type": "chatmessage", "role": "human", "content": "{input}"}
+            {"type": "message", "role": "system", "content": "You are helpful."},
+            {"type": "message", "role": "human", "content": "{input}"}
         ]
         dataset.save(chat_prompt)
         ```
@@ -353,36 +347,6 @@ class LangfusePromptDataset(AbstractDataset):
             )
         return langfuse_prompt
 
-    def _adapt_langfuse_chat_format(self, prompt_data: Union[str, list]) -> Union[str, list]:
-        """Adapt Langfuse chat message format to local storage conventions.
-        
-        TODO: This exists because Langfuse returns prompts with 'message' type,
-        but our local storage standardizes on 'chatmessage' for consistency.
-        This discrepancy requires format adaptation during synchronization.
-
-        Args:
-            prompt_data: The prompt data from Langfuse (string or list of messages).
-
-        Returns:
-            New prompt data with message types converted according to _MESSAGE_TYPE_MAP
-            for chat prompts, unchanged for other prompt types.
-        """
-        if self._prompt_type == "chat" and isinstance(prompt_data, list):
-            # Return new list instead of mutating input
-            adapted_messages = []
-            for msg in prompt_data:
-                if isinstance(msg, dict):
-                    # Create new dict with adapted type if needed
-                    adapted_msg = msg.copy()
-                    msg_type = adapted_msg.get("type")
-                    if msg_type in _MESSAGE_TYPE_MAP:
-                        adapted_msg["type"] = _MESSAGE_TYPE_MAP[msg_type]
-                    adapted_messages.append(adapted_msg)
-                else:
-                    adapted_messages.append(msg)
-            return adapted_messages
-        return prompt_data
-
     def _sync_remote_policy(
         self, local_data: str | None, langfuse_prompt: Any | None
     ) -> Any:
@@ -405,9 +369,8 @@ class LangfusePromptDataset(AbstractDataset):
                 f"but no remote prompt exists in Langfuse. Create the prompt in Langfuse first."
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
-            normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
             logger.info(f"Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
-            self.file_dataset.save(normalized_prompt)
+            self.file_dataset.save(langfuse_prompt.prompt)
         return langfuse_prompt
 
     def _sync_local_policy(
@@ -442,9 +405,8 @@ class LangfusePromptDataset(AbstractDataset):
 
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
-            normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
             logger.info(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse (local sync policy) as local file is missing")
-            self.file_dataset.save(normalized_prompt)
+            self.file_dataset.save(langfuse_prompt.prompt)
             return langfuse_prompt
 
         raise FileNotFoundError(

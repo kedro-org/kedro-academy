@@ -45,7 +45,7 @@ intent_prompt_langfuse:
   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
   prompt_name: "intent-classifier"
-  prompt_type: "chat"
+  prompt_type: "chat" # chat|text
   credentials: langfuse_credentials
   sync_policy: remote      # local|remote|strict
   mode: langchain         # langchain|sdk
