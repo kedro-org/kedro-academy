@@ -4,6 +4,8 @@ from typing import Any, Literal
 from kedro.io import AbstractDataset
 from langfuse import Langfuse
 
+REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
 class LangfuseTraceDataset(AbstractDataset):
     """Kedro dataset for managing Langfuse tracing clients and callbacks.
@@ -32,12 +34,22 @@ class LangfuseTraceDataset(AbstractDataset):
         ```python
         from kedro_agentic_workflows.datasets.langfuse_trace_dataset import LangfuseTraceDataset
 
-        # Basic usage
+        # Basic usage (using default Langfuse cloud)
         dataset = LangfuseTraceDataset(
             credentials={
                 "public_key": "pk_...", 
                 "secret_key": "sk_...", 
-                "host": "https://cloud.langfuse.com",
+                "openai": {"openai_api_key": "sk-..."}
+            },
+            mode="openai"
+        )
+        
+        # With custom host
+        dataset = LangfuseTraceDataset(
+            credentials={
+                "public_key": "pk_...", 
+                "secret_key": "sk_...", 
+                "host": "https://custom.langfuse.com",
                 "openai": {"openai_api_key": "sk-..."}
             },
             mode="openai"
@@ -63,7 +75,8 @@ class LangfuseTraceDataset(AbstractDataset):
         
         Args:
             credentials: Dictionary with Langfuse credentials. Required keys:
-                {public_key, secret_key, host}. For OpenAI mode, may also include
+                {public_key, secret_key}. Optional keys: {host} (defaults to 
+                Langfuse cloud if not provided). For OpenAI mode, may also include
                 openai section with {openai_api_key, openai_api_base}.
             mode: Tracing mode - "langchain", "openai", or "sdk" (default).
             **trace_kwargs: Additional kwargs passed to the tracing client.
@@ -72,15 +85,23 @@ class LangfuseTraceDataset(AbstractDataset):
             ValueError: If required Langfuse credentials are missing or empty.
             
         Examples:
-            >>> # Basic SDK mode
+            >>> # Basic SDK mode (using default Langfuse cloud)
             >>> dataset = LangfuseTraceDataset(
-            ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "..."}
+            ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}
+            ... )
+            
+            >>> # With custom host
+            >>> dataset = LangfuseTraceDataset(
+            ...     credentials={
+            ...         "public_key": "pk_...", "secret_key": "sk_...", 
+            ...         "host": "https://custom.langfuse.com"
+            ...     }
             ... )
             
             >>> # OpenAI mode with API key
             >>> dataset = LangfuseTraceDataset(
             ...     credentials={
-            ...         "public_key": "pk_...", "secret_key": "sk_...", "host": "...",
+            ...         "public_key": "pk_...", "secret_key": "sk_...",
             ...         "openai": {"openai_api_key": "sk-...", "openai_api_base": "..."}
             ...     },
             ...     mode="openai"
@@ -99,25 +120,33 @@ class LangfuseTraceDataset(AbstractDataset):
         self._validate_langfuse_credentials()
         
         # Set Langfuse environment variables from credentials
-        os.environ["LANGFUSE_SECRET_KEY"] = self._credentials.get("secret_key", "")
-        os.environ["LANGFUSE_PUBLIC_KEY"] = self._credentials.get("public_key", "")
-        os.environ["LANGFUSE_HOST"] = self._credentials.get("host", "")
+        os.environ["LANGFUSE_SECRET_KEY"] = self._credentials["secret_key"]
+        os.environ["LANGFUSE_PUBLIC_KEY"] = self._credentials["public_key"]
+        
+        if "host" in self._credentials:
+            os.environ["LANGFUSE_HOST"] = self._credentials["host"]
 
     def _validate_langfuse_credentials(self) -> None:
         """Validate Langfuse credentials before setting environment variables.
         
         Raises:
             ValueError: If Langfuse credentials are missing or invalid.
-        """
-        required_keys = ["public_key", "secret_key", "host"]
-        
-        for key in required_keys:
+        """        
+        # Validate required keys
+        for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in self._credentials:
                 raise ValueError(f"Missing required Langfuse credential: '{key}'")
             
             # Validate that credential is not empty
             if not self._credentials[key] or not str(self._credentials[key]).strip():
                 raise ValueError(f"Langfuse credential '{key}' cannot be empty")
+        
+        # Validate optional keys if present
+        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
+            if key in self._credentials:
+                # If host is provided, it cannot be empty
+                if not self._credentials[key] or not str(self._credentials[key]).strip():
+                    raise ValueError(f"Langfuse credential '{key}' cannot be empty if provided")
         
     def _describe(self) -> dict[str, Any]:
         """Return a description of the dataset for Kedro's internal use.
