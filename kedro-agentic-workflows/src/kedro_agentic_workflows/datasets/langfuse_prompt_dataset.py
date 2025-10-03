@@ -286,7 +286,6 @@ class LangfusePromptDataset(AbstractDataset):
         Raises:
             ValueError: If Langfuse API call fails or invalid data format.
         """
-        self._filepath.parent.mkdir(parents=True, exist_ok=True)
         self.file_dataset.save(data)
 
         create_kwargs = {
@@ -406,8 +405,8 @@ class LangfusePromptDataset(AbstractDataset):
                 f"but no remote prompt exists in Langfuse. Create the prompt in Langfuse first."
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
-            self._filepath.parent.mkdir(parents=True, exist_ok=True)
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
+            logger.info(f"Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
             self.file_dataset.save(normalized_prompt)
         return langfuse_prompt
 
@@ -443,8 +442,8 @@ class LangfusePromptDataset(AbstractDataset):
 
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
-            self._filepath.parent.mkdir(parents=True, exist_ok=True)
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
+            logger.info(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse (local sync policy) as local file is missing")
             self.file_dataset.save(normalized_prompt)
             return langfuse_prompt
 
@@ -572,7 +571,8 @@ class LangfusePromptDataset(AbstractDataset):
         # Synchronize local and remote
         langfuse_prompt = self._sync_with_langfuse(local_data, langfuse_prompt)
 
-        if self._mode == "sdk":
-            return langfuse_prompt
-        else:
-            return ChatPromptTemplate.from_messages(langfuse_prompt.get_langchain_prompt())
+        _RETURN_MODES = {
+            "sdk": lambda prompt: prompt,
+            "langchain": lambda prompt: ChatPromptTemplate.from_messages(prompt.get_langchain_prompt()),
+        }
+        return _RETURN_MODES[self._mode](langfuse_prompt)
