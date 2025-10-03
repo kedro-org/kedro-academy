@@ -47,7 +47,7 @@ intent_prompt_langfuse:
   prompt_name: "intent-classifier"
   prompt_type: "chat" # chat|text
   credentials: langfuse_credentials
-  sync_policy: remote      # local|remote|strict
+  sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
   load_args:
     version: 15
