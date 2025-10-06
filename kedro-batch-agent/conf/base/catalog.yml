@@ -1,0 +1,35 @@
+llm:
+  type: kedro_datasets_experimental.langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o-mini"
+  credentials: openai
+
+claims_docs:
+  type: partitions.PartitionedDataset
+  path: data/raw_data/claims_docs/${runtime_params:client_name,client_1}/
+  dataset: kedro_batch_agent.datasets.pdf_dataset.PDFDataset
+
+claims_pics:
+  type: partitions.PartitionedDataset
+  path: data/raw_data/claims_pics/${runtime_params:client_name,client_1}/
+  dataset: pillow.ImageDataset
+
+claim_completion_prompt:
+  type: text.TextDataset
+  filepath: data/prompts/completion_agent_prompt.txt
+
+image_analysis_prompt:
+  type: text.TextDataset
+  filepath: data/prompts/image_analysis_agent_prompt.txt
+
+response_completion:
+  type: json.JSONDataset
+  filepath: data/results/response_completion_agent/${runtime_params:client_name,client_1}.json
+
+response_image_analysis:
+  type: json.JSONDataset
+  filepath: data/results/response_image_analysis_agent/${runtime_params:client_name,client_1}.json
+
+"{default}":
+  type: MemoryDataset
+  copy_mode: assign
