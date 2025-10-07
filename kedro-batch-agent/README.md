@@ -9,9 +9,12 @@ The goal of this project is to demonstrate how to build batch processing agentic
 ### Agentic Workflows
 
 This project showcases two agentic use-cases in the insurance domain:
-1. An unstructured document analysis agent: Extracts structured claims information from unstructured documents.
+
+#### 1. Document Analysis Agent
+
 This agent processes unstructured text data (e.g., emails, chat records) related to insurance claims and extracts relevant information such as claim number, policy number, date of incident, type of damage, estimated cost of repair, and other pertinent details. The extracted information is then structured into a JSON format for further analysis and reporting. 
-#### Output
+
+**Output**
 The output of the document analysis agent is a JSON file saved in `data/results/response_completion_agent/<client_name>.json` with the following structure:
 ```json
 {
@@ -26,9 +29,12 @@ The output of the document analysis agent is a JSON file saved in `data/results/
 }
 ```
 
-2. An image analysis agent: Analyses images for damage assessment and generates reports.
+#### 2. Image Analysis Agent
+
 This agent processes images submitted along with insurance claims to assess the extent of damage and estimate repair costs. It analyses the images to identify visible damages, categorizes the type of damage (e.g., minor, moderate, severe), and provides an estimated cost for repairs. The analysis results are structured into a JSON format for easy interpretation and further processing.
-#### Output
+
+**Output**
+
 The output of the image analysis agent is a JSON file saved in `data/results/response_image_analysis_agent/<client_name>.json` with the following structure:
 ```json
 {

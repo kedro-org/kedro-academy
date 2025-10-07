@@ -8,3 +8,4 @@ langgraph-prebuilt
 langchain-community
 langchain-core
 langchain-openai
+pypdf
