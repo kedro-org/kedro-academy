@@ -49,10 +49,10 @@ intent_prompt_langfuse:
   credentials: langfuse_credentials
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
-  load_args:
-    version: 15
+#  load_args:
+#    version: 15
   save_args:
-    labels: ["test"]
+    labels: ["latest"]
 
 # Example: Load specific version, save with labels
 # intent_prompt_versioned:
@@ -71,7 +71,7 @@ intent_prompt_langfuse:
 # --- Langfuse Tracing ---
 intent_tracer_langfuse:
   type: kedro_agentic_workflows.datasets.langfuse_trace_dataset.LangfuseTraceDataset
-  credentials: langfuse_credentials
+  credentials: langfuse_credentials_test
   mode: langchain     # langchain | openai | sdk
 
 # intent_prompt_opik:
