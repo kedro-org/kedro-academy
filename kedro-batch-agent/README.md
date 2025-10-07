@@ -15,6 +15,7 @@ This project showcases two agentic use-cases in the insurance domain:
 This agent processes unstructured text data (e.g., emails, chat records) related to insurance claims and extracts relevant information such as claim number, policy number, date of incident, type of damage, estimated cost of repair, and other pertinent details. The extracted information is then structured into a JSON format for further analysis and reporting. 
 
 **Output**
+
 The output of the document analysis agent is a JSON file saved in `data/results/response_completion_agent/<client_name>.json` with the following structure:
 ```json
 {
