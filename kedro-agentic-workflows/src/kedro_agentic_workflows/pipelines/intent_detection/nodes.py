@@ -1,13 +1,13 @@
 import logging
 from typing import Any
 
-import pandas as pd
-import questionary
 from langfuse.langchain import CallbackHandler
-from sqlalchemy import Engine
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+import pandas as pd
+import questionary
+from sqlalchemy import Engine
 
 # from opik.integrations.langchain import OpikTracer
 
@@ -48,7 +48,12 @@ def get_session_id(session_table: pd.DataFrame) -> int:
     return session_id
 
 
-def load_context(user_id: int, user_data: pd.DataFrame, session_id: int, intent_tracer_langfuse: CallbackHandler):
+def load_context(
+    user_id: int,
+    user_data: pd.DataFrame,
+    session_id: int,
+    intent_tracer_langfuse: CallbackHandler,
+):
     """
     Build user context and tracing configuration for LangChain.
 

@@ -73,12 +73,12 @@ def generate_response(
     Accepts intent detection result + user context and session config.
     """
     if intent_detection_result["intent"] == "clarification_needed":
-        message = "Failed to recognize intent. Please try to describe your problem briefly."
+        message = (
+            "Failed to recognize intent. Please try to describe your problem briefly."
+        )
         logger.warning(message)
 
-        result = {
-            "messages": [AIMessage(content=message)]
-        }
+        result = {"messages": [AIMessage(content=message)]}
 
     else:
         agent = ResponseGenerationAgent(context=response_generation_context)
