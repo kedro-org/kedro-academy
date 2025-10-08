@@ -16,7 +16,9 @@ conf/**/*credentials*
 !.gitkeep
 
 # ignore kedro-viz metadata
-.viz
+.viz/*
+# but keep styles.json
+!.viz/styles.json
 
 # ignore file based logs
 *.log
