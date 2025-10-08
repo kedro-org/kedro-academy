@@ -49,10 +49,6 @@ intent_prompt_langfuse:
   credentials: langfuse_credentials
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
-  load_args:
-    version: 15
-  save_args:
-    labels: ["test"]
 
 # Example: Load specific version, save with labels
 # intent_prompt_versioned:
@@ -80,7 +76,6 @@ intent_tracer_langfuse:
 #   prompt_name: "intent-classifier"
 #   prompt_type: "chat"
 #   credentials: opik_credentials
-
 
 # --- Default dataset ---
 "{default_dataset}":
