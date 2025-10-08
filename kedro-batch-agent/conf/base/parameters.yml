@@ -1,0 +1,2 @@
+max_images: 3
+confidence_threshold: 0.8
