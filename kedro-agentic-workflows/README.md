@@ -76,6 +76,7 @@ kedro_agentic_workflows/
       └── kedro_agentic_workflows
           ├── datasets
           │   ├── langfuse_prompt_dataset.py   # Custom Kedro dataset for Langfuse prompts
+          │   │── langfuse_trace_dataset.py    # Custom Kedro dataset for Langfuse tracing
           │   ├── opik_prompt_dataset.py       # Custom Kedro dataset for Opik prompts
           │   └── sqlalchemy_dataset.py        # Custom Kedro dataset to create SQLAlchemy engines
           ├── pipelines
@@ -117,11 +118,17 @@ updating the pipeline.
 
 ```yaml
 intent_prompt_langfuse:
-  type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.PromptDataset
-  filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
-  prompt_name: "intent-classifier"
-  prompt_type: "chat"
-  credentials: langfuse_credentials
+   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+   filepath: data/intent_detection/prompts/intent_prompt_v3.json
+   prompt_name: "intent-classifier"
+   prompt_type: "chat"
+   credentials: langfuse_credentials
+   sync_policy: local
+   mode: langchain
+   load_args:
+     version: 3
+   save_args:
+     labels: ["latest"]
 
 intent_prompt_opik:
   type: kedro_agentic_workflows.datasets.opik_prompt_dataset.PromptDataset
@@ -216,9 +223,10 @@ opik_credentials:
 
 This project supports observability and tracing with either `Langfuse` or `Opik`.
 
-Both `Langfuse` and `Opik` require credentials to be set via environment variables, following their native SDK setup instructions:
-- [Langfuse Setup Guide](https://langfuse.com/docs/observability/get-started)
-- [Opik Setup Guide](https://www.comet.com/docs/opik/tracing/sdk_configuration)
+- `Langfuse` tracing is applied via the `LangfuseTraceDataset` that provides appropriate tracing objects based on mode configuration,
+enabling seamless integration with different AI frameworks and direct SDK usage. It is set as the default option for the project. For more details see `conf/base/catalog.yml` and `src/kedro_agentic_workflows/datasets/langfuse_trace_dataset.py`.
+- `Opik` requires credentials to be set via environment variables, following their native SDK setup instructions: 
+[Opik Setup Guide](https://www.comet.com/docs/opik/tracing/sdk_configuration)
 
 `Note:` Only one tracing backend (`Langfuse` or `Opik`) should be active at a time. See `src/kedro_agentic_workflows/pipelines/intent_detection/nodes.py`.
 

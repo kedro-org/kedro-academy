@@ -7,6 +7,7 @@ from langfuse import Langfuse
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
 OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 
+
 class LangfuseTraceDataset(AbstractDataset):
     """Kedro dataset for managing Langfuse tracing clients and callbacks.
     
