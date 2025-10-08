@@ -9,6 +9,7 @@ from kedro.io import AbstractDataset
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
+from kedro_datasets._typing import JSONPreview
 from langchain.prompts import ChatPromptTemplate
 from langfuse import Langfuse
 
@@ -586,3 +587,17 @@ class LangfusePromptDataset(AbstractDataset):
             ),
         }
         return _RETURN_MODES[self._mode](langfuse_prompt)
+
+    def preview(self) -> JSONPreview:
+        """
+        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
+
+        Returns:
+            JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string of the
+                processed data.
+        """
+        if self._filepath.exists():
+            local_data = self.file_dataset.load()
+            return JSONPreview(json.dumps(local_data))
+
+        return JSONPreview("Local prompt does not exist.")
