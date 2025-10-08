@@ -157,7 +157,7 @@ Example catalog entries:
 ```yaml
 tool_prompt_txt:
   type: text.TextDataset
-  filepath: data/response_generation/prompts/tool_system.txt
+  filepath: data/response_generation/prompts/tool.txt
 
 response_system_prompt_txt:
   type: text.TextDataset
