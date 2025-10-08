@@ -32,7 +32,7 @@ The output of the document analysis agent is a JSON file saved in `data/results/
 
 #### 2. Image Analysis Agent
 
-This agent processes images submitted along with insurance claims to assess the extent of damage and estimate repair costs. It analyses the images to identify visible damages, categorizes the type of damage (e.g., minor, moderate, severe), and provides an estimated cost for repairs. The analysis results are structured into a JSON format for easy interpretation and further processing.
+This agent processes images submitted along with insurance claims to assess the extent of damage and estimate repair costs. It analyses the images to identify visible damages, categorizes the type of damage (e.g., minor, moderate, severe), and provides an estimated cost for repairs. The analysis results are structured into a JSON format for easy interpretation and further processing. The agentic workflow is designed to read images one at a time and stop after either reaching the end of the list, or after processing a predefined number of images, or after a confidence threshold is met. The maximum number of images and the confidence threshold can be set in the `conf/base/parameters.yml` file.
 
 **Output**
 
