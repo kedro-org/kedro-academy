@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Any, TypedDict, Literal
 
+from kedro.pipeline import AgentContext as KedroAgentContext
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.runnables import Runnable
 from langgraph.graph import StateGraph, START, END
@@ -58,7 +59,12 @@ class IntentDetectionAgent(KedroAgent):
     Uses LangGraph with memory checkpointing.
     """
 
-    def __init__(self, context: AgentContext):
+    def __init__(self, context: KedroAgentContext):
+        # Bind LLM to structured output schema
+        structured_llm = context.llm.with_structured_output(IntentOutput)
+        intent_detection_chain = context.prompts["intent_prompt"] | structured_llm
+        context.llm = intent_detection_chain
+
         super().__init__(context)
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None
