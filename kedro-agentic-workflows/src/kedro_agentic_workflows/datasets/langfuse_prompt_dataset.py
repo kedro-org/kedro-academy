@@ -301,19 +301,47 @@ class LangfusePromptDataset(AbstractDataset):
         self._langfuse.create_prompt(**create_kwargs)
 
     def _build_get_kwargs(self) -> dict[str, Any]:
-        """Build kwargs for fetching prompt from Langfuse based on load_args.
+        """Build kwargs for fetching prompt from Langfuse based on load_args and sync_policy.
+
+        When sync_policy="local", load_args (version/label) are ignored since local files
+        are the source of truth. Users get a warning and the latest version is fetched
+        for synchronization purposes only.
+
+        When sync_policy="remote" or "strict", load_args are respected since remote
+        versions matter for these policies.
 
         Returns:
             Kwargs dictionary for langfuse.get_prompt() with name, type, and 
             optional version or label parameters.
         """
         get_kwargs = {"name": self._prompt_name, "type": self._prompt_type}
-        if self._load_args.get("label") is not None:
+        
+        # Check if user specified version/label with local sync policy
+        has_load_args = (self._load_args.get("label") is not None or 
+                           self._load_args.get("version") is not None)
+        
+        if self._sync_policy == "local" and has_load_args:
+            # Warn user that load_args are ignored in local mode
+            specified_args = []
+            if self._load_args.get("label") is not None:
+                specified_args.append(f"label='{self._load_args['label']}'")
+            if self._load_args.get("version") is not None:
+                specified_args.append(f"version={self._load_args['version']}")
+            
+            logger.warning(
+                f"Ignoring load_args ({', '.join(specified_args)}) for prompt '{self._prompt_name}' "
+                f"because sync_policy='local'. Local files are the source of truth. "
+                f"To use specific versions/labels, switch to sync_policy='remote'."
+            )
+            # Always fetch latest for local sync policy
+            get_kwargs["label"] = "latest"
+        elif self._load_args.get("label") is not None:
             get_kwargs["label"] = self._load_args["label"]
         elif self._load_args.get("version") is not None:
             get_kwargs["version"] = self._load_args["version"]
         else:
             get_kwargs["label"] = "latest"
+
         return get_kwargs
 
     def _sync_strict_policy(
