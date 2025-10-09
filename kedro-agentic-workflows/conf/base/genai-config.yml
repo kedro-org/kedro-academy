@@ -11,11 +11,15 @@ tool_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/response_generation/prompts/tool.txt
   template: PromptTemplate
+  dataset:
+    type: text.TextDataset
 
 response_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/response_generation/prompts/response.yml
   template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
 
 intent_prompt_langfuse:
   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
