@@ -277,7 +277,7 @@ class LangfusePromptDataset(AbstractDataset):
         return self._file_dataset
 
     def save(self, data: Union[str, list]) -> None:
-        """Save prompt data to local file and create new version in Langfuse.
+        """Create a new version of prompt in Langfuse with the data.
 
         Args:
             data: The prompt content to save. Can be string for text prompts
@@ -286,8 +286,6 @@ class LangfusePromptDataset(AbstractDataset):
         Raises:
             ValueError: If Langfuse API call fails or invalid data format.
         """
-        self.file_dataset.save(data)
-
         create_kwargs = {
             "name": self._prompt_name,
             "prompt": data,
@@ -434,7 +432,7 @@ class LangfusePromptDataset(AbstractDataset):
             )
         if not local_data or _hash(_get_content(local_data)) != _hash(_get_content(langfuse_prompt.prompt)):
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
-            logger.info(f"Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
+            logger.warning(f"Creating/Overwriting local file '{self._filepath}' with remote prompt '{self._prompt_name}' from Langfuse (remote sync policy)")
             self.file_dataset.save(normalized_prompt)
         return langfuse_prompt
 
@@ -457,6 +455,7 @@ class LangfusePromptDataset(AbstractDataset):
         if local_data is not None:
             if langfuse_prompt is None:
                 # Push local to Langfuse
+                logger.info(f"Creating '{self._prompt_name}' prompt in Langfuse from local file '{self._filepath}' as remote prompt does not exist (local sync policy)")
                 self.save(local_data)
                 return self._langfuse.get_prompt(**self._build_get_kwargs())
 
@@ -464,6 +463,8 @@ class LangfusePromptDataset(AbstractDataset):
             if _hash(_get_content(local_data)) != _hash(
                 _get_content(langfuse_prompt.prompt)
             ):
+                logger.warning(f"Creating a new version of '{self._prompt_name}' prompt in Langfuse from local file '{self._filepath}' as local file prompt content does not match with remote prompt (local sync policy)")
+                # Push local to Langfuse
                 self.save(local_data)
                 return self._langfuse.get_prompt(**self._build_get_kwargs())
             return langfuse_prompt
@@ -471,7 +472,7 @@ class LangfusePromptDataset(AbstractDataset):
         # If local missing but Langfuse exists → persist locally
         if langfuse_prompt:
             normalized_prompt = self._adapt_langfuse_chat_format(langfuse_prompt.prompt)
-            logger.info(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse (local sync policy) as local file is missing")
+            logger.warning(f"Creating local file '{self._filepath}' from remote prompt '{self._prompt_name}' from Langfuse as local file is missing (local sync policy)")
             self.file_dataset.save(normalized_prompt)
             return langfuse_prompt
 
