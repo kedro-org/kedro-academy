@@ -55,9 +55,7 @@ class ResponseGenerationAgent(KedroAgent):
 
         # LLM that generates structured final response
         structured_llm = self.context.llm.with_structured_output(ResponseOutput)
-        self.response_chain = (
-            self.context.prompts["response_prompt"] | structured_llm
-        )
+        self.response_chain = self.context.prompts["response_prompt"] | structured_llm
 
     def compile(self):
         """Compile the state graph for response generation."""

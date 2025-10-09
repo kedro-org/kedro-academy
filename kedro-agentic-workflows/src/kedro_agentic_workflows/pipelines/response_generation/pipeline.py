@@ -14,14 +14,11 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="response_agent_context_node",
                 outputs="response_generation_context",
                 llm="llm",
-                prompts=[
-                    "tool_prompt",
-                    "response_prompt"
-                ],
+                prompts=["tool_prompt", "response_prompt"],
                 tools=[
                     {"func": build_get_user_claims, "inputs": ["db_engine"]},
                     {"func": build_lookup_docs, "inputs": ["docs"]},
-                    {"func": build_create_claim, "inputs": ["db_engine"]}
+                    {"func": build_create_claim, "inputs": ["db_engine"]},
                 ],
             ),
             node(
