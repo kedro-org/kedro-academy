@@ -542,6 +542,11 @@ class LangfusePromptDataset(AbstractDataset):
             ...     # Text prompts return simple string templates
             ...     text = prompt.format(user_input="test")
         """
+        # Temporarily suppress Langfuse logger to prevent ERROR logs for 404s
+        langfuse_logger = logging.getLogger('langfuse')
+        original_level = langfuse_logger.level
+        langfuse_logger.setLevel(logging.CRITICAL)
+        
         try:
             langfuse_prompt = self._langfuse.get_prompt(**self._build_get_kwargs())
         except ConnectionError as e:
@@ -559,9 +564,12 @@ class LangfusePromptDataset(AbstractDataset):
         except Exception as e:
             logger.warning(
                 f"Unexpected error when fetching prompt '{self._prompt_name}': {type(e).__name__}: {e}. "
-                f"Falling back to local file sync."
+                f"Falling back to loading local file."
             )
             langfuse_prompt = None
+        finally:
+            # Restore original logging level
+            langfuse_logger.setLevel(original_level)
 
         # Load local file if it exists
         local_data = None
