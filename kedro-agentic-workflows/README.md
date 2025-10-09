@@ -64,6 +64,7 @@ kedro_agentic_workflows/
   ├── conf
   │   ├── base
   │   │   ├── catalog.yml                      # Kedro datasets catalog
+  │   │   ├── genai-config.yml                 # Configuration for LMMs, prompts, tracing 
   │   │   └── parameters.yml                   # Kedro pipeline parameters (user_id, etc.)
   │   └── local
   │       └── credentials.yml                  # API keys, DB credentials
@@ -146,26 +147,27 @@ Stored under: `data/response_generation/prompts`
 
 Purpose: Generate personalized responses that combine user context, user claims data and knowledge base content and decide which tools to call to retrieve this content.
 
-Unlike intent detection, these are static text templates managed via Kedro’s native `TextDataset`:
+Unlike intent detection, these are static templates managed via recently added Kedro’s experimental `LangChainPromptDataset`:
 
-- `tool_system.txt` – system-level instruction for tool usage (defines how the LLM should decide when and how to call tools).
-- `response_system.txt` – system instruction for response style, tone, and overall reasoning.
-- `response_user.txt` – user-level template, receiving context (intent, claim data, docs) and instructing the model on what to answer.
+- `tool.txt` – instruction for tool usage (defines how the LLM should decide when and how to call tools).
+- `response.yml` – instruction for response style, tone, and overall reasoning with user-level template, receiving context (intent, claim data, docs) and instructing the model on what to answer.
 
 Example catalog entries:
 
 ```yaml
-tool_prompt_txt:
-  type: text.TextDataset
+tool_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/response_generation/prompts/tool.txt
+  template: PromptTemplate
+  dataset:
+    type: text.TextDataset
 
-response_system_prompt_txt:
-  type: text.TextDataset
-  filepath: data/response_generation/prompts/response_system.txt
-
-response_user_prompt_txt:
-  type: text.TextDataset
-  filepath: data/response_generation/prompts/response_user.txt
+response_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/response_generation/prompts/response.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
 ```
 
 ## ⚙️ Project Setup
