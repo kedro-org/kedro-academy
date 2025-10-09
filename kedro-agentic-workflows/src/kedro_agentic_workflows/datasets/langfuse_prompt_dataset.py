@@ -57,14 +57,17 @@ class LangfusePromptDataset(AbstractDataset):
     (langchain mode) or raw Langfuse object (sdk mode).
 
     Sync policies:
-    - local: local file takes precedence (default)
-    - remote: Langfuse version takes precedence 
-    - strict: error if local and remote differ
+    - local: local file takes precedence (default). load_args (version/label) are 
+      ignored with warning and latest prompt from langfuse is loaded if available, 
+      since local files are the source of truth.
+    - remote: Langfuse version takes precedence. load_args are respected.
+    - strict: error if local and remote differ. load_args are respected.
 
     Examples:
         Using catalog YAML configuration:
         
         ```yaml
+        # Local sync policy - local files are source of truth
         intent_prompt:
           type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
           filepath: data/prompts/intent.json
@@ -73,10 +76,19 @@ class LangfusePromptDataset(AbstractDataset):
           credentials: langfuse_credentials
           sync_policy: local
           mode: langchain
-          load_args:
-            label: "production"
+          # load_args are ignored in local mode with warning 
+          # and latest prompt from langfuse is loaded if available
           save_args:
             labels: ["staging", "v2.1"]
+            
+        # Remote sync policy - Langfuse versions are source of truth
+        production_prompt:
+          type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+          filepath: data/prompts/production.json
+          prompt_name: "intent-classifier"
+          sync_policy: remote
+          load_args:
+            label: "production"  # This is respected in remote mode
         ```
 
         Using Python API:
@@ -136,12 +148,13 @@ class LangfusePromptDataset(AbstractDataset):
                 Optional: {host} (defaults to Langfuse cloud if not provided).
             sync_policy: How to handle conflicts between local and remote:
                 - "local": Local file takes precedence (default)
-                - "remote": Langfuse version takes precedence 
+                - "remote": Langfuse version takes precedence
                 - "strict": Error if local and remote differ
             mode: Return type for load() method:
                 - "langchain": Returns ChatPromptTemplate object (default)
                 - "sdk": Returns raw Langfuse prompt object
-            load_args: Dict with loading parameters. Supported keys:
+            load_args: Dict with loading parameters. Only used when sync_policy="remote" or "strict".
+                Ignored with warning when sync_policy="local". Supported keys:
                 - version (int): Specific version number to load
                 - label (str): Specific label to load (e.g., "production", "staging")
                 Note: Cannot specify both version and label simultaneously.
@@ -149,11 +162,29 @@ class LangfusePromptDataset(AbstractDataset):
                 - labels (list[str]): List of labels to assign to new prompt versions
         
         Examples:
-            >>> # Basic usage with default settings (using Langfuse cloud)
+            >>> # Local sync policy (default) - local files are source of truth
             >>> dataset = LangfusePromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_..."}
+            ... )
+            
+            >>> # Remote sync policy - load specific version from Langfuse
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/intent.yaml",
+            ...     prompt_name="intent-classifier", 
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"version": 3}  # This is respected in remote mode
+            ... )
+            
+            >>> # Remote sync policy - load specific label from Langfuse
+            >>> dataset = LangfusePromptDataset(
+            ...     filepath="prompts/production.json",
+            ...     prompt_name="intent-classifier",
+            ...     credentials=creds,
+            ...     sync_policy="remote",
+            ...     load_args={"label": "production"}  # This is respected in remote mode
             ... )
             
             >>> # With custom host
@@ -162,17 +193,8 @@ class LangfusePromptDataset(AbstractDataset):
             ...     prompt_name="intent-classifier",
             ...     credentials={"public_key": "pk_...", "secret_key": "sk_...", "host": "https://custom.langfuse.com"}
             ... )
-            
-            >>> # Load specific version with remote-first policy
-            >>> dataset = LangfusePromptDataset(
-            ...     filepath="prompts/intent.yaml",
-            ...     prompt_name="intent-classifier", 
-            ...     credentials=creds,
-            ...     sync_policy="remote",
-            ...     load_args={"version": 3}
-            ... )
-            
-            >>> # Auto-label new versions when saving
+
+            >>> # Auto-label new versions when saving (works with any sync policy)
             >>> dataset = LangfusePromptDataset(
             ...     filepath="prompts/intent.json",
             ...     prompt_name="intent-classifier",
@@ -441,6 +463,10 @@ class LangfusePromptDataset(AbstractDataset):
     ) -> Any:
         """
         Handle local sync policy - local file takes precedence.
+        
+        Local files are the source of truth. When local content differs from remote,
+        the local content is pushed to Langfuse as a new version. If local file is missing 
+        but remote exists, the remote content is saved locally.
         
         Args:
             local_data: Content from local file, None if file doesn't exist
