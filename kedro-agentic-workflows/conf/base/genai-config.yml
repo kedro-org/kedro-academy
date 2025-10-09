@@ -21,7 +21,7 @@ response_prompt:
   dataset:
     type: yaml.YAMLDataset
 
-intent_prompt_langfuse:
+intent_prompt:
   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
   prompt_name: "intent-classifier"
