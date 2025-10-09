@@ -36,7 +36,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="load_context_node",
             ),
             agent_context_node(
-                name="agent_context_node",
+                name="intent_agent_context_node",
                 outputs="intent_detection_context",
                 llm="llm",
                 prompts=[

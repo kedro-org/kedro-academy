@@ -11,7 +11,7 @@ from sqlalchemy import Engine
 # from opik.integrations.langchain import OpikTracer
 
 from .agent import IntentOutput, IntentDetectionAgent
-from ...utils import log_message, AgentContext
+from ...utils import log_message
 
 logger = logging.getLogger(__name__)
 
