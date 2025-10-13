@@ -41,18 +41,44 @@ response_user_prompt_txt:
   type: text.TextDataset
   filepath: data/response_generation/prompts/response_user.txt
 
-intent_prompt_langfuse:
-  type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+# intent_prompt_langfuse:
+#   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+#   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
+#   prompt_name: intent-classifier
+#   prompt_type: chat       # chat|text
+#   credentials: langfuse_credentials
+#   sync_policy: local      # local|remote|strict
+#   mode: langchain         # langchain|sdk
+#   load_args:
+#     version: 1
+#   save_args:
+#     labels: [test]
+
+intent_prompt_langfuse_txt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
-  prompt_name: "intent-classifier"
-  prompt_type: "chat"
+  prompt_name: intent-classifier-txt
+  prompt_type: text       # chat|text
   credentials: langfuse_credentials
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
   load_args:
-    version: 15
+    version: 1
   save_args:
-    labels: ["test"]
+    labels: [test]
+
+intent_prompt_langfuse_yml_chat:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/intent_detection/prompts/intent_prompt_langfuse.yaml
+  prompt_name: intent-classifier-yml-chat
+  prompt_type: chat       # chat|text
+  credentials: langfuse_credentials
+  sync_policy: remote      # local|remote|strict
+  mode: langchain         # langchain|sdk
+  load_args:
+    version: 1
+  save_args:
+    labels: [test]
 
 # Example: Load specific version, save with labels
 # intent_prompt_versioned:

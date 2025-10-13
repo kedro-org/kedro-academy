@@ -33,7 +33,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=init_intent_detection_context,
-                inputs=["llm", "intent_prompt_langfuse"],
+                inputs=["llm", "intent_prompt_langfuse_yml_chat"],
                 outputs="intent_detection_context",
                 name="init_intent_detection_context_node",
             ),
