@@ -99,7 +99,7 @@ kedro_agentic_workflows/
 This project separates prompt templates by agent type and manages them with Kedro datasets.
 
 - **Intent Detection** → JSON prompts tracked with custom `Langfuse`/`Opik` datasets (observability, tracing, evaluation).
-- **Response Generation** → Static `.txt` prompts via native `TextDataset` (simpler, template-based).
+- **Response Generation** → Static `.txt` and `.yml` prompts via native `LangChainPromptDataset` (simpler, template-based).
 
 ### Intent Detection Prompts
 
