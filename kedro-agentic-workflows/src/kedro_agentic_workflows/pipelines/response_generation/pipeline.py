@@ -7,6 +7,9 @@ from .nodes import (
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
 
 
+# from kedro_agentic import agent_context_node
+# kedro.experimental.agentic import agent_context_node
+
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
@@ -17,7 +20,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 prompts=["tool_prompt", "response_prompt"],
                 tools=[
                     {"func": build_get_user_claims, "inputs": ["db_engine"]},
-                    {"func": build_lookup_docs, "inputs": ["docs"]},
+                    {"func": build_lookup_docs, "inputs": ["docs", "params:docs_matches"]},
                     {"func": build_create_claim, "inputs": ["db_engine"]},
                 ],
             ),
