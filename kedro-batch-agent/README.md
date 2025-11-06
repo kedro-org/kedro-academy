@@ -80,8 +80,8 @@ The project includes a custom dataset `PDFDataset` defined in `kedro_batch_agent
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ankatiyar/batch-agent.git
-   cd batch-agent
+   git clone https://github.com/kedro-org/kedro-academy.git
+   cd kedro-batch-agent
    ```
 
 2. Install the required packages:
