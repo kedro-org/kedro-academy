@@ -5,7 +5,7 @@ generated using Kedro 1.0.0
 
 from kedro.pipeline import Node, Pipeline  # noqa
 
-from experiment.pipelines.completion_agent.nodes import (
+from .nodes import (
     create_agent,
     generate_response,
     init_tools,
