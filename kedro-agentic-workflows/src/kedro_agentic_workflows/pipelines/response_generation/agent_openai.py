@@ -85,8 +85,6 @@ class ResponseGenerationAgent(KedroAgent):
             if isinstance(item, MessageOutputItem):
                 messages.append(AIMessage(content=str(item.raw_item.content)))
             elif isinstance(item, ToolCallOutputItem):
-                # Tool call output – include as message content for downstream logic
-                # We treat tool outputs as BaseMessage via AIMessage for simplicity
                 messages.append(AIMessage(content=str(item.output)))
 
         # Extract tool call outputs for generating structured response
@@ -116,8 +114,6 @@ class ResponseGenerationAgent(KedroAgent):
             "user_claims": doc_lookups,
         }
 
-        # Use the agent one more time (or reuse) to get structured output
-        # Here we assume your model can output JSON that matches ResponseOutput
         final_result: RunResult = Runner.run_sync(
             self.agent,
             input=self.response_prompt,
@@ -132,14 +128,10 @@ class ResponseGenerationAgent(KedroAgent):
         for item in final_result.new_items:
             if isinstance(item, MessageOutputItem):
                 final_message = item.raw_item.content
-            # (Optionally parse tool output if your agent outputs structured JSON as tool call output)
 
         if final_message is None:
             raise RuntimeError("Agent did not return a final message for response.")
 
-        # For simplicity, assume flags are encoded in JSON string within message, or you parse separately
-        # You may extend this to parse JSON from final_message and extract flags
-        # Here: naive placeholder
         if '"claim_created": true' in final_message.lower():
             claim_created_flag = True
         if '"escalation": true' in final_message.lower() or '"escalated": true' in final_message.lower():
