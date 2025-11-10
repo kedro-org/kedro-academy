@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from agents import Agent, Runner, Tool
 from agents.items import ToolCallOutputItem, MessageOutputItem
 from agents.run import RunResult
-from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage, messages_to_dict
 
 from ...utils import KedroAgent, AgentContext
 
@@ -51,14 +51,14 @@ class ResponseGenerationAgent(KedroAgent):
 
         self.tool_agent = Agent(
             name="response_generation_agent_tools",
-            instructions=self.tool_prompt,
+            instructions="Decide which tools to use.",
             tools=openai_tools,
             model=self.context.llm,
         )
 
         self.response_agent = Agent(
             name="response_generation_agent_response",
-            instructions=self.response_prompt,
+            instructions="Generate the final structured response using tool results.",
             model=self.context.llm,
             output_type=ResponseOutput,
         )
@@ -76,11 +76,19 @@ class ResponseGenerationAgent(KedroAgent):
             "intent_generator_summary": context.get("intent_generator_summary", ""),
             "user_id": context.get("user_context", {}).get("profile", {}).get("user_id", "unknown"),
         }
+        tool_instructions = self.tool_prompt.format(**dynamic_context)
+        print(tool_instructions)
+        print("---")
         run_result: RunResult = Runner.run_sync(
             self.tool_agent,
-            input="Decide which tools to use.",
-            context=dynamic_context,
+            input=tool_instructions,
         )
+
+        for item in run_result.new_items:
+            try:
+                item.pretty_print()
+            except Exception:
+                print(item)
 
         # Collect initial messages
         messages: List[BaseMessage] = []
@@ -117,11 +125,20 @@ class ResponseGenerationAgent(KedroAgent):
             "user_claims": user_claims_str,
         }
 
+        response_instructions = messages_to_dict(
+            self.response_prompt.format_messages(**dynamic_context)
+        )
+        print(response_instructions)
+        print("---")
         final_result: RunResult = Runner.run_sync(
             self.response_agent,
-            input="Generate the final structured response using tool results.",
-            context=dynamic_context,
+            input=response_instructions,
         )
+        for item in final_result.new_items:
+            try:
+                item.pretty_print()
+            except Exception:
+                print(item)
         response: ResponseOutput = final_result.final_output
 
         # Append to messages
