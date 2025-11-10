@@ -30,7 +30,8 @@ class ResponseGenerationAgent(KedroAgent):
 
     def __init__(self, context: AgentContext):
         super().__init__(context)
-        self.agent: Agent | None = None
+        self.tool_agent: Agent | None = None
+        self.response_agent: Agent | None = None
         self.tools = self.context.tools
         self.tool_prompt = self.context.get_prompt("tool_prompt")
         self.response_prompt = self.context.get_prompt("response_prompt")
@@ -48,23 +49,25 @@ class ResponseGenerationAgent(KedroAgent):
                 )
             )
 
-        # Create agent instance
-        self.agent = Agent(
-            name="response_generation_agent",
-            instructions=(
-                "You are a customer support assistant for claims handling. "
-                "Based on intent and user context you may call tools (lookup_docs, get_user_claims, create_claim) "
-                "or generate a final structured response."
-            ),
+        self.tool_agent = Agent(
+            name="response_generation_agent_tools",
+            instructions=self.tool_prompt,
             tools=openai_tools,
             model=self.context.llm,
+        )
+
+        self.response_agent = Agent(
+            name="response_generation_agent_response",
+            instructions=self.response_prompt,
+            model=self.context.llm,
+            output_type=ResponseOutput,
         )
 
     def invoke(self, context: dict, config: dict | None = None) -> dict:
         """
         Run the agent and produce the response in the same form as previously.
         """
-        if self.agent is None:
+        if self.tool_agent is None:
             raise ValueError(f"{self.__class__.__name__} must be compiled before invoking. Call .compile() first.")
 
         # Build prompt for tool‐decision phase and run the agent
@@ -74,8 +77,8 @@ class ResponseGenerationAgent(KedroAgent):
             "user_id": context.get("user_context", {}).get("profile", {}).get("user_id", "unknown"),
         }
         run_result: RunResult = Runner.run_sync(
-            self.agent,
-            input=self.tool_prompt,
+            self.tool_agent,
+            input="Decide which tools to use.",
             context=dynamic_context,
         )
 
@@ -103,7 +106,7 @@ class ResponseGenerationAgent(KedroAgent):
 
         created_claim_str = "\n".join(map(str, created_claims))
         doc_results_str = "\n".join(map(str, doc_lookups))
-        doc_lookups = "\n".join(map(str, user_claims))
+        user_claims_str = "\n".join(map(str, user_claims))
 
         dynamic_context = {
             "intent": context["intent"],
@@ -111,37 +114,21 @@ class ResponseGenerationAgent(KedroAgent):
             "user_context": context.get("user_context", ""),
             "created_claim": created_claim_str,
             "docs_lookup": doc_results_str,
-            "user_claims": doc_lookups,
+            "user_claims": user_claims_str,
         }
 
         final_result: RunResult = Runner.run_sync(
-            self.agent,
-            input=self.response_prompt,
+            self.response_agent,
+            input="Generate the final structured response using tool results.",
             context=dynamic_context,
         )
-
-        # Parse final message and structured flags
-        final_message = None
-        claim_created_flag = False
-        escalated_flag = False
-
-        for item in final_result.new_items:
-            if isinstance(item, MessageOutputItem):
-                final_message = item.raw_item.content
-
-        if final_message is None:
-            raise RuntimeError("Agent did not return a final message for response.")
-
-        if '"claim_created": true' in final_message.lower():
-            claim_created_flag = True
-        if '"escalation": true' in final_message.lower() or '"escalated": true' in final_message.lower():
-            escalated_flag = True
+        response: ResponseOutput = final_result.final_output
 
         # Append to messages
-        messages.append(AIMessage(content=final_message))
+        messages.append(AIMessage(content=response.message))
 
         return {
             "messages": messages,
-            "claim_created": claim_created_flag,
-            "escalated": escalated_flag,
+            "claim_created": response.claim_created,
+            "escalated": response.escalation,
         }
