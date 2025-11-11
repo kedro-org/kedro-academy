@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from typing import Callable
+from typing import Any
 
 import pandas as pd
 from langchain_core.messages import AIMessage
@@ -10,7 +10,9 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI
 
 from .agent import ResponseGenerationAgent
-from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
+from .agent_openai import ResponseGenerationAgentOpenAI
+# from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
+from .openai_tools import build_lookup_docs, build_get_user_claims, build_create_claim
 from ...utils import log_message, AgentContext
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def init_tools(
     db_engine: Engine, docs: pd.DataFrame, docs_matches: int
-) -> dict[str, Callable]:
+) -> dict[str, Any]:
     """Assemble all tools used by the response generation agent."""
     return {
         "lookup_docs": build_lookup_docs(docs, docs_matches),
@@ -31,7 +33,7 @@ def init_response_generation_context(
     llm: ChatOpenAI,
     tool_prompt: PromptTemplate,
     response_prompt: ChatPromptTemplate,
-    tools: dict[str, Callable],
+    tools: dict[str, Any],
 ) -> AgentContext:
     """
     Initialize the AgentContext for response generation.
@@ -68,7 +70,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentOpenAI(context=response_generation_context)
         agent.compile()
 
         context = {

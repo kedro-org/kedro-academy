@@ -1,11 +1,28 @@
+import json
 from typing import Any, TypedDict, List
+
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, Tool
-from agents.items import ToolCallOutputItem, MessageOutputItem
+from agents.items import ToolCallOutputItem, MessageOutputItem, ToolCallItem
 from agents.run import RunResult
 from langchain_core.messages import AIMessage, BaseMessage, messages_to_dict
+from langchain_core.tools import BaseTool
 
 from ...utils import KedroAgent, AgentContext
+
+
+def langchain_to_agent_input(messages: list[BaseMessage]) -> list[dict]:
+    """Convert LangChain ChatPromptTemplate messages to valid OpenAI Agent input."""
+    converted = []
+    for msg in messages:
+        role = msg.type if msg.type in ("user", "assistant") else "user"
+        content = msg.content if hasattr(msg, "content") else str(msg)
+        converted.append({
+            "type": "message",
+            "role": role,
+            "content": content,
+        })
+    return converted
 
 
 class AgentState(TypedDict):
@@ -22,7 +39,7 @@ class ResponseOutput(BaseModel):
     escalation: bool = Field(default=False, description="Whether escalation is needed")
 
 
-class ResponseGenerationAgent(KedroAgent):
+class ResponseGenerationAgentOpenAI(KedroAgent):
     """
     Response generation agent using OpenAI Agents SDK.
     Maintains the same compile()/invoke() interface as before for Kedro integration.
@@ -38,28 +55,17 @@ class ResponseGenerationAgent(KedroAgent):
 
     def compile(self):
         """Initialize the Agent with its tools and instructions."""
-        # Wrap each tool function into a Tool object
-        openai_tools: List[Tool] = []
-        for name, fn in self.tools.items():
-            openai_tools.append(
-                Tool(
-                    name=name,
-                    description=fn.__doc__ or f"Tool: {name}",
-                    func=fn,
-                )
-            )
-
         self.tool_agent = Agent(
             name="response_generation_agent_tools",
             instructions="Decide which tools to use.",
-            tools=openai_tools,
-            model=self.context.llm,
+            tools=list(self.tools.values()),
+            model="gpt-4o",
         )
 
         self.response_agent = Agent(
             name="response_generation_agent_response",
             instructions="Generate the final structured response using tool results.",
-            model=self.context.llm,
+            model="gpt-4o",
             output_type=ResponseOutput,
         )
 
@@ -77,8 +83,9 @@ class ResponseGenerationAgent(KedroAgent):
             "user_id": context.get("user_context", {}).get("profile", {}).get("user_id", "unknown"),
         }
         tool_instructions = self.tool_prompt.format(**dynamic_context)
+        print("--->")
         print(tool_instructions)
-        print("---")
+        print("<---")
         run_result: RunResult = Runner.run_sync(
             self.tool_agent,
             input=tool_instructions,
@@ -98,23 +105,76 @@ class ResponseGenerationAgent(KedroAgent):
             elif isinstance(item, ToolCallOutputItem):
                 messages.append(AIMessage(content=str(item.output)))
 
-        # Extract tool call outputs for generating structured response
-        created_claims = [
-            item.output for item in run_result.new_items
-            if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "create_claim"
-        ]
-        doc_lookups = [
-            item.output for item in run_result.new_items
-            if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "lookup_docs"
-        ]
-        user_claims = [
-            item.output for item in run_result.new_items
-            if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "get_user_claims"
-        ]
+        # # Extract tool call outputs for generating structured response
+        # created_claims = [
+        #     item.output for item in run_result.new_items
+        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "create_claim"
+        # ]
+        # doc_lookups = [
+        #     item.output for item in run_result.new_items
+        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "lookup_docs"
+        # ]
+        # user_claims = [
+        #     item.output for item in run_result.new_items
+        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "get_user_claims"
+        # ]
+        #
+        # created_claim_str = "\n".join(map(str, created_claims))
+        # doc_results_str = "\n".join(map(str, doc_lookups))
+        # user_claims_str = "\n".join(map(str, user_claims))
+        #
+        # print("<---")
+        # print(created_claim_str)
+        # print("***")
+        # print(doc_results_str)
+        # print("***")
+        # print(user_claims_str)
+        # print("--->")
 
-        created_claim_str = "\n".join(map(str, created_claims))
-        doc_results_str = "\n".join(map(str, doc_lookups))
-        user_claims_str = "\n".join(map(str, user_claims))
+        def extract_tool_outputs(run_result):
+            """Pair ToolCallItem and ToolCallOutputItem by call_id to recover tool names."""
+            tool_call_map = {}
+            tool_outputs = {}
+
+            # First pass: record tool call names by call_id
+            for item in run_result.new_items:
+                if isinstance(item, ToolCallItem):
+                    call_id = item.raw_item.call_id
+                    tool_name = item.raw_item.name
+                    tool_call_map[call_id] = tool_name
+
+            # Second pass: attach outputs to those tool names
+            for item in run_result.new_items:
+                if isinstance(item, ToolCallOutputItem):
+                    call_id = item.raw_item["call_id"]
+                    tool_name = tool_call_map.get(call_id, "unknown_tool")
+                    output = item.output
+
+                    tool_outputs.setdefault(tool_name, []).append(output)
+
+            def fmt(value):
+                if not value:
+                    return "None"
+                try:
+                    return json.dumps(value, indent=2)
+                except TypeError:
+                    return str(value)
+
+            created_claim_str = fmt(tool_outputs.get("create_claim"))
+            doc_results_str = fmt(tool_outputs.get("lookup_docs"))
+            user_claims_str = fmt(tool_outputs.get("get_user_claims"))
+
+            print("<---")
+            print("created_claim_str:", created_claim_str)
+            print("***")
+            print("doc_results_str:", doc_results_str)
+            print("***")
+            print("user_claims_str:", user_claims_str)
+            print("--->")
+
+            return created_claim_str, doc_results_str, user_claims_str
+
+        created_claim_str, doc_results_str, user_claims_str = extract_tool_outputs(run_result)
 
         dynamic_context = {
             "intent": context["intent"],
@@ -125,11 +185,11 @@ class ResponseGenerationAgent(KedroAgent):
             "user_claims": user_claims_str,
         }
 
-        response_instructions = messages_to_dict(
-            self.response_prompt.format_messages(**dynamic_context)
-        )
+        response_instructions = self.response_prompt.format_messages(**dynamic_context)
+        response_instructions = langchain_to_agent_input(response_instructions)
+        print("<---")
         print(response_instructions)
-        print("---")
+        print("--->")
         final_result: RunResult = Runner.run_sync(
             self.response_agent,
             input=response_instructions,
