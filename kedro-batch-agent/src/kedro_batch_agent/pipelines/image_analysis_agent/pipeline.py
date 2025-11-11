@@ -5,7 +5,7 @@ generated using Kedro 1.0.0
 
 from kedro.pipeline import Node, Pipeline  # noqa
 
-from experiment.pipelines.image_analysis_agent.nodes import (
+from .nodes import (
     build_graph,
     init_state,
     invoke_graph,
