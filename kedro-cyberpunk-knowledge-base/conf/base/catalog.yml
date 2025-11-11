@@ -1,0 +1,36 @@
+# Here you can define all your datasets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+# Raw data
+cyberpunk_transcript:
+  type: text.TextDataset
+  filepath: data/raw/Cyberpunk2077Transcript.txt
+
+cyberpunk_wiki:
+  type: json.JSONDataset
+  filepath: data/raw/wiki_clean_text.json
+
+# Processed data
+transcript_chunks:
+  type: partitions.PartitionedDataset
+  path: data/processed/transcript_chunks
+  dataset:
+    type: json.JSONDataset
+
+character_list:
+  type: json.JSONDataset
+  filepath: data/processed/character_list.json
+
+wiki_embeddings:
+  type: pickle.PickleDataset
+  filepath: data/processed/wiki_embeddings.pkl
+
+# Prompt template loaded with LangChainPromptDataset
+query_prompt:
+  type: kedro_2077.datasets.langchain_prompt_dataset.LangChainPromptDataset
+  filepath: data/prompts/query_prompt.json
+  template: ChatPromptTemplate
+  dataset:
+    type: json.JSONDataset
