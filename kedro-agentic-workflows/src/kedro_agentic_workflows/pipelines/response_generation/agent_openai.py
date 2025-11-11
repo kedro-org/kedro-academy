@@ -52,6 +52,7 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
         self.tools = self.context.tools
         self.tool_prompt = self.context.get_prompt("tool_prompt")
         self.response_prompt = self.context.get_prompt("response_prompt")
+        self.llm = self.context.llm
 
     def compile(self):
         """Initialize the Agent with its tools and instructions."""
@@ -59,13 +60,15 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
             name="response_generation_agent_tools",
             instructions="Decide which tools to use.",
             tools=list(self.tools.values()),
-            model="gpt-4o",
+            model=self.llm.name,
+            model_settings=self.llm.settings,
         )
 
         self.response_agent = Agent(
             name="response_generation_agent_response",
             instructions="Generate the final structured response using tool results.",
-            model="gpt-4o",
+            model=self.llm.name,
+            model_settings=self.llm.settings,
             output_type=ResponseOutput,
         )
 

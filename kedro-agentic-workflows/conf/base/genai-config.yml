@@ -6,6 +6,13 @@ llm:
     temperature: 0.0
   credentials: openai
 
+llm_openai:
+  type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
+  model_name: "gpt-4o-mini"
+  model_settings:
+    temperature: 0.0
+  credentials: openai
+
 # --- Prompts ---
 tool_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset

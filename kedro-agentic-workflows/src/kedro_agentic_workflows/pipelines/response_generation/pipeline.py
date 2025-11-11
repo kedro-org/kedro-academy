@@ -20,7 +20,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             node(
                 func=init_response_generation_context,
                 inputs=[
-                    "llm",
+                    "llm_openai",
                     "tool_prompt",
                     "response_prompt",
                     "tools",
