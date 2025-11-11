@@ -1,12 +1,11 @@
 import json
-from typing import Any, TypedDict, List
+from typing import TypedDict, List
 
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, Tool
 from agents.items import ToolCallOutputItem, MessageOutputItem, ToolCallItem
 from agents.run import RunResult
-from langchain_core.messages import AIMessage, BaseMessage, messages_to_dict
-from langchain_core.tools import BaseTool
+from langchain_core.messages import AIMessage, BaseMessage
 
 from ...utils import KedroAgent, AgentContext
 
@@ -107,32 +106,6 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
                 messages.append(AIMessage(content=str(item.raw_item.content)))
             elif isinstance(item, ToolCallOutputItem):
                 messages.append(AIMessage(content=str(item.output)))
-
-        # # Extract tool call outputs for generating structured response
-        # created_claims = [
-        #     item.output for item in run_result.new_items
-        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "create_claim"
-        # ]
-        # doc_lookups = [
-        #     item.output for item in run_result.new_items
-        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "lookup_docs"
-        # ]
-        # user_claims = [
-        #     item.output for item in run_result.new_items
-        #     if isinstance(item, ToolCallOutputItem) and getattr(item.raw_item, "tool_name", "") == "get_user_claims"
-        # ]
-        #
-        # created_claim_str = "\n".join(map(str, created_claims))
-        # doc_results_str = "\n".join(map(str, doc_lookups))
-        # user_claims_str = "\n".join(map(str, user_claims))
-        #
-        # print("<---")
-        # print(created_claim_str)
-        # print("***")
-        # print(doc_results_str)
-        # print("***")
-        # print(user_claims_str)
-        # print("--->")
 
         def extract_tool_outputs(run_result):
             """Pair ToolCallItem and ToolCallOutputItem by call_id to recover tool names."""

@@ -9,7 +9,7 @@ from sqlalchemy import text, Engine
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI
 
-from .agent import ResponseGenerationAgent
+from .agent import ResponseGenerationAgentOpenAI
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
 from ...utils import log_message, AgentContext
 
@@ -68,7 +68,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentOpenAI(context=response_generation_context)
         agent.compile()
 
         context = {
