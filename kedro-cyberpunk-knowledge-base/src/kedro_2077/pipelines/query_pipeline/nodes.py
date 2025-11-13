@@ -17,7 +17,7 @@ def find_relevant_contexts(
     embedding_model_name: str = "all-MiniLM-L6-v2",
     max_chunks: int = 5,
     character_bonus: float = 0.05,
-    wiki_weight: float = 0.7
+    wiki_weight: float = 0.7,
 ) -> List[Dict[str, Any]]:
     """
     Retrieve top relevant contexts from both transcript chunks and wiki embeddings.
@@ -89,12 +89,12 @@ def format_prompt_with_context(
     max_context_length: int = 2000,
 ) -> List[BaseMessage]:
     """Format a ChatPromptTemplate with the user query and retrieved contexts.
-    
+
     Combines the user's query with relevant context retrieved from the
     transcript and wiki, formatting them according to the prompt template.
     Contexts are truncated to the specified maximum length to fit within
     token limits.
-    
+
     Args:
         prompt_template: LangChain ChatPromptTemplate to format.
         user_query: The user's question or query string.
@@ -104,7 +104,7 @@ def format_prompt_with_context(
             - 'similarity': Similarity score (optional)
         max_context_length: Maximum length of each context block in characters.
             Defaults to 2000.
-    
+
     Returns:
         List of formatted message objects ready to send to the LLM.
     """
@@ -118,8 +118,7 @@ def format_prompt_with_context(
     combined_context = "\n\n---\n\n".join(context_blocks)
 
     messages = prompt_template.format_messages(
-        user_query=user_query,
-        transcript_context=combined_context
+        user_query=user_query, transcript_context=combined_context
     )
 
     return messages
@@ -133,14 +132,14 @@ def query_llm_cli(
     llm_model_name: str = "gpt-4o-mini",
     llm_temperature: float = 0.2,
     max_context_length: int = 2000,
-    prompt_template: ChatPromptTemplate = None
+    prompt_template: ChatPromptTemplate = None,
 ) -> None:
     """Interactive conversation loop for CLI chatbot interface.
-    
+
     Provides an interactive command-line interface for querying the Cyberpunk
     2077 knowledge base. Maintains conversation history across multiple turns
     to enable follow-up questions and contextual responses.
-    
+
     Args:
         transcript_chunks: PartitionedDataset containing transcript chunks.
         wiki_embeddings: Dictionary of wiki page embeddings.
@@ -154,7 +153,7 @@ def query_llm_cli(
         max_context_length: Maximum length of context per chunk.
             Defaults to 2000.
         prompt_template: LangChain ChatPromptTemplate for formatting prompts.
-    
+
     Returns:
         None. This function runs an interactive loop until the user exits.
     """
@@ -190,7 +189,7 @@ def query_llm_cli(
             prompt_template=prompt_template,
             user_query=user_query,
             contexts=contexts,
-            max_context_length=max_context_length
+            max_context_length=max_context_length,
         )
 
         # Append new messages to conversation history
@@ -210,11 +209,11 @@ def query_llm_discord(
     llm_temperature: float = 0.2,
 ) -> str:
     """Run a single LLM query for Discord bot usage.
-    
+
     Processes a single query and returns the LLM response as a string.
     This function is designed for use in the Discord bot pipeline where
     each query is independent (no conversation history).
-    
+
     Args:
         formatted_prompt: List of formatted message objects from
             format_prompt_with_context().
@@ -222,10 +221,10 @@ def query_llm_discord(
             Defaults to "gpt-4o-mini".
         llm_temperature: Sampling temperature for the LLM (0.0-2.0).
                         Defaults to 0.2.
-    
+
     Returns:
         String containing the LLM's response to the query.
-    
+
     Note:
         If the formatted_prompt is empty, returns a default error message.
     """

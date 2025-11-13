@@ -11,7 +11,9 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from kedro_datasets._typing import JSONPreview
 
 
-class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]): # noqa UP007
+class LangChainPromptDataset(
+    AbstractDataset[Union[PromptTemplate, ChatPromptTemplate], Any]
+):  # noqa UP007
     """
     A Kedro dataset for loading LangChain prompt templates from text, JSON, or YAML files.
 
@@ -128,7 +130,9 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
     def _validate_dataset_type(self, dataset: dict[str, Any] | str | None) -> None:
         """Validate that the dataset type is supported and not None."""
         if dataset is None:
-            raise DatasetError(f"Underlying dataset type cannot be empty: {self._filepath}")
+            raise DatasetError(
+                f"Underlying dataset type cannot be empty: {self._filepath}"
+            )
 
         dataset_type = dataset["type"] if isinstance(dataset, dict) else str(dataset)
         normalized_type = ".".join(dataset_type.split(".")[-2:])
@@ -138,7 +142,9 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
                 f"Allowed dataset types are: {', '.join(self.VALID_DATASETS)}"
             )
 
-    def _build_dataset_config(self, dataset: dict[str, Any] | str | None) -> dict[str, Any]:
+    def _build_dataset_config(
+        self, dataset: dict[str, Any] | str | None
+    ) -> dict[str, Any]:
         """
         Build dataset configuration.
 
@@ -226,9 +232,13 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
         if isinstance(raw_data, dict):
             return PromptTemplate(**raw_data)
 
-        raise DatasetError(f"Unsupported data type for PromptTemplate: {type(raw_data)}")
+        raise DatasetError(
+            f"Unsupported data type for PromptTemplate: {type(raw_data)}"
+        )
 
-    def _validate_chat_prompt_data(self, data: dict | list[tuple[str, str]]) -> dict | list[tuple[str, str]]:
+    def _validate_chat_prompt_data(
+        self, data: dict | list[tuple[str, str]]
+    ) -> dict | list[tuple[str, str]]:
         """
         Validate that chat prompt data exists and is not empty.
         Raises an error if data is a plain string, which is only compatible with PromptTemplate.
@@ -251,7 +261,9 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
         return messages
 
-    def _create_chat_prompt_template(self, data: dict | list[tuple[str, str]]) -> ChatPromptTemplate:
+    def _create_chat_prompt_template(
+        self, data: dict | list[tuple[str, str]]
+    ) -> ChatPromptTemplate:
         """
         Create a `ChatPromptTemplate` from validated chat data.
 
@@ -291,7 +303,9 @@ class LangChainPromptDataset(AbstractDataset[Union[PromptTemplate, ChatPromptTem
 
     def _describe(self) -> dict[str, Any]:
         clean_config = {
-            k: v for k, v in getattr(self._dataset, "_config", {}).items() if k != CREDENTIALS_KEY
+            k: v
+            for k, v in getattr(self._dataset, "_config", {}).items()
+            if k != CREDENTIALS_KEY
         }
         return {
             "path": self._filepath,
