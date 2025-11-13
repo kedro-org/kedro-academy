@@ -1,56 +1,18 @@
 from datetime import datetime
 import logging
-from typing import Callable
 
-import pandas as pd
+from kedro.pipeline import AgentContext as KedroAgentContext
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_openai import ChatOpenAI
-
 from .agent import ResponseGenerationAgent
-from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
-from ...utils import log_message, AgentContext
+from ...utils import log_message
 
 logger = logging.getLogger(__name__)
 
 
-def init_tools(
-    db_engine: Engine, docs: pd.DataFrame, docs_matches: int
-) -> dict[str, Callable]:
-    """Assemble all tools used by the response generation agent."""
-    return {
-        "lookup_docs": build_lookup_docs(docs, docs_matches),
-        "get_user_claims": build_get_user_claims(db_engine),
-        "create_claim": build_create_claim(db_engine),
-    }
-
-
-def init_response_generation_context(
-    llm: ChatOpenAI,
-    tool_prompt: PromptTemplate,
-    response_prompt: ChatPromptTemplate,
-    tools: dict[str, Callable],
-) -> AgentContext:
-    """
-    Initialize the AgentContext for response generation.
-    - Binds LLM and tools.
-    - Attaches tool prompt and response prompt.
-    """
-    ctx = AgentContext(agent_id="response_generation_agent")
-    ctx.llm = llm
-
-    for name, fn in tools.items():
-        ctx.add_tool(name, fn)
-
-    ctx.add_prompt("tool_prompt", tool_prompt)
-    ctx.add_prompt("response_prompt", response_prompt)
-    return ctx
-
-
 def generate_response(
-    response_generation_context: AgentContext,
+    response_generation_context: KedroAgentContext,
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
