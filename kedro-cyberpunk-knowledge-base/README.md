@@ -111,7 +111,6 @@ Before you begin, ensure you have:
 │
 ├── src/                             # Source code
 │   └── kedro_2077/                  # Main package
-│       ├── datasets/                # Custom datasets (LangChainPromptDataset)
 │       ├── pipelines/               # Kedro pipelines
 │       │   ├── process_transcript/  # Data processing pipeline
 │       │   └── query_pipeline/      # Query/LLM pipeline
