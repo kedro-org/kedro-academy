@@ -2,7 +2,7 @@ import base64
 from io import BytesIO
 from typing import Literal, Optional, TypedDict
 
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from PIL import Image
