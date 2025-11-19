@@ -1,5 +1,5 @@
 llm:
-  type: kedro_datasets_experimental.langchain.ChatOpenAIDataset
+  type: langchain.ChatOpenAIDataset
   kwargs:
     model: "gpt-4o-mini"
   credentials: openai
@@ -7,7 +7,7 @@ llm:
 claims_docs:
   type: partitions.PartitionedDataset
   path: data/raw_data/claims_docs/${runtime_params:client_name,client_1}/
-  dataset: kedro_batch_agent.datasets.pdf_dataset.PDFDataset
+  dataset: kedro_datasets_experimental.pypdf.PDFDataset
 
 claims_pics:
   type: partitions.PartitionedDataset
