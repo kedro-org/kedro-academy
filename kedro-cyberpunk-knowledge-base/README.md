@@ -56,7 +56,7 @@ The project can be used in two ways:
 
 Before you begin, ensure you have:
 
-- **Python 3.9 or higher** installed
+- **Python 3.10 or higher** installed
 - **An OpenAI API key** (get one at [platform.openai.com](https://platform.openai.com))
 - **A Discord bot token** (optional, only if using Discord integration)
 
