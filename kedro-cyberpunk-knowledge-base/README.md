@@ -1,7 +1,7 @@
 # Cyberpunk 2077 Knowledge Base with Kedro
 
 [![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 
 A Kedro project that uses LangChain and OpenAI LLMs to answer questions about the videogame Cyberpunk 2077, by querying a transcript of the game and the content of the fan-maintained wiki.
 
