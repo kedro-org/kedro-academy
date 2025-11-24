@@ -30,29 +30,20 @@ intent_prompt_langfuse:
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
 
-# Example: Load specific version, save with labels
-# intent_prompt_versioned:
-#   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
-#   filepath: data/intent_detection/prompts/intent_prompt_v3.json
-#   prompt_name: "intent-classifier"
-#   prompt_type: "chat"
-#   credentials: langfuse_credentials
-#   sync_policy: local
-#   mode: langchain
-#   load_args:
-#     version: 3
-#   save_args:
-#     labels: ["backup", "v3.0"]
-
-# --- Langfuse Tracing ---
-intent_tracer_langfuse:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
-  credentials: langfuse_credentials
-  mode: langchain     # langchain | openai | sdk
-
 # intent_prompt_opik:
 #   type: kedro_datasets_experimental.opik.OpikPromptDataset
 #   filepath: data/intent_detection/prompts/intent_prompt_opik.json
 #   prompt_name: "intent-classifier"
 #   prompt_type: "chat"
 #   credentials: opik_credentials
+
+# --- Tracing ---
+intent_tracer_langfuse:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: langchain    # langchain | openai | sdk
+
+# intent_tracer_opik:
+#  type: kedro_datasets_experimental.opik.OpikTraceDataset
+#  credentials: opik_credentials
+#  mode: openai    # langchain | openai | sdk
