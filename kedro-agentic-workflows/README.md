@@ -107,7 +107,7 @@ Stored under: `data/intent_detection/prompts`.
 
 Purpose: Classify user queries into categories (general_question, claim_new, existing_claim_question, clarification) and optionally request clarification when input is ambiguous.
 
-We use custom Kedro datasets for observability and prompt management:
+We use experimental Kedro datasets for observability and prompt management:
 
 - `intent_prompt_langfuse.json` stored using `LangfusePromptDataset` that integrates with [Langfuse](https://langfuse.com/).
 - `intent_prompt_opik.json` stored using `OpikPromptDataset` that integrates with [Opik](https://www.comet.com/opik).
@@ -119,7 +119,7 @@ updating the pipeline.
 
 ```yaml
 intent_prompt_langfuse:
-   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
    filepath: data/intent_detection/prompts/intent_prompt_v3.json
    prompt_name: "intent-classifier"
    prompt_type: "chat"
@@ -132,7 +132,7 @@ intent_prompt_langfuse:
      labels: ["latest"]
 
 intent_prompt_opik:
-  type: kedro_agentic_workflows.datasets.opik_prompt_dataset.PromptDataset
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_opik.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -191,8 +191,8 @@ Create a `credentials.yml` file and place it in the `conf/local/` directory with
 # ----------------------------
 openai:
   # Optional: custom API base (default is https://api.openai.com)
-  openai_api_base: "<openai-api-base>"
-  openai_api_key: "<openai-api-key>"
+  base_url: "<openai-api-base>"
+  api_key: "<openai-api-key>"
 
 # ----------------------------
 # Database credentials
@@ -226,7 +226,7 @@ opik_credentials:
 This project supports observability and tracing with either `Langfuse` or `Opik`.
 
 - `Langfuse` tracing is applied via the `LangfuseTraceDataset` that provides appropriate tracing objects based on mode configuration,
-enabling seamless integration with different AI frameworks and direct SDK usage. It is set as the default option for the project. For more details see `conf/base/catalog.yml` and `src/kedro_agentic_workflows/datasets/langfuse_trace_dataset.py`.
+enabling seamless integration with different AI frameworks and direct SDK usage. It is set as the default option for the project. For more details see `conf/base/catalog.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/).
 - `Opik` requires credentials to be set via environment variables, following their native SDK setup instructions: 
 [Opik Setup Guide](https://www.comet.com/docs/opik/tracing/sdk_configuration)
 

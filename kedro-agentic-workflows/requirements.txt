@@ -2,16 +2,7 @@ ipython>=8.10
 jupyterlab>=3.0
 notebook
 kedro~=1.0.0
-kedro-datasets[pandas-sqltabledataset,pandas-sqlquerydataset,JSONDataset,YAMLDataset]
-langsmith
-langgraph
-langgraph-prebuilt
-langchain-community<1.0
-langchain-core<1.0
-langchain-openai<1.0
-langfuse
-opik
-pandas
-questionary
-scikit-learn
-SQLAlchemy
+kedro-datasets[pandas-sqltabledataset,pandas-sqlquerydataset,yaml-yamldataset,opik,langchain-chatopenaidataset, langfuse]~=9.0.0
+langgraph~=1.0.0
+scikit-learn~=1.7.2
+questionary~=2.1.1

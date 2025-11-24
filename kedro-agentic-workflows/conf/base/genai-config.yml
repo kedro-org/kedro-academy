@@ -1,6 +1,6 @@
 # --- LLM setup ---
 llm:
-  type: kedro_datasets_experimental.langchain.ChatOpenAIDataset
+  type: langchain.ChatOpenAIDataset
   kwargs:
     model: "gpt-4o"
     temperature: 0.0
@@ -22,7 +22,7 @@ response_prompt:
     type: yaml.YAMLDataset
 
 intent_prompt_langfuse:
-  type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
   prompt_name: "intent-classifier"
   prompt_type: "chat"
@@ -32,7 +32,7 @@ intent_prompt_langfuse:
 
 # Example: Load specific version, save with labels
 # intent_prompt_versioned:
-#   type: kedro_agentic_workflows.datasets.langfuse_prompt_dataset.LangfusePromptDataset
+#   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
 #   filepath: data/intent_detection/prompts/intent_prompt_v3.json
 #   prompt_name: "intent-classifier"
 #   prompt_type: "chat"
@@ -46,12 +46,12 @@ intent_prompt_langfuse:
 
 # --- Langfuse Tracing ---
 intent_tracer_langfuse:
-  type: kedro_agentic_workflows.datasets.langfuse_trace_dataset.LangfuseTraceDataset
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
   credentials: langfuse_credentials
   mode: langchain     # langchain | openai | sdk
 
 # intent_prompt_opik:
-#   type: kedro_agentic_workflows.datasets.opik_prompt_dataset.PromptDataset
+#   type: kedro_datasets_experimental.opik.OpikPromptDataset
 #   filepath: data/intent_detection/prompts/intent_prompt_opik.json
 #   prompt_name: "intent-classifier"
 #   prompt_type: "chat"
