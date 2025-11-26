@@ -62,7 +62,7 @@ class IntentDetectionAgent(KedroAgent):
     def __init__(self, context: KedroAgentContext):
         # Bind LLM to structured output schema
         structured_llm = context.llm.with_structured_output(IntentOutput)
-        intent_detection_chain = context.prompts["intent_prompt"] | structured_llm
+        intent_detection_chain = context.prompts["intent_prompt_langfuse"] | structured_llm
         context.llm = intent_detection_chain
 
         super().__init__(context)
