@@ -15,7 +15,7 @@ kedro-agentic-workflows = "kedro_agentic_workflows.__main__:main"
 [tool.kedro]
 package_name = "kedro_agentic_workflows"
 project_name = "kedro-agentic-workflows"
-kedro_init_version = "1.0.0"
+kedro_init_version = "1.1.0"
 tools = "['None']"
 example_pipeline = "False"
 source_dir = "src"
