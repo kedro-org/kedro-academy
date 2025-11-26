@@ -67,7 +67,7 @@ def load_context(
     """
     user_context = {"profile": {"user_id": user_id, "name": user_data.at[0, "name"]}}
     session_config = {
-        "configurable": {"thread_id": session_id},
+        "configurable": {"thread_id": str(session_id)},
         "callbacks": [intent_tracer_langfuse],
     }
 
