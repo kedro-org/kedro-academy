@@ -1,20 +1,20 @@
-# Building a Cyberpunk 2077 Knowledge Base with Kedro and LangChain
+# Building a cyberpunk 2077 knowledge base with Kedro and LangChain
 
-There's a well-known adage about writing that tells people to "write what they know." When I had to create a project to test an experimental Kedro dataset for loading LangChain prompt templates, I decided to take that advice to heart. 
+There's a well-known adage about writing that tells people to "write what they know." When I had to create a project to test an experimental Kedro dataset for loading LangChain prompt templates, I decided to take that advice to heart.
 
-I embarked upon the nerdy endeavor of building an LLM-powered question-answering knowledge base whose sole purpose is to accurately answer questions about the action role-playing game Cyberpunk 2077.  With over 400 hours of gameplay, every achievement unlocked, and more than a few passionate discussions (read: heated arguments on Reddit) about the game under my belt, this would be the perfect test subject. I could easily spot inaccurate responses, hallucinations, or any other LLM quirks that might slip through.
+I embarked upon the nerdy endeavor of building an LLM-powered question-answering knowledge base whose sole purpose is to accurately answer questions about the action role-playing game Cyberpunk 2077. With over 400 hours of gameplay, every achievement unlocked, and more than a few passionate discussions (read: heated arguments on Reddit) about the game under my belt, this would be the perfect test subject. I could easily spot inaccurate responses, hallucinations, or any other LLM quirks that might slip through.
 
 To my pleasant surprise, this project would evolve to become a valuable learning experience in building data pipelines with Kedro, wrestling with LLM limitations, and discovering that sometimes the best solutions come from working within constraints rather than around them.
 
-## The Project
+## The project
 
 At its core, this is a Retrieval-Augmented Generation (RAG) system built with Kedro. The initial goal was to take a full transcript of a Cyberpunk 2077 playthrough (over 400 pages of dialog), make it searchable, and use it to answer questions accurately. I could only select a specific playthrough on a blog that transcribes games (linked below), and this was a challenge seeing as the game itself has multiple different endings based on the player's choices throughout the story.
 
-## The Transcript
+## The transcript
 
 The `LangChainPromptDataset` was built to seamlessly integrate LangChain `PromptTemplate` objects into Kedro pipelines, allowing prompts to be loaded as raw data files and reducing boilerplate code. For a proper field test, I wanted to use it with a real LLM query workflow, not just unit tests or mock responses.
 
-### Let's Talk About Chunking...
+### Let's talk about chunking...
 
 When I started, the first issue I encountered was that LLMs have token limits. You can't just dump 400 pages of transcript into a prompt and expect it to work. The transcript needed to be broken down into manageable chunks.
 
@@ -55,25 +55,25 @@ Then I built the project into two separate pipelines:
 1. **`process_transcript`**: Processes raw data once (expensive operation)
 2. **`query_pipeline`**: Runs queries repeatedly (cheap operation)
 
-Kedro's pipeline structure made iteration easier. This separation meant I could process the data once, store it as a Kedro dataset, and then query it as many times as I wanted without reprocessing. The data catalog handles all the file I/O, so storage and loading is straightforward.
+Kedro's pipeline structure made iteration easier. This separation meant I could process the data once, store it as a Kedro dataset, and then query it as many times as I wanted without reprocessing. The data catalog handles all the file I/O, so storage and loading are straightforward.
 
-### Chippin' in: The Challenges After Chunking
+### Chippin' in: the challenges after chunking
 
 The transcript itself led to four fundamental limitations:
 
-1. **Dialogue-only content**: The 400-page transcript contained only dialogue, missing crucial narrative context about what's actually happening in scenes.
+1. **Dialog-only content**: The 400-page transcript contained only dialog, missing crucial narrative context about what's actually happening in scenes.
 
 2. **Single playthrough bias**: As I've mentioned earlier, Cyberpunk 2077 is a game where player choices dramatically alter the story. This transcript was from only one specific playthrough, so it didn't have information about alternative paths or endings.
 
-3. **The hallucination problem**: When I instructed the LLM to strictly use only the provided context with a low temperature, it would often respond with "I don't have sufficient information." But if I allowed it more freedom or increased the temperature, it would confidently spout off misinformation about the game. 
+3. **The hallucination problem**: When I instructed the LLM to strictly use only the provided context with a low temperature, it would often respond with "I don't have sufficient information." But if I allowed it more freedom or increased the temperature, it would confidently spout misinformation about the game.
 
 4. **Naive keyword matching**: My initial approach of using simple keyword matching to find relevant chunks was inadequate. Sometimes completely unrelated chunks would be selected, leading to nonsensical responses about other plot points or characters. What a gonk.
 
-### Preem Solutions
+### Preem solutions
 
 Kedro's node-based architecture made it trivial to experiment with different approaches. Each solution became a new node or a modification to an existing one.
 
-**Solution 1: PartitionedDataset for Better Retrieval**
+**Solution 1: PartitionedDataset for better retrieval**
 
 I initially stored chunks as individual JSON files. Switching to Kedro's `PartitionedDataset` made retrieval more efficient and the code cleaner:
 
@@ -92,7 +92,7 @@ def partition_transcript_chunks(
 
 This change alone improved response quality because the partitioned structure made it easier to search and retrieve specific chunks.
 
-**Solution 2: Character Name Extraction**
+**Solution 2: Character name extraction**
 
 The transcript's "Character: Dialogue" structure made it easy to extract character names:
 
@@ -114,7 +114,7 @@ def extract_characters(transcript: str) -> List[str]:
 
 I used this character list to boost the relevance score of transcript chunks when a query mentioned a character name. This simple heuristic significantly improved results for character-related questions.
 
-**Solution 3: Semantic Similarity with Sentence Transformers**
+**Solution 3: Semantic similarity with Sentence Transformers**
 
 The most notable improvement came when I replaced keyword matching with semantic similarity search using Sentence Transformers:
 
@@ -148,17 +148,18 @@ This change made response quality significantly better. The model could now unde
 
 However, even with these improvements, the transcript alone was insufficient. Questions about characters worked reasonably well, but questions about game mechanics, missions, or world-building fell flat. The data simply wasn't there. I needed a better data source.
 
-## The Wiki
+## The wiki
 
 I needed a source of data that was complete, up-to-date, reliable, and neutral because people get *very* passionate about their in-game choices. The community-maintained Cyberpunk Wiki was the obvious answer.
 
-### The Download Challenge
+### The download challenge
 
-The wiki is substantial as it's about 15,000 pages. Downloading it required:
+The wiki is substantial, as it's about 15,000 pages. Downloading it required:
 
 1. **Respecting API rate limits**: I had to add intentional pauses between requests to avoid getting blocked. The download script took a couple of hours to complete.
 
 2. **Choosing the right format**: I settled on a single JSON file where each page is a key-value pair:
+
    ```json
    {
      "Johnny Silverhand": "Johnny Silverhand is a...",
@@ -166,21 +167,24 @@ The wiki is substantial as it's about 15,000 pages. Downloading it required:
      ...
    }
    ```
+
    This format made it easy to process in Kedro and convert to embeddings.
 
 3. **Data cleanup**: A significant portion of the work was cleaning the data:
-   - Removing redirect pages
-   - Stripping markdown syntax
-   - Removing image tags, external links, and language links
-   - Cleaning up formatting artifacts
+
+   * Removing redirect pages
+   * Stripping Markdown syntax
+   * Removing image tags, external links, and language links
+   * Cleaning up formatting artifacts
 
 I wrote a separate Python script for this cleanup, which was a one-time operation. The cleaned data went into the `data/raw/` directory, ready for Kedro to process.
 
-### Kedro-Specific Challenges
+### Kedro-specific challenges
 
 This project was already testing one new dataset (`LangChainPromptDataset`), and I wanted to see how far I could push Kedro's built-in datasets before needing external tools.
 
 The "proper" solution for storing embeddings would be a vector database like Pinecone or Weaviate. But that would require:
+
 1. Writing another custom dataset to interface with the database
 2. Setting up and managing external infrastructure
 3. Adding complexity to the project
@@ -216,21 +220,23 @@ wiki_embeddings:
 ```
 
 This approach has trade-offs:
-- ✅ No external dependencies
-- ✅ Fast retrieval (everything in memory)
-- ✅ No type conversion needed
-- ❌ Not scalable for very large datasets
-- ❌ Entire dataset loads into memory
 
-For 13,000 pages (about 11 megabytes of data), I decided, this was a perfectly reasonable trade-off. The embeddings load quickly, and the similarity search is fast enough for interactive use. It's not production-ready for millions of documents, but it proves that Kedro's built-in tools can handle non-trivial workloads well enough.
+* ✅ No external dependencies
+* ✅ Fast retrieval (everything in memory)
+* ✅ No type conversion needed
+* ❌ Not scalable for very large datasets
+* ❌ Entire dataset loads into memory
 
-### The Results
+For 13,000 pages (about 11 megabytes of data), I decided this was a perfectly reasonable trade-off. The embeddings load quickly, and the similarity search is fast enough for interactive use. It's not production-ready for millions of documents, but it proves that Kedro's built-in tools can handle non-trivial workloads well enough.
+
+### The results
 
 Integrating wiki embeddings into the context retrieval node significantly improved the quality of the output. The system could now answer questions about:
-- Characters and locations
-- Narrative events and mission outcomes
-- Game mechanics like weapons, systems, skills, or vehicles
-- World-building and lore
+
+* Characters and locations
+* Narrative events and mission outcomes
+* Game mechanics like weapons, systems, skills, or vehicles
+* World-building and lore
 
 The prompt engineering also became more effective. With better data, I could confidently instruct the LLM to use only the provided context:
 
@@ -243,7 +249,7 @@ The prompt engineering also became more effective. With better data, I could con
 
 Previously, this strict instruction led to many "I don't have sufficient data" responses. Now, with comprehensive wiki data, the LLM had enough context to provide accurate, detailed answers while staying within the provided materials.
 
-## Making It a Conversation
+## Making it a conversation
 
 At this point, I had a working RAG system, but using it was clunky. Each query required:
 
@@ -251,9 +257,9 @@ At this point, I had a working RAG system, but using it was clunky. Each query r
 2. Running the entire pipeline
 3. Passing the query as a runtime parameter: `kedro run --pipeline=query_pipeline --params=user_query="Who is Johnny Silverhand?"`
 
-This was fine for testing, but not very nice for actual use. I wanted something more convenient and user-friendly.
+This was fine for testing but not very nice for actual use. I wanted something more convenient and user-friendly.
 
-### The Loop Solution
+### The loop solution
 
 Kedro nodes are just Python functions. There's nothing stopping you from putting a loop inside a node:
 
@@ -287,17 +293,17 @@ def query_llm_cli(
 
 This approach leverages LangChain's `ChatPromptTemplate` (loaded via our `LangChainPromptDataset`) to maintain conversation history. The chatbot now has memory of previous exchanges, making the interaction feel natural and conversational.
 
-## Games Belong on Discord
+## Games belong on Discord
 
 As a stretch goal, I wanted to make this a Discord bot. It seemed fitting. A gaming knowledge base should live where people game. It also brought some interesting insights from an architecture perspective.
 
-### The Async Challenge
+### The async challenge
 
-To get my Kedro runs to interact with Discord, I used Discord.py, an open source Python API wrapper for Discord.
+To get my Kedro runs to interact with Discord, I used Discord.py, an open-source Python API wrapper for Discord.
 
 Discord.py is built on asyncio. Kedro pipeline runs are blocking operations. These two paradigms don't play well together.
 
-**Solution: Bootstrap and Thread**
+**Solution: bootstrap and thread**
 
 Each Discord command bootstraps its own Kedro session and runs the pipeline in a separate thread:
 
@@ -329,7 +335,7 @@ async def run_query(ctx: commands.Context, *, user_query: str) -> None:
 
 This approach has a nice side effect: each query runs in its own pipeline execution, so multiple users can query the bot simultaneously without interfering with each other.
 
-### The Message Length Problem
+### The message length problem
 
 Discord has a 2000-character limit per message. LLM responses can easily exceed this. The solution was a simple chunking function:
 
@@ -346,27 +352,28 @@ async def send_long_message(ctx: commands.Context, message: str) -> None:
             await ctx.send(message[i:i+DISCORD_MAX_MESSAGE_LENGTH])
 ```
 
-### The Pipeline Architecture Challenge
+### The pipeline architecture challenge
 
 Here's where I got some interesting insights about Kedro pipeline design. The Discord bot and CLI chatbot needed different behaviors:
 
-- **CLI**: Interactive loop, maintains conversation history
-- **Discord**: Single query, no history, returns string response
+* **CLI**: Interactive loop, maintains conversation history
+* **Discord**: Single query, no history, returns string response
 
-**Attempt 1: Duplicate Pipelines**
+**Attempt 1: duplicate pipelines**
 
 My first instinct was to create separate pipelines. This worked but violated DRY principles and Kedro best practices. Not ideal. In fact, Kedro does not even allow nodes to have the same name even if they're in different pipelines. The framework that exists to apply proper software development practices to data projects was doing its job.
 
-**Attempt 2: Separate Pipelines with Tags**
+**Attempt 2: separate pipelines with tags**
 
 I tried splitting into three pipelines:
+
 1. Context retrieval and prompt assembly (shared)
 2. CLI LLM query node
 3. Discord LLM query node
 
 The idea was to use tags to control execution. This failed because I couldn't guarantee execution order—sometimes the LLM node would run before context retrieval, leading to hallucinations from empty context.
 
-**Solution: Single Pipeline with Tagged Nodes**
+**Solution: single pipeline with tagged nodes**
 
 The chosen approach was a single pipeline with all nodes, using tags to select execution paths:
 
@@ -401,52 +408,55 @@ def create_pipeline() -> Pipeline:
 ```
 
 Now I can run:
-- `kedro run --pipeline=query_pipeline --tags=cli` for CLI mode
-- `kedro run --pipeline=query_pipeline --tags=discord` for Discord mode
 
-Kedro's tag system ensures only the appropriate nodes run, and execution order is guaranteed because nodes are connected by their inputs/outputs. This is the Kedro way: use the framework's features to solve problems elegantly.
+* `kedro run --pipeline=query_pipeline --tags=cli` for CLI mode
+* `kedro run --pipeline=query_pipeline --tags=discord` for Discord mode
 
-## Lessons Learned
+Kedro's tag system ensures only the appropriate nodes run, and execution order is guaranteed because nodes are connected by their inputs and outputs. This is the Kedro way: use the framework's features to solve problems elegantly.
+
+## Lessons learned
 
 This project started with building a simple query system to test a new dataset. It ended up being a very insightful learning experience.
 
-### 1. Separation of Concerns Is Important
+### 1. Separation of concerns is important
 
 Having separate pipelines for processing and querying meant I could iterate on query logic without reprocessing 400 pages of transcript and 13,000 wiki pages. This separation, enforced by Kedro's architecture, was a great time saver.
 
-### 2. The Data Catalog Is Your Friend
+### 2. The data catalog is your friend
 
 Never hardcode file paths. The catalog makes it trivial to:
-- Change data locations
-- Use different datasets for testing vs. production
-- Track data lineage
 
-### 3. Parameters Enable Experimentation
+* Change data locations
+* Use different datasets for testing vs. production
+* Track data lineage
+
+### 3. Parameters enable experimentation
 
 Moving magic numbers to `parameters.yml` made it easy to experiment:
-- What's the optimal chunk size?
-- How much overlap is needed?
-- What temperature works best for this use case?
+
+* What's the optimal chunk size?
+* How much overlap is needed?
+* What temperature works best for this use case?
 
 Change a parameter, rerun the pipeline. No code changes needed.
 
-### 4. Nodes Are Just Functions
+### 4. Nodes are just functions
 
 Don't overthink it. A node can be a simple transformation, a complex loop, or anything in between. Kedro provides structure, not restrictions.
 
-### 5. Tags Are Powerful
+### 5. Tags are powerful
 
 The tag system solved a real architectural problem elegantly. It's a simple feature with powerful implications for pipeline organization.
 
-## Conclusion: From Experiment to Production Pattern
+## Conclusion: from experiment to production pattern
 
 What started as a test of an experimental dataset became a comprehensive exploration of building production-ready data pipelines with Kedro. The project demonstrates:
 
-- **RAG system architecture** using semantic search
-- **Custom dataset integration** with LangChain
-- **Pipeline organization** for different execution modes
-- **Async integration** with blocking operations
-- **Practical constraints** and trade-offs in real systems
+* **RAG system architecture** using semantic search
+* **Custom dataset integration** with LangChain
+* **Pipeline organization** for different execution modes
+* **Async integration** with blocking operations
+* **Practical constraints** and trade-offs in real systems
 
 The code is clean, maintainable, and follows Kedro best practices. More importantly, it works. The bot can answer questions about Cyberpunk 2077, drawing from both the game transcript and comprehensive wiki data.
 
@@ -454,14 +464,16 @@ And after 466 hours of gameplay and every achievement unlocked, I can confirm: t
 
 ## Resources
 
-- [Kedro Documentation](https://docs.kedro.org/) - Comprehensive guide to Kedro
-- [LangChain Documentation](https://python.langchain.com/) - LLM framework
-- [Discord.py Documentation](https://discordpy.readthedocs.io/) - Discord bot library
-- [Sentence Transformers](https://www.sbert.net/) - Semantic embeddings
-- [OpenAI API](https://platform.openai.com/docs) - LLM provider
-- [Cyberpunk Wiki](https://cyberpunk.fandom.com/wiki/Cyberpunk_Wiki) - Game information source
-- [Full Cyberpunk 2077 Transcript](https://game-scripts-wiki.blogspot.com/2020/12/cyberpunk-2077-full-transcript.html) - Transcript source
+* [Kedro documentation](https://docs.kedro.org/) - Comprehensive guide to Kedro
+* [LangChain documentation](https://python.langchain.com/) - LLM framework
+* [Discord.py documentation](https://discordpy.readthedocs.io/) - Discord bot library
+* [Sentence Transformers](https://www.sbert.net/) - Semantic embeddings
+* [OpenAI API](https://platform.openai.com/docs) - LLM provider
+* [Cyberpunk Wiki](https://cyberpunk.fandom.com/wiki/Cyberpunk_Wiki) - Game information source
+* [Full Cyberpunk 2077 transcript](https://game-scripts-wiki.blogspot.com/2020/12/cyberpunk-2077-full-transcript.html) - Transcript source
 
 ---
 
 *The complete project is available on GitHub as part of the Kedro Academy repository. Feel free to explore, experiment, and adapt it for your own use cases.*
+
+
