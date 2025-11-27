@@ -1,18 +1,20 @@
 # Building a cyberpunk 2077 knowledge base with Kedro and LangChain
 
-There's a well-known adage about writing that tells people to "write what they know." When I had to create a project to test an experimental Kedro dataset for loading LangChain prompt templates, I decided to take that advice to heart.
+There's a well-known adage about writing that tells people to "write what they know." When I decided to create a project to test an experimental [Kedro dataset](https://docs.kedro.org/projects/kedro-datasets/) for loading [LangChain](https://python.langchain.com/) prompt templates, I took that advice to heart.
 
-I embarked upon the nerdy endeavor of building an LLM-powered question-answering knowledge base whose sole purpose is to accurately answer questions about the action role-playing game Cyberpunk 2077. With over 400 hours of gameplay, every achievement unlocked, and more than a few passionate discussions (read: heated arguments on Reddit) about the game under my belt, this would be the perfect test subject. I could easily spot inaccurate responses, hallucinations, or any other LLM quirks that might slip through.
+I embarked upon the nerdy endeavor of building an LLM-powered question-answering knowledge base whose sole purpose is to accurately answer questions about the action role-playing game Cyberpunk 2077. This would be the perfect test subject: I have over 450 hours of gameplay, every achievement unlocked, and have had more than a few passionate discussions (or heated arguments) on Reddit about the game under my belt. I could easily spot inaccurate responses, hallucinations, or any other LLM quirks that might slip through.
 
 To my pleasant surprise, this project would evolve to become a valuable learning experience in building data pipelines with Kedro, wrestling with LLM limitations, and discovering that sometimes the best solutions come from working within constraints rather than around them.
 
+I decided to write up what I learned to share with the Kedro community. Hopefully you'll find this useful if you have <x skills> and are trying to achieve <y>. If you want to try it out, you can find the the project [on GitHub as part of the Kedro Academy repository](https://github.com/kedro-org/kedro-academy/tree/main/kedro-cyberpunk-knowledge-base).
+
 ## The project
 
-At its core, this is a Retrieval-Augmented Generation (RAG) system built with Kedro. The initial goal was to take a full transcript of a Cyberpunk 2077 playthrough (over 400 pages of dialog), make it searchable, and use it to answer questions accurately. I could only select a specific playthrough on a blog that transcribes games (linked below), and this was a challenge seeing as the game itself has multiple different endings based on the player's choices throughout the story.
+At its core, this is a Retrieval-Augmented Generation (RAG) system built with Kedro. The initial goal was to take a full [transcript of a Cyberpunk 2077 playthrough](https://game-scripts-wiki.blogspot.com/2020/12/cyberpunk-2077-full-transcript.html) (over 400 pages of dialog), make it searchable, and use it to answer questions accurately. I could only select a specific playthrough on a blog that transcribes games (linked below), and this was a challenge seeing as the game itself has multiple different endings based on the player's choices throughout the story.
 
 ## The transcript
 
-The `LangChainPromptDataset` was built to seamlessly integrate LangChain `PromptTemplate` objects into Kedro pipelines, allowing prompts to be loaded as raw data files and reducing boilerplate code. For a proper field test, I wanted to use it with a real LLM query workflow, not just unit tests or mock responses.
+The `LangChainPromptDataset` was built to seamlessly integrate LangChain `PromptTemplate` objects into Kedro pipelines, enabling prompts to be loaded as raw data files and reducing boilerplate code. For a proper field test, I wanted to use it with a real LLM query workflow, not just unit tests or mock responses.
 
 ### Let's talk about chunking...
 
@@ -116,7 +118,7 @@ I used this character list to boost the relevance score of transcript chunks whe
 
 **Solution 3: Semantic similarity with Sentence Transformers**
 
-The most notable improvement came when I replaced keyword matching with semantic similarity search using Sentence Transformers:
+The most notable improvement came when I replaced keyword matching with semantic similarity search using [Sentence Transformers](https://www.sbert.net/):
 
 ```python
 def find_relevant_contexts(
@@ -150,7 +152,7 @@ However, even with these improvements, the transcript alone was insufficient. Qu
 
 ## The wiki
 
-I needed a source of data that was complete, up-to-date, reliable, and neutral because people get *very* passionate about their in-game choices. The community-maintained Cyberpunk Wiki was the obvious answer.
+I needed a source of data that was complete, up-to-date, reliable, and neutral because people get *very* passionate about their in-game choices. The [community-maintained Cyberpunk Wiki](https://cyberpunk.fandom.com/wiki/Cyberpunk_Wiki) was the obvious answer.
 
 ### The download challenge
 
@@ -291,7 +293,7 @@ def query_llm_cli(
         conversation_history.append({"role": "ai", "content": response.content})
 ```
 
-This approach leverages LangChain's `ChatPromptTemplate` (loaded via our `LangChainPromptDataset`) to maintain conversation history. The chatbot now has memory of previous exchanges, making the interaction feel natural and conversational.
+This approach uses LangChain's `ChatPromptTemplate` (loaded via our `LangChainPromptDataset`) to maintain conversation history. The chatbot now has memory of previous exchanges, making the interaction feel natural and conversational.
 
 ## Games belong on Discord
 
@@ -299,7 +301,7 @@ As a stretch goal, I wanted to make this a Discord bot. It seemed fitting. A gam
 
 ### The async challenge
 
-To get my Kedro runs to interact with Discord, I used Discord.py, an open-source Python API wrapper for Discord.
+To get my Kedro runs to interact with Discord, I used [Discord.py](https://discordpy.readthedocs.io/), an open-source Python API wrapper for Discord.
 
 Discord.py is built on asyncio. Kedro pipeline runs are blocking operations. These two paradigms don't play well together.
 
@@ -462,17 +464,7 @@ The code is clean, maintainable, and follows Kedro best practices. More importan
 
 And after 466 hours of gameplay and every achievement unlocked, I can confirm: the bot's answers are accurate. Now if only it could tell me when the sequel's release date is going to be.
 
-## Resources
-
-* [Kedro documentation](https://docs.kedro.org/) - Comprehensive guide to Kedro
-* [LangChain documentation](https://python.langchain.com/) - LLM framework
-* [Discord.py documentation](https://discordpy.readthedocs.io/) - Discord bot library
-* [Sentence Transformers](https://www.sbert.net/) - Semantic embeddings
-* [OpenAI API](https://platform.openai.com/docs) - LLM provider
-* [Cyberpunk Wiki](https://cyberpunk.fandom.com/wiki/Cyberpunk_Wiki) - Game information source
-* [Full Cyberpunk 2077 transcript](https://game-scripts-wiki.blogspot.com/2020/12/cyberpunk-2077-full-transcript.html) - Transcript source
-
----
+### Get the code
 
 *The complete project is available on GitHub as part of the Kedro Academy repository. Feel free to explore, experiment, and adapt it for your own use cases.*
 
