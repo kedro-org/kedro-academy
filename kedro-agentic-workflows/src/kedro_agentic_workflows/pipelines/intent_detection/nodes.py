@@ -71,7 +71,10 @@ def load_context(
     }
 
     # Example alternative using Opik
-    # session_config = {"configurable": {"thread_id": str(session_id)}, "callbacks": [intent_tracer_opik]}
+    # session_config = {
+    #     "configurable": {"thread_id": str(session_id)},
+    #     "callbacks": [intent_tracer_opik]
+    # }
 
     return user_context, session_config
 
