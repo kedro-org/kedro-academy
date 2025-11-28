@@ -12,6 +12,17 @@ I decided to write up what I learned to share with the Kedro community. Hopefull
 
 At its core, this is a Retrieval-Augmented Generation (RAG) system built with Kedro. The initial goal was to take a full [transcript of a Cyberpunk 2077 playthrough](https://game-scripts-wiki.blogspot.com/2020/12/cyberpunk-2077-full-transcript.html) (over 400 pages of dialog), make it searchable, and use it to answer questions accurately. I could only select a specific playthrough on a blog that transcribes games (linked below), and this was a challenge seeing as the game itself has multiple different endings based on the player's choices throughout the story.
 
+## What is Kedro?
+
+[Kedro](https://kedro.org/) is an open-source Python framework for building production-ready data pipelines. It provides structure and best practices for data engineering projects through:
+
+* **Nodes**: Pure Python functions that transform data
+* **Pipelines**: Directed acyclic graphs (DAGs) of nodes that define execution order
+* **Data Catalog**: Centralized configuration for data sources, eliminating hardcoded file paths
+* **Parameters**: Externalized configuration for easy experimentation
+
+For this project, Kedro provided the structure to manage all of the datasets and transformations, and allowed quick, easy iteration while building data pipelines.
+
 ## The transcript
 
 The `LangChainPromptDataset` was built to seamlessly integrate LangChain `PromptTemplate` objects into Kedro pipelines, enabling prompts to be loaded as raw data files and reducing boilerplate code. For a proper field test, I wanted to use it with a real LLM query workflow, not just unit tests or mock responses.
@@ -463,6 +474,15 @@ What started as a test of an experimental dataset became a comprehensive explora
 The code is clean, maintainable, and follows Kedro best practices. More importantly, it works. The bot can answer questions about Cyberpunk 2077, drawing from both the game transcript and comprehensive wiki data.
 
 And after 466 hours of gameplay and every achievement unlocked, I can confirm: the bot's answers are accurate. Now if only it could tell me when the sequel's release date is going to be.
+
+## Learn more about Kedro
+
+If you want to dive deeper into Kedro or explore similar concepts:
+
+* **[Kedro Documentation](https://docs.kedro.org/):** The official docs for Kedro, covering everything from tutorials to advanced usage.
+* **[Kedro GitHub Repository](https://github.com/kedro-org/kedro):** Source code, issues, and discussions.
+* **[Kedro Youtube Channel](https://www.youtube.com/@kedro-python):** Guides, presentations, and bi-weekly livestreamed coffee chats with the Kedro team.
+* **[Kedro Slack Community](https://slack.kedro.org/):** Talk to other Kedro users and maintainers.
 
 ### Get the code
 
