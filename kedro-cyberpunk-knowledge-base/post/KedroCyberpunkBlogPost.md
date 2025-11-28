@@ -1,4 +1,4 @@
-# Building a cyberpunk 2077 knowledge base with Kedro and LangChain
+# Building a Cyberpunk 2077 knowledge base with Kedro and LangChain
 
 There's a well-known adage about writing that tells people to "write what they know." When I decided to create a project to test an experimental [Kedro dataset](https://docs.kedro.org/projects/kedro-datasets/) for loading [LangChain](https://python.langchain.com/) prompt templates, I took that advice to heart.
 
@@ -6,7 +6,7 @@ I embarked upon the nerdy endeavor of building an LLM-powered question-answering
 
 To my pleasant surprise, this project would evolve to become a valuable learning experience in building data pipelines with Kedro, wrestling with LLM limitations, and discovering that sometimes the best solutions come from working within constraints rather than around them.
 
-I decided to write up what I learned to share with the Kedro community. Hopefully you'll find this useful if you have <x skills> and are trying to achieve <y>. If you want to try it out, you can find the the project [on GitHub as part of the Kedro Academy repository](https://github.com/kedro-org/kedro-academy/tree/main/kedro-cyberpunk-knowledge-base).
+I decided to write up what I learned to share with the Kedro community. Hopefully you'll find this useful if you're familiar with Kedro and want to learn how to integrate LLMs into your projects, or if you want to learn how to expose your pipelines through external APIs and messaging platforms. If you want to try it out, you can find the the project [on GitHub as part of the Kedro Academy repository](https://github.com/kedro-org/kedro-academy/tree/main/kedro-cyberpunk-knowledge-base).
 
 ## The project
 
@@ -166,7 +166,7 @@ The wiki is substantial, as it's about 15,000 pages. Downloading it required:
    {
      "Johnny Silverhand": "Johnny Silverhand is a...",
      "Arasaka Tower": "Arasaka Tower is located in...",
-     ...
+     "..."
    }
    ```
 
@@ -466,6 +466,6 @@ And after 466 hours of gameplay and every achievement unlocked, I can confirm: t
 
 ### Get the code
 
-*The complete project is available on GitHub as part of the Kedro Academy repository. Feel free to explore, experiment, and adapt it for your own use cases.*
+*The [complete project](https://github.com/kedro-org/kedro-academy/tree/main/kedro-cyberpunk-knowledge-base) is available on GitHub as part of the Kedro Academy repository. Feel free to explore, experiment, and adapt it for your own use cases.*
 
 
