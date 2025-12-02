@@ -2,12 +2,11 @@ from datetime import datetime
 import logging
 from typing import Callable
 
-import pandas as pd
 from langchain_core.messages import AIMessage
-from sqlalchemy import text, Engine
-
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI
+import pandas as pd
+from sqlalchemy import text, Engine
 
 from .agent import ResponseGenerationAgent
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
@@ -29,9 +28,8 @@ def init_tools(
 
 def init_response_generation_context(
     llm: ChatOpenAI,
-    tool_prompt_txt: str,
-    response_system_prompt_txt: str,
-    response_user_prompt_txt: str,
+    tool_prompt: PromptTemplate,
+    response_prompt: ChatPromptTemplate,
     tools: dict[str, Callable],
 ) -> AgentContext:
     """
@@ -44,18 +42,6 @@ def init_response_generation_context(
 
     for name, fn in tools.items():
         ctx.add_tool(name, fn)
-
-    tool_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", tool_prompt_txt),
-        ]
-    )
-    response_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", response_system_prompt_txt),
-            ("human", response_user_prompt_txt),
-        ]
-    )
 
     ctx.add_prompt("tool_prompt", tool_prompt)
     ctx.add_prompt("response_prompt", response_prompt)

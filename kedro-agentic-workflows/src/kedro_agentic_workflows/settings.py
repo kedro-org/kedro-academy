@@ -31,10 +31,9 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 CONFIG_LOADER_ARGS = {
     "base_env": "base",
     "default_run_env": "local",
-    # "config_patterns": {
-    #     "spark" : ["spark*/"],
-    #     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
-    # }
+    "config_patterns": {
+        "catalog": ["catalog*", "catalog*/**", "**/catalog*", "genai-config.yml"],
+    }
 }
 
 # Class that manages Kedro's library components.
