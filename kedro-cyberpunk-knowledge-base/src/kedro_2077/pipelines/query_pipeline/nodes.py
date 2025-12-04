@@ -1,7 +1,7 @@
 """Query pipeline nodes for Cyberpunk 2077 transcript."""
 
 from typing import Any, Dict, List
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import BaseMessage
 from sentence_transformers import util
 import torch
