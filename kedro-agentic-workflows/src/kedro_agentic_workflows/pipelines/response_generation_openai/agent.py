@@ -2,7 +2,7 @@ import json
 from typing import TypedDict, List
 
 from pydantic import BaseModel, Field
-from agents import Agent, Runner, Tool
+from agents import Agent, Runner
 from agents.items import ToolCallOutputItem, MessageOutputItem, ToolCallItem
 from agents.run import RunResult
 from langchain_core.messages import AIMessage, BaseMessage
@@ -84,6 +84,9 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
             "intent_generator_summary": context.get("intent_generator_summary", ""),
             "user_id": context.get("user_context", {}).get("profile", {}).get("user_id", "unknown"),
         }
+        # This might error out as the official OpenAI platform,
+        # valid secret keys always begin with the prefix sk (not JWT)
+        # TODO: Test with personal key
         tool_instructions = self.tool_prompt.format(**dynamic_context)
         print("--->")
         print(tool_instructions)

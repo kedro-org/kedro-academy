@@ -23,15 +23,15 @@ class OpenAIModelDataset(AbstractDataset[None, OpenAIModelConfig]):
     ):
         """
         Args:
-            credentials: Must include `openai_api_key` and optionally `openai_api_base`.
+            credentials: Must include `api_key` and optionally `base_url`.
             model_name: Name of the OpenAI model, e.g., "gpt-4o-mini".
             model_settings: Optional settings (temperature, max_output_tokens, etc.)
         """
-        if "openai_api_key" not in credentials:
-            raise DatasetError("Missing `openai_api_key` in credentials.")
+        if "api_key" not in credentials:
+            raise DatasetError("Missing `api_key` in credentials.")
 
-        self.api_key = credentials["openai_api_key"]
-        self.api_base = credentials.get("openai_api_base", "https://api.openai.com/v1")
+        self.api_key = credentials["api_key"]
+        self.base_url = credentials.get("base_url", "https://api.openai.com/v1")
 
         self.model_name = model_name
         self.model_settings = model_settings or {}
@@ -40,13 +40,14 @@ class OpenAIModelDataset(AbstractDataset[None, OpenAIModelConfig]):
         return {
             "model_name": self.model_name,
             "model_settings": self.model_settings,
-            "api_base": self.api_base,
+            "base_url": self.base_url,
         }
 
     def load(self) -> OpenAIModelConfig:
         # Set credentials as environment variables for OpenAI SDK
         os.environ["OPENAI_API_KEY"] = self.api_key
-        os.environ["OPENAI_API_BASE"] = self.api_base
+        os.environ["OPENAI_BASE_URL"] = self.base_url
+        # os.environ["OPENAI_API_BASE"] = self.base_url
 
         return OpenAIModelConfig(
             name=self.model_name,
