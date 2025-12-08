@@ -72,10 +72,6 @@ The `conf/` folder contains the catalog, parameters and credentials for the proj
 - `local/`: Contains local configuration files for the project.
     - `credentials.yml`: Stores sensitive information such as API keys and passwords. [NOT COMMITTED TO THE REPO]
 
-### Custom Datasets
-
-The project includes a custom dataset `PDFDataset` defined in `kedro_batch_agent/datasets/pdf_dataset.py` to handle PDF files. This dataset is used to read unstructured text data from PDF files. The `PDFDataset` class extends Kedro's `AbstractDataSet`. It uses the [`pypdf` library](https://pypdf.readthedocs.io/en/stable/) to read and extract text from PDF files.
-
 ### Setup and run the project
 
 1. Clone the repository:
@@ -93,8 +89,8 @@ The project includes a custom dataset `PDFDataset` defined in `kedro_batch_agent
    In the `conf/local/` directory, create a file named `credentials.yml` and add your API keys and other sensitive information there.
    ```yaml
    openai:
-     openai_api_key: your_openai_api_key
-     openai_api_base: your_openai_api_base
+     api_key: your_openai_api_key
+     base_url: your_openai_api_base
    ```
 
 4. Run the project:
