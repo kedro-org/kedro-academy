@@ -1,5 +1,5 @@
 autogen-agentchat
-autogen-ext[openai]kedrp-agentic-workflows
+autogen-ext[openai]
 ipython>=8.10
 jupyterlab>=3.0
 notebook
