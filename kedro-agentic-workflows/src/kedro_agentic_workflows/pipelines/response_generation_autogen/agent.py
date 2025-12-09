@@ -1,4 +1,7 @@
+import json
+
 from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.base import TaskResult
 from pydantic import BaseModel, Field
 
 from ...utils import KedroAgent, AgentContext
@@ -41,5 +44,36 @@ class ResponseGenerationAgentAutogen(KedroAgent):
         }
 
         tool_instructions = self.tool_prompt.format(**dynamic_context)
+
+        tool_result: TaskResult = await self.tool_agent.run(
+            task=tool_instructions
+        )
+        print("---")
+        print(tool_result.messages)
+        print("---")
+
+        # tool_result.messages → full conversation
+        # tool_result.artifacts → tool call outputs indexed by tool name
+        created_claim = tool_result.artifacts.get("create_claim")
+        doc_results = tool_result.artifacts.get("lookup_docs")
+        user_claims = tool_result.artifacts.get("get_user_claims")
+
+        # Normalise formatting for response prompt
+        def fmt(v):
+            if not v:
+                return "None"
+            try:
+                return json.dumps(v, indent=2)
+            except Exception:
+                return str(v)
+
+        dynamic_context = {
+            "intent": context["intent"],
+            "intent_generator_summary": context.get("intent_generator_summary", ""),
+            "user_context": context.get("user_context", ""),
+            "created_claim": fmt(created_claim),
+            "docs_lookup": fmt(doc_results),
+            "user_claims": fmt(user_claims),
+        }
 
         return {}
