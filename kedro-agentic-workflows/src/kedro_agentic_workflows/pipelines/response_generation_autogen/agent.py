@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from autogen_agentchat.agents import AssistantAgent
@@ -45,9 +46,7 @@ class ResponseGenerationAgentAutogen(KedroAgent):
 
         tool_instructions = self.tool_prompt.format(**dynamic_context)
 
-        tool_result: TaskResult = await self.tool_agent.run(
-            task=tool_instructions
-        )
+        tool_result: TaskResult = asyncio.run(self.tool_agent.run(task=tool_instructions))
         print("---")
         print(tool_result.messages)
         print("---")

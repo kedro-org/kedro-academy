@@ -6,7 +6,7 @@ llm:
     temperature: 0.0
   credentials: openai
 
-llm_openai:
+llm_autogen:
   type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
   kwargs:
     model: "gpt-4o"
