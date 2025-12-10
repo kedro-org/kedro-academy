@@ -8,8 +8,6 @@ import pandas as pd
 import questionary
 from sqlalchemy import Engine
 
-# from opik.integrations.langchain import OpikTracer
-
 from .agent import IntentOutput, IntentDetectionAgent
 from ...utils import log_message
 
@@ -72,8 +70,10 @@ def load_context(
     }
 
     # Example alternative using Opik
-    # opik_tracer = OpikTracer()
-    # session_config = {"configurable": {"thread_id": str(session_id)}, "callbacks": [opik_tracer]}
+    # session_config = {
+    #     "configurable": {"thread_id": str(session_id)},
+    #     "callbacks": [intent_tracer_opik]
+    # }
 
     return user_context, session_config
 
