@@ -1,5 +1,5 @@
 import json
-from typing import TypedDict, List
+from typing import List
 
 from pydantic import BaseModel, Field
 from agents import Agent, Runner
@@ -22,13 +22,6 @@ def langchain_to_agent_input(messages: list[BaseMessage]) -> list[dict]:
             "content": content,
         })
     return converted
-
-
-class AgentState(TypedDict):
-    messages: List[BaseMessage]
-    intent: str
-    intent_generator_summary: str
-    user_context: dict
 
 
 class ResponseOutput(BaseModel):
@@ -72,9 +65,7 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
         )
 
     def invoke(self, context: dict, config: dict | None = None) -> dict:
-        """
-        Run the agent and produce the response in the same form as previously.
-        """
+        """Run the agent and produce the response in the same form as previously."""
         if self.tool_agent is None:
             raise ValueError(f"{self.__class__.__name__} must be compiled before invoking. Call .compile() first.")
 
@@ -84,23 +75,14 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
             "intent_generator_summary": context.get("intent_generator_summary", ""),
             "user_id": context.get("user_context", {}).get("profile", {}).get("user_id", "unknown"),
         }
+
         # This might error out as the official OpenAI platform,
         # valid secret keys always begin with the prefix sk (not JWT)
-        # TODO: Test with personal key
         tool_instructions = self.tool_prompt.format(**dynamic_context)
-        print("--->")
-        print(tool_instructions)
-        print("<---")
         run_result: RunResult = Runner.run_sync(
             self.tool_agent,
             input=tool_instructions,
         )
-
-        for item in run_result.new_items:
-            try:
-                item.pretty_print()
-            except Exception:
-                print(item)
 
         # Collect initial messages
         messages: List[BaseMessage] = []
@@ -143,14 +125,6 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
             doc_results_str = fmt(tool_outputs.get("lookup_docs"))
             user_claims_str = fmt(tool_outputs.get("get_user_claims"))
 
-            print("<---")
-            print("created_claim_str:", created_claim_str)
-            print("***")
-            print("doc_results_str:", doc_results_str)
-            print("***")
-            print("user_claims_str:", user_claims_str)
-            print("--->")
-
             return created_claim_str, doc_results_str, user_claims_str
 
         created_claim_str, doc_results_str, user_claims_str = extract_tool_outputs(run_result)
@@ -165,19 +139,12 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
         }
 
         response_instructions = self.response_prompt.format_messages(**dynamic_context)
+
         response_instructions = langchain_to_agent_input(response_instructions)
-        print("<---")
-        print(response_instructions)
-        print("--->")
         final_result: RunResult = Runner.run_sync(
             self.response_agent,
             input=response_instructions,
         )
-        for item in final_result.new_items:
-            try:
-                item.pretty_print()
-            except Exception:
-                print(item)
         response: ResponseOutput = final_result.final_output
 
         # Append to messages

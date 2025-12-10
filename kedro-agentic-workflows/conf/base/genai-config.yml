@@ -8,7 +8,7 @@ llm:
 
 llm_openai:
   type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
-  model_name: "gpt-4o-mini"
+  model_name: "gpt-4o"
   model_settings:
     temperature: 0.0
   credentials: openai
