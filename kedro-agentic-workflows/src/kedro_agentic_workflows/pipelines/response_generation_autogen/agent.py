@@ -47,32 +47,32 @@ class ResponseGenerationAgentAutogen(KedroAgent):
         tool_instructions = self.tool_prompt.format(**dynamic_context)
 
         tool_result: TaskResult = asyncio.run(self.tool_agent.run(task=tool_instructions))
-        print("---")
-        print(tool_result.messages)
-        print("---")
 
-        # tool_result.messages → full conversation
-        # tool_result.artifacts → tool call outputs indexed by tool name
-        created_claim = tool_result.artifacts.get("create_claim")
-        doc_results = tool_result.artifacts.get("lookup_docs")
-        user_claims = tool_result.artifacts.get("get_user_claims")
+        try:
+            function_called = tool_result.messages[-2].content[0].name
+        except Exception:
+            function_called = None
 
-        # Normalise formatting for response prompt
-        def fmt(v):
-            if not v:
-                return "None"
-            try:
-                return json.dumps(v, indent=2)
-            except Exception:
-                return str(v)
+        created_claim = ""
+        doc_results = ""
+        user_claims = ""
+
+        if function_called == "create_claim":
+            created_claim = tool_result.messages[-1].content
+        elif function_called == "lookup_docs":
+            doc_results = tool_result.messages[-1].content
+        elif function_called == "get_user_claims":
+            user_claims = tool_result.messages[-1].content
 
         dynamic_context = {
             "intent": context["intent"],
             "intent_generator_summary": context.get("intent_generator_summary", ""),
             "user_context": context.get("user_context", ""),
-            "created_claim": fmt(created_claim),
-            "docs_lookup": fmt(doc_results),
-            "user_claims": fmt(user_claims),
+            "created_claim": created_claim,
+            "docs_lookup": doc_results,
+            "user_claims": user_claims,
         }
+
+        print(dynamic_context)
 
         return {}
