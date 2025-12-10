@@ -7,9 +7,6 @@ from .nodes import (
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
 
 
-# from kedro_agentic import agent_context_node
-# kedro.experimental.agentic import agent_context_node
-
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
