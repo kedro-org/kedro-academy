@@ -1,4 +1,4 @@
-from kedro.pipeline import Pipeline, node, pipeline, llm_context_node
+from kedro.pipeline import Pipeline, node, pipeline, llm_context_node, tool
 
 from .nodes import (
     generate_response,
@@ -16,9 +16,9 @@ def create_pipeline(**kwargs) -> Pipeline:
                 llm="llm",
                 prompts=["tool_prompt", "response_prompt"],
                 tools=[
-                    {"func": build_get_user_claims, "inputs": ["db_engine"]},
-                    {"func": build_lookup_docs, "inputs": ["docs", "params:docs_matches"]},
-                    {"func": build_create_claim, "inputs": ["db_engine"]},
+                    tool(build_get_user_claims, "db_engine"),
+                    tool(build_lookup_docs, "docs", "params:docs_matches"),
+                    tool(build_create_claim, "db_engine"),
                 ],
             ),
             node(
