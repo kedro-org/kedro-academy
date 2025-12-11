@@ -1,14 +1,14 @@
 import logging
 from typing import Any
 
-from kedro.pipeline import AgentContext as KedroAgentContext
+from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 from langchain_core.messages import HumanMessage, AIMessage
 import pandas as pd
 import questionary
 from sqlalchemy import Engine
 
-from .agent import IntentOutput, IntentDetectionAgent
+from .agent import IntentDetectionAgent
 from ...utils import log_message
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def load_context(
 
 
 def detect_intent(
-    intent_detection_context: KedroAgentContext,
+    intent_detection_context: LLMContext,
     user_context: dict,
     session_config: dict,
     clarification_attempts: int = 2,

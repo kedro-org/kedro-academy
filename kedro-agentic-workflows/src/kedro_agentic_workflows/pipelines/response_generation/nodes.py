@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 
-from kedro.pipeline import AgentContext as KedroAgentContext
+from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_response(
-    response_generation_context: KedroAgentContext,
+    response_generation_context: LLMContext,
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,

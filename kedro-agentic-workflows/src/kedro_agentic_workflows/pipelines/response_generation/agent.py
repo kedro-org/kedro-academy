@@ -1,7 +1,7 @@
 from functools import partial
 from typing import TypedDict, Any
 
-from kedro.pipeline import AgentContext as KedroAgentContext
+from kedro.pipeline import LLMContext
 from langchain_core.messages import BaseMessage, AIMessage
 from langchain_core.runnables import Runnable
 from langgraph.graph import StateGraph, START, END
@@ -41,7 +41,7 @@ class ResponseGenerationAgent(KedroAgent):
     - Generates structured final responses using context + tool outputs.
     """
 
-    def __init__(self, context: KedroAgentContext):
+    def __init__(self, context: LLMContext):
         super().__init__(context)
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None

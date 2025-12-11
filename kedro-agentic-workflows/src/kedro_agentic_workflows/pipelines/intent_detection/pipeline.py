@@ -1,4 +1,4 @@
-from kedro.pipeline import Pipeline, node, pipeline, agent_context_node
+from kedro.pipeline import Pipeline, node, pipeline, llm_context_node
 
 from .nodes import (
     create_session,
@@ -35,7 +35,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs=["user_context", "session_config"],
                 name="load_context_node",
             ),
-            agent_context_node(
+            llm_context_node(
                 name="intent_agent_context_node",
                 outputs="intent_detection_context",
                 llm="llm",

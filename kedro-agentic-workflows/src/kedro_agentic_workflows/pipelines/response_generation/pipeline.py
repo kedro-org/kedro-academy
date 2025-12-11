@@ -1,4 +1,4 @@
-from kedro.pipeline import Pipeline, node, pipeline, agent_context_node
+from kedro.pipeline import Pipeline, node, pipeline, llm_context_node
 
 from .nodes import (
     generate_response,
@@ -10,7 +10,7 @@ from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
-            agent_context_node(
+            llm_context_node(
                 name="response_agent_context_node",
                 outputs="response_generation_context",
                 llm="llm",
