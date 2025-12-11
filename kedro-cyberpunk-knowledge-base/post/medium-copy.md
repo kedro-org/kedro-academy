@@ -15,14 +15,20 @@ I decided to write up what I learned to share with the Kedro community. Hopefull
 
 The project
 At its core, this is a Retrieval-Augmented Generation (RAG) system built with Kedro. The initial goal was to take a full transcript of a Cyberpunk 2077 playthrough (over 400 pages of dialog), make it searchable, and use it to answer questions accurately. 
-This article walks through the workflow shown.What is Kedro?
+
+The following diagram illustrates how the RAG pipeline operates end-to-end. The raw data is chunked and embeddings are generated from it, all of which is stored in Kedro datasets. The user query is then passed as a parameter to the pipeline, and semantic similarity search is used to find the most relevant part of the stored data. This is then used as context to format a LangChain ChatPromptTemplate object. Finally, the LLM processes this prompt to produce a response, which becomes the final product of this pipeline.
+
+This article walks through the workflow shown.
+
+What is Kedro?
 Kedro is an open-source Python framework for building production-ready data pipelines. It provides structure and best practices for data engineering projects through:
 Nodes: Pure Python functions that transform data
 Pipelines: Directed acyclic graphs (DAGs) of nodes that define execution order
 Data Catalog: Centralized configuration for data sources, eliminating hardcoded file paths
 Parameters: Externalized configuration for easy experimentation
 
-For this project, Kedro provided the structure to manage all of the datasets and transformations, and allowed quick, easy iteration while building data pipelines.
+Kedro transforms what is often a loose collection of scripts and LangChain components into a coherent, well-defined and reproducible RAG architecture. For this project, it provided the structure to manage all of the datasets and transformations, allowing quick, easy iteration while building data pipelines.
+
 The transcript
 The LangChainPromptDataset was built to seamlessly integrate LangChain PromptTemplate objects into Kedro pipelines, enabling prompts to be loaded as raw data files and reducing boilerplate code. For a proper field test, I wanted to use it with a real LLM query workflow, not just unit tests or mock responses.
 Let's talk about chunking…
@@ -123,12 +129,16 @@ def find_relevant_contexts(
         for sim, src, txt in results[:max_chunks]
     ]
 This change made response quality significantly better. The model could now understand that "Who is Johnny Silverhand?" and "Tell me about the guy who blew up Arasaka Tower?" were asking for similar information, even without exact keyword matches.
+
+I've chosen to use SentenceTransformers to embed and retrieve information at the sentence level to try to get a balance between retrieving the part of the data that was most relevant and preserving meaning. Token-based or size-based chunking, like LangChain TextSplitter, risks slicing an idea arbitrarily, while long paragraphs can end up mixing unrelated concepts. Sentence level embeddings give me a chunk of context that's small enough to not contain unrelated ideas or that end up using too many tokens, while still preserving the meaning, which is particularly interesting in the case of a game like Cyberpunk 2077, that contains a lot of invented slang, pseudo-technological terms, and other fictional bits of language.
+
 However, even with these improvements, the transcript alone was insufficient. Questions about characters worked reasonably well, but questions about game mechanics, missions, or world-building fell flat. The data simply wasn't there. I needed a better data source.
 The wiki
 I needed a source of data that was complete, up-to-date, reliable, and neutral because people get very passionate about their in-game choices. The community-maintained Cyberpunk Wiki was the obvious answer.
 The download challenge
 The wiki is substantial, as it's about 15,000 pages. Downloading it required the following:
-Respecting API rate limits: I had to add intentional pauses between requests to avoid getting blocked. The download script took a couple of hours to complete.
+Respecting API rate limits: I had to add intentional pauses between requests to avoid getting blocked. The download script, which ran simple GET requests to the fandom.com API with `sleep()` calls for pauses, took a couple of hours to complete. Getting fresh data from the wiki would require the script to be run again manually, but since Cyberpunk 2077 is a completed game that receives very infrequent updates, I decided this was not an issue.
+
 Choosing the right format: I settled on a single JSON file where each page is a key-value pair:
 
 {
@@ -143,7 +153,8 @@ Stripping Markdown syntax
 Removing image tags, external links, and language links
 Cleaning up formatting artifacts
 
-I wrote a separate Python script for this cleanup, which was a one-time operation. The cleaned data went into the data/raw/ directory, ready for Kedro to process.
+I wrote a separate Python script using string manipulation for this cleanup, which was a one-time operation. The cleaned data went into the data/raw/ directory, ready for Kedro to process. Neither of those scripts are included in the project's repository, as they're not directly related to running the RAG pipeline.
+
 Kedro-specific challenges
 This project was already testing one new dataset (LangChainPromptDataset), and I wanted to see how far I could push Kedro's built-in datasets before needing external tools.
 The "proper" solution for storing embeddings would be a vector database like Pinecone or Weaviate. But that would require:
@@ -179,7 +190,8 @@ This approach has trade-offs:
 ❌ Not scalable for very large datasets
 ❌ Entire dataset loads into memory
 
-For 13,000 pages (about 11 megabytes of data), I decided this was a perfectly reasonable trade-off. The embeddings load quickly, and the similarity search is fast enough for interactive use. It's not production-ready for millions of documents, but it proves that Kedro's built-in tools can handle non-trivial workloads well enough.
+For 13,000 pages (about 11 megabytes of data), I decided this was a perfectly reasonable trade-off. The embeddings load quickly, and the similarity search is fast enough for interactive use. It's easy to run locally, does not require any setup, and allowed me to iterate quickly on writing the pipeline. It would not be a suitable approach for production, as the pickled embeddings must be fully loaded into memory, and the PickleDataset does not offer the same range of features that a vector database would, like indexing, metadata filtering, or persistence in storage. But for a relatively small project, it demonstrates well enough that Kedro's built-in tools can handle non-trivial workloads.
+
 The results
 Integrating wiki embeddings into the context retrieval node significantly improved the quality of the output. The system could now answer questions about:
 Characters and locations
@@ -230,9 +242,10 @@ def query_llm_cli(
 This approach uses LangChain's ChatPromptTemplate (loaded via our LangChainPromptDataset) to maintain conversation history. The chatbot now has memory of previous exchanges, making the interaction feel natural and conversational.
 Prompt history is saved and reused as context in the CLI conversational chatbot.Games belong on Discord
 As a stretch goal, I wanted to make this a Discord bot. It seemed fitting. A gaming knowledge base should live where people game. It also brought some interesting insights from an architecture perspective.
+
 The async challenge
 To get my Kedro runs to interact with Discord, I used Discord.py, an open-source Python API wrapper for Discord.
-Discord.py is built on asyncio for asynchronous I/O. Kedro pipeline runs are blocking operations. These two paradigms don't play well together.
+Discord.py is built on asyncio for asynchronous I/O, and Discord is built on asynchronous operations, as it's common for messaging application. A Discord bot must constantly yield control to the Discord event loop so it can handle network I/O, message dispatching, etc. Kedro pipeline runs, on the other hand, are blocking operations. They run synchronously inside a blocking Python call stack, occupying the main thread until completion. These two paradigms don't play well together.
 Solution: bootstrap and thread
 Each Discord command bootstraps its own Kedro session and runs the pipeline in a separate thread:
 def setup_kedro_project() -> Path:
@@ -276,7 +289,7 @@ CLI: Interactive loop, maintains conversation history
 Discord: Single query, no history, returns string response
 
 Attempt 1: duplicate pipelines
-My first instinct was to create separate pipelines. This worked but violated DRY principles and Kedro best practices. Not ideal. In fact, Kedro does not even allow nodes to have the same name even if they're in different pipelines. The framework that exists to apply proper software development practices to data projects was doing its job.
+My first instinct was to create separate pipelines. This worked but violated DRY principles and Kedro best practices. Not ideal. In fact, Kedro does not even allow nodes to have the same name even if they're in different pipelines. It enforces pipeline integrity, and duplicating nodes breaks maintainability. The framework that exists to apply proper software development practices to data projects was doing its job.
 Attempt 2: separate pipelines with tags
 I tried splitting it into three pipelines:
 Context retrieval and prompt assembly (shared)
@@ -346,7 +359,13 @@ Why thoughtful data handling (chunking, embeddings, semantic search, and wiki in
 How challenges can surface when bridging LLM workflows with real-world constraints like token limits, hallucinations, and Discord's async environment.
 That a single, well-structured Kedro pipeline supports multiple execution modes (CLI and Discord) without duplication.
 
-The code is clean, maintainable, and follows Kedro best practices. More importantly, it works. The bot can answer questions about Cyberpunk 2077, drawing from both the game transcript and comprehensive wiki data.
+It was a good opportunity to explore patterns that generalize well to production RAG systems, like separation of data ingestion, preprocessing, embedding and retrieval, so each of those stages can be worked on independently. And things like chunks, embeddings, prompts, and other artifacts being stored as reproducible datasets make them easy to swap and experiment with.
+
+Kedro brings structure to this exploration. It enforces correct ordering of transformations, offers a configuration layer that keeps thing like paths, parameters, and credentials easy to track, and formalizes I/O so artifacts are typed and testable. Nodes as pure Python functions give flexibility in writing code, while modular pipelines make the project easier to refactor when necessary.
+
+It was also nice to see how a simple PickleDataset worked very well for a demo. Were the project to be scaled to a larger level, for example, if I wanted to add hundreds of thousands of social media posts about Cyberpunk 2077 to my data sources, it would benefit from moving to a vector database. After a certain point, working with embeddings in memory would become too slow, and a vector database would provide much faster similarity search, efficient indexing, filtering, and general robustness that would be beneficial for a larger project.
+
+As it is, the code is clean, maintainable, and follows Kedro best practices. More importantly, it works. The bot can answer questions about Cyberpunk 2077, drawing from both the game transcript and comprehensive wiki data.
 And after 466 hours of gameplay and every achievement unlocked, I can confirm: the bot's answers are accurate. Now, if only it could tell me when the sequel's release date is going to be…🤔
 Learn more about Kedro
 Kedro is an open-source Python toolbox that applies software engineering principles to data engineering and data science code. It reduces the time spent rewriting data science experiments so that they are fit for production.
@@ -360,6 +379,8 @@ Kedro Slack Community: Talk to other Kedro users and maintainers.
 Get the code
 The complete project is available on GitHub as part of the Kedro Academy repository. Feel free to explore, experiment, and adapt it for your own use cases.
 Feedback? Let us know in the comments below, or respond on GitHub.
+
+When experimenting with automated retrieval and prompting, be aware that it's possible to hit external rate limits. The OpenAI API may throttle you if you send too many simultaneous requests, and Discord enforces per-channel and per-user message limits that can cause your bot to be temporarily blocked if disrespected.
 
 ---
 
