@@ -46,7 +46,7 @@ def generate_response(
         try:
             m.pretty_print()
         except Exception:
-            pass
+            print(m)
 
     return result
 
