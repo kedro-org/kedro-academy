@@ -1,16 +1,15 @@
 import logging
 from typing import Any
 
+from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 import pandas as pd
 import questionary
 from sqlalchemy import Engine
 
-from .agent import IntentOutput, IntentDetectionAgent
-from ...utils import log_message, AgentContext
+from .agent import IntentDetectionAgent
+from ...utils import log_message
 
 logger = logging.getLogger(__name__)
 
@@ -79,33 +78,8 @@ def load_context(
     return user_context, session_config
 
 
-def init_intent_detection_context(
-    llm: ChatOpenAI, intent_prompt: ChatPromptTemplate
-) -> AgentContext:
-    """
-    Initialize the AgentContext for intent detection.
-
-    Args:
-        llm: Base ChatOpenAI model.
-        intent_prompt: Prompt template for intent detection.
-
-    Returns:
-        Configured AgentContext.
-    """
-    intent_detection_context = AgentContext(agent_id="intent_detection_agent")
-
-    # Bind LLM to structured output schema
-    structured_llm = llm.with_structured_output(IntentOutput)
-    intent_detection_chain = intent_prompt | structured_llm
-    intent_detection_context.llm = intent_detection_chain
-
-    intent_detection_context.add_prompt("intent_detection_prompt", intent_prompt)
-
-    return intent_detection_context
-
-
 def detect_intent(
-    intent_detection_context: AgentContext,
+    intent_detection_context: LLMContext,
     user_context: dict,
     session_config: dict,
     clarification_attempts: int = 2,
