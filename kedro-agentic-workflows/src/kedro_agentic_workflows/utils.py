@@ -30,7 +30,7 @@ class KedroAgent(ABC):
 
 
 def log_message(
-        db_engine: Engine, session_id: int, message: BaseMessage | dict
+    db_engine: Engine, session_id: int, message: BaseMessage | dict
 ) -> None:
     """
     Persist an agent message into the `message` table.
