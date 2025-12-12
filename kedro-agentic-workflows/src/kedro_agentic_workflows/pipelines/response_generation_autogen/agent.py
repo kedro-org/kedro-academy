@@ -3,10 +3,11 @@ from typing import List
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.base import TaskResult
+from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage, BaseMessage
 from pydantic import BaseModel, Field
 
-from ...utils import KedroAgent, AgentContext
+from ...utils import KedroAgent
 
 
 class ResponseOutput(BaseModel):
@@ -18,14 +19,14 @@ class ResponseOutput(BaseModel):
 
 class ResponseGenerationAgentAutogen(KedroAgent):
     """Response generation agent using Autogen agents."""
-    def __init__(self, context: AgentContext):
+    def __init__(self, context: LLMContext):
         super().__init__(context)
         self.tool_agent: AssistantAgent | None = None
         self.tools = self.context.tools
-        self.tool_prompt = self.context.get_prompt("tool_prompt")
+        self.tool_prompt = self.context.prompts["tool_prompt"]
         self.llm = self.context.llm
 
-        self.response_prompt = self.context.get_prompt("response_prompt")
+        self.response_prompt = self.context.prompts["response_prompt"]
         self.response_agent: AssistantAgent | None = None
 
     def compile(self):
