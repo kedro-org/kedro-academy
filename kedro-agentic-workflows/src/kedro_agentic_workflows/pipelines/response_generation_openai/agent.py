@@ -1,13 +1,14 @@
 import json
 from typing import List
 
-from pydantic import BaseModel, Field
 from agents import Agent, Runner
 from agents.items import ToolCallOutputItem, MessageOutputItem, ToolCallItem
 from agents.run import RunResult
+from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage, BaseMessage
+from pydantic import BaseModel, Field
 
-from ...utils import KedroAgent, AgentContext
+from ...utils import KedroAgent
 
 
 def langchain_to_agent_input(messages: list[BaseMessage]) -> list[dict]:
@@ -37,13 +38,13 @@ class ResponseGenerationAgentOpenAI(KedroAgent):
     Maintains the same compile()/invoke() interface as before for Kedro integration.
     """
 
-    def __init__(self, context: AgentContext):
+    def __init__(self, context: LLMContext):
         super().__init__(context)
         self.tool_agent: Agent | None = None
         self.response_agent: Agent | None = None
         self.tools = self.context.tools
-        self.tool_prompt = self.context.get_prompt("tool_prompt")
-        self.response_prompt = self.context.get_prompt("response_prompt")
+        self.tool_prompt = self.context.prompts["tool_prompt"]
+        self.response_prompt = self.context.prompts["response_prompt"]
         self.llm = self.context.llm
 
     def compile(self):
