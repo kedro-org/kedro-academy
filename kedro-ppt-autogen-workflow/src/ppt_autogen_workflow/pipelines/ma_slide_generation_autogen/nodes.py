@@ -1,9 +1,10 @@
 """Kedro nodes for multi-agent AutoGen PPT generation pipeline."""
+from __future__ import annotations
 
 import asyncio
 import logging
 import tempfile
-from typing import Any, Dict, Tuple
+from typing import Any
 from pathlib import Path
 
 import pandas as pd
@@ -136,10 +137,10 @@ def orchestrate_multi_agent_workflow(
     chart_agent: ChartGeneratorAgent,
     summarizer_agent: SummarizerAgent,
     critic_agent: CriticAgent,
-    instructions_yaml: Dict[str, Any],
+    instructions_yaml: dict[str, Any],
     sales_data: Any,
     user_query: str
-) -> Tuple[Any, Dict[str, plt.Figure], Dict[str, str]]:
+) -> tuple[Any, dict[str, plt.Figure], dict[str, str]]:
     """
     Orchestrate multi-agent workflow: parse instructions_yaml, generate slides with agent collaboration.
     
@@ -333,7 +334,7 @@ def orchestrate_multi_agent_workflow(
         return prs, {}, {}
 
 
-def _format_agent_response(result: Dict[str, Any]) -> str:
+def _format_agent_response(result: dict[str, Any]) -> str:
     """Format agent response for readable logging output."""
     if not result:
         return "No response"
@@ -375,7 +376,7 @@ def _format_agent_response(result: Dict[str, Any]) -> str:
     return "\n".join(formatted) if formatted else str(result)
 
 
-def _extract_plan_text(plan_result: Dict[str, Any]) -> str:
+def _extract_plan_text(plan_result: dict[str, Any]) -> str:
     """Extract plan text from planner agent result."""
     if not plan_result:
         return "No plan available"
@@ -392,7 +393,7 @@ def _generate_chart_for_slide_with_logging(
     slide_key: str,
     chart_agent: ChartGeneratorAgent,
     agent_query: str
-) -> Tuple[str, Any]:
+) -> tuple[str, Any]:
     """Generate chart with logging. Returns (chart_path, matplotlib.Figure) for partition dataset."""
     try:
         # Use direct utility function for chart generation (more reliable for structured workflow)

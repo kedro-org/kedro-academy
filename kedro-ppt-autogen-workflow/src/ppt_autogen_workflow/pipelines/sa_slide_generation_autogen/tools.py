@@ -1,9 +1,9 @@
 """PPT Generation Tools for Single-Agent AutoGen Pipeline."""
+from __future__ import annotations
 
 import json
 import logging
 import tempfile
-from typing import List
 from pathlib import Path
 
 import pandas as pd
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def build_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool]:
+def build_tools(sales_data: pd.DataFrame = None) -> list[FunctionTool]:
     """Build and return the list of tools for PPT generation.
 
     Args:

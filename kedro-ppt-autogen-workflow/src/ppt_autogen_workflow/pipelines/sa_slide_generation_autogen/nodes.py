@@ -1,8 +1,9 @@
 """Kedro nodes for single-agent AutoGen PPT generation pipeline."""
+from __future__ import annotations
 
 import logging
 import tempfile
-from typing import Any, Dict
+from typing import Any
 from pathlib import Path
 
 import pandas as pd
@@ -47,7 +48,7 @@ def initialize_ppt_agent(
 
 def run_ppt_generation(
     agent: PPTGenerationAgent,
-    instructions_yaml: Dict[str, Any],
+    instructions_yaml: dict[str, Any],
     sales_data: Any,
     user_query: str
 ) -> Any:

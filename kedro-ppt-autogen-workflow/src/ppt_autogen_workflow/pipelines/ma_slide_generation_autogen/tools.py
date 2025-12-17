@@ -1,9 +1,9 @@
 """Multi-agent PPT Generation Tools for AutoGen Pipeline."""
+from __future__ import annotations
 
 import json
 import logging
 import tempfile
-from typing import List
 from pathlib import Path
 
 import pandas as pd
@@ -23,7 +23,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def build_planner_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool]:
+def build_planner_tools(sales_data: pd.DataFrame = None) -> list[FunctionTool]:
     """Build and return tools for the PlannerAgent."""
     logger.info("Building planner tools...")
     
@@ -35,7 +35,7 @@ def build_planner_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool]:
     return tools
 
 
-def build_chart_generator_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool]:
+def build_chart_generator_tools(sales_data: pd.DataFrame = None) -> list[FunctionTool]:
     """Build and return tools for the ChartGeneratorAgent."""
     logger.info("Building chart generator tools...")
     
@@ -47,7 +47,7 @@ def build_chart_generator_tools(sales_data: pd.DataFrame = None) -> List[Functio
     return tools
 
 
-def build_summarizer_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool]:
+def build_summarizer_tools(sales_data: pd.DataFrame = None) -> list[FunctionTool]:
     """Build and return tools for the SummarizerAgent."""
     logger.info("Building summarizer tools...")
     
@@ -57,7 +57,7 @@ def build_summarizer_tools(sales_data: pd.DataFrame = None) -> List[FunctionTool
     return tools
 
 
-def build_critic_tools() -> List[FunctionTool]:
+def build_critic_tools() -> list[FunctionTool]:
     """Build and return tools for the CriticAgent."""
     logger.info("Building critic tools...")
     
