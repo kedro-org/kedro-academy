@@ -1,0 +1,26 @@
+# Kedro Framework
+kedro~=1.0.0
+kedro-datasets[pandas,matplotlib,yaml,openxml,text-TextDataset,partitions-PartitionedDataset]>=3
+
+# Core Dependencies
+ipython>=8.10
+jupyterlab>=3.0
+notebook
+
+# Data Processing
+pandas>=2.0,<3
+numpy>=1.24,<2
+
+# Visualization
+matplotlib>=3.7,<4
+
+# PowerPoint Generation
+python-pptx>=0.6.21,<1
+
+# AutoGen Dependencies
+autogen-agentchat>=0.4,<1
+autogen-ext[openai]>=0.4,<1
+autogen-core>=0.4,<1
+
+# Configuration
+pyyaml>=6.0,<7

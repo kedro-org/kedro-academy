@@ -1,0 +1,44 @@
+# ============================================================================
+# DATA CATALOG - AutoGen PPT Generation Pipeline
+# ============================================================================
+
+# ==============================================================================
+# INPUT DATASETS
+# ==============================================================================
+
+instructions_yaml:
+  type: yaml.YAMLDataset
+  filepath: data/01_raw/instructions.yaml
+
+sales_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/sample_sales_50_products.csv
+
+
+# ==============================================================================
+# INTERMEDIATE DATASETS - Charts and Summaries (Partitioned)
+# ==============================================================================
+
+slide_charts:
+  type: partitions.PartitionedDataset
+  path: data/02_intermediate/charts
+  dataset:
+    type: matplotlib.MatplotlibDataset
+  filename_suffix: .png
+
+slide_summaries:
+  type: partitions.PartitionedDataset
+  path: data/02_intermediate/summaries
+  dataset:
+    type: text.TextDataset
+  filename_suffix: .txt
+
+
+# ==============================================================================
+# OUTPUT - Final Presentation (Versioned)
+# ==============================================================================
+
+final_presentation:
+  type: openxml.PptxDataset
+  filepath: data/08_reporting/final_presentation.pptx
+  versioned: true
