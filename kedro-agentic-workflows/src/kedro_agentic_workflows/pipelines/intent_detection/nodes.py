@@ -2,6 +2,8 @@ import logging
 from typing import Any
 
 from kedro.pipeline import LLMContext
+from kedro.pipeline.node import with_node_preview
+from kedro.pipeline.preview_types import PreviewPayload
 from langfuse.langchain import CallbackHandler
 from langchain_core.messages import HumanMessage, AIMessage
 import pandas as pd
@@ -78,6 +80,34 @@ def load_context(
     return user_context, session_config
 
 
+def visualize_companies_graph() -> PreviewPayload:
+    """
+    Visualization function that returns a Mermaid diagram of the intent detection workflow.
+
+    Args:
+        result: The result from detect_intent function
+
+    Returns:
+        Mermaid diagram representation of the intent detection flow.
+    """
+    return PreviewPayload(kind="mermaid", content="""graph TD
+A[START] --> B[detect_intent]
+B --> C{Intent Classification}
+C -->|clarification_needed| D[clarify_intent]
+C -->|general_question| E[update_context]
+C -->|claim_new| E
+C -->|existing_claim_question| E
+D --> E
+E --> F[END]
+style A fill:#e1f5fe
+style F fill:#f3e5f5
+style C fill:#fff3e0
+style D fill:#ffebee
+style E fill:#e8f5e8"""
+                          )
+
+
+@with_node_preview(visualize_companies_graph)
 def detect_intent(
     intent_detection_context: LLMContext,
     user_context: dict,
