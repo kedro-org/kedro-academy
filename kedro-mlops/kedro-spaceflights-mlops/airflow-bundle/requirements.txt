@@ -1,0 +1,10 @@
+# Astro Runtime includes the following pre-installed providers packages: https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
+kedro~=0.19.14
+kedro-datasets[matplotlib-matplotlibwriter,pandas-parquetdataset,polars]>=3.0
+scikit-learn>=1.5.1
+seaborn~=0.12.1
+openpyxl>=3.1.5
+adbc-driver-snowflake>=1.6.0
+pyarrow>=16.0.0
+kedro-mlflow~=0.14.2
+mlflow~=2.22.1

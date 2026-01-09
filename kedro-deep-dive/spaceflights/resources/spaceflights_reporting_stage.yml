@@ -1,0 +1,98 @@
+resources:
+    jobs:
+        spaceflights_reporting_stage:
+            name: spaceflights_reporting_stage
+            tasks:
+            -   task_key: reporting_cancel_policy_bar_chart
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.cancel_policy_bar_chart
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_confusion_matrix
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.confusion_matrix
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_feature_importance_plot
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.feature_importance_plot
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_price_analysis_image
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.price_analysis_image
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_price_histogram
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.price_histogram
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_top_shuttle_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.top_shuttle_data
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12

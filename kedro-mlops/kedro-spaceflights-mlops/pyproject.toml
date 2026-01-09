@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.9"
+name = "kedro_spaceflights_mlops"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = [
+    "kedro~=0.19.14",
+    "kedro-datasets[matplotlib-matplotlibwriter,pandas-parquetdataset,polars]>=3.0",
+    "scikit-learn>=1.5.1",
+    "seaborn~=0.12.1",
+    "openpyxl>=3.1.5",
+    "adbc-driver-snowflake>=1.6.0",
+    "pyarrow>=16.0.0",
+    "kedro-mlflow~=0.14.2",
+    "mlflow~=2.22.1",
+]
+
+[project.scripts]
+"kedro-spaceflights-mlops" = "kedro_spaceflights_mlops.__main__:main"
+
+[project.entry-points."kedro.hooks"]
+
+[project.optional-dependencies]
+docs = [
+    "docutils<0.21",
+    "sphinx>=5.3,<7.3",
+    "sphinx_rtd_theme==2.0.0",
+    "nbsphinx==0.8.1",
+    "sphinx-autodoc-typehints==1.20.2",
+    "sphinx_copybutton==0.5.2",
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.2.0",
+    "myst-parser>=1.0,<2.1"
+]
+dev = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+    "kedro[jupyter]~=0.19.14",
+    "kedro-airflow>=0.10.0",
+    "kedro-viz>=6.7.0",
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest~=7.2",
+    "ruff~=0.1.8",
+    "dvc>=3.60.1",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "kedro_spaceflights_mlops.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.kedro]
+package_name = "kedro_spaceflights_mlops"
+project_name = "kedro-spaceflights-mlops"
+kedro_init_version = "0.19.14"
+tools = "['None']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.pytest.ini_options]
+addopts = """
+--cov-report term-missing \
+--cov src/kedro_spaceflights_mlops -ra"""
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+
+[tool.ruff.lint]
+select = [
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
+    "T201", # Print Statement
+]
+ignore = ["E501"]  # Ruff format takes care of line-too-long
+
+[tool.kedro_telemetry]
+project_id = "1a9223dd26cf4a208cc8fbadce121ad4"

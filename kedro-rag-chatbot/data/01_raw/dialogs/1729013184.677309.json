@@ -1,0 +1,62 @@
+{
+    "datetime": "2024-10-15",
+    "user": "U05N15AG6A3",
+    "text": "I have a question about the memory dataset's default copy method. I noticed that if the data is a pandas dataframe or a numpy array that copy rather than assignment (i.e. making a reference) is used by default. I'm wondering what the rationale for that is. Often making a reference is cheaper in terms of runtime than making either a shallow or deep copy. Why is assignment not the top priority default?\n\n<https://docs.kedro.org/en/stable/_modules/kedro/io/memory_dataset.html#MemoryDataset>",
+    "reply_count": 8,
+    "reply_users_count": 3,
+    "reply_users": [
+        "U03S12LHNNQ",
+        "U05N15AG6A3",
+        "U0482AVABUN"
+    ],
+    "replies": [
+        {
+            "user": "U03S12LHNNQ",
+            "ts": "1729013321.002879",
+            "datetime": "2024-10-15",
+            "text": "The default goal is to preserve the same behavior, whether somebody uses a `MemoryDataset` or, say, `pandas.ParquetDataset`. It would be confusing if your pipeline started behaving differently based on how you configured your catalog."
+        },
+        {
+            "user": "U05N15AG6A3",
+            "ts": "1729013488.177999",
+            "datetime": "2024-10-15",
+            "text": "<@U03S12LHNNQ> It does make sense to me to have the same default behaviour where possible, but I think I am missing some premises to fully understand the default in MemoryDataset. Why isn't assignment the default regardless of dataset type?"
+        },
+        {
+            "user": "U03S12LHNNQ",
+            "ts": "1729013609.559039",
+            "datetime": "2024-10-15",
+            "text": "Without a copy, pandas assignments can be unsafe: <https://pandas.pydata.org/docs/user_guide/indexing.html#indexing-view-versus-copy|https://pandas.pydata.org/docs/user_guide/indexing.html#indexing-view-versus-copy>\n\nThis can't really happen with Spark, Polars, Ibis, etc."
+        },
+        {
+            "user": "U05N15AG6A3",
+            "ts": "1729013741.836879",
+            "datetime": "2024-10-15",
+            "text": "<@U03S12LHNNQ> Ah, thank you! I had forgotten about Pandas' approach. Thank you for sharing that documentation."
+        },
+        {
+            "user": "U05N15AG6A3",
+            "ts": "1729013845.839359",
+            "datetime": "2024-10-15",
+            "text": "<@U03S12LHNNQ> I have a follow-up question if you have time. To control this behaviour of assignment/copy/deep copy in my Kedro project, what is the conventional way to do that? Should I make a Kedro catalog entry with `MemoryDataset` as the dataset type?"
+        },
+        {
+            "user": "U03S12LHNNQ",
+            "ts": "1729013984.389699",
+            "datetime": "2024-10-15",
+            "text": "Yep, sounds good!\n\nThat said, Kedro explicitly tríes to separate data transformation logic from I/O. You should probably document it clearly if you want to do this, so that somebody doesn't come along later, swap in a different dataset, and things behave weirdly."
+        },
+        {
+            "user": "U05N15AG6A3",
+            "ts": "1729014140.728709",
+            "datetime": "2024-10-15",
+            "text": "<@U03S12LHNNQ> Great! Thank you for answering my questions about this topic. :slightly_smiling_face:"
+        },
+        {
+            "user": "U0482AVABUN",
+            "ts": "1729028695.770179",
+            "datetime": "2024-10-15",
+            "text": "1 additional reasons + 1 comment : \n• Kedro pipelines used to be sorted non deterministically, and pandas data frame could be modified by different nodes. Running twice the same pipeline with the exact same configuration could lead to different results :exploding_head:  The order is now deterministic but <@U03S12LHNNQ> reason is still valid though\n• You can change the default behaviour with a factory in your catalog:\n`{default}:\n    type: Memory dataset\n    copy_mode: assign`"
+        }
+    ]
+}

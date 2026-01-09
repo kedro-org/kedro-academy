@@ -1,0 +1,16 @@
+
+chunk_size: 1000
+overlap: 200
+
+# Embedding model configuration
+embedding_model_name: "all-MiniLM-L6-v2"
+
+# LLM configuration
+llm_model_name: "gpt-4o-mini"
+llm_temperature: 0.2
+
+user_query: "What is the main plot of the game?"
+max_chunks: 2
+max_context_length: 2000
+character_bonus: 0.05
+wiki_weight: 0.7

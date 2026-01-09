@@ -1,0 +1,34 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "extending_kedro"
+readme = "README.md"
+dynamic = [ "dependencies", "version",]
+
+[project.scripts]
+extending-kedro = "extending_kedro.__main__:main"
+
+[tool.kedro]
+package_name = "extending_kedro"
+project_name = "extending-kedro"
+kedro_init_version = "0.19.9"
+tools = [ "Data Structure",]
+example_pipeline = "True"
+source_dir = "src"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic.dependencies]
+file = "requirements.txt"
+
+[tool.setuptools.dynamic.version]
+attr = "extending_kedro.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "ea05ea294bb84e72a703a185f7a0cad5"

@@ -1,0 +1,3 @@
+# NOTE: Replace missing values with your own
+snowflake_uri_raw: snowflake://USER:PAT@ACCOUNT_IDENTIFIER/DB?authenticator=snowflake&role=ROLE&warehouse=WH&schema=RAW
+snowflake_uri_data: snowflake://USER:PAT@ACCOUNT_IDENTIFIER/DB?authenticator=snowflake&role=ROLE&warehouse=WH&schema=DATA

@@ -1,0 +1,33 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.9"
+name = "kedro_2077"
+readme = "README.md"
+dynamic = [ "version",]
+dependencies = [ "ipython>=8.10", "jupyterlab>=3.0", "notebook", "kedro~=1.0.0",]
+
+[project.scripts]
+kedro-2077 = "kedro_2077.__main__:main"
+
+[tool.kedro]
+package_name = "kedro_2077"
+project_name = "Kedro 2077"
+kedro_init_version = "1.0.0"
+tools = "['None']"
+example_pipeline = "False"
+source_dir = "src"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic.version]
+attr = "kedro_2077.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "b560fd4ee13040cb85b19bb4cdb8c4a9"

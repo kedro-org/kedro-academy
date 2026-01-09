@@ -1,0 +1,34 @@
+dialogs:
+  type: partitions.IncrementalDataset
+  path: data/01_raw/dialogs/
+  dataset:
+    type: json.JSONDataset
+
+"{default_dataset}":
+  type: MemoryDataset
+  copy_mode: "assign"
+
+vector_store_init:
+  type: kedro_rag_chatbot.datasets.DeeplakeVectorStoreDataset
+  path: data/02_intermediate/vector_store/
+  overwrite: True
+
+vector_store_load:
+  type: kedro_rag_chatbot.datasets.DeeplakeVectorStoreDataset
+  path: data/02_intermediate/vector_store/
+  overwrite: False
+
+openai_llm:
+ type: kedro_datasets_experimental.langchain.ChatOpenAIDataset
+ kwargs:
+   model: "gpt-3.5-turbo"
+   temperature: 0.0
+ credentials: openai
+
+system_prompt:
+  type: text.TextDataset
+  filepath: data/01_raw/system_prompt.txt
+
+user_interaction_output:
+  type: text.TextDataset
+  filepath: data/08_reporting/output.md

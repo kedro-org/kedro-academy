@@ -1,0 +1,5 @@
+outs:
+- md5: e47e913492c9cb96822dcbeb329629bc
+  size: 100295
+  hash: md5
+  path: model_input_table.parquet

@@ -1,0 +1,94 @@
+resources:
+    jobs:
+        spaceflights_modelling_stage:
+            name: spaceflights_modelling_stage
+            tasks:
+            -   task_key: split_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - split_data
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_linear_regression_evaluate_model
+                depends_on:
+                -   task_key: split_data
+                -   task_key: train_evaluation_linear_regression_train_model
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.linear_regression.evaluate_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_linear_regression_train_model
+                depends_on:
+                -   task_key: split_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.linear_regression.train_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_random_forest_evaluate_model
+                depends_on:
+                -   task_key: split_data
+                -   task_key: train_evaluation_random_forest_train_model
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.random_forest.evaluate_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_random_forest_train_model
+                depends_on:
+                -   task_key: split_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.random_forest.train_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12
