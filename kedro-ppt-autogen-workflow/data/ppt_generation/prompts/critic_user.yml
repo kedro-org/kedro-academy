@@ -1,0 +1,16 @@
+messages:
+  - role: user
+    content: |
+      Please review and provide feedback on the following slide content:
+
+      Slide Content: {slide_content}
+      Quality Standards: {quality_standards}
+      Review Criteria: {review_criteria}
+
+      Please provide:
+      1. Overall quality assessment (score 1-10)
+      2. Specific areas for improvement
+      3. Actionable recommendations
+      4. Compliance with presentation best practices
+
+      Return structured feedback that can guide improvements to the slides.

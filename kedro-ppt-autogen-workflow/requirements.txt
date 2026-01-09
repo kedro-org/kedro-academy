@@ -1,6 +1,6 @@
 # Kedro Framework
 kedro~=1.0.0
-kedro-datasets[pandas,matplotlib,yaml,openxml,text-TextDataset,partitions-PartitionedDataset]>=3
+kedro-datasets[pandas,matplotlib,yaml,openxml,text-TextDataset,partitions-PartitionedDataset,langchain-LangChainPromptDataset]>=3
 
 # Core Dependencies
 ipython>=8.10

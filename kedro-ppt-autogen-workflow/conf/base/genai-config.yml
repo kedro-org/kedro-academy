@@ -6,6 +6,6 @@
 llm_autogen:
   type: ppt_autogen_workflow.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
   kwargs:
-    model: "gpt-5-nano-2025-08-07"
+    model: "gpt-4o"
     temperature: 1
   credentials: openai

@@ -1,0 +1,20 @@
+messages:
+  - role: user
+    content: |
+      Please create a slide summary based on the following requirements:
+
+      Planner's Analysis: {planner_analysis}
+      Chart Status: {chart_status}
+      Summary Instruction: {summary_instruction}
+      Slide Title: {slide_title}
+      Data Context: {data_context}
+
+      Please:
+      1. Consider the planner's analysis and recommendations
+      2. Coordinate with the chart generation status
+      3. Follow the summary instruction exactly as specified
+      4. Generate content that is concise and presentation-ready
+      5. Ensure the summary aligns with the slide title and overall plan
+      6. Create bullet points that are executive-appropriate
+
+      Generate the summary according to the specific requirements and coordination strategy.

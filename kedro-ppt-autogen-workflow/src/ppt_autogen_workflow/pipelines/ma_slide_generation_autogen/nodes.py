@@ -22,6 +22,12 @@ from .agent import (
     SummarizerAgent,
     CriticAgent
 )
+from .tools import (
+    build_planner_tools,
+    build_chart_generator_tools,
+    build_summarizer_tools,
+    build_critic_tools,
+)
 
 # Import utility functions
 from ppt_autogen_workflow.utils.chart_generator import generate_chart
@@ -32,24 +38,49 @@ from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yam
 logger = logging.getLogger(__name__)
 
 
+def init_tools(sales_data: pd.DataFrame) -> dict[str, Any]:
+    """Initialize all tools needed for PPT generation agents.
+    
+    Args:
+        sales_data: Sales data DataFrame for tool initialization
+        
+    Returns:
+        Dictionary containing all tools organized by agent type
+    """
+    return {
+        "planner_tools": build_planner_tools(sales_data),
+        "chart_generator_tools": build_chart_generator_tools(sales_data),
+        "summarizer_tools": build_summarizer_tools(sales_data),
+        "critic_tools": build_critic_tools(),
+    }
+
+
 def initialize_planner_agent(
     model_client: OpenAIChatCompletionClient,
-    sales_data: pd.DataFrame,
+    planner_system_prompt: Any,  # LangChain PromptTemplate from LangChainPromptDataset
+    tools: dict[str, Any],  # Tools dictionary from init_tools
 ) -> PlannerAgent:
-    """Initialize and compile the PlannerAgent with sales data access.
+    """Initialize and compile the PlannerAgent with LangChain prompt template and tools from dictionary.
 
     Args:
         model_client: Pre-configured OpenAI chat completion client
-        sales_data: Sales data DataFrame for tool access
+        planner_system_prompt: LangChain PromptTemplate from experimental dataset (no placeholders)
+        tools: Tools dictionary containing all agent tools
 
     Returns:
         Compiled PlannerAgent ready for invocation
     """
-    logger.info("Initializing planner agent...")
+    logger.info("Initializing planner agent with LangChain prompt template")
 
     try:
-        agent = create_planner_agent(model_client, sales_data)
-        logger.info("✓ Planner agent initialized and compiled successfully")
+        # Use system prompt directly (no placeholders to format)
+        system_prompt_text = planner_system_prompt.format()  # LangChain prompt with no variables
+        
+        # Extract planner-specific tools from dictionary
+        planner_tools = tools["planner_tools"]
+        
+        agent = create_planner_agent(model_client, system_prompt_text, planner_tools)
+        logger.info("✓ Planner agent initialized with tools from dictionary")
         return agent
 
     except Exception as e:
@@ -59,22 +90,30 @@ def initialize_planner_agent(
 
 def initialize_chart_generator_agent(
     model_client: OpenAIChatCompletionClient,
-    sales_data: pd.DataFrame,
+    chart_generator_system_prompt: Any,  # LangChain PromptTemplate from LangChainPromptDataset
+    tools: dict[str, Any],  # Tools dictionary from init_tools
 ) -> ChartGeneratorAgent:
-    """Initialize and compile the ChartGeneratorAgent with sales data access.
+    """Initialize and compile the ChartGeneratorAgent with LangChain prompt template and tools from dictionary.
 
     Args:
         model_client: Pre-configured OpenAI chat completion client
-        sales_data: Sales data DataFrame for tool access
+        chart_generator_system_prompt: LangChain PromptTemplate from experimental dataset (no placeholders)
+        tools: Tools dictionary containing all agent tools
 
     Returns:
         Compiled ChartGeneratorAgent ready for invocation
     """
-    logger.info("Initializing chart generator agent...")
+    logger.info("Initializing chart generator agent with LangChain prompt template")
 
     try:
-        agent = create_chart_generator_agent(model_client, sales_data)
-        logger.info("✓ Chart generator agent initialized and compiled successfully")
+        # Use system prompt directly (no placeholders to format)
+        system_prompt_text = chart_generator_system_prompt.format()  # LangChain prompt with no variables
+        
+        # Extract chart generator-specific tools from dictionary
+        chart_generator_tools = tools["chart_generator_tools"]
+        
+        agent = create_chart_generator_agent(model_client, system_prompt_text, chart_generator_tools)
+        logger.info("✓ Chart generator agent initialized with tools from dictionary")
         return agent
 
     except Exception as e:
@@ -84,22 +123,30 @@ def initialize_chart_generator_agent(
 
 def initialize_summarizer_agent(
     model_client: OpenAIChatCompletionClient,
-    sales_data: pd.DataFrame,
+    summarizer_system_prompt: Any,  # LangChain PromptTemplate from LangChainPromptDataset
+    tools: dict[str, Any],  # Tools dictionary from init_tools
 ) -> SummarizerAgent:
-    """Initialize and compile the SummarizerAgent with sales data access.
+    """Initialize and compile the SummarizerAgent with LangChain prompt template and tools from dictionary.
 
     Args:
         model_client: Pre-configured OpenAI chat completion client
-        sales_data: Sales data DataFrame for tool access
+        summarizer_system_prompt: LangChain PromptTemplate from experimental dataset (no placeholders)
+        tools: Tools dictionary containing all agent tools
 
     Returns:
         Compiled SummarizerAgent ready for invocation
     """
-    logger.info("Initializing summarizer agent...")
+    logger.info("Initializing summarizer agent with LangChain prompt template")
 
     try:
-        agent = create_summarizer_agent(model_client, sales_data)
-        logger.info("✓ Summarizer agent initialized and compiled successfully")
+        # Use system prompt directly (no placeholders to format)
+        system_prompt_text = summarizer_system_prompt.format()  # LangChain prompt with no variables
+        
+        # Extract summarizer-specific tools from dictionary
+        summarizer_tools = tools["summarizer_tools"]
+        
+        agent = create_summarizer_agent(model_client, system_prompt_text, summarizer_tools)
+        logger.info("✓ Summarizer agent initialized with tools from dictionary")
         return agent
 
     except Exception as e:
@@ -109,22 +156,30 @@ def initialize_summarizer_agent(
 
 def initialize_critic_agent(
     model_client: OpenAIChatCompletionClient,
-    sales_data: pd.DataFrame,
+    critic_system_prompt: Any,  # LangChain PromptTemplate from LangChainPromptDataset
+    tools: dict[str, Any],  # Tools dictionary from init_tools
 ) -> CriticAgent:
-    """Initialize and compile the CriticAgent.
+    """Initialize and compile the CriticAgent with LangChain prompt template and tools from dictionary.
 
     Args:
         model_client: Pre-configured OpenAI chat completion client
-        sales_data: Sales data DataFrame (passed for consistency, not used by critic tools)
+        critic_system_prompt: LangChain PromptTemplate from experimental dataset (no placeholders)
+        tools: Tools dictionary containing all agent tools
 
     Returns:
         Compiled CriticAgent ready for invocation
     """
-    logger.info("Initializing critic agent...")
+    logger.info("Initializing critic agent with LangChain prompt template")
 
     try:
-        agent = create_critic_agent(model_client, sales_data)
-        logger.info("✓ Critic agent initialized and compiled successfully")
+        # Use system prompt directly (no placeholders to format)
+        system_prompt_text = critic_system_prompt.format()  # LangChain prompt with no variables
+        
+        # Extract critic-specific tools from dictionary
+        critic_tools = tools["critic_tools"]
+        
+        agent = create_critic_agent(model_client, system_prompt_text, critic_tools)
+        logger.info("✓ Critic agent initialized with tools from dictionary")
         return agent
 
     except Exception as e:
@@ -137,6 +192,10 @@ def orchestrate_multi_agent_workflow(
     chart_agent: ChartGeneratorAgent,
     summarizer_agent: SummarizerAgent,
     critic_agent: CriticAgent,
+    planner_user_prompt: Any,  # LangChain PromptTemplate
+    chart_generator_user_prompt: Any,  # LangChain PromptTemplate
+    summarizer_user_prompt: Any,  # LangChain PromptTemplate
+    critic_user_prompt: Any,  # LangChain PromptTemplate
     instructions_yaml: dict[str, Any],
     sales_data: Any,
     user_query: str
@@ -188,15 +247,14 @@ def orchestrate_multi_agent_workflow(
             
             # Step 1: Planner agent analyzes requirements
             logger.info(f"[AGENT: Planner] Analyzing requirements for {slide_key}...")
-            planner_query = f"""
-            Slide: {slide_key}
-            Title: {slide_title}
-            Chart Instruction: {chart_instruction}
-            Summary Instruction: {summary_instruction}
             
-            Please analyze these requirements and provide a plan for generating the chart and summary.
-            Consider the sales data context: {len(sales_data)} records available.
-            """
+            # Use LangChain user prompt template with slide instructions from YAML
+            planner_query = planner_user_prompt.format(
+                slide_title=slide_title,
+                chart_instruction=chart_instruction,
+                summary_instruction=summary_instruction,
+                data_context=f"Sales data with {len(sales_data)} records available"
+            )
             
             logger.info(f"[LLM CALL] Planner Agent Query:\n{planner_query}")
             plan_result = asyncio.run(planner_agent.invoke(planner_query))
@@ -204,14 +262,14 @@ def orchestrate_multi_agent_workflow(
             
             # Step 2: Chart agent generates chart (with planner context)
             logger.info(f"\n[AGENT: ChartGenerator] Generating chart for {slide_key}...")
-            chart_query = f"""
-            Based on the planner's analysis: {_extract_plan_text(plan_result)}
             
-            Chart Instruction: {chart_instruction}
-            Slide Title: {slide_title}
-            
-            Generate a chart visualization following the instruction exactly.
-            """
+            # Use LangChain user prompt template with slide instructions from YAML
+            chart_query = chart_generator_user_prompt.format(
+                planner_analysis=_extract_plan_text(plan_result),
+                chart_instruction=chart_instruction,
+                slide_title=slide_title,
+                data_context=f"Sales data with {len(sales_data)} records available"
+            )
             
             logger.info(f"[LLM CALL] Chart Generator Agent Query:\n{chart_query}")
             chart_path, chart_fig = _generate_chart_for_slide_with_logging(
@@ -225,15 +283,15 @@ def orchestrate_multi_agent_workflow(
             
             # Step 3: Summarizer agent generates summary (with chart context)
             logger.info(f"\n[AGENT: Summarizer] Generating summary for {slide_key}...")
-            summary_query = f"""
-            Based on the planner's analysis: {_extract_plan_text(plan_result)}
-            Chart has been generated: {chart_path if chart_path else 'Chart generation in progress'}
             
-            Summary Instruction: {summary_instruction}
-            Slide Title: {slide_title}
-            
-            Generate a summary following the instruction exactly.
-            """
+            # Use LangChain user prompt template with slide instructions from YAML
+            summary_query = summarizer_user_prompt.format(
+                planner_analysis=_extract_plan_text(plan_result),
+                chart_status=f"Chart has been generated: {chart_path if chart_path else 'Chart generation in progress'}",
+                summary_instruction=summary_instruction,
+                slide_title=slide_title,
+                data_context=f"Sales data with {len(sales_data)} records available"
+            )
             
             logger.info(f"[LLM CALL] Summarizer Agent Query:\n{summary_query}")
             summary_text = _generate_summary_for_slide_with_logging(
@@ -246,23 +304,21 @@ def orchestrate_multi_agent_workflow(
             
             # Step 4: Critic agent QA review
             logger.info(f"\n[AGENT: Critic] Quality assurance review for {slide_key}...")
-            qa_query = f"""
-            Review the following slide for quality:
             
+            # Use LangChain user prompt template with placeholders
+            slide_content_details = f"""
             Slide Title: {slide_title}
             Chart Instruction: {chart_instruction}
             Summary Instruction: {summary_instruction}
-            
             Generated Chart: {'Available' if chart_path and Path(chart_path).exists() else 'Not available'}
             Generated Summary: {summary_text[:200]}...
-            
-            Please provide:
-            1. Quality score (1-10)
-            2. Feedback on chart alignment with instruction
-            3. Feedback on summary alignment with instruction
-            4. Recommendations for improvement
-            5. Overall assessment
             """
+            
+            qa_query = critic_user_prompt.format(
+                slide_content=slide_content_details,
+                quality_standards="Professional presentation standards with clear messaging",
+                review_criteria="Score 1-10, check chart/summary alignment, provide improvement recommendations"
+            )
             
             logger.info(f"[LLM CALL] Critic Agent Query:\n{qa_query}")
             qa_result = asyncio.run(critic_agent.invoke(qa_query))
