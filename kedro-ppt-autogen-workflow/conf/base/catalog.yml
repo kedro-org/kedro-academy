@@ -22,48 +22,56 @@ sales_data:
 planner_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/planner_system.yml
+  template: ChatPromptTemplate
   dataset:
         type: yaml.YAMLDataset
 
 planner_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/planner_user.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 chart_generator_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/chart_generator_system.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 chart_generator_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/chart_generator_user.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 summarizer_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/summarizer_system.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 summarizer_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/summarizer_user.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 critic_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/critic_system.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 critic_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/critic_user.yml
+  template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
