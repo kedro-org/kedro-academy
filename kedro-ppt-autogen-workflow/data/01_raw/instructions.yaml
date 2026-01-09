@@ -1,0 +1,43 @@
+iterative_slide_generation:
+  slide_1:
+    objective:
+      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
+      chart_instruction: >
+        Please generate a horizontal bar chart showing FY_Sales for the top 10 products
+        by FY_Sales. Sort bars in descending order. Use the primary brand color #1F4E79
+        for the bars and a light gray #DDDDDD for the axis lines. Show data labels at
+        the end of each bar with no decimal places. Use 'Product' on the y-axis and
+        'FY Sales (in USD)' on the x-axis. Remove vertical gridlines; keep only subtle
+        horizontal gridlines. Use Segoe UI font for all chart text.
+      summary_instruction: >
+        Please generate 3–5 concise bullet points summarizing the performance of the
+        top 10 products by FY_Sales. Mention the overall total FY sales of these top
+        10 products, highlight the top 1–2 products by name, and note if there is a
+        long tail of smaller contributors. Use neutral, executive-ready language.
+      slide_title: "Top 10 Products Performance Analysis"
+
+  slide_2:
+    objective:
+      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
+      chart_instruction: >
+        Create a pie chart showing the distribution of FY_Sales by Product_Category.
+        Use distinct colors for each category. Include percentage labels on each slice.
+        Show a legend on the right side. Use professional color palette.
+      summary_instruction: >
+        Provide a brief analysis of the category distribution including the dominant
+        categories and their contribution percentages. Generate 3-4 bullet points
+        with specific numbers and business insights.
+      slide_title: "Product Category Distribution"
+
+  slide_3:
+    objective:
+      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
+      chart_instruction: >
+        Generate a bar chart showing total FY_Sales by Region. Sort regions by sales
+        in descending order. Use blue color #1F4E79 for all bars. Include data labels
+        on top of each bar showing the sales amount.
+      summary_instruction: >
+        Analyze regional performance with 3-4 key insights about market distribution
+        and opportunities. Include total sales by region and identify the strongest
+        and weakest performing regions.
+      slide_title: "Regional Sales Performance"
