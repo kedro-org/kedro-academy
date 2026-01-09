@@ -1,0 +1,93 @@
+# Here you can define all your data sets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+#
+# We support interacting with a variety of data stores including local file systems, cloud, network and HDFS
+#
+# An example data set definition can look as follows:
+#
+#bikes:
+#  type: pandas.CSVDataset
+#  filepath: "data/01_raw/bikes.csv"
+#
+#weather:
+#  type: spark.SparkDataset
+#  filepath: s3a://your_bucket/data/01_raw/weather*
+#  file_format: csv
+#  credentials: dev_s3
+#  load_args:
+#    header: True
+#    inferSchema: True
+#  save_args:
+#    sep: '|'
+#    header: True
+#
+#scooters:
+#  type: pandas.SQLTableDataset
+#  credentials: scooters_credentials
+#  table_name: scooters
+#  load_args:
+#    index_col: ['name']
+#    columns: ['name', 'gear']
+#  save_args:
+#    if_exists: 'replace'
+#    # if_exists: 'fail'
+#    # if_exists: 'append'
+#
+# The Data Catalog supports being able to reference the same file using two different Dataset implementations
+# (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
+# https://docs.kedro.org/en/stable/data/data_catalog.html
+
+companies:
+  type: kedro_spaceflights_mlops.datasets.SimplePolarsDatabaseDataset
+  uri: ${globals:snowflake_uri_raw}
+  table_name: COMPANIES
+  engine: adbc
+  save_args:
+    if_table_exists: replace
+
+reviews:
+  type: kedro_spaceflights_mlops.datasets.SimplePolarsDatabaseDataset
+  uri: ${globals:snowflake_uri_raw}
+  table_name: REVIEWS
+  engine: adbc
+  save_args:
+    if_table_exists: replace
+
+shuttles:
+  type: kedro_spaceflights_mlops.datasets.SimplePolarsDatabaseDataset
+  uri: ${globals:snowflake_uri_raw}
+  table_name: SHUTTLES
+  engine: adbc
+  save_args:
+    if_table_exists: replace
+
+preprocessed_companies:
+  type: kedro_spaceflights_mlops.datasets.SimplePolarsDatabaseDataset
+  uri: ${globals:snowflake_uri_data}
+  table_name: PREPROCESSED_COMPANIES
+  engine: adbc
+  save_args:
+    if_table_exists: replace
+
+preprocessed_shuttles:
+  type: kedro_spaceflights_mlops.datasets.SimplePolarsDatabaseDataset
+  uri: ${globals:snowflake_uri_data}
+  table_name: PREPROCESSED_SHUTTLES
+  engine: adbc
+  save_args:
+    if_table_exists: replace
+
+model_input_table@polars:
+  type: polars.EagerPolarsDataset
+  filepath: data/03_primary/model_input_table.parquet
+  file_format: parquet
+
+model_input_table@pandas:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/model_input_table.parquet
+
+regressor:
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn

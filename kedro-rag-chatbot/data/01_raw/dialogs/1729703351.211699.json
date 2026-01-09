@@ -1,0 +1,18 @@
+{
+    "datetime": "2024-10-23",
+    "user": "U07KD4K4B2P",
+    "text": "What is the right place to validate command line parameters to kedro run? Let's say I want to check if parameter A has been passed (kedro run --params=a=1) if \"env\" is local and parameter C exists when env is \"prod\". It would be great if  the process just stops with an error message and not a stack trace.",
+    "reply_count": 1,
+    "reply_users_count": 1,
+    "reply_users": [
+        "U03R8FW4HUZ"
+    ],
+    "replies": [
+        {
+            "user": "U03R8FW4HUZ",
+            "ts": "1729705203.086979",
+            "datetime": "2024-10-23",
+            "text": "so you could define a `before_pipeline_run` hook which insects things. At that point you could do some `if/else/raise` logic or use something like Pydantic so you get validation superpowers\n\n<https://docs.kedro.org/en/stable/hooks/index.html>"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+companies_raw:
+  type: polars.CSVDataset
+  filepath: ${kedro_root:}/data/01_raw/companies.csv
+
+reviews_raw:
+  type: polars.CSVDataset
+  filepath: ${kedro_root:}/data/01_raw/reviews.csv
+
+shuttles_raw:
+  type: polars.EagerPolarsDataset
+  filepath: ${kedro_root:}/data/01_raw/shuttles.xlsx
+  file_format: excel
+  load_args:
+    engine: openpyxl  # https://github.com/kedro-org/kedro-plugins/issues/589

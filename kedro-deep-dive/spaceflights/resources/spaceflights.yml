@@ -1,0 +1,334 @@
+resources:
+    jobs:
+        spaceflights:
+            name: spaceflights
+            tasks:
+            -   task_key: feature_engineering_derived_features
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - feature_engineering.derived_features
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: feature_engineering_feature_importance
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - feature_engineering.feature_importance
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: feature_engineering_joiner
+                depends_on:
+                -   task_key: feature_engineering_derived_features
+                -   task_key: feature_engineering_static_features
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - feature_engineering.joiner
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: feature_engineering_static_features
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - feature_engineering.static_features
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_apply_types_to_companies
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_companies
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_apply_types_to_reviews
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_reviews
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_apply_types_to_shuttles
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_shuttles
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_combine_step
+                depends_on:
+                -   task_key: ingestion_apply_types_to_reviews
+                -   task_key: ingestion_apply_types_to_shuttles
+                -   task_key: ingestion_company_agg
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.combine_step
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_company_agg
+                depends_on:
+                -   task_key: ingestion_apply_types_to_companies
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.company_agg
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_cancel_policy_bar_chart
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.cancel_policy_bar_chart
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_confusion_matrix
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.confusion_matrix
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_feature_importance_plot
+                depends_on:
+                -   task_key: feature_engineering_feature_importance
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.feature_importance_plot
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_price_analysis_image
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.price_analysis_image
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_price_histogram
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.price_histogram
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: reporting_top_shuttle_data
+                depends_on:
+                -   task_key: ingestion_combine_step
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - reporting.top_shuttle_data
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: split_data
+                depends_on:
+                -   task_key: feature_engineering_joiner
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - split_data
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_linear_regression_evaluate_model
+                depends_on:
+                -   task_key: split_data
+                -   task_key: train_evaluation_linear_regression_train_model
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.linear_regression.evaluate_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_linear_regression_train_model
+                depends_on:
+                -   task_key: split_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.linear_regression.train_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_random_forest_evaluate_model
+                depends_on:
+                -   task_key: split_data
+                -   task_key: train_evaluation_random_forest_train_model
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.random_forest.evaluate_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: train_evaluation_random_forest_train_model
+                depends_on:
+                -   task_key: split_data
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - train_evaluation.random_forest.train_model
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12

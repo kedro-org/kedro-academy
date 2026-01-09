@@ -1,0 +1,119 @@
+# Here you can define all your data sets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+#
+# We support interacting with a variety of data stores including local file systems, cloud, network and HDFS
+#
+# An example data set definition can look as follows:
+#
+#bikes:
+#  type: pandas.CSVDataset
+#  filepath: "data/01_raw/bikes.csv"
+#
+#weather:
+#  type: spark.SparkDataset
+#  filepath: s3a://your_bucket/data/01_raw/weather*
+#  file_format: csv
+#  credentials: dev_s3
+#  load_args:
+#    header: True
+#    inferSchema: True
+#  save_args:
+#    sep: '|'
+#    header: True
+#
+#scooters:
+#  type: pandas.SQLTableDataset
+#  credentials: scooters_credentials
+#  table_name: scooters
+#  load_args:
+#    index_col: ['name']
+#    columns: ['name', 'gear']
+#  save_args:
+#    if_exists: 'replace'
+#    # if_exists: 'fail'
+#    # if_exists: 'append'
+#
+# The Data Catalog supports being able to reference the same file using two different Dataset implementations
+# (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
+# https://docs.kedro.org/en/stable/data/data_catalog.html
+
+_uc_catalog: #your catalog location
+_uc_schema: #your schema location
+
+companies_raw:
+  type: spark.SparkDataset
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/companies.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+
+reviews_raw:
+  type: spark.SparkDataset
+  filepath: /Volumes/${_uc_catalog}/${_uc_schema}/bronze/reviews.csv
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+
+# This dataset should ideally go into local/catalog.yml
+shuttles_raw:
+  type: pandas.ExcelDataset
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl
+
+companies:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: companies
+  write_mode: overwrite
+
+reviews:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: reviews
+  write_mode: overwrite
+
+shuttles:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: shuttles
+  write_mode: overwrite
+
+preprocessed_companies:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: preprocessed_companies
+  write_mode: overwrite
+
+preprocessed_shuttles:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: preprocessed_shuttles
+  write_mode: overwrite
+
+preprocessed_reviews:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: preprocessed_reviews
+  write_mode: overwrite
+
+model_input_table:
+  type: databricks.ManagedTableDataset
+  catalog: ${_uc_catalog}
+  database: ${_uc_schema}
+  table: model_input_table
+  write_mode: overwrite
+
+regressor:
+  type: kedro_mlflow.io.models.MlflowModelTrackingDataset
+  flavor: mlflow.sklearn

@@ -1,0 +1,90 @@
+resources:
+    jobs:
+        spaceflights_data_ingestion:
+            name: spaceflights_data_ingestion
+            tasks:
+            -   task_key: ingestion_apply_types_to_companies
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_companies
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_apply_types_to_reviews
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_reviews
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_apply_types_to_shuttles
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.apply_types_to_shuttles
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_combine_step
+                depends_on:
+                -   task_key: ingestion_apply_types_to_reviews
+                -   task_key: ingestion_apply_types_to_shuttles
+                -   task_key: ingestion_company_agg
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.combine_step
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            -   task_key: ingestion_company_agg
+                depends_on:
+                -   task_key: ingestion_apply_types_to_companies
+                python_wheel_task:
+                    package_name: spaceflights
+                    entry_point: spaceflights
+                    parameters:
+                    - --nodes
+                    - ingestion.company_agg
+                    - --conf-source
+                    - ${workspace.file_path}/conf
+                    - --env
+                    - dev
+                libraries:
+                -   whl: ../dist/*.whl
+                existing_cluster_id: 0327-113653-sw9v617d
+            job_clusters:
+            -   job_cluster_key: default
+                new_cluster:
+                    data_security_mode: USER_ISOLATION
+                    node_type_id: Standard_DS3_v2
+                    num_workers: 2
+                    spark_env_vars:
+                        KEDRO_LOGGING_CONFIG: ${workspace.file_path}/conf/logging.yml
+                    spark_version: 15.4.x-scala2.12

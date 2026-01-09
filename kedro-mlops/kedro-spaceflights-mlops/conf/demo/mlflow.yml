@@ -1,0 +1,6 @@
+server:
+  mlflow_tracking_uri: mlflow_runs
+
+tracking:
+  experiment:
+    name: kedro_spaceflights_mlops

@@ -1,0 +1,9 @@
+# This is a boilerplate parameters config generated for pipeline 'data_processing'
+# using Kedro 0.19.8.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.19.8/configuration/parameters.html
+
+test_size: 0.1
+val_size: 0.2
+random_state: 42

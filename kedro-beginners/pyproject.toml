@@ -1,0 +1,21 @@
+[project]
+name = "spaceflights"
+version = "2025.1.0"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "The Kedro team" },
+    { name = "Juan Luis Cano Rodríguez", email = "juan_luis_cano@mckinsey.com" },
+]
+dependencies = [
+    "aiohttp>=3.11.11",
+    "kedro>=0.19.10",
+    "kedro-datasets[pandas]>=6.0.0",
+    "requests>=2.32.3",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "notebook>=7.3.2",
+]

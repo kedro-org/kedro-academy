@@ -1,0 +1,14 @@
+%%writefile catalog.yml
+_root: data
+
+companies:
+  type: pandas.CSVDataset
+  filepath: ${_root}/companies.csv
+
+reviews:
+  type: pandas.CSVDataset
+  filepath: ${_root}/reviews.csv
+
+shuttles:
+    type: pandas.ExcelDataset
+    filepath: ${_root}/shuttles.xlsx
