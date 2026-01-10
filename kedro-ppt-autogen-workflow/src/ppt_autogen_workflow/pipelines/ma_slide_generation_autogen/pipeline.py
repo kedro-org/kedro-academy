@@ -93,7 +93,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "compiled_summarizer_agent",
                 "compiled_critic_agent",
             ],
-            outputs=["sales_analysis", "slide_charts", "slide_summaries"],
+            outputs=["sales_analysis_ma", "slide_charts", "slide_summaries"],
             name="orchestrate_agents",
             tags=["autogen", "orchestration"],
         ),

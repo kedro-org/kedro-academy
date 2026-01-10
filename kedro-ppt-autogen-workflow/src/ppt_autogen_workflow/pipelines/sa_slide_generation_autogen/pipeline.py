@@ -2,32 +2,36 @@
 
 from kedro.pipeline import Pipeline, pipeline, node
 
-from .nodes import initialize_ppt_agent, run_ppt_generation
+from .nodes import init_tools, compile_ppt_agent, generate_presentation
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    """
-    Create the single-agent AutoGen PPT generation pipeline.
-    
-    Parses instructions_yaml and generates slides programmatically using utility functions.
-    Agent is initialized for future extensibility but not actively used.
-    
-    Returns:
-        Pipeline object with compile and generation nodes
-    """
+    """Create the single-agent AutoGen PPT generation pipeline."""
     return pipeline([
         node(
-            func=initialize_ppt_agent,
-            inputs=["llm_autogen", "sales_data"],
-            outputs="compiled_ppt_agent",
-            name="compile_ppt_agent",
-            tags=["autogen", "compilation", "agent", "single_agent"],
+            func=init_tools,
+            inputs=["sales_data"],
+            outputs="tools",
+            name="init_tools_node",
+            tags=["tools"],
         ),
         node(
-            func=run_ppt_generation,
-            inputs=["compiled_ppt_agent", "instructions_yaml", "sales_data", "params:user_query"],
-            outputs="final_presentation",
-            name="invoke_ppt_generation",
-            tags=["autogen", "invocation", "generation", "single_agent"],
+            func=compile_ppt_agent,
+            inputs=[
+                "slide_generation_requirements",
+                "ppt_generator_system_prompt",
+                "llm_autogen",
+                "tools",
+            ],
+            outputs="compiled_ppt_agent",
+            name="compile_ppt_agent",
+            tags=["autogen", "compilation", "single_agent"],
+        ),
+        node(
+            func=generate_presentation,
+            inputs=["compiled_ppt_agent"],
+            outputs="sales_analysis_sa",
+            name="generate_presentation",
+            tags=["autogen", "generation", "single_agent"],
         ),
     ])
