@@ -31,8 +31,6 @@ from .tools import (
     build_summarizer_tools,
     build_critic_tools,
 )
-from ppt_autogen_workflow.utils.chart_generator import generate_chart
-from ppt_autogen_workflow.utils.summary_generator import generate_summary
 from ppt_autogen_workflow.utils.ppt_builder import create_slide, combine_presentations
 from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
 

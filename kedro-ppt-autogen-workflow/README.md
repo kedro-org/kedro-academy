@@ -4,17 +4,132 @@ Automated PowerPoint presentation generation from structured YAML instructions u
 
 [![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
 
+## Table of Contents
+
+- [Architecture](#architecture)
+- [Pipeline Patterns](#pipeline-patterns)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+
+## Architecture
+
+### Overview
+
+This project implements two pipeline patterns for generating PowerPoint presentations:
+
+1. **Multi-Agent (MA) Pipeline** - Uses specialized agents (Planner, Chart Generator, Summarizer, Critic) working in collaboration
+2. **Single-Agent (SA) Pipeline** - Uses one agent with all necessary tools
+
+Both pipelines follow the same architectural pattern:
+- **Separation of Concerns**: Prompts are stored in YAML files, separate from code
+- **Tool-Based Data Access**: Sales data is accessed through agent tools, not passed directly
+- **Requirement-Driven**: Slide requirements are parsed and stored in agents during compilation
+- **Agent Invocation**: Agents use their tools to generate charts and summaries
+
+### Data Flow
+
+```
+Input Data (CSV) → Tools (with data access) → Agents → Generated Content → PPT Slides
+```
+
+### Key Components
+
+1. **Tools** (`tools.py`): Function tools that agents can invoke
+   - Chart generation tools
+   - Summary generation tools
+   - Data analysis tools
+   - Sales data is captured in tool closures
+
+2. **Agents** (`agent.py`): AutoGen agents with specialized roles
+   - Each agent has access to specific tools
+   - Agents store requirements and formatted prompts internally
+
+3. **Nodes** (`nodes.py`): Kedro pipeline nodes
+   - `init_tools`: Builds tools with sales data
+   - `compile_*_agent`: Compiles agents with requirements and prompts
+   - `orchestrate_*/generate_*`: Coordinates agent execution
+
+4. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
+   - System prompts define agent behavior
+   - User prompts define task instructions
+   - Placeholders are filled during compilation
+
+## Pipeline Patterns
+
+### Multi-Agent (MA) Pipeline
+
+**Architecture**: Planner-driven with specialized agents
+
+```
+1. analyze_requirements → Parse YAML, create agent-specific requirements
+2. compile_planner_agent → Planner analyzes requirements
+3. compile_chart_generator_agent → Chart agent with formatted prompts
+4. compile_summarizer_agent → Summarizer agent with formatted prompts
+5. compile_critic_agent → Critic agent for QA
+6. orchestrate_multi_agent_workflow → Round-robin execution
+```
+
+**Flow**:
+- Planner analyzes requirements and creates instructions
+- Chart Generator creates charts using tools
+- Summarizer creates summaries using tools (with chart status)
+- Critic reviews slide content for quality
+- All slides are combined into final presentation
+
+**Features**:
+- ✅ Quality assurance via Critic agent
+- ✅ Specialized agents for each task
+- ✅ Context passing between agents
+- ✅ Intermediate outputs (charts, summaries) saved
+
+### Single-Agent (SA) Pipeline
+
+**Architecture**: Single agent with all tools
+
+```
+1. init_tools → Build all tools with sales data
+2. compile_ppt_agent → Single agent with requirements
+3. generate_presentation → Agent generates charts and summaries
+```
+
+**Flow**:
+- Single agent receives queries to generate charts/summaries
+- Agent uses its tools (generate_sales_chart, generate_business_summary)
+- Results are extracted and combined into slides
+
+**Features**:
+- ✅ Simpler architecture
+- ✅ Faster execution
+- ✅ Single agent handles all tasks
+- ❌ No quality assurance step
+
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Prerequisites
+
+- Python 3.11+
+- OpenAI API key (or compatible API)
+
+### 2. Installation
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd kedro-ppt-autogen-workflow
+
+# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Credentials
+### 3. Configuration
+
+#### 3.1. Set Up Credentials
 
 Create `conf/local/credentials.yml`:
 
@@ -24,26 +139,50 @@ openai:
   base_url: "${oc.env:OPENAI_API_BASE}"
 ```
 
-### 3. Export your credentials in the terminal to make it available as env
+#### 3.2. Export Environment Variables
 
 ```bash
 export OPENAI_API_KEY="your-api-key"
-export OPENAI_API_BASE="base-url"
+export OPENAI_API_BASE="your-base-url"  # Optional, defaults to OpenAI
 ```
 
-### 4. Prepare Inputs
+#### 3.3. Prepare Input Data
 
-- **Instructions**: `data/01_raw/instructions.yaml` - Define slides with chart and summary instructions
-- **Data**: `data/01_raw/sample_sales_50_products.csv` - Sales data for analysis
+1. **Sales Data**: Place your CSV file at `data/ppt_generation/sample/sales_50_products.csv`
+2. **Slide Requirements**: Edit `data/ppt_generation/sample/slide_generation_requirements.yaml`
 
-### 5. Run Pipeline
+Example requirements file:
 
-**Multi-Agent Pipeline** (recommended):
+```yaml
+iterative_slide_generation:
+  slide_1:
+    objective:
+      slide_title: "Top 10 Products Performance Analysis"
+      chart_instruction: >
+        Please generate a horizontal bar chart showing FY_Sales for the top 10 products
+        by FY_Sales. Sort bars in descending order. Use the primary brand color #1F4E79.
+      summary_instruction: >
+        Please generate 3–5 concise bullet points summarizing the performance of the
+        top 10 products by FY_Sales. Mention the overall total FY sales of these top
+        10 products, highlight the top 1–2 products by name.
+  slide_2:
+    objective:
+      slide_title: "Product Category Distribution"
+      chart_instruction: >
+        Create a pie chart showing the distribution of FY_Sales by Product_Category.
+      summary_instruction: >
+        Provide a brief analysis of the category distribution including the dominant
+        categories and their contribution percentages.
+```
+
+### 4. Run Pipeline
+
+**Multi-Agent Pipeline** (recommended for production):
 ```bash
 kedro run --pipeline=ma_slide_generation_autogen
 ```
 
-**Single-Agent Pipeline**:
+**Single-Agent Pipeline** (faster, simpler):
 ```bash
 kedro run --pipeline=sa_slide_generation_autogen
 ```
@@ -55,92 +194,164 @@ kedro run
 
 ### 5. Check Outputs
 
-- **Presentation**: `data/08_reporting/final_presentation.pptx`
-- **Charts**: `data/02_intermediate/charts/slide_*.png`
-- **Summaries**: `data/02_intermediate/summaries/slide_*.txt`
+- **MA Pipeline Output**: `data/ppt_generation/output/ma/sales_analysis.pptx`
+- **SA Pipeline Output**: `data/ppt_generation/output/sa/sales_analysis.pptx`
+- **Charts** (MA only): `data/ppt_generation/intermediate/ma/charts/`
+- **Summaries** (MA only): `data/ppt_generation/intermediate/ma/summaries/`
 
-## Instructions Format
+## Configuration
 
-Edit `data/01_raw/instructions.yaml`:
+### Update LLM Model
+
+Edit `conf/base/genai-config.yml`:
 
 ```yaml
-iterative_slide_generation:
-  slide_1:
-    objective:
-      csv_path_input: "sample_sales_50_products.csv"
-      chart_instruction: "Create a horizontal bar chart showing top 10 products by FY_Sales"
-      summary_instruction: "Generate 3-5 bullet points summarizing top 10 products performance"
-      slide_title: "Top 10 Products Performance"
-  slide_2:
-    objective:
-      # ... next slide definition
+llm_autogen:
+  type: ppt_autogen_workflow.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
+  kwargs:
+    model: "gpt-4o"  # or your preferred model
+    temperature: 1
+  credentials: openai
 ```
 
-## Pipeline Comparison
+### Customize Styling and Layout (TODO)
 
-| Feature | Multi-Agent | Single-Agent |
-|---------|------------|--------------|
-| Agents | 4 specialized agents | 1 agent |
-| QA Review | ✅ Critic agent | ❌ |
-| LLM Logging | ✅ Detailed | ❌ |
-| Conversation Flow | ✅ Context passing | ❌ |
-| Intermediate Outputs | ✅ Charts & Summaries | ❌ |
-| Use Case | Production, quality-focused | Simple, fast |
+Edit `conf/base/parameters.yml`:
+
+```yaml
+styling:
+  primary_color: "#1F4E79"
+  font_family: "Segoe UI"
+
+layout:
+  chart_width: 0.6
+  summary_width: 0.35
+
+quality_assurance:
+  quality_standards: "Professional presentation standards"
+  review_criteria: "Accuracy, clarity, visual appeal"
+```
+
+### Modify Prompts
+
+Edit prompt files in `data/ppt_generation/prompts/`:
+- `ma/` - Multi-agent prompts
+- `sa/` - Single-agent prompts
+
+Prompts use placeholders that are filled during agent compilation.
 
 ## Project Structure
 
 ```
 ├── conf/
-│   ├── base/              # Base configuration
-│   └── local/             # Local credentials (gitignored)
+│   ├── base/
+│   │   ├── catalog.yml          # Dataset definitions
+│   │   ├── parameters.yml       # Pipeline parameters
+│   │   └── genai-config.yml     # LLM configuration
+│   └── local/                    # Local credentials (gitignored)
+│       └── credentials.yml
 ├── data/
-│   ├── 01_raw/            # Input data
-│   ├── 02_intermediate/   # Charts & summaries
-│   └── 08_reporting/      # Final presentations
+│   ├── ppt_generation/
+│   │   ├── sample/               # Input data
+│   │   │   ├── slide_generation_requirements.yaml
+│   │   │   └── sales_50_products.csv
+│   │   ├── prompts/              # Prompt templates
+│   │   │   ├── ma/               # Multi-agent prompts
+│   │   │   └── sa/               # Single-agent prompts
+│   │   ├── intermediate/         # Intermediate outputs
+│   │   │   ├── ma/
+│   │   │   │   ├── charts/       # Generated charts
+│   │   │   │   └── summaries/    # Generated summaries
+│   │   │   └── requirements/      # Parsed requirements (versioned)
+│   │   └── output/               # Final presentations
+│   │       ├── ma/
+│   │       └── sa/
 ├── src/ppt_autogen_workflow/
-│   ├── datasets/          # Autogen Model Client Datasets
-│   ├── pipelines/         # Pipeline definitions
-│   └── utils/             # Utility functions
+│   ├── base/
+│   │   └── agent.py              # Base agent classes
+│   ├── datasets/
+│   │   └── autogen_model_client.py  # LLM client dataset
+│   ├── pipelines/
+│   │   ├── ma_slide_generation_autogen/
+│   │   │   ├── agent.py          # Multi-agent definitions
+│   │   │   ├── nodes.py          # Pipeline nodes
+│   │   │   ├── pipeline.py       # Pipeline definition
+│   │   │   └── tools.py          # Agent tools
+│   │   └── sa_slide_generation_autogen/
+│   │       ├── agent.py          # Single-agent definition
+│   │       ├── nodes.py          # Pipeline nodes
+│   │       ├── pipeline.py       # Pipeline definition
+│   │       └── tools.py          # Agent tools
+│   └── utils/
+│       ├── chart_generator.py    # Chart generation utilities
+│       ├── data_analyzer.py      # Data analysis utilities
+│       ├── instruction_parser.py # YAML parser
+│       ├── ppt_builder.py        # PPT creation utilities
+│       └── summary_generator.py  # Summary generation utilities
 └── requirements.txt
-```
-
-## Configuration
-
-### Update User Query
-
-Edit `conf/base/parameters.yml`:
-```yaml
-user_query: "Your presentation request here"
-```
-
-### Change LLM Model
-
-Edit `conf/base/genai-config.yml`:
-```yaml
-llm_autogen:
-  type: ppt_autogen_workflow.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
-  kwargs:
-    model: "gpt-5-nano-2025-08-07" # your preferred model here
-    temperature: 1
-  credentials: openai
 ```
 
 ## Troubleshooting
 
+### Common Issues
+
 **Error: "Environment variable 'OPENAI_API_KEY' not found"**
-- Ensure `conf/local/credentials.yml` exists with your API key
+- Ensure `conf/local/credentials.yml` exists
+- Export `OPENAI_API_KEY` in your terminal
+- Check that credentials file uses correct environment variable names
 
-**Error: "No 'iterative_slide_generation' found"**
-- Check `instructions.yaml` format matches expected structure
+**Error: "No 'iterative_slide_generation' found in YAML"**
+- Verify `slide_generation_requirements.yaml` has correct structure
+- Check YAML syntax (indentation, quotes)
 
-**Empty presentations**
-- Verify `sales_data` CSV is loaded correctly
-- Check chart/summary generation logs for errors
+**Empty or invalid presentations**
+- Verify sales data CSV is loaded correctly
+- Check agent logs for tool invocation errors
+- Ensure chart/summary generation tools are working
 
-## Documentation
+**Matplotlib GUI errors on macOS**
+- The code uses 'Agg' backend automatically
+- If issues persist, ensure matplotlib is properly installed
 
-- [Architecture](ARCHITECTURE.md) - Detailed pipeline architecture
-- [Kedro Docs](https://docs.kedro.org) - Kedro framework documentation
+**Agent not using tools**
+- Check that tools are properly built with sales data
+- Verify agent system prompts instruct tool usage
+- Review agent response logs for tool invocation
+
+### Debugging
+
+Enable verbose logging:
+
+```bash
+kedro run --pipeline=ma_slide_generation_autogen --verbose
+```
+
+Check intermediate outputs:
+- Requirements: `data/ppt_generation/intermediate/ma/requirements/`
+- Charts: `data/ppt_generation/intermediate/ma/charts/`
+- Summaries: `data/ppt_generation/intermediate/ma/summaries/`
+
+## Key Design Patterns
+
+### 1. Prompt Separation
+- Prompts stored in YAML files, not hardcoded
+- Placeholders filled during agent compilation
+- Easy to modify without code changes
+
+### 2. Tool-Based Data Access
+- Sales data captured in tool closures
+- Agents access data through tools, not direct parameters
+- Clean separation between data and logic
+
+### 3. Requirement-Driven Compilation
+- Requirements parsed once during compilation
+- Stored in agent context for later use
+- Reduces redundant parsing
+
+### 4. Agent Specialization (MA)
+- Each agent has specific role and tools
+- Prompts formatted for each agent's needs
+- Context passed between agents
 
 ## License
 
