@@ -6,13 +6,13 @@
 # INPUT DATASETS
 # ==============================================================================
 
-instructions_yaml:
+slide_generation_requirements:
   type: yaml.YAMLDataset
-  filepath: data/01_raw/instructions.yaml
+  filepath: data/ppt_generation/sample/slide_generation_requirements.yaml
 
 sales_data:
   type: pandas.CSVDataset
-  filepath: data/01_raw/sample_sales_50_products.csv
+  filepath: data/ppt_generation/sample/sales_50_products.csv
 
 
 # ==============================================================================
@@ -25,13 +25,6 @@ planner_system_prompt:
   template: ChatPromptTemplate
   dataset:
         type: yaml.YAMLDataset
-
-planner_user_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-  filepath: data/ppt_generation/prompts/planner_user.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
 
 chart_generator_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
@@ -76,19 +69,39 @@ critic_user_prompt:
     type: yaml.YAMLDataset
 
 # ==============================================================================
+# INTERMEDIATE DATASETS - Analyzed Requirements (Versioned)
+# ==============================================================================
+
+planner_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/planner_requirements.json
+  versioned: true
+
+chart_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/chart_requirements.json
+  versioned: true
+
+summarizer_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/summarizer_requirements.json
+  versioned: true
+
+
+# ==============================================================================
 # INTERMEDIATE DATASETS - Charts and Summaries (Partitioned)
 # ==============================================================================
 
 slide_charts:
   type: partitions.PartitionedDataset
-  path: data/02_intermediate/charts
+  path: data/ppt_generation/intermediate/charts
   dataset:
     type: matplotlib.MatplotlibDataset
   filename_suffix: .png
 
 slide_summaries:
   type: partitions.PartitionedDataset
-  path: data/02_intermediate/summaries
+  path: data/ppt_generation/intermediate/summaries
   dataset:
     type: text.TextDataset
   filename_suffix: .txt
@@ -98,7 +111,7 @@ slide_summaries:
 # OUTPUT - Final Presentation (Versioned)
 # ==============================================================================
 
-final_presentation:
+sales_analysis:
   type: openxml.PptxDataset
-  filepath: data/08_reporting/final_presentation.pptx
+  filepath: data/ppt_generation/output/sales_analysis.pptx
   versioned: true

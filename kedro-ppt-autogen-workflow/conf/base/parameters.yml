@@ -2,9 +2,6 @@
 # AUTOGEN PPT GENERATION PARAMETERS
 # ============================================================================
 
-# User Query for PPT Generation
-user_query: "Create a business presentation about quarterly sales performance with charts and key insights"
-
 # ============================================================================
 # STYLING PARAMETERS
 # ============================================================================
@@ -52,3 +49,10 @@ layout:
   title_top: 0.3
   title_width: 9.0
   title_height: 0.8
+
+# ============================================================================
+# QUALITY ASSURANCE PARAMETERS
+# ============================================================================
+quality_assurance:
+  quality_standards: "Professional presentation standards with clear messaging"
+  review_criteria: "Score 1-10, check chart/summary alignment, provide improvement recommendations"

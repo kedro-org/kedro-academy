@@ -3,18 +3,15 @@ messages:
     content: |
       Please create a slide summary based on the following requirements:
 
-      Planner's Analysis: {planner_analysis}
+      {planner_analysis}
       Chart Status: {chart_status}
-      Summary Instruction: {summary_instruction}
-      Slide Title: {slide_title}
-      Data Context: {data_context}
 
-      Please:
-      1. Consider the planner's analysis and recommendations
-      2. Coordinate with the chart generation status
-      3. Follow the summary instruction exactly as specified
-      4. Generate content that is concise and presentation-ready
-      5. Ensure the summary aligns with the slide title and overall plan
-      6. Create bullet points that are executive-appropriate
+      IMPORTANT INSTRUCTIONS:
+      1. Use the generate_business_summary tool to get actual calculated values from the sales data
+      2. DO NOT include the slide title in your summary output - the title is handled separately
+      3. DO NOT use placeholders like "$X million" - use actual calculated values from the tool
+      4. Follow the summary instruction exactly as specified
+      5. Generate content that is concise and presentation-ready
+      6. Create bullet points that are executive-appropriate with real numbers
 
-      Generate the summary according to the specific requirements and coordination strategy.
+      Generate the summary using actual calculated values from the data.

@@ -7,6 +7,11 @@ import warnings
 from dataclasses import dataclass
 from typing import Any, Final
 
+# Set matplotlib to use non-interactive backend before importing pyplot
+# This prevents GUI window creation issues on macOS when running in threads
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+
 import matplotlib.pyplot as plt
 import pandas as pd
 

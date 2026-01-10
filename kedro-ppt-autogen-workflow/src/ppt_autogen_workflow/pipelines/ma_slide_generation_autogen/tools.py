@@ -6,6 +6,11 @@ import logging
 import tempfile
 from pathlib import Path
 
+# Set matplotlib to use non-interactive backend before importing pyplot
+# This prevents GUI window creation issues on macOS when running in threads
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from autogen_core.tools import FunctionTool
@@ -51,7 +56,9 @@ def build_summarizer_tools(sales_data: pd.DataFrame = None) -> list[FunctionTool
     """Build and return tools for the SummarizerAgent."""
     logger.info("Building summarizer tools...")
     
-    tools = []
+    tools = [
+        build_summary_generation_tool(sales_data),
+    ]
     
     logger.info(f"✓ Built {len(tools)} summarizer tools")
     return tools
@@ -97,6 +104,23 @@ def build_sales_chart_generation_tool(sales_data: pd.DataFrame = None) -> Functi
     )
 
 
+def build_summary_generation_tool(sales_data: pd.DataFrame = None) -> FunctionTool:
+    """Build the summary generation tool."""
+    
+    def generate_business_summary(instruction: str) -> str:
+        """Generate business summary from sales data based on instruction.
+        
+        This tool calculates actual values from the sales data and generates
+        formatted bullet points. Use this tool to get accurate, calculated summaries.
+        """
+        return _generate_business_summary_sync(instruction, sales_data)
+    
+    return FunctionTool(
+        generate_business_summary,
+        description="Generate business summary with calculated values from sales data. Use this tool to get accurate summaries with actual numbers, not placeholders."
+    )
+
+
 def build_slide_creation_tool() -> FunctionTool:
     """Build the slide creation tool."""
     
@@ -111,6 +135,37 @@ def build_slide_creation_tool() -> FunctionTool:
 
 
 # Implementation functions (sync versions) - Only functions actually used by registered tools
+
+def _generate_business_summary_sync(instruction: str, sales_data: pd.DataFrame = None) -> str:
+    """Generate business summary from sales data based on instruction."""
+    logger.info(f"Generating business summary for instruction: {instruction}")
+    
+    try:
+        if sales_data is None:
+            return json.dumps({"error": "No sales data available"})
+        
+        if not TOOLS_AVAILABLE:
+            return json.dumps({"error": "Summary generation tools not available"})
+        
+        df = sales_data.copy()
+        
+        # Use utility function to generate summary with actual calculated values
+        summary_text = generate_summary(df, instruction)
+        
+        result = {
+            "summary_text": summary_text,
+            "instruction": instruction,
+            "data_shape": {"rows": len(df), "columns": len(df.columns)},
+            "status": "success"
+        }
+        
+        return json.dumps(result, indent=2)
+        
+    except Exception as e:
+        error_msg = f"Error generating business summary: {str(e)}"
+        logger.error(error_msg)
+        return json.dumps({"error": error_msg})
+
 
 def _analyze_sales_data_sync(query: str, sales_data: pd.DataFrame = None) -> str:
     """Analyze sales data based on query."""

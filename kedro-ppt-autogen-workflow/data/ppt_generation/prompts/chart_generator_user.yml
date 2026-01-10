@@ -3,16 +3,12 @@ messages:
     content: |
       Please generate a chart based on the following requirements:
 
-      Planner's Analysis: {planner_analysis}
-      Chart Instruction: {chart_instruction}
-      Slide Title: {slide_title}
-      Data Context: {data_context}
+      {planner_analysis}
 
       Please:
-      1. Consider the planner's analysis and recommendations
-      2. Follow the chart instruction exactly as specified
-      3. Generate the appropriate visualization
-      4. Ensure the chart is professional and presentation-ready
-      5. Validate that the chart aligns with the slide title and overall plan
+      1. Follow the chart instruction exactly as specified
+      2. Generate the appropriate visualization
+      3. Ensure the chart is professional and presentation-ready
+      4. Validate that the chart aligns with the slide title
 
-      Generate the chart according to the specific requirements and coordination strategy.
+      Generate the chart according to the specific requirements.

@@ -1,7 +1,6 @@
 iterative_slide_generation:
   slide_1:
     objective:
-      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
       chart_instruction: >
         Please generate a horizontal bar chart showing FY_Sales for the top 10 products
         by FY_Sales. Sort bars in descending order. Use the primary brand color #1F4E79
@@ -18,7 +17,6 @@ iterative_slide_generation:
 
   slide_2:
     objective:
-      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
       chart_instruction: >
         Create a pie chart showing the distribution of FY_Sales by Product_Category.
         Use distinct colors for each category. Include percentage labels on each slice.
@@ -31,7 +29,6 @@ iterative_slide_generation:
 
   slide_3:
     objective:
-      csv_path_input: "AutogenPPT/sample_sales_50_products.csv"
       chart_instruction: >
         Generate a bar chart showing total FY_Sales by Region. Sort regions by sales
         in descending order. Use blue color #1F4E79 for all bars. Include data labels

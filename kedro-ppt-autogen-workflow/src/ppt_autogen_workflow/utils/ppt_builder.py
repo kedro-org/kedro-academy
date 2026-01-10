@@ -89,24 +89,37 @@ def create_slide(
         title_font, title_size, title_color,
     )
 
-    # Add chart
-    chart_path = Path(chart_path)
-    if chart_path.exists():
-        slide.shapes.add_picture(
-            str(chart_path),
-            Inches(content_left),
-            Inches(content_top),
-            Inches(chart_width),
-            Inches(chart_height),
-        )
+    # Add chart (if path is provided and file exists)
+    chart_added = False
+    if chart_path:
+        chart_path = Path(chart_path)
+        if chart_path.exists():
+            slide.shapes.add_picture(
+                str(chart_path),
+                Inches(content_left),
+                Inches(content_top),
+                Inches(chart_width),
+                Inches(chart_height),
+            )
+            chart_added = True
+        else:
+            logger.warning(f"Chart path does not exist: {chart_path}")
 
     # Add summary
     if summary_text:
-        summary_left = content_left + chart_width + summary_spacing
+        if chart_added:
+            # Summary on the right side when chart is present
+            summary_left = content_left + chart_width + summary_spacing
+            summary_w = summary_width
+        else:
+            # Summary takes more space when no chart
+            summary_left = content_left
+            summary_w = chart_width + summary_width + summary_spacing
+        
         _add_summary_box(
             slide,
             summary_text,
-            summary_left, content_top, summary_width, chart_height,
+            summary_left, content_top, summary_w, chart_height,
             text_font, text_size, paragraph_spacing, text_color,
         )
 
