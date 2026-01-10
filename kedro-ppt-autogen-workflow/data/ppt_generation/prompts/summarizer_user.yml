@@ -3,7 +3,7 @@ messages:
     content: |
       Please create a slide summary based on the following requirements:
 
-      {planner_analysis}
+      {summarizer_config}
       Chart Status: {chart_status}
 
       IMPORTANT INSTRUCTIONS:
