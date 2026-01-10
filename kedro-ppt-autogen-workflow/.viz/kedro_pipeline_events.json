@@ -1,0 +1,276 @@
+[
+  {
+    "event": "before_pipeline_run",
+    "timestamp": "2026-01-09T02:41:43.919194+00:00"
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "sales_data",
+    "node_id": "e71743a9",
+    "status": "Available",
+    "size": 2461
+  },
+  {
+    "event": "after_node_run",
+    "node": "init_tools_node",
+    "node_id": "2e7e68a2",
+    "duration": 0.007117166998796165,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "tools",
+    "node_id": "0284c6ac",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "llm_autogen",
+    "node_id": "d7c67002",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "chart_generator_system_prompt",
+    "node_id": "4a354463",
+    "status": "Available",
+    "size": 662
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "tools",
+    "node_id": "0284c6ac",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "compile_chart_generator_agent",
+    "node_id": "2f04f891",
+    "duration": 0.0022801249870099127,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "compiled_chart_agent",
+    "node_id": "76008f92",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "llm_autogen",
+    "node_id": "d7c67002",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "critic_system_prompt",
+    "node_id": "16f7901e",
+    "status": "Available",
+    "size": 675
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "tools",
+    "node_id": "0284c6ac",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "compile_critic_agent",
+    "node_id": "48e9eb0b",
+    "duration": 0.001917292014695704,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "compiled_critic_agent",
+    "node_id": "a0907e74",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "llm_autogen",
+    "node_id": "d7c67002",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "planner_system_prompt",
+    "node_id": "c22af907",
+    "status": "Available",
+    "size": 671
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "tools",
+    "node_id": "0284c6ac",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "compile_planner_agent",
+    "node_id": "ae7db5c1",
+    "duration": 0.0018209580448456109,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "compiled_planner_agent",
+    "node_id": "a2d32c03",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "llm_autogen",
+    "node_id": "d7c67002",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "summarizer_system_prompt",
+    "node_id": "b186068b",
+    "status": "Available",
+    "size": 630
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "tools",
+    "node_id": "0284c6ac",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "compile_summarizer_agent",
+    "node_id": "09f0a186",
+    "duration": 0.0017742920317687094,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "compiled_summarizer_agent",
+    "node_id": "c2715a45",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "compiled_planner_agent",
+    "node_id": "a2d32c03",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "compiled_chart_agent",
+    "node_id": "76008f92",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "compiled_summarizer_agent",
+    "node_id": "c2715a45",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "compiled_critic_agent",
+    "node_id": "a0907e74",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "planner_user_prompt",
+    "node_id": "e306e228",
+    "status": "Available",
+    "size": 646
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "chart_generator_user_prompt",
+    "node_id": "6fba7a6e",
+    "status": "Available",
+    "size": 683
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "summarizer_user_prompt",
+    "node_id": "9deb8a7b",
+    "status": "Available",
+    "size": 793
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "critic_user_prompt",
+    "node_id": "b2a584ec",
+    "status": "Available",
+    "size": 514
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "instructions_yaml",
+    "node_id": "fa2bcacc",
+    "status": "Available",
+    "size": 2365
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "sales_data",
+    "node_id": "e71743a9",
+    "status": "Available",
+    "size": 2461
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "params:user_query",
+    "node_id": "ca0b4bce",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "orchestrate_agents",
+    "node_id": "5dfccd28",
+    "duration": 77.03820383298444,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "final_presentation",
+    "node_id": "b0f39235",
+    "status": "Available",
+    "size": 224
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "slide_charts",
+    "node_id": "4e050cb2",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "slide_summaries",
+    "node_id": "1be73a98",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_pipeline_run",
+    "timestamp": "2026-01-09T02:43:01.286218+00:00"
+  }
+]
