@@ -1,0 +1,15 @@
+# ============================================================================
+# DATA CATALOG - AutoGen PPT Generation Pipeline
+# ============================================================================
+
+# ==============================================================================
+# INPUT DATASETS
+# ==============================================================================
+
+slide_generation_requirements:
+  type: yaml.YAMLDataset
+  filepath: data/ppt_generation/sample/slide_generation_requirements.yaml
+
+sales_data:
+  type: pandas.CSVDataset
+  filepath: data/ppt_generation/sample/sales_50_products.csv

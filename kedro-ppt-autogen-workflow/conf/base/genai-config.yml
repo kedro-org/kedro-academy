@@ -1,0 +1,11 @@
+# ============================================================================
+# GENERATIVE AI CONFIGURATION
+# ============================================================================
+
+# AutoGen Model Client Configuration
+llm_autogen:
+  type: ppt_autogen_workflow.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 1
+  credentials: openai
