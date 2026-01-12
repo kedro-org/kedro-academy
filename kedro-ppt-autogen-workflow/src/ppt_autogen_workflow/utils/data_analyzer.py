@@ -10,9 +10,27 @@ import json
 import logging
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+
+def _convert_to_native_types(obj: Any) -> Any:
+    """Convert numpy/pandas types to native Python types for JSON serialization."""
+    if isinstance(obj, dict):
+        return {k: _convert_to_native_types(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_convert_to_native_types(item) for item in obj]
+    if isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float64, np.float32)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if pd.isna(obj):
+        return None
+    return obj
 
 
 def analyze_sales_data(
@@ -172,6 +190,7 @@ def analyze_sales_data_json(
 
     try:
         analysis = analyze_sales_data(query, df.copy())
+        analysis = _convert_to_native_types(analysis)
         return json.dumps(analysis, indent=2)
     except Exception as e:
         error_msg = f"Error analyzing sales data: {e}"

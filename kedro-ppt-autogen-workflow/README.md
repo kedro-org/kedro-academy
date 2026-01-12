@@ -36,22 +36,27 @@ Input Data (CSV) → Tools (with data access) → Agents → Generated Content �
 
 ### Key Components
 
-1. **Tools** (`tools.py`): Function tools that agents can invoke
-   - Chart generation tools
-   - Summary generation tools
-   - Data analysis tools
-   - Sales data is captured in tool closures
+1. **Shared Utilities** (`utils/`): Common implementations used by both pipelines
+   - `tools_common.py`: Shared tool implementations (chart, summary, data lookup, slide creation)
+   - `node_helpers.py`: Shared helper functions (format summary, extract results)
+   - `chart_generator.py`, `summary_generator.py`, `ppt_builder.py`: Core generation logic
 
-2. **Agents** (`agent.py`): AutoGen agents with specialized roles
+2. **Tools** (`tools.py`): Function tools that agents can invoke
+   - Import shared implementations from `utils/tools_common.py`
+   - MA pipeline: Each agent gets specific tools
+   - SA pipeline: Single agent gets all tools
+
+3. **Agents** (`agent.py`): AutoGen agents with specialized roles
    - Each agent has access to specific tools
    - Agents store requirements and formatted prompts internally
 
-3. **Nodes** (`nodes.py`): Kedro pipeline nodes
+4. **Nodes** (`nodes.py`): Kedro pipeline nodes
+   - Import shared helpers from `utils/node_helpers.py`
    - `init_tools`: Builds tools with sales data
    - `compile_*_agent`: Compiles agents with requirements and prompts
    - `orchestrate_*/generate_*`: Coordinates agent execution
 
-4. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
+5. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
    - System prompts define agent behavior
    - User prompts define task instructions
    - Placeholders are filled during compilation
@@ -283,6 +288,8 @@ Prompts use placeholders that are filled during agent compilation.
 │   │       ├── pipeline.py       # Pipeline definition
 │   │       └── tools.py          # Agent tools
 │   └── utils/
+│       ├── tools_common.py       # Shared tool implementations
+│       ├── node_helpers.py       # Shared node helper functions
 │       ├── chart_generator.py    # Chart generation utilities
 │       ├── data_analyzer.py      # Data analysis utilities
 │       ├── instruction_parser.py # YAML parser
@@ -333,22 +340,27 @@ Check intermediate outputs:
 
 ## Key Design Patterns
 
-### 1. Prompt Separation
+### 1. Shared Utilities
+- Common tool implementations in `utils/tools_common.py`
+- Common node helpers in `utils/node_helpers.py`
+- Eliminates code duplication between MA and SA pipelines
+
+### 2. Prompt Separation
 - Prompts stored in YAML files, not hardcoded
 - Placeholders filled during agent compilation
 - Easy to modify without code changes
 
-### 2. Tool-Based Data Access
+### 3. Tool-Based Data Access
 - Sales data captured in tool closures
 - Agents access data through tools, not direct parameters
 - Clean separation between data and logic
 
-### 3. Requirement-Driven Compilation
+### 4. Requirement-Driven Compilation
 - Requirements parsed once during compilation
 - Stored in agent context for later use
 - Reduces redundant parsing
 
-### 4. Agent Specialization (MA)
+### 5. Agent Specialization (MA)
 - Each agent has specific role and tools
 - Prompts formatted for each agent's needs
 - Context passed between agents

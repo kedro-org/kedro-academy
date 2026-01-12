@@ -37,8 +37,9 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
             func=compile_planner_agent,
             inputs=[
-                "planner_system_prompt",
                 "planner_requirements",
+                "planner_system_prompt",
+                "planner_user_prompt",
                 "llm_autogen",
                 "tools",
             ],
