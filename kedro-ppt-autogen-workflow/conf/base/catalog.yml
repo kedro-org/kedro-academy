@@ -13,3 +13,108 @@ slide_generation_requirements:
 sales_data:
   type: pandas.CSVDataset
   filepath: data/ppt_generation/sample/sales_50_products.csv
+
+
+# ==============================================================================
+# PROMPT DATASETS - Multi-Agent Pipeline
+# ==============================================================================
+
+planner_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/planner_system.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+planner_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/planner_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+chart_generator_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/chart_generator_system.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+chart_generator_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/chart_generator_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+summarizer_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/summarizer_system.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+summarizer_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/summarizer_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+critic_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/critic_system.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+critic_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/critic_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+
+# ==============================================================================
+# INTERMEDIATE DATASETS - Multi-Agent Pipeline
+# ==============================================================================
+
+planner_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/ma/planner_requirements.json
+  versioned: true
+
+chart_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/ma/chart_requirements.json
+  versioned: true
+
+summarizer_requirements:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/ma/summarizer_requirements.json
+  versioned: true
+
+slide_charts:
+  type: partitions.PartitionedDataset
+  path: data/ppt_generation/intermediate/ma/charts
+  dataset:
+    type: matplotlib.MatplotlibDataset
+  filename_suffix: .png
+
+slide_summaries:
+  type: partitions.PartitionedDataset
+  path: data/ppt_generation/intermediate/ma/summaries
+  dataset:
+    type: text.TextDataset
+  filename_suffix: .txt
+
+
+# ==============================================================================
+# OUTPUT - Multi-Agent Pipeline
+# ==============================================================================
+
+sales_analysis_ma:
+  type: openxml.PptxDataset
+  filepath: data/ppt_generation/output/ma/sales_analysis.pptx
+  versioned: true
