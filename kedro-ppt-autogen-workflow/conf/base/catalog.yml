@@ -24,7 +24,14 @@ planner_system_prompt:
   filepath: data/ppt_generation/prompts/ma/planner_system.yml
   template: ChatPromptTemplate
   dataset:
-        type: yaml.YAMLDataset
+    type: yaml.YAMLDataset
+
+planner_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/ma/planner_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
 
 chart_generator_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
