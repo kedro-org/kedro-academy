@@ -20,6 +20,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             inputs=[
                 "slide_generation_requirements",
                 "ppt_generator_system_prompt",
+                "ppt_generator_user_prompt",
                 "llm_autogen",
                 "tools",
             ],
