@@ -106,6 +106,24 @@ def extract_summary_text(result: dict[str, Any]) -> str:
 
 def _extract_summary_from_text(text: str) -> str:
     """Extract summary bullets from raw agent response text."""
+    # Try to parse as JSON first (tool output)
+    clean_text = text.strip()
+    if clean_text.startswith('{') or clean_text.startswith("{'"):
+        try:
+            # Handle both JSON and Python dict-like strings
+            parsed = json.loads(clean_text.replace("'", '"'))
+            # Check for summary_text key (from summary tool)
+            if 'summary_text' in parsed:
+                return _clean_summary(parsed['summary_text'])
+            # Skip slide tool output (has slide_path or slidepath but no summary)
+            if ('slide_path' in parsed or 'slidepath' in parsed) and 'summary_text' not in parsed:
+                return ""
+            # Check for error
+            if 'error' in parsed:
+                return ""
+        except (json.JSONDecodeError, ValueError):
+            pass
+
     # Find lines that start with bullet points or dashes
     lines = text.replace('\\n', '\n').split('\n')
     summary_lines = []
@@ -113,6 +131,9 @@ def _extract_summary_from_text(text: str) -> str:
 
     for line in lines:
         line = line.strip()
+        # Skip JSON-like content
+        if line.startswith('{') or line.startswith("{'"):
+            continue
         # Check if we're entering a summary section
         if re.match(r'^[Ss]ummary[:\s]*$', line):
             in_summary_section = True
@@ -130,6 +151,10 @@ def _extract_summary_from_text(text: str) -> str:
 
     if summary_lines:
         return _clean_summary('\n'.join(summary_lines))
+
+    # Don't return raw JSON/dict as summary
+    if clean_text.startswith('{') or clean_text.startswith("{'"):
+        return ""
     return _clean_summary(text)
 
 
