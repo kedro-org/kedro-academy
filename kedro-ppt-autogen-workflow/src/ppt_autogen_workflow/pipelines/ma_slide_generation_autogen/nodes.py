@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 from typing import Any
 
 import matplotlib
@@ -10,33 +11,21 @@ matplotlib.use('Agg')
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from pptx import Presentation
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from .agent import (
-    create_planner_agent,
-    create_chart_generator_agent,
-    create_summarizer_agent,
-    create_critic_agent,
-    PlannerAgent,
-    ChartGeneratorAgent,
-    SummarizerAgent,
-    CriticAgent
-)
-from .agent_helpers import (
-    generate_chart,
-    generate_summary,
-    run_qa_review,
-    create_slide_presentation,
-    create_error_presentation,
-)
+from .agent_planner import PlannerAgent, create_planner_agent
+from .agent_chart import ChartGeneratorAgent, create_chart_generator_agent, generate_chart
+from .agent_summarizer import SummarizerAgent, create_summarizer_agent, generate_summary
+from .agent_critic import CriticAgent, create_critic_agent, run_qa_review
 from .tools import (
     build_planner_tools,
     build_chart_generator_tools,
     build_summarizer_tools,
     build_critic_tools,
 )
-from ppt_autogen_workflow.utils.ppt_builder import combine_presentations
+from ppt_autogen_workflow.utils.ppt_builder import combine_presentations, create_slide
 from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
 from ppt_autogen_workflow.utils.node_helpers import format_summary_text
 
@@ -290,3 +279,42 @@ def orchestrate_multi_agent_workflow(
     except Exception as e:
         logger.error(f"Multi-agent workflow failed: {str(e)}", exc_info=True)
         return create_error_presentation(str(e)), {}, {}
+
+
+def create_slide_presentation(
+    title: str, chart_path: str | None, summary: str,
+    layout_params: dict[str, Any], styling_params: dict[str, Any]
+) -> Presentation:
+    """Create a single slide presentation.
+
+    Args:
+        title: Slide title
+        chart_path: Path to chart image
+        summary: Summary text
+        layout_params: Layout configuration
+        styling_params: Styling configuration
+
+    Returns:
+        Presentation object with single slide
+    """
+    chart = chart_path if chart_path and Path(chart_path).exists() else ""
+    return create_slide(
+        slide_title=title, chart_path=chart, summary_text=summary,
+        layout_params=layout_params, styling_params=styling_params
+    )
+
+
+def create_error_presentation(error_message: str) -> Presentation:
+    """Create error presentation when workflow fails.
+
+    Args:
+        error_message: Error message to display
+
+    Returns:
+        Presentation object with error slide
+    """
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[0])
+    slide.shapes.title.text = "Multi-Agent Workflow Error"
+    slide.placeholders[1].text = f"Error: {error_message}\nPlease check the logs for details."
+    return prs
