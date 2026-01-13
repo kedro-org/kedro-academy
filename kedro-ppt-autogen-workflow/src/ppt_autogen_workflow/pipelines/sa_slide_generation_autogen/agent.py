@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from ppt_autogen_workflow.base import AgentContext, BaseAgent
+from ppt_autogen_workflow.base import AgentContext, BaseAgent, ChartOutput, SummaryOutput
 
 logger = logging.getLogger(__name__)
 
@@ -14,29 +13,25 @@ logger = logging.getLogger(__name__)
 class PPTGenerationAgent(BaseAgent["PPTGenerationAgent"]):
     """Agent responsible for generating PowerPoint presentations from sales data."""
 
-    async def invoke(self, query: str) -> dict[str, Any]:
-        """Invoke the agent to generate presentation content."""
-        self._ensure_compiled()
+    async def invoke_for_chart(self, query: str) -> ChartOutput:
+        """Invoke the agent to generate a chart.
 
-        try:
-            result = await self._agent.run(task=query)
-            output = {
-                "query": query,
-                "content": self._extract_content_from_response(result, "content"),
-                "tools_used": self._extract_tools_used(result),
-                "success": True,
-            }
-            return output
+        Returns:
+            ChartOutput with chart_path and status
+        """
+        return await self._run_with_output(query, ChartOutput)
 
-        except Exception as e:
-            logger.error(f"PPT generation agent failed: {str(e)}")
-            return {
-                "query": query,
-                "content": {},
-                "tools_used": [],
-                "success": False,
-                "error": str(e),
-            }
+    async def invoke_for_summary(self, query: str) -> SummaryOutput:
+        """Invoke the agent to generate a summary.
+
+        Returns:
+            SummaryOutput with summary_text and status
+        """
+        return await self._run_with_output(query, SummaryOutput)
+
+    async def invoke(self, query: str) -> ChartOutput:
+        """Default invoke returns ChartOutput for backwards compatibility."""
+        return await self.invoke_for_chart(query)
 
 
 def create_ppt_agent(

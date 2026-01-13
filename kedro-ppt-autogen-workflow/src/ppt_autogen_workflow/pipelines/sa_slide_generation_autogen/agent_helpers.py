@@ -11,7 +11,6 @@ import asyncio
 import logging
 import tempfile
 from pathlib import Path
-from typing import Any
 
 import matplotlib
 matplotlib.use('Agg')
@@ -20,20 +19,16 @@ import matplotlib.pyplot as plt
 from pptx import Presentation
 
 from .agent import PPTGenerationAgent
+from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
 from ppt_autogen_workflow.utils.ppt_builder import create_slide
-from ppt_autogen_workflow.utils.node_helpers import (
-    extract_chart_path,
-    extract_summary_text,
-    create_fallback_summary,
-)
 
 logger = logging.getLogger(__name__)
 
 
 def generate_chart(
     agent: PPTGenerationAgent, user_prompt: str, slide_key: str, chart_instruction: str = ""
-) -> tuple[str, plt.Figure | None]:
-    """Generate chart for a slide using agent with formatted prompt.
+) -> str:
+    """Generate chart for a slide using agent with structured output.
 
     Args:
         agent: Compiled PPT generation agent
@@ -42,44 +37,38 @@ def generate_chart(
         chart_instruction: Chart instruction for fallback
 
     Returns:
-        Tuple of (chart_path, matplotlib_figure)
+        Path to the generated chart image
     """
     try:
         query = f"{user_prompt}\n\nTask: Generate a chart using the generate_sales_chart tool."
-        chart_result = asyncio.run(agent.invoke(query))
-        chart_path = extract_chart_path(chart_result)
+        chart_output: ChartOutput = asyncio.run(agent.invoke_for_chart(query))
+        chart_path = chart_output.chart_path
 
         if chart_path and Path(chart_path).exists():
-            try:
-                from matplotlib.image import imread
-                img = imread(chart_path)
-                fig, ax = plt.subplots(figsize=(10, 6))
-                ax.imshow(img)
-                ax.axis('off')
-                return str(chart_path), fig
-            except Exception as e:
-                logger.warning(f"Could not load chart image: {e}")
+            return chart_path
 
         # Fallback: create placeholder chart
+        logger.warning(f"Chart not generated for {slide_key}, creating placeholder")
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.text(0.5, 0.5, f"Chart for {slide_key}\n{chart_instruction[:50]}...",
                 ha='center', va='center', fontsize=12, wrap=True)
         ax.set_title(f"Chart: {slide_key}")
 
         temp_dir = Path(tempfile.mkdtemp())
-        chart_path = temp_dir / f"chart_{slide_key}.png"
-        fig.savefig(chart_path, dpi=300, bbox_inches='tight')
-        return str(chart_path), fig
+        fallback_path = temp_dir / f"chart_{slide_key}.png"
+        fig.savefig(fallback_path, dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        return str(fallback_path)
 
     except Exception as e:
         logger.error(f"Error generating chart for {slide_key}: {str(e)}")
-        return "", None
+        return ""
 
 
 def generate_summary(
     agent: PPTGenerationAgent, user_prompt: str, slide_key: str, chart_path: str = None
 ) -> str:
-    """Generate summary text for a slide using agent with formatted prompt.
+    """Generate summary text for a slide using agent with structured output.
 
     Args:
         agent: Compiled PPT generation agent
@@ -99,13 +88,26 @@ Chart Status: {chart_status}
 
 Use actual calculated values, not placeholders."""
 
-        summary_result = asyncio.run(agent.invoke(query))
-        summary_text = extract_summary_text(summary_result)
-        return summary_text if summary_text else create_fallback_summary(slide_key, user_prompt)
+        summary_output: SummaryOutput = asyncio.run(agent.invoke_for_summary(query))
+        summary_text = summary_output.summary_text
+
+        if summary_text:
+            return summary_text
+
+        # Fallback
+        logger.warning(f"Summary not generated for {slide_key}, using fallback")
+        return _create_fallback_summary(slide_key, user_prompt)
 
     except Exception as e:
         logger.error(f"Error generating summary for {slide_key}: {str(e)}")
-        return create_fallback_summary(slide_key, user_prompt)
+        return _create_fallback_summary(slide_key, user_prompt)
+
+
+def _create_fallback_summary(slide_key: str, instruction: str = "") -> str:
+    """Create fallback summary when agent fails."""
+    if instruction:
+        return f"• Analysis for {slide_key}\n• Data insights based on: {instruction[:100]}..."
+    return f"• Analysis for {slide_key}\n• Data insights generated"
 
 
 def create_slide_presentation(title: str, chart_path: str | None, summary: str) -> Presentation:

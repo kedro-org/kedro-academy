@@ -86,7 +86,7 @@ def generate_presentation(compiled_ppt_agent: PPTGenerationAgent) -> Any:
             user_prompt = formatted_prompts.get(slide_key, '')
 
             # Generate chart using formatted prompt
-            chart_path, _ = generate_chart(
+            chart_path = generate_chart(
                 compiled_ppt_agent, user_prompt, slide_key, config.get('chart_instruction', '')
             )
 

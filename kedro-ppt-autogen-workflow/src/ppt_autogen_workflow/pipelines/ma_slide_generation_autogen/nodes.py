@@ -243,7 +243,7 @@ def orchestrate_multi_agent_workflow(
         # Step 2: Chart generation
         chart_instruction = config.get('chart_instruction', '')
         chart_query = chart_formatted_prompts.get(slide_key, '')
-        chart_path, _ = generate_chart(
+        chart_path = generate_chart(
             compiled_chart_agent, chart_query, slide_key, chart_instruction
         )
         slide_chart_paths[slide_key] = chart_path

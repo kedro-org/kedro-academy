@@ -7,15 +7,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from ppt_autogen_workflow.base import AgentContext, BaseAgent
-from ppt_autogen_workflow.utils.node_helpers import (
-    extract_summary_text,
-    create_fallback_summary,
-)
+from ppt_autogen_workflow.base import AgentContext, BaseAgent, SummaryOutput
 
 logger = logging.getLogger(__name__)
 
@@ -23,29 +18,13 @@ logger = logging.getLogger(__name__)
 class SummarizerAgent(BaseAgent["SummarizerAgent"]):
     """Agent responsible for generating slide summaries."""
 
-    async def invoke(self, content_to_summarize: str) -> dict[str, Any]:
-        """Invoke the summarizer agent to create slide summaries."""
-        self._ensure_compiled()
+    async def invoke(self, content_to_summarize: str) -> SummaryOutput:
+        """Invoke the summarizer agent to create slide summaries.
 
-        try:
-            result = await self._agent.run(task=content_to_summarize)
-            summary_output = {
-                "original_content": content_to_summarize,
-                "summary": self._extract_content_from_response(result, "summary"),
-                "tools_used": self._extract_tools_used(result),
-                "success": True,
-            }
-            return summary_output
-
-        except Exception as e:
-            logger.error(f"Summarizer agent failed: {str(e)}")
-            return {
-                "original_content": content_to_summarize,
-                "summary": {},
-                "tools_used": [],
-                "success": False,
-                "error": str(e),
-            }
+        Returns:
+            SummaryOutput with summary_text and status
+        """
+        return await self._run_with_output(content_to_summarize, SummaryOutput)
 
 
 def create_summarizer_agent(
@@ -66,7 +45,7 @@ def create_summarizer_agent(
 def generate_summary(
     summarizer_agent: SummarizerAgent, query: str, slide_key: str, instruction: str
 ) -> str:
-    """Generate summary using summarizer agent.
+    """Generate summary using summarizer agent with structured output.
 
     Args:
         summarizer_agent: Compiled summarizer agent
@@ -78,9 +57,23 @@ def generate_summary(
         Generated summary text
     """
     try:
-        summary_result = asyncio.run(summarizer_agent.invoke(query))
-        summary_text = extract_summary_text(summary_result)
-        return summary_text if summary_text else create_fallback_summary(slide_key, instruction)
+        summary_output: SummaryOutput = asyncio.run(summarizer_agent.invoke(query))
+        summary_text = summary_output.summary_text
+
+        if summary_text:
+            return summary_text
+
+        # Fallback
+        logger.warning(f"Summary not generated for {slide_key}, using fallback")
+        return _create_fallback_summary(slide_key, instruction)
+
     except Exception as e:
         logger.error(f"Error generating summary for {slide_key}: {str(e)}")
-        return create_fallback_summary(slide_key, instruction)
+        return _create_fallback_summary(slide_key, instruction)
+
+
+def _create_fallback_summary(slide_key: str, instruction: str = "") -> str:
+    """Create fallback summary when agent fails."""
+    if instruction:
+        return f"• Analysis for {slide_key}\n• Data insights based on: {instruction[:100]}..."
+    return f"• Analysis for {slide_key}\n• Data insights generated"

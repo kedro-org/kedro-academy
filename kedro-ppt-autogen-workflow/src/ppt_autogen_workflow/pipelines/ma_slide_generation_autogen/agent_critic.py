@@ -12,7 +12,7 @@ from typing import Any
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from ppt_autogen_workflow.base import AgentContext, BaseAgent
+from ppt_autogen_workflow.base import AgentContext, BaseAgent, QAFeedbackOutput
 
 logger = logging.getLogger(__name__)
 
@@ -20,42 +20,13 @@ logger = logging.getLogger(__name__)
 class CriticAgent(BaseAgent["CriticAgent"]):
     """Agent responsible for QA and feedback on slides."""
 
-    async def invoke(self, slide_content: str) -> dict[str, Any]:
-        """Invoke the critic agent to review and provide feedback on slides."""
-        self._ensure_compiled()
+    async def invoke(self, slide_content: str) -> QAFeedbackOutput:
+        """Invoke the critic agent to review and provide feedback on slides.
 
-        try:
-            result = await self._agent.run(task=slide_content)
-            feedback = self._extract_content_from_response(result, "feedback")
-
-            critic_output = {
-                "reviewed_content": slide_content,
-                "feedback": feedback,
-                "quality_score": self._extract_quality_score(feedback),
-                "tools_used": self._extract_tools_used(result),
-                "success": True,
-            }
-            return critic_output
-
-        except Exception as e:
-            logger.error(f"Critic agent failed: {str(e)}")
-            return {
-                "reviewed_content": slide_content,
-                "feedback": {},
-                "quality_score": 0.0,
-                "tools_used": [],
-                "success": False,
-                "error": str(e),
-            }
-
-    def _extract_quality_score(self, feedback: dict[str, Any]) -> float:
-        """Extract quality score from feedback dictionary."""
-        if isinstance(feedback, dict) and "overall_score" in feedback:
-            try:
-                return float(feedback["overall_score"])
-            except (ValueError, TypeError):
-                pass
-        return 8.0
+        Returns:
+            QAFeedbackOutput with feedback, overall_score, and status
+        """
+        return await self._run_with_output(slide_content, QAFeedbackOutput)
 
 
 def create_critic_agent(
@@ -76,8 +47,8 @@ def create_critic_agent(
 def run_qa_review(
     critic_agent: CriticAgent, user_prompt_template: Any, qa_params: dict[str, Any],
     slide_title: str, chart_path: str | None, summary_text: str, config: dict[str, Any]
-) -> dict[str, Any]:
-    """Run QA review using critic agent.
+) -> QAFeedbackOutput:
+    """Run QA review using critic agent with structured output.
 
     Args:
         critic_agent: Compiled critic agent
@@ -89,7 +60,7 @@ def run_qa_review(
         config: Slide configuration
 
     Returns:
-        QA review result dictionary
+        QAFeedbackOutput with feedback and quality score
     """
     try:
         chart_available = 'Available' if chart_path and Path(chart_path).exists() else 'Not available'
@@ -105,6 +76,7 @@ def run_qa_review(
             review_criteria=qa_params.get('review_criteria', '')
         )
         return asyncio.run(critic_agent.invoke(qa_query))
+
     except Exception as e:
         logger.error(f"Error in QA review: {str(e)}")
-        return {"success": False, "error": str(e)}
+        return QAFeedbackOutput(feedback=f"Error: {str(e)}", overall_score=0.0, status="error")

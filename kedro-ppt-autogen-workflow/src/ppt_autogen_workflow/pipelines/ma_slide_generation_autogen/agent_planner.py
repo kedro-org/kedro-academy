@@ -6,11 +6,10 @@ and planning the presentation workflow.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from ppt_autogen_workflow.base import AgentContext, BaseAgent
+from ppt_autogen_workflow.base import AgentContext, BaseAgent, PlanOutput
 
 logger = logging.getLogger(__name__)
 
@@ -18,29 +17,13 @@ logger = logging.getLogger(__name__)
 class PlannerAgent(BaseAgent["PlannerAgent"]):
     """Agent responsible for orchestrating and planning the agentic flow."""
 
-    async def invoke(self, query: str) -> dict[str, Any]:
-        """Invoke the planner agent to create presentation plan."""
-        self._ensure_compiled()
+    async def invoke(self, query: str) -> PlanOutput:
+        """Invoke the planner agent to create presentation plan.
 
-        try:
-            result = await self._agent.run(task=query)
-            plan_output = {
-                "query": query,
-                "plan": self._extract_content_from_response(result, "plan"),
-                "tools_used": self._extract_tools_used(result),
-                "success": True,
-            }
-            return plan_output
-
-        except Exception as e:
-            logger.error(f"Planner agent failed: {str(e)}")
-            return {
-                "query": query,
-                "plan": {},
-                "tools_used": [],
-                "success": False,
-                "error": str(e),
-            }
+        Returns:
+            PlanOutput with plan and status
+        """
+        return await self._run_with_output(query, PlanOutput)
 
 
 def create_planner_agent(
