@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import pandas as pd
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
 from ppt_autogen_workflow.base import AgentContext, BaseAgent
