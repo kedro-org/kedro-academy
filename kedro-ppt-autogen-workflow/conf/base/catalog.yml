@@ -16,7 +16,7 @@ sales_data:
 
 
 # ==============================================================================
-# PROMPT DATASETS - Using kedro-datasets-experimental LangChainPromptDataset
+# PROMPT DATASETS - Multi-Agent Pipeline
 # ==============================================================================
 
 planner_system_prompt:
@@ -75,22 +75,9 @@ critic_user_prompt:
   dataset:
     type: yaml.YAMLDataset
 
-ppt_generator_system_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-  filepath: data/ppt_generation/prompts/sa/ppt_generator_system.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
-
-ppt_generator_user_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-  filepath: data/ppt_generation/prompts/sa/ppt_generator_user.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
 
 # ==============================================================================
-# INTERMEDIATE DATASETS - Analyzed Requirements (Versioned)
+# INTERMEDIATE DATASETS - Multi-Agent Pipeline
 # ==============================================================================
 
 planner_requirements:
@@ -108,11 +95,6 @@ summarizer_requirements:
   filepath: data/ppt_generation/intermediate/ma/summarizer_requirements.json
   versioned: true
 
-
-# ==============================================================================
-# INTERMEDIATE DATASETS - Charts and Summaries (Partitioned)
-# ==============================================================================
-
 slide_charts:
   type: partitions.PartitionedDataset
   path: data/ppt_generation/intermediate/ma/charts
@@ -129,15 +111,39 @@ slide_summaries:
 
 
 # ==============================================================================
-# OUTPUT - Final Presentation (Versioned)
+# OUTPUT - Multi-Agent Pipeline
 # ==============================================================================
 
 sales_analysis_ma:
-    type: openxml.PptxDataset
-    filepath: data/ppt_generation/output/ma/sales_analysis.pptx
-    versioned: true
+  type: openxml.PptxDataset
+  filepath: data/ppt_generation/output/ma/sales_analysis.pptx
+  versioned: true
+
+
+# ==============================================================================
+# PROMPT DATASETS - Single-Agent Pipeline
+# ==============================================================================
+
+ppt_generator_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/sa/ppt_generator_system.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+ppt_generator_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/sa/ppt_generator_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+
+# ==============================================================================
+# OUTPUT - Single-Agent Pipeline
+# ==============================================================================
 
 sales_analysis_sa:
-    type: openxml.PptxDataset
-    filepath: data/ppt_generation/output/sa/sales_analysis.pptx
-    versioned: true
+  type: openxml.PptxDataset
+  filepath: data/ppt_generation/output/sa/sales_analysis.pptx
+  versioned: true
