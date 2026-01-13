@@ -9,7 +9,8 @@ from .nodes import (
     compile_chart_generator_agent,
     compile_summarizer_agent,
     compile_critic_agent,
-    orchestrate_multi_agent_workflow
+    orchestrate_multi_agent_workflow,
+    assemble_presentation,
 )
 
 
@@ -94,8 +95,15 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "compiled_summarizer_agent",
                 "compiled_critic_agent",
             ],
-            outputs=["sales_analysis_ma", "slide_charts", "slide_summaries"],
+            outputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
             name="orchestrate_agents",
             tags=["autogen", "orchestration"],
+        ),
+        node(
+            func=assemble_presentation,
+            inputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
+            outputs="sales_analysis_ma",
+            name="assemble_presentation",
+            tags=["presentation", "assembly"],
         ),
     ])

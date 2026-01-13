@@ -6,11 +6,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import matplotlib
-matplotlib.use('Agg')
-
 import pandas as pd
-import matplotlib.pyplot as plt
 from pptx import Presentation
 
 from autogen_ext.models.openai import OpenAIChatCompletionClient
@@ -216,105 +212,112 @@ def orchestrate_multi_agent_workflow(
     compiled_chart_agent: ChartGeneratorAgent,
     compiled_summarizer_agent: SummarizerAgent,
     compiled_critic_agent: CriticAgent,
-) -> tuple[Any, dict[str, plt.Figure], dict[str, str]]:
-    """Orchestrate multi-agent workflow in round-robin fashion."""
+) -> tuple[dict[str, str], dict[str, str], dict[str, Any]]:
+    """Orchestrate multi-agent workflow to generate charts and summaries.
+
+    This node focuses purely on agent orchestration. Slide assembly is handled
+    by a separate deterministic node.
+
+    Returns:
+        Tuple of (slide_chart_paths, slide_summaries, slide_configs)
+    """
+    planner_requirement = compiled_planner_agent._planner_requirement
+    planner_formatted_prompts = compiled_planner_agent._formatted_prompts
+    chart_formatted_prompts = compiled_chart_agent._formatted_prompts
+    summarizer_formatted_prompts = compiled_summarizer_agent._formatted_prompts
+    critic_user_prompt_template = compiled_critic_agent._user_prompt_template
+    quality_assurance_params = compiled_critic_agent._quality_assurance_params
+
+    layout_params = planner_requirement.get('layout', {})
+    styling_params = planner_requirement.get('styling', {})
+    slide_configs = planner_requirement['slides']
+
+    slide_chart_paths = {}
+    slide_summaries = {}
+
+    for slide_key, config in slide_configs.items():
+        # Step 1: Planner analyzes the slide requirements
+        planner_query = planner_formatted_prompts.get(slide_key, '')
+        asyncio.run(compiled_planner_agent.invoke(planner_query))
+
+        # Step 2: Chart generation
+        chart_instruction = config.get('chart_instruction', '')
+        chart_query = chart_formatted_prompts.get(slide_key, '')
+        chart_path, _ = generate_chart(
+            compiled_chart_agent, chart_query, slide_key, chart_instruction
+        )
+        slide_chart_paths[slide_key] = chart_path
+
+        # Step 3: Summary generation
+        chart_status = f"Chart generated: {chart_path}" if chart_path else "Chart generation in progress"
+        summary_query = summarizer_formatted_prompts.get(slide_key, '').replace('{chart_status}', chart_status)
+        summary_instruction = config.get('summary_instruction', '')
+        summary_text = generate_summary(
+            compiled_summarizer_agent, summary_query, slide_key, summary_instruction
+        )
+        slide_summaries[slide_key] = format_summary_text(summary_text)
+
+        # Step 4: QA review
+        slide_title = config['slide_title']
+        run_qa_review(
+            compiled_critic_agent, critic_user_prompt_template, quality_assurance_params,
+            slide_title, chart_path, summary_text, config
+        )
+
+    # Package configs with layout/styling for the assembly node
+    assembly_configs = {
+        'slides': slide_configs,
+        'layout': layout_params,
+        'styling': styling_params,
+    }
+
+    return slide_chart_paths, slide_summaries, assembly_configs
+
+
+def assemble_presentation(
+    slide_chart_paths: dict[str, str],
+    slide_summaries: dict[str, str],
+    slide_configs: dict[str, Any],
+) -> Any:
+    """Assemble final presentation from generated charts and summaries.
+
+    This is a deterministic node that creates slides from the agent-generated content.
+
+    Args:
+        slide_chart_paths: Dict mapping slide_key to chart image path
+        slide_summaries: Dict mapping slide_key to formatted summary text
+        slide_configs: Dict containing slide metadata and layout/styling params
+
+    Returns:
+        Combined PowerPoint presentation
+    """
     try:
-        planner_requirement = compiled_planner_agent._planner_requirement
-        planner_formatted_prompts = compiled_planner_agent._formatted_prompts
-        chart_formatted_prompts = compiled_chart_agent._formatted_prompts
-        summarizer_formatted_prompts = compiled_summarizer_agent._formatted_prompts
-        critic_user_prompt_template = compiled_critic_agent._user_prompt_template
-        quality_assurance_params = compiled_critic_agent._quality_assurance_params
+        slides = slide_configs.get('slides', {})
+        layout_params = slide_configs.get('layout', {})
+        styling_params = slide_configs.get('styling', {})
 
-        layout_params = planner_requirement.get('layout', {})
-        styling_params = planner_requirement.get('styling', {})
-        slide_configs = planner_requirement['slides']
-
-        slide_charts_dict = {}
-        slide_summaries_dict = {}
         slide_presentations = []
-
-        for slide_key, config in slide_configs.items():
-            # Step 1: Planner analyzes the slide requirements
-            planner_query = planner_formatted_prompts.get(slide_key, '')
-            asyncio.run(compiled_planner_agent.invoke(planner_query))
-
-            # Step 2: Chart generation
-            chart_instruction = config.get('chart_instruction', '')
-            chart_query = chart_formatted_prompts.get(slide_key, '')
-            chart_path, chart_fig = generate_chart(
-                compiled_chart_agent, chart_query, slide_key, chart_instruction
-            )
-
-            if chart_fig is not None:
-                slide_charts_dict[slide_key] = chart_fig
-
-            # Step 3: Summary generation
-            chart_status = f"Chart generated: {chart_path}" if chart_path else "Chart generation in progress"
-            summary_query = summarizer_formatted_prompts.get(slide_key, '').replace('{chart_status}', chart_status)
-            summary_instruction = config.get('summary_instruction', '')
-            summary_text = generate_summary(
-                compiled_summarizer_agent, summary_query, slide_key, summary_instruction
-            )
-
-            formatted_summary = format_summary_text(summary_text)
-            slide_summaries_dict[slide_key] = formatted_summary
-
-            # Step 4: QA review
+        for slide_key, config in slides.items():
             slide_title = config['slide_title']
-            run_qa_review(
-                compiled_critic_agent, critic_user_prompt_template, quality_assurance_params,
-                slide_title, chart_path, summary_text, config
-            )
+            chart_path = slide_chart_paths.get(slide_key, '')
+            summary = slide_summaries.get(slide_key, '')
 
-            # Step 5: Create slide
-            slide_prs = create_slide_presentation(
-                slide_title, chart_path, formatted_summary, layout_params, styling_params
+            chart = chart_path if chart_path and Path(chart_path).exists() else ""
+            slide_prs = create_slide(
+                slide_title=slide_title,
+                chart_path=chart,
+                summary_text=summary,
+                layout_params=layout_params,
+                styling_params=styling_params,
             )
             slide_presentations.append(slide_prs)
 
-        final_presentation = combine_presentations(slide_presentations)
-        return final_presentation, slide_charts_dict, slide_summaries_dict
+        return combine_presentations(slide_presentations)
 
     except Exception as e:
-        logger.error(f"Multi-agent workflow failed: {str(e)}", exc_info=True)
-        return create_error_presentation(str(e)), {}, {}
-
-
-def create_slide_presentation(
-    title: str, chart_path: str | None, summary: str,
-    layout_params: dict[str, Any], styling_params: dict[str, Any]
-) -> Presentation:
-    """Create a single slide presentation.
-
-    Args:
-        title: Slide title
-        chart_path: Path to chart image
-        summary: Summary text
-        layout_params: Layout configuration
-        styling_params: Styling configuration
-
-    Returns:
-        Presentation object with single slide
-    """
-    chart = chart_path if chart_path and Path(chart_path).exists() else ""
-    return create_slide(
-        slide_title=title, chart_path=chart, summary_text=summary,
-        layout_params=layout_params, styling_params=styling_params
-    )
-
-
-def create_error_presentation(error_message: str) -> Presentation:
-    """Create error presentation when workflow fails.
-
-    Args:
-        error_message: Error message to display
-
-    Returns:
-        Presentation object with error slide
-    """
-    prs = Presentation()
-    slide = prs.slides.add_slide(prs.slide_layouts[0])
-    slide.shapes.title.text = "Multi-Agent Workflow Error"
-    slide.placeholders[1].text = f"Error: {error_message}\nPlease check the logs for details."
-    return prs
+        logger.error(f"Presentation assembly failed: {str(e)}", exc_info=True)
+        prs = Presentation()
+        slide = prs.slides.add_slide(prs.slide_layouts[0])
+        slide.shapes.title.text = "Presentation Assembly Error"
+        slide.placeholders[1].text = f"Error: {str(e)}"
+        return prs
