@@ -82,18 +82,24 @@ def compile_ppt_agent(
 
 
 def generate_presentation(compiled_ppt_agent: PPTGenerationAgent) -> Any:
-    """Generate presentation using compiled agent."""
+    """Generate presentation using compiled agent with formatted prompts."""
     try:
         slide_configs = compiled_ppt_agent._ppt_requirement['slides']
+        formatted_prompts = compiled_ppt_agent._formatted_prompts
         slide_presentations = []
 
         for slide_key, config in slide_configs.items():
             slide_title = config['slide_title']
+            user_prompt = formatted_prompts.get(slide_key, '')
+
+            # Generate chart using formatted prompt
             chart_path, _ = _generate_chart(
-                compiled_ppt_agent, config.get('chart_instruction', ''), slide_key
+                compiled_ppt_agent, user_prompt, slide_key, config.get('chart_instruction', '')
             )
+
+            # Generate summary using formatted prompt (with chart status injected)
             summary_text = _generate_summary(
-                compiled_ppt_agent, config.get('summary_instruction', ''), slide_key, chart_path
+                compiled_ppt_agent, user_prompt, slide_key, chart_path
             )
             formatted_summary = format_summary_text(summary_text)
             slide_prs = _create_slide_presentation(slide_title, chart_path, formatted_summary)
@@ -107,11 +113,11 @@ def generate_presentation(compiled_ppt_agent: PPTGenerationAgent) -> Any:
 
 
 def _generate_chart(
-    agent: PPTGenerationAgent, chart_instruction: str, slide_key: str
+    agent: PPTGenerationAgent, user_prompt: str, slide_key: str, chart_instruction: str = ""
 ) -> tuple[str, plt.Figure | None]:
-    """Generate chart for a slide using agent."""
+    """Generate chart for a slide using agent with formatted prompt."""
     try:
-        query = f"Please generate a chart using the generate_sales_chart tool.\n\nChart Instruction: {chart_instruction}"
+        query = f"{user_prompt}\n\nTask: Generate a chart using the generate_sales_chart tool."
         chart_result = asyncio.run(agent.invoke(query))
         chart_path = extract_chart_path(chart_result)
 
@@ -142,25 +148,25 @@ def _generate_chart(
 
 
 def _generate_summary(
-    agent: PPTGenerationAgent, summary_instruction: str, slide_key: str, chart_path: str = None
+    agent: PPTGenerationAgent, user_prompt: str, slide_key: str, chart_path: str = None
 ) -> str:
-    """Generate summary text for a slide using agent."""
+    """Generate summary text for a slide using agent with formatted prompt."""
     try:
         chart_status = f"Chart generated: {chart_path}" if chart_path and Path(chart_path).exists() else "Chart generation in progress"
-        query = f"""Please generate a summary using the generate_business_summary tool.
+        query = f"""{user_prompt}
 
-Summary Instruction: {summary_instruction}
+Task: Generate a summary using the generate_business_summary tool.
 Chart Status: {chart_status}
 
 Use actual calculated values, not placeholders."""
 
         summary_result = asyncio.run(agent.invoke(query))
         summary_text = extract_summary_text(summary_result)
-        return summary_text if summary_text else create_fallback_summary(slide_key, summary_instruction)
+        return summary_text if summary_text else create_fallback_summary(slide_key, user_prompt)
 
     except Exception as e:
         logger.error(f"Error generating summary for {slide_key}: {str(e)}")
-        return create_fallback_summary(slide_key, summary_instruction)
+        return create_fallback_summary(slide_key, user_prompt)
 
 
 def _create_slide_presentation(title: str, chart_path: str | None, summary: str) -> Presentation:
