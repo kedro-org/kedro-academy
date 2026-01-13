@@ -81,27 +81,38 @@ def extract_summary_text(result: dict[str, Any]) -> str:
     content = result.get('summary') or result.get('content', {})
 
     if isinstance(content, dict):
-        # Check for structured keys first
-        text = content.get('summary_text', '') or content.get('text', '') or content.get('content', '')
+        # Check for summary_text key first (from summary tool)
+        if 'summary_text' in content:
+            return _clean_summary(content['summary_text'])
+        # Check other common text keys
+        text = content.get('text', '') or content.get('content', '')
         if text:
             return _clean_summary(text)
         # Extract from content_text if present (raw agent response)
         raw_text = content.get('content_text', '')
         if raw_text:
             return _extract_summary_from_text(raw_text)
+        # Skip tool output dicts that don't contain summary (slide_path, chart_path, status, error)
+        if any(k in content for k in ['slide_path', 'slidepath', 'chart_path', 'status', 'error']):
+            return ""
+        # Don't return stringified dicts as summary
+        return ""
 
     if isinstance(content, str):
-        if content.strip().startswith('{'):
+        if content.strip().startswith('{') or content.strip().startswith("{'"):
             try:
-                parsed = json.loads(content)
-                text = parsed.get('summary_text', '') or parsed.get('text', '')
-                if text:
-                    return _clean_summary(text)
-            except json.JSONDecodeError:
+                parsed = json.loads(content.replace("'", '"'))
+                if 'summary_text' in parsed:
+                    return _clean_summary(parsed['summary_text'])
+                # Skip tool output strings
+                if any(k in parsed for k in ['slide_path', 'slidepath', 'chart_path', 'status', 'error']):
+                    return ""
+            except (json.JSONDecodeError, ValueError):
                 pass
         return _extract_summary_from_text(content)
 
-    return _clean_summary(str(content))
+    # Don't return non-string content as summary
+    return ""
 
 
 def _extract_summary_from_text(text: str) -> str:
