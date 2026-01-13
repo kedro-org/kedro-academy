@@ -140,10 +140,24 @@ def _extract_summary_from_text(text: str) -> str:
     summary_lines = []
     in_summary_section = False
 
+    # Metadata patterns to skip
+    skip_patterns = [
+        r'^[Cc]hart[_ ][Pp]ath[:\s]',
+        r'^[Ss]ummary[_ ][Tt]ext[:\s]*$',
+        r'^[Ss]lide[_ ][Pp]ath[:\s]',
+        r'^[Ss]tatus[:\s]',
+        r'^[Ii]nstruction[:\s]',
+        r'^/var/folders/',
+        r'^/tmp/',
+    ]
+
     for line in lines:
         line = line.strip()
         # Skip JSON-like content
         if line.startswith('{') or line.startswith("{'"):
+            continue
+        # Skip metadata lines
+        if any(re.match(pattern, line) for pattern in skip_patterns):
             continue
         # Check if we're entering a summary section
         if re.match(r'^[Ss]ummary[:\s]*$', line):
@@ -153,6 +167,9 @@ def _extract_summary_from_text(text: str) -> str:
         if re.match(r'^[-•*]\s+', line) or re.match(r'^\d+[\.\)]\s+', line):
             # Clean the line
             clean_line = re.sub(r'^[-•*\d\.\)]+\s*', '', line).strip()
+            # Skip if it's a metadata line after removing bullet
+            if any(re.match(pattern, clean_line) for pattern in skip_patterns):
+                continue
             if clean_line and len(clean_line) > 10:
                 summary_lines.append(clean_line)
         # Stop if we hit a section that's not summary
