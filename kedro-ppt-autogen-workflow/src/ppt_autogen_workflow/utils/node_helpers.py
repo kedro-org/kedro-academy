@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 
@@ -35,13 +36,40 @@ def extract_chart_path(result: dict[str, Any]) -> str | None:
 
     content = result.get('chart_data') or result.get('content', {})
 
+    # Handle structured dict with chart_path key
     if isinstance(content, dict):
-        return content.get('chart_path')
-    if isinstance(content, str) and content.strip().startswith('{'):
-        try:
-            return json.loads(content).get('chart_path')
-        except json.JSONDecodeError:
-            pass
+        if 'chart_path' in content:
+            return content.get('chart_path')
+        # Extract from content_text if present (raw agent response)
+        raw_text = content.get('content_text', '')
+        if raw_text:
+            return _extract_path_from_text(raw_text)
+
+    if isinstance(content, str):
+        if content.strip().startswith('{'):
+            try:
+                return json.loads(content).get('chart_path')
+            except json.JSONDecodeError:
+                pass
+        # Try to extract path from raw text
+        return _extract_path_from_text(content)
+
+    return None
+
+
+def _extract_path_from_text(text: str) -> str | None:
+    """Extract file path from raw agent response text."""
+    # Match patterns like "Chart Path: /path/to/file.png" or "chart_path: /path/to/file"
+    patterns = [
+        r'[Cc]hart[_ ][Pp]ath[:\s]+([/\w\-_.]+\.png)',
+        r'[Cc]hart[_ ][Pp]ath[:\s]+[\'"]?([/\w\-_.]+\.png)[\'"]?',
+        r'saved (?:to|at)[:\s]+[\'"]?([/\w\-_.]+\.png)[\'"]?',
+        r'([/\w\-_.]+/chart[/\w\-_.]*\.png)',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
     return None
 
 
@@ -53,13 +81,14 @@ def extract_summary_text(result: dict[str, Any]) -> str:
     content = result.get('summary') or result.get('content', {})
 
     if isinstance(content, dict):
+        # Check for structured keys first
         text = content.get('summary_text', '') or content.get('text', '') or content.get('content', '')
-        if not text:
-            try:
-                text = json.loads(str(content)).get('summary_text', '')
-            except (json.JSONDecodeError, TypeError):
-                text = str(content)
-        return _clean_summary(text)
+        if text:
+            return _clean_summary(text)
+        # Extract from content_text if present (raw agent response)
+        raw_text = content.get('content_text', '')
+        if raw_text:
+            return _extract_summary_from_text(raw_text)
 
     if isinstance(content, str):
         if content.strip().startswith('{'):
@@ -70,9 +99,38 @@ def extract_summary_text(result: dict[str, Any]) -> str:
                     return _clean_summary(text)
             except json.JSONDecodeError:
                 pass
-        return _clean_summary(content)
+        return _extract_summary_from_text(content)
 
     return _clean_summary(str(content))
+
+
+def _extract_summary_from_text(text: str) -> str:
+    """Extract summary bullets from raw agent response text."""
+    # Find lines that start with bullet points or dashes
+    lines = text.replace('\\n', '\n').split('\n')
+    summary_lines = []
+    in_summary_section = False
+
+    for line in lines:
+        line = line.strip()
+        # Check if we're entering a summary section
+        if re.match(r'^[Ss]ummary[:\s]*$', line):
+            in_summary_section = True
+            continue
+        # Check for bullet points (-, •, *, or numbered)
+        if re.match(r'^[-•*]\s+', line) or re.match(r'^\d+[\.\)]\s+', line):
+            # Clean the line
+            clean_line = re.sub(r'^[-•*\d\.\)]+\s*', '', line).strip()
+            if clean_line and len(clean_line) > 10:
+                summary_lines.append(clean_line)
+        # Stop if we hit a section that's not summary
+        elif in_summary_section and line and not line.startswith('-'):
+            if re.match(r'^(Both|The chart|Chart|Note)', line):
+                break
+
+    if summary_lines:
+        return _clean_summary('\n'.join(summary_lines))
+    return _clean_summary(text)
 
 
 def _clean_summary(text: str) -> str:
