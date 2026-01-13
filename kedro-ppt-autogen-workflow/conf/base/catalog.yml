@@ -131,6 +131,13 @@ ppt_generator_system_prompt:
   dataset:
     type: yaml.YAMLDataset
 
+ppt_generator_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/ppt_generation/prompts/sa/ppt_generator_user.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
 
 # ==============================================================================
 # OUTPUT - Single-Agent Pipeline

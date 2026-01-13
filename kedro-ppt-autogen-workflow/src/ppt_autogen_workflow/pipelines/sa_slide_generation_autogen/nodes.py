@@ -38,10 +38,11 @@ def init_tools(sales_data: pd.DataFrame) -> dict[str, Any]:
 def compile_ppt_agent(
     slide_generation_requirements: dict[str, Any],
     ppt_generator_system_prompt: Any,
+    ppt_generator_user_prompt: Any,
     model_client: OpenAIChatCompletionClient,
     tools: dict[str, Any],
 ) -> PPTGenerationAgent:
-    """Compile the PPT Generation Agent with requirements."""
+    """Compile the PPT Generation Agent with requirements and formatted prompts."""
     try:
         slide_definitions = parse_instructions_yaml(slide_generation_requirements)
         ppt_requirement = {'slides': {}}
@@ -59,6 +60,20 @@ def compile_ppt_agent(
         system_prompt_text = ppt_generator_system_prompt.format()
         agent = create_ppt_agent(model_client, system_prompt_text, tools["ppt_tools"])
         agent._ppt_requirement = ppt_requirement
+
+        # Format user prompts for each slide
+        formatted_prompts = {}
+        for slide_key, slide_config in ppt_requirement['slides'].items():
+            slide_config_str = (
+                f"Slide Title: {slide_config['slide_title']}\n"
+                f"Chart Instruction: {slide_config['chart_instruction']}\n"
+                f"Summary Instruction: {slide_config['summary_instruction']}\n"
+                f"Data Context: {slide_config['data_context']}"
+            )
+            formatted_prompt = ppt_generator_user_prompt.format(slide_config=slide_config_str)
+            formatted_prompts[slide_key] = formatted_prompt
+
+        agent._formatted_prompts = formatted_prompts
         return agent
 
     except Exception as e:
