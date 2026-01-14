@@ -1,4 +1,8 @@
-"""PPT building tool - Creates PowerPoint presentations."""
+"""PPT building utilities for creating PowerPoint presentations.
+
+This module contains all PowerPoint presentation building logic
+used by the assembly node and critic agent.
+"""
 from __future__ import annotations
 
 import io
@@ -17,15 +21,53 @@ from ppt_autogen_workflow.utils.fonts import SYSTEM_FONT
 logger = logging.getLogger(__name__)
 
 
+def format_summary_text(summary_text: str) -> str:
+    """Format and clean summary text for presentation.
+
+    Cleans up the summary text by:
+    - Removing empty/short lines
+    - Filtering out slide title references
+    - Removing placeholder text
+    - Ensuring consistent bullet point formatting
+
+    Args:
+        summary_text: Raw summary text from agent
+
+    Returns:
+        Formatted summary text with bullet points
+    """
+    if not summary_text:
+        return ""
+
+    lines = summary_text.split('\n')
+    formatted_lines = []
+
+    for line in lines:
+        line = line.strip()
+        if not line or len(line) < 3:
+            continue
+        if 'slide title' in line.lower() or 'slide_title' in line.lower():
+            continue
+        if any(p in line.lower() for p in ['$x', 'please fill', 'placeholder']):
+            continue
+
+        # Clean up markdown formatting
+        line = line.replace('**', '').replace('*', '').replace('__', '')
+        line = line.lstrip('•').lstrip('*').lstrip('-').strip()
+        formatted_lines.append(f"• {line}" if not line.startswith('•') else line)
+
+    return '\n'.join(formatted_lines) or f"• {summary_text.strip()}"
+
+
 def _get_blank_layout(prs: Presentation):
     """Find a blank slide layout from the presentation."""
     if len(prs.slide_layouts) > 6:
         return prs.slide_layouts[6]
-    
+
     for layout in prs.slide_layouts:
         if "blank" in layout.name.lower():
             return layout
-    
+
     return prs.slide_layouts[0]
 
 
@@ -36,11 +78,9 @@ def create_slide(
     layout_params: dict[str, Any] | None = None,
     styling_params: dict[str, Any] | None = None,
 ) -> Presentation:
-    """
-    Create a PowerPoint slide with chart and summary.
+    """Create a PowerPoint slide with chart and summary.
 
     This is a pure function that returns a Presentation object.
-    The presentation can be saved to disk via Kedro's PptxDataset.
 
     Args:
         slide_title: Title for the slide
@@ -54,7 +94,7 @@ def create_slide(
     """
     layout = layout_params or {}
     styling = styling_params or {}
-    
+
     # Layout defaults
     content_left = layout.get("content_left", 0.5)
     content_top = layout.get("content_top", 1.3)
@@ -66,7 +106,7 @@ def create_slide(
     title_top = layout.get("title_top", 0.3)
     title_width = layout.get("title_width", 9.0)
     title_height = layout.get("title_height", 0.8)
-    
+
     # Styling defaults
     title_font = styling.get("title_font", SYSTEM_FONT)
     title_size = styling.get("title_size", 28)
@@ -115,7 +155,7 @@ def create_slide(
             # Summary takes more space when no chart
             summary_left = content_left
             summary_w = chart_width + summary_width + summary_spacing
-        
+
         _add_summary_box(
             slide,
             summary_text,
@@ -211,8 +251,7 @@ def _add_summary_box(
 def combine_presentations(
     presentations: list[Presentation],
 ) -> Presentation:
-    """
-    Combine multiple presentations into one.
+    """Combine multiple presentations into one.
 
     This is a pure function that returns a combined Presentation object.
 

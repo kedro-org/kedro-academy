@@ -1,4 +1,8 @@
-"""Chart generation tool - Pure functions for creating charts from data."""
+"""Chart generation logic for creating data visualizations.
+
+This module contains all chart generation functionality used by the
+ChartGeneratorAgent, including parsing instructions and rendering charts.
+"""
 from __future__ import annotations
 
 import logging
@@ -7,23 +11,19 @@ import warnings
 from dataclasses import dataclass
 from typing import Any, Final
 
-# Set matplotlib to use non-interactive backend before importing pyplot
-# This prevents GUI window creation issues on macOS when running in threads
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from ppt_autogen_workflow.utils.fonts import SYSTEM_FONT
 
-# Suppress font warnings
 warnings.filterwarnings("ignore", message="findfont")
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
 logger = logging.getLogger(__name__)
 
-# Chart color palette
 CHART_COLORS: Final[tuple[str, ...]] = (
     "#1F4E79", "#D0582A", "#70AD47", "#FFC000", "#5B9BD5", "#A5A5A5"
 )
@@ -48,8 +48,7 @@ def parse_chart_instruction(
     df: pd.DataFrame,
     styling_params: dict[str, Any] | None = None,
 ) -> ChartConfig:
-    """
-    Parse natural language chart instructions into configuration.
+    """Parse natural language chart instructions into configuration.
 
     Args:
         instruction: Natural language chart specification
@@ -109,16 +108,14 @@ def parse_chart_instruction(
     return config
 
 
-def generate_chart(
+def generate_chart_figure(
     df: pd.DataFrame,
     chart_instruction: str,
     styling_params: dict[str, Any] | None = None,
 ) -> plt.Figure:
-    """
-    Generate chart visualization from DataFrame.
+    """Generate chart visualization from DataFrame.
 
     This is a pure function that returns a matplotlib Figure object.
-    The figure can be saved to disk via Kedro's MatplotlibWriter dataset.
 
     Args:
         df: Input DataFrame with data to visualize
@@ -130,7 +127,7 @@ def generate_chart(
     """
     params = styling_params or {}
     config = parse_chart_instruction(chart_instruction, df, params)
-    
+
     df_chart = df.copy()
 
     # Apply filters
@@ -171,7 +168,7 @@ def generate_chart(
         ax.spines["right"].set_visible(False)
 
     plt.tight_layout()
-    
+
     logger.info(f"Generated {config.chart_type} chart")
     return fig
 
