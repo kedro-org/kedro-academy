@@ -1,0 +1,335 @@
+"""PPT building utilities for creating PowerPoint presentations.
+
+This module contains all PowerPoint presentation building logic
+used by the assembly node and critic agent.
+"""
+from __future__ import annotations
+
+import io
+import logging
+from pathlib import Path
+from typing import Any
+
+from pptx import Presentation
+from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pptx.enum.text import MSO_AUTO_SIZE
+from pptx.util import Inches, Pt
+
+from ppt_autogen_workflow.utils.fonts import SYSTEM_FONT
+
+logger = logging.getLogger(__name__)
+
+
+def format_summary_text(summary_text: str) -> str:
+    """Format and clean summary text for presentation.
+
+    Cleans up the summary text by:
+    - Removing empty/short lines
+    - Filtering out slide title references
+    - Removing placeholder text
+    - Ensuring consistent bullet point formatting
+
+    Args:
+        summary_text: Raw summary text from agent
+
+    Returns:
+        Formatted summary text with bullet points
+    """
+    if not summary_text:
+        return ""
+
+    lines = summary_text.split('\n')
+    formatted_lines = []
+
+    for line in lines:
+        line = line.strip()
+        if not line or len(line) < 3:
+            continue
+        if 'slide title' in line.lower() or 'slide_title' in line.lower():
+            continue
+        if any(p in line.lower() for p in ['$x', 'please fill', 'placeholder']):
+            continue
+
+        # Clean up markdown formatting
+        line = line.replace('**', '').replace('*', '').replace('__', '')
+        line = line.lstrip('•').lstrip('*').lstrip('-').strip()
+        formatted_lines.append(f"• {line}" if not line.startswith('•') else line)
+
+    return '\n'.join(formatted_lines) or f"• {summary_text.strip()}"
+
+
+def _get_blank_layout(prs: Presentation):
+    """Find a blank slide layout from the presentation."""
+    if len(prs.slide_layouts) > 6:
+        return prs.slide_layouts[6]
+
+    for layout in prs.slide_layouts:
+        if "blank" in layout.name.lower():
+            return layout
+
+    return prs.slide_layouts[0]
+
+
+def create_slide(
+    slide_title: str,
+    chart_path: str | Path,
+    summary_text: str,
+    layout_params: dict[str, Any] | None = None,
+    styling_params: dict[str, Any] | None = None,
+) -> Presentation:
+    """Create a PowerPoint slide with chart and summary.
+
+    This is a pure function that returns a Presentation object.
+
+    Args:
+        slide_title: Title for the slide
+        chart_path: Path to the chart image file
+        summary_text: Summary text content (bullet points)
+        layout_params: Layout parameters (positions, dimensions)
+        styling_params: Styling parameters (fonts, colors)
+
+    Returns:
+        python-pptx Presentation object containing the slide
+    """
+    layout = layout_params or {}
+    styling = styling_params or {}
+
+    # Layout defaults
+    content_left = layout.get("content_left", 0.5)
+    content_top = layout.get("content_top", 1.3)
+    chart_width = layout.get("chart_width", 5.0)
+    chart_height = layout.get("chart_height", 5.0)
+    summary_width = layout.get("summary_width", 4.0)
+    summary_spacing = layout.get("summary_spacing", 0.5)
+    title_left = layout.get("title_left", 0.5)
+    title_top = layout.get("title_top", 0.3)
+    title_width = layout.get("title_width", 9.0)
+    title_height = layout.get("title_height", 0.8)
+
+    # Styling defaults
+    title_font = styling.get("title_font", SYSTEM_FONT)
+    title_size = styling.get("title_size", 28)
+    text_font = styling.get("text_font", SYSTEM_FONT)
+    text_size = styling.get("text_size_small", 11)
+    paragraph_spacing = styling.get("paragraph_spacing", 8)
+    title_color = styling.get("title_color_rgb", (31, 78, 121))
+    text_color = styling.get("text_color_rgb", (51, 51, 51))
+
+    # Create presentation
+    prs = Presentation()
+    slide_layout = _get_blank_layout(prs)
+    slide = prs.slides.add_slide(slide_layout)
+
+    # Add title
+    _add_title_box(
+        slide,
+        slide_title,
+        title_left, title_top, title_width, title_height,
+        title_font, title_size, title_color,
+    )
+
+    # Add chart (if path is provided and file exists)
+    chart_added = False
+    if chart_path:
+        chart_path = Path(chart_path)
+        if chart_path.exists():
+            slide.shapes.add_picture(
+                str(chart_path),
+                Inches(content_left),
+                Inches(content_top),
+                Inches(chart_width),
+                Inches(chart_height),
+            )
+            chart_added = True
+        else:
+            logger.warning(f"Chart path does not exist: {chart_path}")
+
+    # Add summary
+    if summary_text:
+        if chart_added:
+            # Summary on the right side when chart is present
+            summary_left = content_left + chart_width + summary_spacing
+            summary_w = summary_width
+        else:
+            # Summary takes more space when no chart
+            summary_left = content_left
+            summary_w = chart_width + summary_width + summary_spacing
+
+        _add_summary_box(
+            slide,
+            summary_text,
+            summary_left, content_top, summary_w, chart_height,
+            text_font, text_size, paragraph_spacing, text_color,
+        )
+
+    logger.info(f"Created slide: {slide_title}")
+    return prs
+
+
+def _add_title_box(
+    slide,
+    title_text: str,
+    left: float,
+    top: float,
+    width: float,
+    height: float,
+    font_name: str,
+    font_size: int,
+    color_rgb: tuple[int, int, int],
+) -> None:
+    """Add a styled title to a slide."""
+    title_box = slide.shapes.add_textbox(
+        Inches(left), Inches(top), Inches(width), Inches(height)
+    )
+    text_frame = title_box.text_frame
+    text_frame.clear()
+
+    p = text_frame.paragraphs[0]
+    p.level = 0
+
+    run = p.add_run()
+    run.text = title_text
+    run.font.name = font_name
+    run.font.size = Pt(font_size)
+    run.font.bold = True
+    run.font.color.rgb = RGBColor(*color_rgb)
+
+
+def _add_summary_box(
+    slide,
+    summary_text: str,
+    left: float,
+    top: float,
+    width: float,
+    height: float,
+    font_name: str,
+    font_size: int,
+    paragraph_spacing: int,
+    color_rgb: tuple[int, int, int],
+) -> None:
+    """Add formatted summary text box to slide."""
+    text_box = slide.shapes.add_textbox(
+        Inches(left), Inches(top), Inches(width), Inches(height)
+    )
+    text_frame = text_box.text_frame
+    text_frame.word_wrap = True
+    text_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
+    text_frame.margin_left = Inches(0.1)
+    text_frame.margin_right = Inches(0.1)
+    text_frame.margin_top = Inches(0.1)
+    text_frame.margin_bottom = Inches(0.1)
+
+    lines = summary_text.split("\n")
+    text_frame.clear()
+
+    para_count = 0
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        if para_count == 0:
+            p = text_frame.paragraphs[0]
+        else:
+            p = text_frame.add_paragraph()
+
+        cleaned_line = line[1:].strip() if line.startswith("•") else line
+
+        run = p.add_run()
+        run.text = f"• {cleaned_line}"
+        run.font.size = Pt(font_size)
+        run.font.name = font_name
+        run.font.color.rgb = RGBColor(*color_rgb)
+
+        p.level = 0
+        p.space_after = Pt(paragraph_spacing)
+
+        para_count += 1
+
+
+def combine_presentations(
+    presentations: list[Presentation],
+) -> Presentation:
+    """Combine multiple presentations into one.
+
+    This is a pure function that returns a combined Presentation object.
+
+    Args:
+        presentations: List of Presentation objects to combine
+
+    Returns:
+        Combined Presentation object
+    """
+    combined_prs = Presentation()
+    slides_combined = 0
+
+    for source_prs in presentations:
+        for source_slide in source_prs.slides:
+            slide_layout = _get_blank_layout(combined_prs)
+            new_slide = combined_prs.slides.add_slide(slide_layout)
+
+            # Copy all shapes
+            for shape in source_slide.shapes:
+                _copy_shape_to_slide(shape, new_slide)
+
+            slides_combined += 1
+
+    logger.info(f"Combined {slides_combined} slides into final presentation")
+    return combined_prs
+
+
+def _copy_shape_to_slide(shape, new_slide) -> None:
+    """Copy a shape from source slide to new slide."""
+    try:
+        if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+            image_stream = shape.image.blob
+            new_slide.shapes.add_picture(
+                io.BytesIO(image_stream),
+                shape.left, shape.top, shape.width, shape.height,
+            )
+
+        elif shape.shape_type == MSO_SHAPE_TYPE.TEXT_BOX or (
+            hasattr(shape, "text_frame") and shape.has_text_frame
+        ):
+            text_box = new_slide.shapes.add_textbox(
+                shape.left, shape.top, shape.width, shape.height
+            )
+            text_frame = text_box.text_frame
+            text_frame.word_wrap = True
+            text_frame.clear()
+
+            for i, src_paragraph in enumerate(shape.text_frame.paragraphs):
+                if i == 0:
+                    dst_paragraph = text_frame.paragraphs[0]
+                else:
+                    dst_paragraph = text_frame.add_paragraph()
+
+                dst_paragraph.level = src_paragraph.level
+
+                for src_run in src_paragraph.runs:
+                    dst_run = dst_paragraph.add_run()
+                    dst_run.text = src_run.text
+
+                    try:
+                        if src_run.font.size:
+                            dst_run.font.size = src_run.font.size
+                        if src_run.font.name:
+                            dst_run.font.name = src_run.font.name
+                        if src_run.font.bold is not None:
+                            dst_run.font.bold = src_run.font.bold
+                        if src_run.font.color and src_run.font.color.type is not None:
+                            try:
+                                if src_run.font.color.rgb:
+                                    dst_run.font.color.rgb = src_run.font.color.rgb
+                            except (AttributeError, TypeError):
+                                pass
+                    except (AttributeError, TypeError):
+                        pass
+
+                if not src_paragraph.runs:
+                    dst_run = dst_paragraph.add_run()
+                    dst_run.text = src_paragraph.text
+
+    except Exception as e:
+        logger.debug(f"Failed to copy shape: {e}")

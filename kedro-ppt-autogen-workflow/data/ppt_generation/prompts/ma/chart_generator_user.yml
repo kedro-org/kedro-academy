@@ -1,0 +1,14 @@
+messages:
+  - role: user
+    content: |
+      Please generate a chart based on the following requirements:
+
+      {chart_config}
+
+      Please:
+      1. Follow the chart instruction exactly as specified
+      2. Generate the appropriate visualization
+      3. Ensure the chart is professional and presentation-ready
+      4. Validate that the chart aligns with the slide title
+
+      Generate the chart according to the specific requirements.

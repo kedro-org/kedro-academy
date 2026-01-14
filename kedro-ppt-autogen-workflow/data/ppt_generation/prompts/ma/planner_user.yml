@@ -1,0 +1,17 @@
+messages:
+  - role: user
+    content: |
+      Please create a comprehensive presentation plan for the following slide:
+
+      Slide Title: {slide_title}
+      Chart Requirements: {chart_instruction}
+      Summary Requirements: {summary_instruction}
+      Available Data: {data_context}
+
+      Please provide a detailed plan that includes:
+      1. How to approach the chart generation
+      2. Key data points to highlight in summary
+      3. Coordination strategy between chart and summary
+      4. Overall slide coherence recommendations
+
+      Return your response as structured analysis with clear next steps for chart and summary generation.
