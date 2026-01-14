@@ -13,17 +13,17 @@ from typing import Any
 from pptx import Presentation
 from kedro.pipeline.llm_context import LLMContext
 
-from .agent_planner import create_planner_agent
-from .agent_chart import create_chart_generator_agent, generate_chart
-from .agent_summarizer import create_summarizer_agent, generate_summary
-from .agent_critic import create_critic_agent, run_qa_review
+# Import from new module structure
+from .planner import create_planner_agent
+from .chart import create_chart_generator_agent, generate_chart
+from .summary import create_summarizer_agent, generate_summary
+from .critic import create_critic_agent, run_qa_review
+from .presentation import create_slide, combine_presentations, format_summary_text
 from .orchestration_helpers import (
     create_agent_from_context,
     parse_slide_requirements,
     format_all_prompts,
 )
-from ppt_autogen_workflow.utils.ppt_builder import combine_presentations, create_slide
-from ppt_autogen_workflow.utils.node_helpers import format_summary_text
 
 logger = logging.getLogger(__name__)
 
