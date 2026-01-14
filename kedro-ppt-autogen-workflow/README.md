@@ -36,47 +36,53 @@ Input Data (CSV) → Tools (with data access) → Agents → Generated Content �
 
 ### Key Components
 
-1. **Shared Utilities** (`utils/`): Common implementations used by both pipelines
+1. **LLM Context Node** (`llm_context_node`): Kedro feature that bundles LLM + prompts + tools
+   - Creates `LLMContext` objects containing model client, prompts dict, and tools dict
+   - Reduces boilerplate by eliminating separate init_tools and compile nodes
+   - Uses `tool()` helper to associate tool builder functions with Kedro datasets
+
+2. **Shared Utilities** (`utils/`): Common implementations used by both pipelines
    - `tools_common.py`: Shared tool implementations (chart, summary, data lookup, slide creation)
    - `node_helpers.py`: Shared helper functions (format summary, extract results)
    - `chart_generator.py`, `summary_generator.py`, `ppt_builder.py`: Core generation logic
 
-2. **Tools** (`tools.py`): Function tools that agents can invoke
+3. **Tools** (`tools.py`): Function tools that agents can invoke
    - Import shared implementations from `utils/tools_common.py`
-   - MA pipeline: Each agent gets specific tools
-   - SA pipeline: Single agent gets all tools
+   - MA pipeline: Each agent gets specific tools via separate tool builder functions
+   - SA pipeline: Single agent gets all tools via `build_tools` function
 
-3. **Agents** (`agent.py`): AutoGen agents with specialized roles
-   - Each agent has access to specific tools
-   - Agents store requirements and formatted prompts internally
+4. **Agents** (separate agent files): AutoGen agents with specialized roles
+   - MA pipeline: `agent_planner.py`, `agent_chart.py`, `agent_summarizer.py`, `agent_critic.py`
+   - SA pipeline: `agent.py` with single PPTGenerationAgent
+   - Base classes in `base/agent.py` with structured output support (Pydantic models)
 
-4. **Nodes** (`nodes.py`): Kedro pipeline nodes
-   - Import shared helpers from `utils/node_helpers.py`
-   - `init_tools`: Builds tools with sales data
-   - `compile_*_agent`: Compiles agents with requirements and prompts
+5. **Nodes** (`nodes.py`): Kedro pipeline nodes
+   - Import shared helpers from `utils/node_helpers.py` and pipeline-specific helpers
+   - Use `LLMContext` to create agents with bundled LLM, prompts, and tools
    - `orchestrate_*/generate_*`: Coordinates agent execution
 
-5. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
+6. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
    - System prompts define agent behavior
    - User prompts define task instructions
-   - Placeholders are filled during compilation
+   - Loaded as `LangChainPromptDataset` and accessed via `LLMContext.prompts`
 
 ## Pipeline Patterns
 
 ### Multi-Agent (MA) Pipeline
 
-**Architecture**: Planner-driven with specialized agents
+**Architecture**: Planner-driven with specialized agents using `llm_context_node`
 
 ```
-1. analyze_requirements → Parse YAML, create agent-specific requirements
-2. compile_planner_agent → Planner analyzes requirements
-3. compile_chart_generator_agent → Chart agent with formatted prompts
-4. compile_summarizer_agent → Summarizer agent with formatted prompts
-5. compile_critic_agent → Critic agent for QA
-6. orchestrate_multi_agent_workflow → Round-robin execution
+1. create_planner_context    → Bundle LLM + prompts + tools for Planner
+2. create_chart_context      → Bundle LLM + prompts + tools for ChartGenerator
+3. create_summarizer_context → Bundle LLM + prompts + tools for Summarizer
+4. create_critic_context     → Bundle LLM + prompts + tools for Critic
+5. orchestrate_agents        → Create agents, coordinate execution
+6. assemble_presentation     → Combine charts + summaries into slides
 ```
 
 **Flow**:
+- LLM contexts bundle model client, prompts, and tools for each agent
 - Planner analyzes requirements and creates instructions
 - Chart Generator creates charts using tools
 - Summarizer creates summaries using tools (with chart status)
@@ -88,26 +94,28 @@ Input Data (CSV) → Tools (with data access) → Agents → Generated Content �
 - ✅ Specialized agents for each task
 - ✅ Context passing between agents
 - ✅ Intermediate outputs (charts, summaries) saved
+- ✅ Clean separation via `llm_context_node` pattern
 
 ### Single-Agent (SA) Pipeline
 
-**Architecture**: Single agent with all tools
+**Architecture**: Single agent with all tools using `llm_context_node`
 
 ```
-1. init_tools → Build all tools with sales data
-2. compile_ppt_agent → Single agent with requirements
-3. generate_presentation → Agent generates charts and summaries
+1. create_ppt_context      → Bundle LLM + prompts + tools for PPTGenerator
+2. generate_presentation   → Create agent, generate charts and summaries
 ```
 
 **Flow**:
+- LLM context bundles model client, prompts, and tools
 - Single agent receives queries to generate charts/summaries
 - Agent uses its tools (generate_sales_chart, generate_business_summary)
 - Results are extracted and combined into slides
 
 **Features**:
-- ✅ Simpler architecture
+- ✅ Simpler architecture (2 nodes)
 - ✅ Faster execution
 - ✅ Single agent handles all tasks
+- ✅ Clean separation via `llm_context_node` pattern
 - ❌ No quality assurance step
 
 ## Quick Start
@@ -261,32 +269,38 @@ Prompts use placeholders that are filled during agent compilation.
 │   │   │   ├── slide_generation_requirements.yaml
 │   │   │   └── sales_50_products.csv
 │   │   ├── prompts/              # Prompt templates
-│   │   │   ├── ma/               # Multi-agent prompts
-│   │   │   └── sa/               # Single-agent prompts
+│   │   │   ├── ma/               # Multi-agent prompts (8 files)
+│   │   │   └── sa/               # Single-agent prompts (2 files)
 │   │   ├── intermediate/         # Intermediate outputs
-│   │   │   ├── ma/
-│   │   │   │   ├── charts/       # Generated charts
-│   │   │   │   └── summaries/    # Generated summaries
-│   │   │   └── requirements/      # Parsed requirements (versioned)
+│   │   │   └── ma/
+│   │   │       ├── slide_chart_paths.json
+│   │   │       ├── slide_summaries.json
+│   │   │       └── slide_configs.json
 │   │   └── output/               # Final presentations
 │   │       ├── ma/
 │   │       └── sa/
 ├── src/ppt_autogen_workflow/
 │   ├── base/
-│   │   └── agent.py              # Base agent classes
+│   │   ├── __init__.py           # Exports base classes and Pydantic models
+│   │   └── agent.py              # BaseAgent with structured output support
 │   ├── datasets/
 │   │   └── autogen_model_client.py  # LLM client dataset
 │   ├── pipelines/
 │   │   ├── ma_slide_generation_autogen/
-│   │   │   ├── agent.py          # Multi-agent definitions
-│   │   │   ├── nodes.py          # Pipeline nodes
-│   │   │   ├── pipeline.py       # Pipeline definition
-│   │   │   └── tools.py          # Agent tools
+│   │   │   ├── agent_planner.py       # PlannerAgent definition
+│   │   │   ├── agent_chart.py         # ChartGeneratorAgent definition
+│   │   │   ├── agent_summarizer.py    # SummarizerAgent definition
+│   │   │   ├── agent_critic.py        # CriticAgent definition
+│   │   │   ├── nodes.py               # Pipeline nodes
+│   │   │   ├── orchestration_helpers.py  # Helper functions for orchestration
+│   │   │   ├── pipeline.py            # Pipeline definition (6 nodes)
+│   │   │   └── tools.py               # Agent tool builders
 │   │   └── sa_slide_generation_autogen/
-│   │       ├── agent.py          # Single-agent definition
-│   │       ├── nodes.py          # Pipeline nodes
-│   │       ├── pipeline.py       # Pipeline definition
-│   │       └── tools.py          # Agent tools
+│   │       ├── agent.py               # PPTGenerationAgent definition
+│   │       ├── agent_helpers.py       # Helper functions for agent operations
+│   │       ├── nodes.py               # Pipeline nodes
+│   │       ├── pipeline.py            # Pipeline definition (2 nodes)
+│   │       └── tools.py               # Agent tool builder
 │   └── utils/
 │       ├── tools_common.py       # Shared tool implementations
 │       ├── node_helpers.py       # Shared node helper functions
@@ -340,30 +354,37 @@ Check intermediate outputs:
 
 ## Key Design Patterns
 
-### 1. Shared Utilities
+### 1. LLM Context Node Pattern
+- `llm_context_node` bundles LLM + prompts + tools into `LLMContext` objects
+- Reduces pipeline boilerplate (MA: 6 nodes instead of 8, SA: 2 nodes instead of 3)
+- `tool()` helper associates tool builder functions with Kedro dataset inputs
+- Clean separation of concerns: context creation vs. agent execution
+
+### 2. Shared Utilities
 - Common tool implementations in `utils/tools_common.py`
 - Common node helpers in `utils/node_helpers.py`
 - Eliminates code duplication between MA and SA pipelines
 
-### 2. Prompt Separation
-- Prompts stored in YAML files, not hardcoded
-- Placeholders filled during agent compilation
+### 3. Prompt Separation
+- Prompts stored in YAML files as `LangChainPromptDataset`
+- Accessed via `LLMContext.prompts` dictionary
 - Easy to modify without code changes
 
-### 3. Tool-Based Data Access
-- Sales data captured in tool closures
+### 4. Tool-Based Data Access
+- Sales data captured in tool closures via tool builder functions
 - Agents access data through tools, not direct parameters
 - Clean separation between data and logic
 
-### 4. Requirement-Driven Compilation
-- Requirements parsed once during compilation
-- Stored in agent context for later use
-- Reduces redundant parsing
+### 5. Structured Output
+- Pydantic models for agent outputs (`ChartOutput`, `SummaryOutput`, `PlanOutput`, `QAFeedbackOutput`)
+- Type-safe responses from agents
+- Consistent data structures across pipelines
 
-### 5. Agent Specialization (MA)
+### 6. Agent Specialization (MA)
+- Separate agent files: `agent_planner.py`, `agent_chart.py`, `agent_summarizer.py`, `agent_critic.py`
 - Each agent has specific role and tools
 - Prompts formatted for each agent's needs
-- Context passed between agents
+- Context passed between agents via orchestration helpers
 
 ## License
 
