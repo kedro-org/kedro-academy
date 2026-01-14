@@ -1,104 +1,89 @@
-"""Multi-agent AutoGen PPT generation pipeline."""
+"""Multi-agent AutoGen PPT generation pipeline.
+
+This pipeline uses Kedro's llm_context_node to bundle LLM, prompts, and tools
+into LLMContext objects for each agent, reducing boilerplate and simplifying
+the pipeline structure.
+
+Pipeline structure (6 nodes):
+    1-4. llm_context_nodes: Create contexts for planner, chart, summarizer, critic
+    5. orchestrate_agents: Parse requirements, create agents, run workflow
+    6. assemble_presentation: Create final PowerPoint from agent outputs
+"""
 
 from kedro.pipeline import Pipeline, pipeline, node
+from kedro.pipeline.llm_context import llm_context_node, tool
 
-from .nodes import (
-    init_tools,
-    analyze_requirements,
-    compile_planner_agent,
-    compile_chart_generator_agent,
-    compile_summarizer_agent,
-    compile_critic_agent,
-    orchestrate_multi_agent_workflow,
-    assemble_presentation,
+from .nodes import orchestrate_multi_agent_workflow, assemble_presentation
+from .tools import (
+    build_planner_tools,
+    build_chart_generator_tools,
+    build_summarizer_tools,
+    build_critic_tools,
 )
 
 
 def create_pipeline(**kwargs) -> Pipeline:
     """Create the multi-agent PPT generation pipeline with planner-driven architecture."""
     return pipeline([
-        node(
-            func=init_tools,
-            inputs=["sales_data"],
-            outputs="tools",
-            name="init_tools_node",
-            tags=["tools"],
-        ),
-        node(
-            func=analyze_requirements,
-            inputs=[
-                "slide_generation_requirements",
-                "params:styling",
-                "params:layout",
-            ],
-            outputs=["planner_requirements", "chart_requirements", "summarizer_requirements"],
-            name="analyze_requirements",
-            tags=["analysis", "requirements"],
-        ),
-        node(
-            func=compile_planner_agent,
-            inputs=[
-                "planner_requirements",
+        # Context nodes: Bundle LLM + prompts + tools for each agent
+        llm_context_node(
+            outputs="planner_context",
+            llm="llm_autogen",
+            prompts=[
                 "planner_system_prompt",
                 "planner_user_prompt",
-                "llm_autogen",
-                "tools",
             ],
-            outputs="compiled_planner_agent",
-            name="compile_planner_agent",
-            tags=["autogen", "compilation", "planner"],
+            tools=[tool(build_planner_tools, "sales_data")],
+            name="create_planner_context",
         ),
-        node(
-            func=compile_chart_generator_agent,
-            inputs=[
-                "chart_requirements",
+        llm_context_node(
+            outputs="chart_context",
+            llm="llm_autogen",
+            prompts=[
                 "chart_generator_system_prompt",
                 "chart_generator_user_prompt",
-                "llm_autogen",
-                "tools",
             ],
-            outputs="compiled_chart_agent",
-            name="compile_chart_generator_agent",
-            tags=["autogen", "compilation", "chart_generator"],
+            tools=[tool(build_chart_generator_tools, "sales_data")],
+            name="create_chart_context",
         ),
-        node(
-            func=compile_summarizer_agent,
-            inputs=[
-                "summarizer_requirements",
+        llm_context_node(
+            outputs="summarizer_context",
+            llm="llm_autogen",
+            prompts=[
                 "summarizer_system_prompt",
                 "summarizer_user_prompt",
-                "llm_autogen",
-                "tools",
             ],
-            outputs="compiled_summarizer_agent",
-            name="compile_summarizer_agent",
-            tags=["autogen", "compilation", "summarizer"],
+            tools=[tool(build_summarizer_tools, "sales_data")],
+            name="create_summarizer_context",
         ),
-        node(
-            func=compile_critic_agent,
-            inputs=[
+        llm_context_node(
+            outputs="critic_context",
+            llm="llm_autogen",
+            prompts=[
                 "critic_system_prompt",
                 "critic_user_prompt",
-                "params:quality_assurance",
-                "llm_autogen",
-                "tools",
             ],
-            outputs="compiled_critic_agent",
-            name="compile_critic_agent",
-            tags=["autogen", "compilation", "critic"],
+            tools=[tool(build_critic_tools)],
+            name="create_critic_context",
         ),
+        # Orchestration node: Parse requirements, create agents, run workflow
         node(
             func=orchestrate_multi_agent_workflow,
             inputs=[
-                "compiled_planner_agent",
-                "compiled_chart_agent",
-                "compiled_summarizer_agent",
-                "compiled_critic_agent",
+                "planner_context",
+                "chart_context",
+                "summarizer_context",
+                "critic_context",
+                "slide_generation_requirements",
+                "params:styling",
+                "params:layout",
+                "params:quality_assurance",
             ],
             outputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
             name="orchestrate_agents",
             tags=["autogen", "orchestration"],
         ),
+        # Assembly node: Create final PowerPoint (deterministic)
         node(
             func=assemble_presentation,
             inputs=["slide_chart_paths", "slide_summaries", "slide_configs"],

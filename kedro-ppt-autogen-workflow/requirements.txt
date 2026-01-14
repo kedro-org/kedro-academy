@@ -1,5 +1,6 @@
 # Kedro Framework
-kedro~=1.0.0
+# Installing from main branch to use llm_context_node feature (PR #5273)
+kedro @ git+https://github.com/kedro-org/kedro.git@main
 kedro-datasets[pandas,matplotlib,yaml,openxml,text-TextDataset,partitions-PartitionedDataset,langchain-LangChainPromptDataset]>=3
 
 # Core Dependencies
