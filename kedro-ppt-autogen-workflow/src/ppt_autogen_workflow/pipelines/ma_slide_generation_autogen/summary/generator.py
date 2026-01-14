@@ -1,4 +1,8 @@
-"""Summary generation tool - Analyzes data and creates bullet points."""
+"""Summary generation logic for creating business summaries.
+
+This module contains all summary generation functionality used by the
+SummarizerAgent, including data analysis and bullet point generation.
+"""
 from __future__ import annotations
 
 import logging
@@ -10,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def analyze_dataframe(df: pd.DataFrame) -> dict[str, Any]:
-    """
-    Analyze dataframe and extract insights.
+    """Analyze dataframe and extract insights.
 
     Args:
         df: Input DataFrame
@@ -77,12 +80,11 @@ def analyze_dataframe(df: pd.DataFrame) -> dict[str, Any]:
     return insights
 
 
-def generate_summary(
+def generate_summary_text(
     df: pd.DataFrame,
     summary_instruction: str,
 ) -> str:
-    """
-    Generate business summary from DataFrame.
+    """Generate business summary from DataFrame.
 
     This is a pure function that returns formatted summary text.
 
@@ -95,7 +97,7 @@ def generate_summary(
     """
     insights = analyze_dataframe(df)
     instruction_lower = summary_instruction.lower()
-    
+
     bullet_points: list[str] = []
 
     # Sales-based content

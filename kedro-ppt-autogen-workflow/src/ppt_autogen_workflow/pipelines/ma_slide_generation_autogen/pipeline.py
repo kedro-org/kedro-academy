@@ -14,12 +14,12 @@ from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
 from .nodes import orchestrate_multi_agent_workflow, assemble_presentation
-from .tools import (
-    build_planner_tools,
-    build_chart_generator_tools,
-    build_summarizer_tools,
-    build_critic_tools,
-)
+
+# Import tool builders from new module structure
+from .planner import build_planner_tools
+from .chart import build_chart_generator_tools
+from .summary import build_summarizer_tools
+from .critic import build_critic_tools
 
 
 def create_pipeline(**kwargs) -> Pipeline:

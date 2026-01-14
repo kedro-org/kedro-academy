@@ -1,9 +1,8 @@
-"""Data analysis utilities for sales data processing.
+"""Data analysis utilities for the PlannerAgent.
 
-This module provides shared data analysis functions used by both
-single-agent and multi-agent pipeline tools.
+This module provides data analysis functions used by the PlannerAgent
+for understanding sales data and planning presentation workflow.
 """
-
 from __future__ import annotations
 
 import json
@@ -37,32 +36,18 @@ def analyze_sales_data(
     query: str,
     df: pd.DataFrame,
 ) -> dict[str, Any]:
-    """
-    Analyze sales data based on a natural language query.
+    """Analyze sales data based on a natural language query.
 
     Extracts insights based on query keywords:
     - "top": Top products, regional performance, category performance
-    - "summary" or "trend": Comprehensive business insights including
-      totals, averages, top performer, category/regional breakdown
+    - "summary" or "trend": Comprehensive business insights
 
     Args:
         query: Natural language query describing desired analysis
-        df: DataFrame containing sales data with expected columns:
-            FY_Sales, Product, Product_Category, Region
+        df: DataFrame containing sales data
 
     Returns:
-        Dictionary containing analysis results with keys:
-        - query: Original query string
-        - data_shape: Dict with rows and columns counts
-        - columns: List of column names
-        - top_products: (if "top" in query) List of top 10 products
-        - regional_performance: (if "top" in query) Dict of sales by region
-        - category_performance: (if "top" in query) Dict of sales by category
-        - total_sales, avg_sales, median_sales: (if "summary/trend") Aggregates
-        - top_performer: (if "summary/trend") Dict with top product details
-        - category_insights: (if "summary/trend") Category breakdown
-        - regional_insights: (if "summary/trend") Regional breakdown
-        - sample_data: First 3 rows of data
+        Dictionary containing analysis results
     """
     analysis: dict[str, Any] = {
         "query": query,
@@ -172,8 +157,7 @@ def analyze_sales_data_json(
     query: str,
     df: pd.DataFrame | None,
 ) -> str:
-    """
-    Analyze sales data and return JSON string result.
+    """Analyze sales data and return JSON string result.
 
     Convenience wrapper around analyze_sales_data() that handles
     None DataFrames and JSON serialization.
