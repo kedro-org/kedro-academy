@@ -16,9 +16,12 @@ from .agent_helpers import (
     create_slide_presentation,
     create_error_presentation,
 )
-from ppt_autogen_workflow.utils.ppt_builder import combine_presentations
+# Import shared utilities from MA pipeline and utils
+from ppt_autogen_workflow.pipelines.ma_slide_generation_autogen.presentation import (
+    combine_presentations,
+    format_summary_text,
+)
 from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
-from ppt_autogen_workflow.utils.node_helpers import format_summary_text
 
 logger = logging.getLogger(__name__)
 

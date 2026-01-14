@@ -41,25 +41,26 @@ Input Data (CSV) → Tools (with data access) → Agents → Generated Content �
    - Reduces boilerplate by eliminating separate init_tools and compile nodes
    - Uses `tool()` helper to associate tool builder functions with Kedro datasets
 
-2. **Shared Utilities** (`utils/`): Common implementations used by both pipelines
-   - `tools_common.py`: Shared tool implementations (chart, summary, data lookup, slide creation)
-   - `node_helpers.py`: Shared helper functions (format summary, extract results)
-   - `chart_generator.py`, `summary_generator.py`, `ppt_builder.py`: Core generation logic
+2. **Domain Modules** (MA Pipeline): Agent-specific code colocated by domain
+   - `chart/`: ChartGeneratorAgent, chart generation logic, and chart tools
+   - `summary/`: SummarizerAgent, summary generation logic, and summary tools
+   - `planner/`: PlannerAgent, data analysis logic, and planner tools
+   - `critic/`: CriticAgent and QA review tools
+   - `presentation/`: PPT building utilities (create_slide, combine_presentations)
+   - Each module contains `agent.py`, business logic (`generator.py`/`analyzer.py`/`builder.py`), and `tools.py`
 
-3. **Tools** (`tools.py`): Function tools that agents can invoke
-   - Import shared implementations from `utils/tools_common.py`
-   - MA pipeline: Each agent gets specific tools via separate tool builder functions
-   - SA pipeline: Single agent gets all tools via `build_tools` function
+3. **Shared Utilities** (`utils/`): True utilities only (no business logic)
+   - `fonts.py`: System font detection
+   - `instruction_parser.py`: YAML parsing for slide requirements
 
-4. **Agents** (separate agent files): AutoGen agents with specialized roles
-   - MA pipeline: `agent_planner.py`, `agent_chart.py`, `agent_summarizer.py`, `agent_critic.py`
-   - SA pipeline: `agent.py` with single PPTGenerationAgent
-   - Base classes in `base/agent.py` with structured output support (Pydantic models)
+4. **Base Classes** (`base/`): Shared agent infrastructure
+   - `agent.py`: BaseAgent with structured output support (Pydantic models)
+   - Output models: `ChartOutput`, `SummaryOutput`, `PlanOutput`, `QAFeedbackOutput`
 
 5. **Nodes** (`nodes.py`): Kedro pipeline nodes
-   - Import shared helpers from `utils/node_helpers.py` and pipeline-specific helpers
+   - Import from domain modules within the same pipeline
    - Use `LLMContext` to create agents with bundled LLM, prompts, and tools
-   - `orchestrate_*/generate_*`: Coordinates agent execution
+   - Clear data flow traceability (1 hop within same folder)
 
 6. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
    - System prompts define agent behavior
@@ -287,28 +288,40 @@ Prompts use placeholders that are filled during agent compilation.
 │   │   └── autogen_model_client.py  # LLM client dataset
 │   ├── pipelines/
 │   │   ├── ma_slide_generation_autogen/
-│   │   │   ├── agent_planner.py       # PlannerAgent definition
-│   │   │   ├── agent_chart.py         # ChartGeneratorAgent definition
-│   │   │   ├── agent_summarizer.py    # SummarizerAgent definition
-│   │   │   ├── agent_critic.py        # CriticAgent definition
-│   │   │   ├── nodes.py               # Pipeline nodes
-│   │   │   ├── orchestration_helpers.py  # Helper functions for orchestration
-│   │   │   ├── pipeline.py            # Pipeline definition (6 nodes)
-│   │   │   └── tools.py               # Agent tool builders
+│   │   │   ├── chart/                 # Chart generation domain module
+│   │   │   │   ├── __init__.py        # Exports agent, generator, tools
+│   │   │   │   ├── agent.py           # ChartGeneratorAgent
+│   │   │   │   ├── generator.py       # Chart generation logic
+│   │   │   │   └── tools.py           # Chart tools for agent
+│   │   │   ├── summary/               # Summary generation domain module
+│   │   │   │   ├── __init__.py        # Exports agent, generator, tools
+│   │   │   │   ├── agent.py           # SummarizerAgent
+│   │   │   │   ├── generator.py       # Summary generation logic
+│   │   │   │   └── tools.py           # Summary tools for agent
+│   │   │   ├── planner/               # Planning domain module
+│   │   │   │   ├── __init__.py        # Exports agent, analyzer, tools
+│   │   │   │   ├── agent.py           # PlannerAgent
+│   │   │   │   ├── analyzer.py        # Data analysis logic
+│   │   │   │   └── tools.py           # Planner tools for agent
+│   │   │   ├── critic/                # QA domain module
+│   │   │   │   ├── __init__.py        # Exports agent, tools
+│   │   │   │   ├── agent.py           # CriticAgent + run_qa_review
+│   │   │   │   └── tools.py           # QA review tools
+│   │   │   ├── presentation/          # PPT building module
+│   │   │   │   ├── __init__.py        # Exports builder functions
+│   │   │   │   └── builder.py         # create_slide, combine_presentations
+│   │   │   ├── nodes.py               # Pipeline nodes (imports from modules)
+│   │   │   ├── orchestration_helpers.py  # Agent creation helpers
+│   │   │   └── pipeline.py            # Pipeline definition (6 nodes)
 │   │   └── sa_slide_generation_autogen/
 │   │       ├── agent.py               # PPTGenerationAgent definition
-│   │       ├── agent_helpers.py       # Helper functions for agent operations
+│   │       ├── agent_helpers.py       # Helper functions (imports from MA modules)
 │   │       ├── nodes.py               # Pipeline nodes
 │   │       ├── pipeline.py            # Pipeline definition (2 nodes)
-│   │       └── tools.py               # Agent tool builder
-│   └── utils/
-│       ├── tools_common.py       # Shared tool implementations
-│       ├── node_helpers.py       # Shared node helper functions
-│       ├── chart_generator.py    # Chart generation utilities
-│       ├── data_analyzer.py      # Data analysis utilities
-│       ├── instruction_parser.py # YAML parser
-│       ├── ppt_builder.py        # PPT creation utilities
-│       └── summary_generator.py  # Summary generation utilities
+│   │       └── tools.py               # Tools (imports from MA modules)
+│   └── utils/                         # True utilities only
+│       ├── fonts.py              # System font detection
+│       └── instruction_parser.py # YAML parser for slide requirements
 └── requirements.txt
 ```
 
@@ -360,29 +373,36 @@ Check intermediate outputs:
 - `tool()` helper associates tool builder functions with Kedro dataset inputs
 - Clean separation of concerns: context creation vs. agent execution
 
-### 2. Shared Utilities
-- Common tool implementations in `utils/tools_common.py`
-- Common node helpers in `utils/node_helpers.py`
-- Eliminates code duplication between MA and SA pipelines
+### 2. Domain Module Architecture (MA Pipeline)
+- Agent-specific code colocated by domain (`chart/`, `summary/`, `planner/`, `critic/`, `presentation/`)
+- Each module contains: `agent.py`, business logic file, and `tools.py`
+- Clear data flow traceability: trace imports within same folder (1 hop vs 4 hops before)
+- SA pipeline reuses logic via imports from MA modules
 
-### 3. Prompt Separation
+### 3. Minimal Shared Utilities
+- `utils/` contains only true utilities with no business logic
+- `fonts.py`: System font detection
+- `instruction_parser.py`: YAML parsing
+- Business logic lives in domain modules, not utils
+
+### 4. Prompt Separation
 - Prompts stored in YAML files as `LangChainPromptDataset`
 - Accessed via `LLMContext.prompts` dictionary
 - Easy to modify without code changes
 
-### 4. Tool-Based Data Access
+### 5. Tool-Based Data Access
 - Sales data captured in tool closures via tool builder functions
 - Agents access data through tools, not direct parameters
 - Clean separation between data and logic
 
-### 5. Structured Output
+### 6. Structured Output
 - Pydantic models for agent outputs (`ChartOutput`, `SummaryOutput`, `PlanOutput`, `QAFeedbackOutput`)
 - Type-safe responses from agents
 - Consistent data structures across pipelines
 
-### 6. Agent Specialization (MA)
-- Separate agent files: `agent_planner.py`, `agent_chart.py`, `agent_summarizer.py`, `agent_critic.py`
-- Each agent has specific role and tools
+### 7. Agent Specialization (MA)
+- Domain modules: `chart/`, `summary/`, `planner/`, `critic/`
+- Each module owns its agent, business logic, and tools
 - Prompts formatted for each agent's needs
 - Context passed between agents via orchestration helpers
 

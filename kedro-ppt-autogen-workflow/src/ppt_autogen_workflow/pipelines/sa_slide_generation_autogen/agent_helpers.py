@@ -20,7 +20,8 @@ from pptx import Presentation
 
 from .agent import PPTGenerationAgent
 from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
-from ppt_autogen_workflow.utils.ppt_builder import create_slide
+# Import from MA pipeline's presentation module
+from ppt_autogen_workflow.pipelines.ma_slide_generation_autogen.presentation import create_slide
 
 logger = logging.getLogger(__name__)
 
