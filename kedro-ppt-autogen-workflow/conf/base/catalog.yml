@@ -79,35 +79,23 @@ critic_user_prompt:
 # ==============================================================================
 # INTERMEDIATE DATASETS - Multi-Agent Pipeline
 # ==============================================================================
+# Note: planner_requirements, chart_requirements, and summarizer_requirements
+# are now parsed internally in orchestrate_multi_agent_workflow node.
 
-planner_requirements:
+slide_chart_paths:
   type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/planner_requirements.json
+  filepath: data/ppt_generation/intermediate/ma/slide_chart_paths.json
   versioned: true
-
-chart_requirements:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/chart_requirements.json
-  versioned: true
-
-summarizer_requirements:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/summarizer_requirements.json
-  versioned: true
-
-slide_charts:
-  type: partitions.PartitionedDataset
-  path: data/ppt_generation/intermediate/ma/charts
-  dataset:
-    type: matplotlib.MatplotlibDataset
-  filename_suffix: .png
 
 slide_summaries:
-  type: partitions.PartitionedDataset
-  path: data/ppt_generation/intermediate/ma/summaries
-  dataset:
-    type: text.TextDataset
-  filename_suffix: .txt
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/ma/slide_summaries.json
+  versioned: true
+
+slide_configs:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/ma/slide_configs.json
+  versioned: true
 
 
 # ==============================================================================
