@@ -7,7 +7,6 @@ eliminate code duplication.
 
 from __future__ import annotations
 
-import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -15,6 +14,7 @@ from typing import Any, Generic, TypeVar
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_ext.models.openai import OpenAIChatCompletionClient
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -43,22 +43,16 @@ class BaseAgent(ABC, Generic[T]):
 
     This abstract base class provides common implementation for:
     - Agent initialization and compilation
-    - Tool usage extraction from responses
-    - Content extraction from agent messages
+    - Structured output handling via Pydantic models
 
-    Subclasses only need to implement the invoke() method with their
-    specific logic and output structure.
+    Subclasses implement the invoke() method and use _run_with_output()
+    to get typed responses.
 
     Example:
         ```python
         class MyAgent(BaseAgent["MyAgent"]):
-            async def invoke(self, task: str) -> dict[str, Any]:
-                self._ensure_compiled()
-                result = await self._agent.run(task=task)
-                return {
-                    "content": self._extract_content_from_response(result),
-                    "tools_used": self._extract_tools_used(result),
-                }
+            async def invoke(self, task: str) -> MyOutput:
+                return await self._run_with_output(task, MyOutput)
         ```
     """
 
@@ -103,69 +97,75 @@ class BaseAgent(ABC, Generic[T]):
                 f"{self.context.agent_name} not compiled. Call compile() first."
             )
 
-    def _extract_tools_used(self, result: Any) -> list[str]:
-        """Extract list of tools used from agent response messages.
+    async def _run_with_output(
+        self, task: str, output_type: type[BaseModel]
+    ) -> BaseModel:
+        """Run agent and return structured output.
 
-        Parses through agent messages to find tool call content blocks
-        and extracts their names.
-
-        Args:
-            result: The agent run result containing messages
-
-        Returns:
-            List of tool names that were invoked
-        """
-        tools_used = []
-        if not hasattr(result, "messages"):
-            return tools_used
-
-        for msg in result.messages:
-            if hasattr(msg, "content") and isinstance(msg.content, list):
-                for content_part in msg.content:
-                    if hasattr(content_part, "name"):
-                        tools_used.append(content_part.name)
-        return tools_used
-
-    def _extract_content_from_response(
-        self,
-        result: Any,
-        content_key: str = "content"
-    ) -> dict[str, Any]:
-        """Extract structured content from agent response.
-
-        Attempts to parse the last message as JSON. If parsing fails,
-        wraps the content in a dictionary with the specified key.
+        Runs the agent and parses the response into a Pydantic model.
+        Looks for tool results first, then tries to parse raw content.
 
         Args:
-            result: The agent run result containing messages
-            content_key: Key to use when wrapping non-JSON content
+            task: The task for the agent to process
+            output_type: Pydantic model class for structured output
 
         Returns:
-            Dictionary with extracted content
+            Instance of output_type with agent's response
         """
-        if not hasattr(result, "messages") or not result.messages:
-            return {}
+        self._ensure_compiled()
+        result = await self._agent.run(task=task)
 
-        content = str(result.messages[-1].content)
-        try:
-            if content.startswith("{"):
-                return json.loads(content)
-            return {f"{content_key}_text": content}
-        except json.JSONDecodeError:
-            return {f"{content_key}_text": content}
+        # Try to extract structured data from messages
+        if hasattr(result, 'messages') and result.messages:
+            for msg in reversed(result.messages):
+                parsed = self._try_parse_message(msg, output_type)
+                if parsed:
+                    return parsed
 
-    def _get_last_message_content(self, result: Any) -> str:
-        """Get the content of the last message from agent response.
+        # Return default instance if parsing fails
+        return output_type()
+
+    def _try_parse_message(
+        self, msg: Any, output_type: type[BaseModel]
+    ) -> BaseModel | None:
+        """Try to parse a message into the output type.
 
         Args:
-            result: The agent run result containing messages
+            msg: Message from agent response
+            output_type: Pydantic model class to parse into
 
         Returns:
-            String content of the last message, or empty string if not available
+            Parsed model instance or None if parsing fails
         """
-        if hasattr(result, "messages") and result.messages:
-            return str(result.messages[-1].content)
-        return ""
+        import json
+
+        if not hasattr(msg, 'content'):
+            return None
+
+        content = msg.content
+
+        # Handle list content (tool results)
+        if isinstance(content, list):
+            for item in content:
+                if hasattr(item, 'content'):
+                    try:
+                        data = json.loads(item.content) if isinstance(item.content, str) else item.content
+                        if isinstance(data, dict):
+                            return output_type(**data)
+                    except (json.JSONDecodeError, TypeError, ValueError):
+                        continue
+
+        # Handle string content
+        if isinstance(content, str):
+            content = content.strip()
+            if content.startswith('{'):
+                try:
+                    data = json.loads(content)
+                    return output_type(**data)
+                except (json.JSONDecodeError, TypeError, ValueError):
+                    pass
+
+        return None
 
     @abstractmethod
     async def invoke(self, task: str) -> Any:
