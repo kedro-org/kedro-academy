@@ -1,0 +1,482 @@
+{
+  "ppt_generator_system_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "ppt_generator_user_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "planner_system_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "planner_user_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "chart_generator_system_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "chart_generator_user_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "summarizer_system_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "summarizer_user_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "critic_system_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "critic_user_prompt": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#6B21A8",
+        "stroke": "#9333EA",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#E9D5FF",
+        "stroke": "#A855F7",
+        "color": "#581C87"
+      }
+    }
+  },
+  "ma_parse_slide_requirements": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#0F766E",
+        "stroke": "#14B8A6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#CCFBF1",
+        "stroke": "#2DD4BF",
+        "color": "#134E4A"
+      }
+    }
+  },
+  "sa_parse_slide_requirements": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#0F766E",
+        "stroke": "#14B8A6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#CCFBF1",
+        "stroke": "#2DD4BF",
+        "color": "#134E4A"
+      }
+    }
+  },
+  "ma_assemble_presentation": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#0F766E",
+        "stroke": "#14B8A6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#CCFBF1",
+        "stroke": "#2DD4BF",
+        "color": "#134E4A"
+      }
+    }
+  },
+  "sa_assemble_presentation": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#0F766E",
+        "stroke": "#14B8A6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#CCFBF1",
+        "stroke": "#2DD4BF",
+        "color": "#134E4A"
+      }
+    }
+  },
+  "sa_create_ppt_context": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#B45309",
+        "stroke": "#F59E0B",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FEF3C7",
+        "stroke": "#FBBF24",
+        "color": "#92400E"
+      }
+    }
+  },
+  "ma_create_planner_context": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#B45309",
+        "stroke": "#F59E0B",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FEF3C7",
+        "stroke": "#FBBF24",
+        "color": "#92400E"
+      }
+    }
+  },
+  "ma_create_chart_context": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#B45309",
+        "stroke": "#F59E0B",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FEF3C7",
+        "stroke": "#FBBF24",
+        "color": "#92400E"
+      }
+    }
+  },
+  "ma_create_summarizer_context": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#B45309",
+        "stroke": "#F59E0B",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FEF3C7",
+        "stroke": "#FBBF24",
+        "color": "#92400E"
+      }
+    }
+  },
+  "ma_create_critic_context": {
+    "opacity": "0.95",
+    "strokeWidth": "2.5px",
+    "themes": {
+      "dark": {
+        "fill": "#B45309",
+        "stroke": "#F59E0B",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FEF3C7",
+        "stroke": "#FBBF24",
+        "color": "#92400E"
+      }
+    }
+  },
+  "ma_orchestrate_agents": {
+    "opacity": "0.95",
+    "strokeWidth": "3px",
+    "themes": {
+      "dark": {
+        "fill": "#C2410C",
+        "stroke": "#F97316",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FFEDD5",
+        "stroke": "#FB923C",
+        "color": "#7C2D12"
+      }
+    }
+  },
+  "sa_run_ppt_agent": {
+    "opacity": "0.95",
+    "strokeWidth": "3px",
+    "themes": {
+      "dark": {
+        "fill": "#C2410C",
+        "stroke": "#F97316",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#FFEDD5",
+        "stroke": "#FB923C",
+        "color": "#7C2D12"
+      }
+    }
+  },
+  "slide_generation_requirements": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "sales_data": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "ma_slide_configs": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "sa_slide_configs": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "ma_slide_content": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "sa_slide_content": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "sales_analysis_ma": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "sales_analysis_sa": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#1E40AF",
+        "stroke": "#3B82F6",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DBEAFE",
+        "stroke": "#60A5FA",
+        "color": "#1E3A8A"
+      }
+    }
+  },
+  "llm_autogen": {
+    "opacity": "0.9",
+    "strokeWidth": "2px",
+    "themes": {
+      "dark": {
+        "fill": "#166534",
+        "stroke": "#22C55E",
+        "color": "#FFFFFF"
+      },
+      "light": {
+        "fill": "#DCFCE7",
+        "stroke": "#4ADE80",
+        "color": "#14532D"
+      }
+    }
+  }
+}
