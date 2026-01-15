@@ -90,14 +90,14 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "params:layout",
                 "params:quality_assurance",
             ],
-            outputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
+            outputs="ma_slide_content",
             name="orchestrate_agents",
             tags=["autogen", "agentic", "orchestration"],
         ),
         # Step 7: Assembly node - Create final PowerPoint (deterministic)
         node(
             func=assemble_presentation,
-            inputs="slide_configs",
+            inputs="ma_slide_content",
             outputs="sales_analysis_ma",
             name="assemble_presentation",
             tags=["deterministic", "assembly"],

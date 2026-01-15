@@ -89,11 +89,11 @@ def orchestrate_multi_agent_workflow(
     styling_params: dict[str, Any],
     layout_params: dict[str, Any],
     quality_assurance_params: dict[str, Any],
-) -> tuple[dict[str, str], dict[str, str], dict[str, Any]]:
+) -> dict[str, Any]:
     """Orchestrate multi-agent workflow to generate charts and summaries.
 
     This is the agentic node that coordinates multiple agents to generate content.
-    It receives pre-parsed requirements and outputs raw results.
+    It receives pre-parsed requirements and outputs slide content for assembly.
 
     Args:
         planner_context: LLMContext for planner agent
@@ -106,7 +106,7 @@ def orchestrate_multi_agent_workflow(
         quality_assurance_params: QA parameters for critic
 
     Returns:
-        Tuple of (slide_chart_paths, slide_summaries, slide_configs)
+        Dict containing slides (with content), layout, and styling for assembly
     """
     # Extract parsed requirements
     planner_slides = slide_configs.get('planner_slides', {})
@@ -129,8 +129,6 @@ def orchestrate_multi_agent_workflow(
     )
 
     # Run multi-agent workflow
-    slide_chart_paths = {}
-    slide_summaries = {}
     slide_content = {}
 
     for slide_key, config in planner_slides.items():
@@ -141,7 +139,6 @@ def orchestrate_multi_agent_workflow(
         chart_path = generate_chart(
             chart_agent, chart_prompts[slide_key], slide_key, config.get('chart_instruction', '')
         )
-        slide_chart_paths[slide_key] = chart_path
 
         # Summary generation
         chart_status = f"Chart generated: {chart_path}" if chart_path else "Chart generation in progress"
@@ -149,14 +146,12 @@ def orchestrate_multi_agent_workflow(
         summary_text = generate_summary(
             summarizer_agent, summary_query, slide_key, config.get('summary_instruction', '')
         )
-        formatted_summary = format_summary_text(summary_text)
-        slide_summaries[slide_key] = formatted_summary
 
         # Bundle content for assembly
         slide_content[slide_key] = {
             'slide_title': config['slide_title'],
             'chart_path': chart_path,
-            'summary': formatted_summary,
+            'summary': format_summary_text(summary_text),
         }
 
         # QA review
@@ -166,7 +161,7 @@ def orchestrate_multi_agent_workflow(
         )
 
     # Package results with layout and styling for assembly
-    return slide_chart_paths, slide_summaries, {
+    return {
         'slides': slide_content,
         'layout': layout_params,
         'styling': styling_params,

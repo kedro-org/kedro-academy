@@ -50,7 +50,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "ppt_llm_context",
                 "sa_slide_configs",
             ],
-            outputs=["sa_slide_chart_paths", "sa_slide_summaries", "sa_slide_content"],
+            outputs="sa_slide_content",
             name="run_ppt_agent",
             tags=["autogen", "agentic", "single_agent"],
         ),

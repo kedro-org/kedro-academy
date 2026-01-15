@@ -63,20 +63,18 @@ def parse_requirements(
 def run_ppt_agent(
     llm_context: LLMContext,
     slide_configs: dict[str, Any],
-) -> tuple[dict[str, str], dict[str, str], dict[str, Any]]:
+) -> dict[str, Any]:
     """Run PPT agent to generate charts and summaries.
 
     This is the agentic node that uses the LLM to generate content.
-    It receives parsed requirements and outputs raw chart paths, summaries,
-    and combined slide content for assembly.
+    It receives parsed requirements and outputs slide content for assembly.
 
     Args:
         llm_context: LLMContext containing llm, prompts, and tools
         slide_configs: Parsed slide configurations from parse_requirements
 
     Returns:
-        Tuple of (slide_chart_paths, slide_summaries, slide_content)
-        where slide_content bundles everything needed for assembly
+        Dict mapping slide_key to content dict with slide_title, chart_path, summary
     """
     try:
         # Create the PPT agent directly from LLMContext
@@ -103,8 +101,6 @@ def run_ppt_agent(
             formatted_prompts[slide_key] = formatted_prompt
 
         # Generate charts and summaries for each slide
-        slide_chart_paths = {}
-        slide_summaries = {}
         slide_content = {}
 
         for slide_key, config in slides.items():
@@ -114,23 +110,20 @@ def run_ppt_agent(
             chart_path = generate_chart(
                 agent, user_prompt, slide_key, config.get('chart_instruction', '')
             )
-            slide_chart_paths[slide_key] = chart_path
 
             # Generate summary
             summary_text = generate_summary(
                 agent, user_prompt, slide_key, chart_path
             )
-            formatted_summary = format_summary_text(summary_text)
-            slide_summaries[slide_key] = formatted_summary
 
             # Bundle content for assembly
             slide_content[slide_key] = {
                 'slide_title': config['slide_title'],
                 'chart_path': chart_path,
-                'summary': formatted_summary,
+                'summary': format_summary_text(summary_text),
             }
 
-        return slide_chart_paths, slide_summaries, slide_content
+        return slide_content
 
     except Exception as e:
         logger.error(f"PPT agent execution failed: {str(e)}", exc_info=True)

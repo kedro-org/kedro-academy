@@ -24,19 +24,9 @@ ma_slide_configs:
   filepath: data/ppt_generation/intermediate/ma/slide_configs_parsed.json
   versioned: true
 
-slide_chart_paths:
+ma_slide_content:
   type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/slide_chart_paths.json
-  versioned: true
-
-slide_summaries:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/slide_summaries.json
-  versioned: true
-
-slide_configs:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/slide_configs.json
+  filepath: data/ppt_generation/intermediate/ma/slide_content.json
   versioned: true
 
 
@@ -57,16 +47,6 @@ sales_analysis_ma:
 sa_slide_configs:
   type: json.JSONDataset
   filepath: data/ppt_generation/intermediate/sa/slide_configs_parsed.json
-  versioned: true
-
-sa_slide_chart_paths:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/sa/slide_chart_paths.json
-  versioned: true
-
-sa_slide_summaries:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/sa/slide_summaries.json
   versioned: true
 
 sa_slide_content:
