@@ -1,4 +1,4 @@
-# --- LLM setup ---
+# --- LLMs setup ---
 llm:
   type: langchain.ChatOpenAIDataset
   kwargs:
@@ -10,6 +10,13 @@ llm_openai:
   type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
   model_name: "gpt-4o"
   model_settings:
+    temperature: 0.0
+  credentials: openai
+
+llm_autogen:
+  type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
+  kwargs:
+    model: "gpt-4o"
     temperature: 0.0
   credentials: openai
 
