@@ -1,7 +1,9 @@
 """Kedro nodes for multi-agent AutoGen PPT generation pipeline.
 
-This module contains only node functions used in the pipeline definition.
-Helper functions are in orchestration_helpers.py.
+This module contains node functions with clear separation between:
+1. parse_requirements - Deterministic data preparation
+2. orchestrate_agents - Agentic chart/summary generation
+3. assemble_presentation - Deterministic slide assembly
 """
 from __future__ import annotations
 
@@ -21,11 +23,64 @@ from .critic import create_critic_agent, run_qa_review
 from .presentation import create_slide, combine_presentations, format_summary_text
 from .orchestration_helpers import (
     create_agent_from_context,
-    parse_slide_requirements,
     format_all_prompts,
 )
+from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
 
 logger = logging.getLogger(__name__)
+
+
+def parse_requirements(
+    slide_generation_requirements: dict[str, Any],
+) -> dict[str, Any]:
+    """Parse slide generation requirements from YAML.
+
+    This is a deterministic node that prepares slide configurations
+    for the agents to process.
+
+    Args:
+        slide_generation_requirements: Raw slide configuration from YAML
+
+    Returns:
+        Parsed slide configurations with agent-specific views
+    """
+    slide_definitions = parse_instructions_yaml(slide_generation_requirements)
+    data_context = "Sales data available through agent tools"
+
+    planner_slides = {}
+    chart_slides = {}
+    summarizer_slides = {}
+
+    for slide_key, slide_config in slide_definitions.items():
+        objective = slide_config.get('objective', {})
+        slide_title = objective.get('slide_title', slide_key)
+        chart_instruction = objective.get('chart_instruction', '')
+        summary_instruction = objective.get('summary_instruction', '')
+
+        planner_slides[slide_key] = {
+            'slide_title': slide_title,
+            'chart_instruction': chart_instruction,
+            'summary_instruction': summary_instruction,
+            'data_context': data_context,
+        }
+
+        chart_slides[slide_key] = {
+            'slide_title': slide_title,
+            'chart_instruction': chart_instruction,
+            'data_context': data_context,
+        }
+
+        summarizer_slides[slide_key] = {
+            'slide_title': slide_title,
+            'summary_instruction': summary_instruction,
+            'data_context': data_context,
+        }
+
+    return {
+        'planner_slides': planner_slides,
+        'chart_slides': chart_slides,
+        'summarizer_slides': summarizer_slides,
+    }
 
 
 def orchestrate_multi_agent_workflow(
@@ -33,19 +88,22 @@ def orchestrate_multi_agent_workflow(
     chart_context: LLMContext,
     summarizer_context: LLMContext,
     critic_context: LLMContext,
-    slide_generation_requirements: dict[str, Any],
+    slide_configs: dict[str, Any],
     styling_params: dict[str, Any],
     layout_params: dict[str, Any],
     quality_assurance_params: dict[str, Any],
 ) -> tuple[dict[str, str], dict[str, str], dict[str, Any]]:
     """Orchestrate multi-agent workflow to generate charts and summaries.
 
+    This is the agentic node that coordinates multiple agents to generate content.
+    It receives pre-parsed requirements and outputs raw results.
+
     Args:
         planner_context: LLMContext for planner agent
         chart_context: LLMContext for chart generator agent
         summarizer_context: LLMContext for summarizer agent
         critic_context: LLMContext for critic agent
-        slide_generation_requirements: Raw slide configuration from YAML
+        slide_configs: Parsed slide configurations from parse_requirements
         styling_params: Styling parameters for presentation
         layout_params: Layout parameters for presentation
         quality_assurance_params: QA parameters for critic
@@ -53,12 +111,12 @@ def orchestrate_multi_agent_workflow(
     Returns:
         Tuple of (slide_chart_paths, slide_summaries, slide_configs)
     """
-    # Step 1: Parse requirements
-    planner_slides, chart_slides, summarizer_slides = parse_slide_requirements(
-        slide_generation_requirements
-    )
+    # Extract parsed requirements
+    planner_slides = slide_configs.get('planner_slides', {})
+    chart_slides = slide_configs.get('chart_slides', {})
+    summarizer_slides = slide_configs.get('summarizer_slides', {})
 
-    # Step 2: Create agents from LLMContext objects
+    # Create agents from LLMContext objects
     planner_agent = create_agent_from_context(
         planner_context, "planner_system_prompt", create_planner_agent
     )
@@ -72,7 +130,7 @@ def orchestrate_multi_agent_workflow(
         critic_context, "critic_system_prompt", create_critic_agent
     )
 
-    # Step 3: Format prompts
+    # Format prompts
     critic_user_prompt = critic_context.prompts.get("critic_user_prompt")
     planner_prompts, chart_prompts, summarizer_prompts = format_all_prompts(
         planner_slides, chart_slides, summarizer_slides,
@@ -81,7 +139,7 @@ def orchestrate_multi_agent_workflow(
         summarizer_context.prompts.get("summarizer_user_prompt"),
     )
 
-    # Step 4: Run multi-agent workflow
+    # Run multi-agent workflow
     slide_chart_paths = {}
     slide_summaries = {}
 
@@ -109,7 +167,7 @@ def orchestrate_multi_agent_workflow(
             config['slide_title'], chart_path, summary_text, config
         )
 
-    # Package results
+    # Package results - include planner_slides for assemble_presentation
     return slide_chart_paths, slide_summaries, {
         'slides': planner_slides,
         'layout': layout_params,

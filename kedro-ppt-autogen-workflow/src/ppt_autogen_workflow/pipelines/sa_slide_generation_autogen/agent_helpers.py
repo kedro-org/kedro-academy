@@ -20,8 +20,6 @@ from pptx import Presentation
 
 from .agent import PPTGenerationAgent
 from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
-# Import from MA pipeline's presentation module
-from ppt_autogen_workflow.pipelines.ma_slide_generation_autogen.presentation import create_slide
 
 logger = logging.getLogger(__name__)
 
@@ -109,21 +107,6 @@ def _create_fallback_summary(slide_key: str, instruction: str = "") -> str:
     if instruction:
         return f"• Analysis for {slide_key}\n• Data insights based on: {instruction[:100]}..."
     return f"• Analysis for {slide_key}\n• Data insights generated"
-
-
-def create_slide_presentation(title: str, chart_path: str | None, summary: str) -> Presentation:
-    """Create a single slide presentation.
-
-    Args:
-        title: Slide title
-        chart_path: Path to chart image
-        summary: Summary text
-
-    Returns:
-        Presentation object with single slide
-    """
-    chart = chart_path if chart_path and Path(chart_path).exists() else ""
-    return create_slide(slide_title=title, chart_path=chart, summary_text=summary)
 
 
 def create_error_presentation(error_message: str) -> Presentation:

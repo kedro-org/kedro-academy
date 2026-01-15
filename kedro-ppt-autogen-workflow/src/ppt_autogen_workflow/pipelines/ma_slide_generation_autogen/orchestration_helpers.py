@@ -9,8 +9,6 @@ from typing import Any
 
 from kedro.pipeline.llm_context import LLMContext
 
-from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
-
 
 def create_agent_from_context(
     context: LLMContext,
@@ -44,52 +42,6 @@ def create_agent_from_context(
     )
 
     return create_agent_func(model_client, system_prompt_text, tools)
-
-
-def parse_slide_requirements(
-    slide_generation_requirements: dict[str, Any],
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    """Parse slide requirements into agent-specific configurations.
-
-    Args:
-        slide_generation_requirements: Raw slide configuration from YAML
-
-    Returns:
-        Tuple of (planner_slides, chart_slides, summarizer_slides)
-    """
-    slide_definitions = parse_instructions_yaml(slide_generation_requirements)
-    data_context = "Sales data available through agent tools"
-
-    planner_slides = {}
-    chart_slides = {}
-    summarizer_slides = {}
-
-    for slide_key, slide_config in slide_definitions.items():
-        objective = slide_config.get('objective', {})
-        slide_title = objective.get('slide_title', slide_key)
-        chart_instruction = objective.get('chart_instruction', '')
-        summary_instruction = objective.get('summary_instruction', '')
-
-        planner_slides[slide_key] = {
-            'slide_title': slide_title,
-            'chart_instruction': chart_instruction,
-            'summary_instruction': summary_instruction,
-            'data_context': data_context,
-        }
-
-        chart_slides[slide_key] = {
-            'slide_title': slide_title,
-            'chart_instruction': chart_instruction,
-            'data_context': data_context,
-        }
-
-        summarizer_slides[slide_key] = {
-            'slide_title': slide_title,
-            'summary_instruction': summary_instruction,
-            'data_context': data_context,
-        }
-
-    return planner_slides, chart_slides, summarizer_slides
 
 
 def format_prompt(template: Any, **kwargs) -> str:

@@ -1,19 +1,22 @@
 """Multi-agent AutoGen PPT generation pipeline.
 
-This pipeline uses Kedro's llm_context_node to bundle LLM, prompts, and tools
-into LLMContext objects for each agent, reducing boilerplate and simplifying
-the pipeline structure.
+This pipeline demonstrates clear separation between:
+1. Deterministic data preparation (parse_requirements)
+2. LLM context assembly (llm_context_nodes for each agent)
+3. Agentic content generation (orchestrate_agents)
+4. Deterministic presentation assembly (assemble_presentation)
 
-Pipeline structure (6 nodes):
-    1-4. llm_context_nodes: Create contexts for planner, chart, summarizer, critic
-    5. orchestrate_agents: Parse requirements, create agents, run workflow
-    6. assemble_presentation: Create final PowerPoint from agent outputs
+Pipeline structure (7 nodes):
+    1. parse_requirements: Parse YAML requirements (deterministic)
+    2-5. llm_context_nodes: Create contexts for planner, chart, summarizer, critic
+    6. orchestrate_agents: Run multi-agent workflow (agentic)
+    7. assemble_presentation: Create final PowerPoint (deterministic)
 """
 
 from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
-from .nodes import orchestrate_multi_agent_workflow, assemble_presentation
+from .nodes import parse_requirements, orchestrate_multi_agent_workflow, assemble_presentation
 
 # Import tool builders from new module structure
 from .planner import build_planner_tools
@@ -25,7 +28,15 @@ from .critic import build_critic_tools
 def create_pipeline(**kwargs) -> Pipeline:
     """Create the multi-agent PPT generation pipeline with planner-driven architecture."""
     return pipeline([
-        # Context nodes: Bundle LLM + prompts + tools for each agent
+        # Step 1: Parse requirements (deterministic)
+        node(
+            func=parse_requirements,
+            inputs="slide_generation_requirements",
+            outputs="ma_slide_configs",
+            name="parse_requirements",
+            tags=["deterministic", "data_preparation"],
+        ),
+        # Steps 2-5: Context nodes - Bundle LLM + prompts + tools for each agent
         llm_context_node(
             outputs="planner_context",
             llm="llm_autogen",
@@ -66,7 +77,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             tools=[tool(build_critic_tools)],
             name="create_critic_context",
         ),
-        # Orchestration node: Parse requirements, create agents, run workflow
+        # Step 6: Orchestration node - Run multi-agent workflow (agentic)
         node(
             func=orchestrate_multi_agent_workflow,
             inputs=[
@@ -74,21 +85,21 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "chart_context",
                 "summarizer_context",
                 "critic_context",
-                "slide_generation_requirements",
+                "ma_slide_configs",
                 "params:styling",
                 "params:layout",
                 "params:quality_assurance",
             ],
             outputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
             name="orchestrate_agents",
-            tags=["autogen", "orchestration"],
+            tags=["autogen", "agentic", "orchestration"],
         ),
-        # Assembly node: Create final PowerPoint (deterministic)
+        # Step 7: Assembly node - Create final PowerPoint (deterministic)
         node(
             func=assemble_presentation,
             inputs=["slide_chart_paths", "slide_summaries", "slide_configs"],
             outputs="sales_analysis_ma",
             name="assemble_presentation",
-            tags=["presentation", "assembly"],
+            tags=["deterministic", "assembly"],
         ),
     ])
