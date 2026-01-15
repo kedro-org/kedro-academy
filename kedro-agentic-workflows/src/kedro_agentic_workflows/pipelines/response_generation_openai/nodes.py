@@ -2,14 +2,15 @@ from datetime import datetime
 import logging
 from typing import Any
 
-from langchain_core.messages import AIMessage
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_openai import ChatOpenAI
 import pandas as pd
+from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
-from .agent import ResponseGenerationAgent
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+
+from .agent import ResponseGenerationAgentOpenAI
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
+from ...datasets.openai_model_dataset import OpenAIModelConfig
 from ...utils import log_message, AgentContext
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def init_tools(
 
 
 def init_response_generation_context(
-    llm: ChatOpenAI,
+    llm_openai: OpenAIModelConfig,
     tool_prompt: PromptTemplate,
     response_prompt: ChatPromptTemplate,
     tools: dict[str, Any],
@@ -38,7 +39,7 @@ def init_response_generation_context(
     - Attaches tool prompt and response prompt.
     """
     ctx = AgentContext(agent_id="response_generation_agent")
-    ctx.llm = llm
+    ctx.llm = llm_openai
 
     for name, fn in tools.items():
         ctx.add_tool(name, fn)
@@ -67,7 +68,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentOpenAI(context=response_generation_context)
         agent.compile()
 
         context = {

@@ -9,3 +9,4 @@ kedro-viz>=12.2.0
 langgraph~=1.0.0
 scikit-learn~=1.7.2
 questionary~=2.1.1
+openai-agents
