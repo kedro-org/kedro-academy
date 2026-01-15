@@ -1,0 +1,19 @@
+{
+  "slides": {
+    "slide_1": {
+      "slide_title": "Top 10 Products Performance Analysis",
+      "chart_path": "/var/folders/yq/c20bj7wj6k12th672929gw1w0000gp/T/tmpkn00h_qu/chart_8720.png",
+      "summary": "\u2022 The top 10 products generated $14,480,000 in total sales, representing 34.0% of overall performance\n\u2022 Product_H leads with $1,600,000, followed by Product_EE at $1,550,000"
+    },
+    "slide_2": {
+      "slide_title": "Product Category Distribution",
+      "chart_path": "/var/folders/yq/c20bj7wj6k12th672929gw1w0000gp/T/tmpwrprxk9l/chart_238.png",
+      "summary": "\u2022 Electronics dominates with $20,500,000 (48.2% of total sales)"
+    },
+    "slide_3": {
+      "slide_title": "Regional Sales Performance",
+      "chart_path": "/var/folders/yq/c20bj7wj6k12th672929gw1w0000gp/T/tmpfbm5qxsn/chart_4412.png",
+      "summary": "\u2022 Europe leads regional performance with $16,950,000 (39.9% of total)"
+    }
+  }
+}

@@ -1,9 +1,4 @@
-"""Base agent classes for AutoGen integration.
-
-This module provides shared base classes for all AutoGen agents in the project.
-Both single-agent and multi-agent pipelines can inherit from BaseAgent to
-eliminate code duplication.
-"""
+"""Base agent classes for AutoGen integration."""
 
 from __future__ import annotations
 
@@ -20,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 # Type variable for generic agent typing
 T = TypeVar("T", bound="BaseAgent")
-
 
 class BaseAgent(ABC, Generic[T]):
     """Base class for all AutoGen agents with shared functionality.

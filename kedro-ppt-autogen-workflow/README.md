@@ -7,7 +7,8 @@ Automated PowerPoint presentation generation from structured YAML instructions u
 ## Table of Contents
 
 - [Architecture](#architecture)
-- [Pipeline Patterns](#pipeline-patterns)
+- [Data Flow](#data-flow)
+- [Pipeline Structure](#pipeline-structure)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [Project Structure](#project-structure)
@@ -22,128 +23,151 @@ This project implements two pipeline patterns for generating PowerPoint presenta
 1. **Multi-Agent (MA) Pipeline** - Uses specialized agents (Planner, Chart Generator, Summarizer, Critic) working in collaboration
 2. **Single-Agent (SA) Pipeline** - Uses one agent with all necessary tools
 
-Both pipelines follow the same architectural pattern:
-- **Separation of Concerns**: Prompts are stored in YAML files, separate from code
-- **Tool-Based Data Access**: Sales data is accessed through agent tools, not passed directly
-- **Requirement-Driven**: Slide requirements are parsed and stored in agents during compilation
-- **Agent Invocation**: Agents use their tools to generate charts and summaries
+Both pipelines follow a **three-phase architecture**:
+- **Preprocessing** (Deterministic): Parse YAML instructions into structured configurations
+- **Agentic** (LLM-powered): Agents analyze data on demand and generate content
+- **Postprocessing** (Deterministic): Assemble final presentations from generated content
 
-### Data Flow
+### Key Design Principles
 
-```
-Input Data (CSV) → Tools (with data access) → Agents → Generated Content → PPT Slides
-```
+1. **Separation of Concerns**: Clear boundaries between deterministic and agentic logic
+2. **On-Demand Analysis**: Agents analyze data based on instructions, not pre-computed metrics
+3. **Code Reuse**: Shared preprocessing and postprocessing functions in `base/` module
+4. **Tool-Based Data Access**: Agents access raw data through tools, enabling flexible analysis
+5. **Self-Contained Pipelines**: Each pipeline (MA/SA) includes all necessary steps
+6. **Base Module Independence**: Base module is self-sufficient with no dependencies on pipelines
 
-### Key Components
+## Data Flow
 
-1. **LLM Context Node** (`llm_context_node`): Kedro feature that bundles LLM + prompts + tools
-   - Creates `LLMContext` objects containing model client, prompts dict, and tools dict
-   - Reduces boilerplate by eliminating separate init_tools and compile nodes
-   - Uses `tool()` helper to associate tool builder functions with Kedro datasets
-
-2. **Domain Modules** (MA Pipeline): Agent-specific code colocated by domain
-   - `chart/`: ChartGeneratorAgent, chart generation logic, and chart tools
-   - `summary/`: SummarizerAgent, summary generation logic, and summary tools
-   - `planner/`: PlannerAgent, data analysis logic, and planner tools
-   - `critic/`: CriticAgent and QA review tools
-   - `presentation/`: PPT building utilities (create_slide, combine_presentations)
-   - Each module contains `agent.py`, business logic (`generator.py`/`analyzer.py`/`builder.py`), and `tools.py`
-
-3. **Shared Utilities** (`utils/`): True utilities only (no business logic)
-   - `fonts.py`: System font detection
-   - `instruction_parser.py`: YAML parsing for slide requirements
-
-4. **Base Classes** (`base/`): Shared agent infrastructure
-   - `agent.py`: BaseAgent that accepts `LLMContext` directly with class attributes for configuration
-   - Output models: `ChartOutput`, `SummaryOutput`, `PlanOutput`, `QAFeedbackOutput`
-   - Agents define `agent_name` and `system_prompt_key` as class attributes
-   - Simple instantiation: `MyAgent(llm_context).compile()`
-
-5. **Nodes** (`nodes.py`): Kedro pipeline nodes
-   - Import from domain modules within the same pipeline
-   - Use `LLMContext` to create agents with bundled LLM, prompts, and tools
-   - Clear data flow traceability (1 hop within same folder)
-
-6. **Prompts** (`data/ppt_generation/prompts/`): YAML-based prompt templates
-   - System prompts define agent behavior
-   - User prompts define task instructions
-   - Loaded as `LangChainPromptDataset` and accessed via `LLMContext.prompts`
-
-## Pipeline Patterns
-
-### Multi-Agent (MA) Pipeline
-
-**Architecture**: Planner-driven with specialized agents using `llm_context_node`
+### Multi-Agent Pipeline Flow
 
 ```
-Deterministic Phase:
-1. parse_requirements        → Parse YAML into slide configurations
-
-LLM Context Phase:
-2. create_planner_context    → Bundle LLM + prompts + tools for Planner
-3. create_chart_context      → Bundle LLM + prompts + tools for ChartGenerator
-4. create_summarizer_context → Bundle LLM + prompts + tools for Summarizer
-5. create_critic_context     → Bundle LLM + prompts + tools for Critic
-
-Agentic Phase:
-6. orchestrate_agents        → Create agents from LLMContext, coordinate execution
-
-Deterministic Phase:
-7. assemble_presentation     → Combine charts + summaries into slides
+Input Files
+├── slide_generation_requirements.yaml
+└── sales_50_products.csv
+    │
+    ▼
+[PREPROCESSING - Deterministic]
+    │
+    ├─ parse_ma_slide_requirements (in MA pipeline)
+    │  └─→ ma_slide_configs (structured configs for each slide)
+    │
+    ▼
+[AGENTIC - LLM-powered]
+    │
+    ├─ llm_context_node (Planner) → planner_context
+    ├─ llm_context_node (Chart Generator) → chart_context
+    ├─ llm_context_node (Summarizer) → summarizer_context
+    ├─ llm_context_node (Critic) → critic_context
+    │
+    └─ orchestrate_multi_agent_workflow
+       ├─ Planner analyzes requirements using analyze_data tool
+       ├─ Chart Generator creates charts using generate_chart tool
+       ├─ Summarizer generates summaries using generate_summary tool
+       └─ Critic reviews quality using QA tools
+       │
+       └─→ ma_slide_content (charts + summaries per slide)
+    │
+    ▼
+[POSTPROCESSING - Deterministic]
+    │
+    └─ assemble_presentation (from base module)
+       └─→ sales_analysis_ma.pptx
 ```
 
-**Flow**:
-- Requirements parsed into structured slide configurations
-- LLM contexts bundle model client, prompts, and tools for each agent
-- Agents created directly: `ChartGeneratorAgent(llm_context).compile()`
-- Planner analyzes requirements, Chart Generator creates charts, Summarizer creates summaries
-- Critic reviews slide content for quality
-- Final presentation assembled from generated content
-
-**Features**:
-- ✅ Clear separation: deterministic vs agentic nodes
-- ✅ Quality assurance via Critic agent
-- ✅ Specialized agents for each task
-- ✅ Simple agent creation from LLMContext
-- ✅ Intermediate outputs (charts, summaries) saved
-
-### Single-Agent (SA) Pipeline
-
-**Architecture**: Single agent with all tools using `llm_context_node`
+### Single-Agent Pipeline Flow
 
 ```
-Deterministic Phase:
-1. parse_requirements      → Parse YAML into slide configurations
-
-LLM Context Phase:
-2. create_ppt_context      → Bundle LLM + prompts + tools for PPTGenerator
-
-Agentic Phase:
-3. run_ppt_agent           → Create agent from LLMContext, generate charts and summaries
-
-Deterministic Phase:
-4. assemble_presentation   → Combine charts + summaries into slides
+Input Files
+├── slide_generation_requirements.yaml
+└── sales_50_products.csv
+    │
+    ▼
+[PREPROCESSING - Deterministic]
+    │
+    ├─ parse_sa_slide_requirements (in SA pipeline)
+    │  └─→ sa_slide_configs (structured configs for each slide)
+    │
+    ▼
+[AGENTIC - LLM-powered]
+    │
+    ├─ llm_context_node (PPT Generator) → ppt_llm_context
+    │
+    └─ run_ppt_agent
+       ├─ Agent analyzes data using analyze_data tool
+       ├─ Agent creates charts using generate_chart tool
+       └─ Agent generates summaries using generate_summary tool
+       │
+       └─→ sa_slide_content (charts + summaries per slide)
+    │
+    ▼
+[POSTPROCESSING - Deterministic]
+    │
+    └─ assemble_presentation (from base module)
+       └─→ sales_analysis_sa.pptx
 ```
 
-**Flow**:
-- Requirements parsed into structured slide configurations
-- LLM context bundles model client, prompts, and tools
-- Agent created directly: `PPTGenerationAgent(llm_context).compile()`
-- Single agent generates charts and summaries using tools
-- Final presentation assembled from generated content
+### How Agents Analyze Data
 
-**Features**:
-- ✅ Clear separation: deterministic vs agentic nodes
-- ✅ Simpler architecture (4 nodes)
-- ✅ Faster execution
-- ✅ Simple agent creation from LLMContext
-- ❌ No quality assurance step
+**Key Point**: Agents analyze data **on demand** based on instructions, not from pre-computed metrics.
+
+1. **Tools receive raw data**: Tool builder functions receive the full `sales_data` DataFrame
+2. **Agents query dynamically**: Agents use natural language queries to request specific analyses
+3. **Tools perform analysis**: Tools filter, aggregate, and compute metrics based on agent queries
+4. **Results returned**: Tools return JSON results that agents use to generate charts/summaries
+
+Example:
+- Agent receives instruction: "Show top 10 products by sales"
+- Agent calls `analyze_data("Get top 10 products by FY_Sales, sorted descending")`
+- Tool filters data, sorts, and returns top 10 as JSON
+- Agent uses results to generate chart
+
+## Pipeline Structure
+
+### Architecture Overview
+
+The project uses **self-contained pipelines** where each pipeline (MA/SA) includes all necessary steps:
+
+1. **Preprocessing nodes** (in each pipeline): Parse YAML instructions into structured configs
+   - MA pipeline: `parse_ma_slide_requirements` → `ma_slide_configs`
+   - SA pipeline: `parse_sa_slide_requirements` → `sa_slide_configs`
+   - Both use shared functions from `base.preprocessing` module
+
+2. **Agentic nodes** (pipeline-specific): LLM-powered content generation
+   - MA pipeline: 4 `llm_context_node`s + 1 orchestration node → `ma_slide_content`
+   - SA pipeline: 1 `llm_context_node` + 1 agent execution node → `sa_slide_content`
+
+3. **Postprocessing nodes** (in each pipeline): Assemble final presentations
+   - Both pipelines: `assemble_presentation` → `sales_analysis_ma` or `sales_analysis_sa`
+   - Uses shared function from `base.postprocessing` module
+
+### Code Organization
+
+**Base Module** (`src/ppt_autogen_workflow/base/`):
+- **`preprocessing.py`**: Shared parsing functions (`parse_instructions_yaml`, `parse_slide_requirements`)
+- **`postprocessing.py`**: Shared presentation assembly (`assemble_presentation`, `create_slide`, `combine_presentations`)
+- **`tools.py`**: Shared tool builders for agents (data analysis, chart generation, summaries)
+- **`agent.py`**: Base agent classes
+- **`utils.py`**: Shared utilities
+
+**Pipeline Modules** (`src/ppt_autogen_workflow/pipelines/`):
+- **`ma_slide_generation_autogen/`**: Complete MA pipeline with preprocessing, agentic, and postprocessing nodes
+- **`sa_slide_generation_autogen/`**: Complete SA pipeline with preprocessing, agentic, and postprocessing nodes
+
+### Available Pipelines
+
+**Full pipelines** (self-contained, ready for production):
+```bash
+kedro run --pipeline=ma_slide_generation_autogen
+kedro run --pipeline=sa_slide_generation_autogen
+kedro run  # Runs default (MA pipeline)
+```
 
 ## Quick Start
 
 ### 1. Prerequisites
 
-- Python 3.11+
+- Python 3.9+
 - OpenAI API key (or compatible API)
 
 ### 2. Installation
@@ -230,8 +254,7 @@ kedro run
 
 - **MA Pipeline Output**: `data/ppt_generation/output/ma/sales_analysis.pptx`
 - **SA Pipeline Output**: `data/ppt_generation/output/sa/sales_analysis.pptx`
-- **Charts** (MA only): `data/ppt_generation/intermediate/ma/charts/`
-- **Summaries** (MA only): `data/ppt_generation/intermediate/ma/summaries/`
+- **Intermediate Content**: `data/ppt_generation/intermediate/ma/slide_content.json` (or `sa/`)
 
 ## Configuration
 
@@ -252,41 +275,39 @@ llm_autogen:
     model: "gpt-4o"  # or your preferred model
     temperature: 1
   credentials: openai
-
-# Prompts are also defined here (not in catalog.yml)
-ppt_generator_system_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
-  filepath: data/ppt_generation/prompts/sa/ppt_generator_system.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
 ```
 
-### Customize Styling and Layout (TODO)
+### Customize Styling and Layout
 
 Edit `conf/base/parameters.yml`:
 
 ```yaml
 styling:
-  primary_color: "#1F4E79"
-  font_family: "Segoe UI"
+  title_font: "Helvetica Neue"  # System font detected automatically
+  title_size: 28
+  text_size_small: 11
+  title_color_rgb: [31, 78, 121]
+  text_color_rgb: [51, 51, 51]
 
 layout:
-  chart_width: 0.6
-  summary_width: 0.35
+  content_left: 0.5
+  content_top: 1.3
+  chart_width: 5.0
+  chart_height: 5.0
+  summary_width: 4.0
 
 quality_assurance:
-  quality_standards: "Professional presentation standards"
-  review_criteria: "Accuracy, clarity, visual appeal"
+  quality_standards: "Professional presentation standards with clear messaging"
+  review_criteria: "Score 1-10, check chart/summary alignment, provide improvement recommendations"
 ```
 
 ### Modify Prompts
 
 Edit prompt files in `data/ppt_generation/prompts/`:
-- `ma/` - Multi-agent prompts
-- `sa/` - Single-agent prompts
+- `ma/` - Multi-agent prompts (8 files: 4 system + 4 user prompts)
+- `sa/` - Single-agent prompts (2 files: 1 system + 1 user prompt)
 
-Prompts use placeholders that are filled during agent compilation.
+Prompts use placeholders that are filled during agent execution.
 
 ## Project Structure
 
@@ -295,68 +316,59 @@ Prompts use placeholders that are filled during agent compilation.
 │   ├── base/
 │   │   ├── catalog.yml          # Dataset definitions
 │   │   ├── parameters.yml       # Pipeline parameters
-│   │   └── genai-config.yml     # LLM configuration
+│   │   └── genai-config.yml     # LLM + prompt configuration
 │   └── local/                    # Local credentials (gitignored)
 │       └── credentials.yml
+│
 ├── data/
-│   ├── ppt_generation/
-│   │   ├── sample/               # Input data
-│   │   │   ├── slide_generation_requirements.yaml
-│   │   │   └── sales_50_products.csv
-│   │   ├── prompts/              # Prompt templates
-│   │   │   ├── ma/               # Multi-agent prompts (8 files)
-│   │   │   └── sa/               # Single-agent prompts (2 files)
-│   │   ├── intermediate/         # Intermediate outputs
-│   │   │   └── ma/
-│   │   │       ├── slide_chart_paths.json
-│   │   │       ├── slide_summaries.json
-│   │   │       └── slide_configs.json
-│   │   └── output/               # Final presentations
-│   │       ├── ma/
-│   │       └── sa/
-├── src/ppt_autogen_workflow/
-│   ├── base/
-│   │   ├── __init__.py           # Exports base classes and Pydantic models
-│   │   └── agent.py              # BaseAgent with structured output support
-│   ├── datasets/
-│   │   └── autogen_model_client.py  # LLM client dataset
-│   ├── pipelines/
-│   │   ├── ma_slide_generation_autogen/
-│   │   │   ├── chart/                 # Chart generation domain module
-│   │   │   │   ├── __init__.py        # Exports agent, generator, tools
-│   │   │   │   ├── agent.py           # ChartGeneratorAgent
-│   │   │   │   ├── generator.py       # Chart generation logic
-│   │   │   │   └── tools.py           # Chart tools for agent
-│   │   │   ├── summary/               # Summary generation domain module
-│   │   │   │   ├── __init__.py        # Exports agent, generator, tools
-│   │   │   │   ├── agent.py           # SummarizerAgent
-│   │   │   │   ├── generator.py       # Summary generation logic
-│   │   │   │   └── tools.py           # Summary tools for agent
-│   │   │   ├── planner/               # Planning domain module
-│   │   │   │   ├── __init__.py        # Exports agent, analyzer, tools
-│   │   │   │   ├── agent.py           # PlannerAgent
-│   │   │   │   ├── analyzer.py        # Data analysis logic
-│   │   │   │   └── tools.py           # Planner tools for agent
-│   │   │   ├── critic/                # QA domain module
-│   │   │   │   ├── __init__.py        # Exports agent, tools
-│   │   │   │   ├── agent.py           # CriticAgent + run_qa_review
-│   │   │   │   └── tools.py           # QA review tools
-│   │   │   ├── presentation/          # PPT building module
-│   │   │   │   ├── __init__.py        # Exports builder functions
-│   │   │   │   └── builder.py         # create_slide, combine_presentations
-│   │   │   ├── nodes.py               # Pipeline nodes (imports from modules)
-│   │   │   ├── orchestration_helpers.py  # Prompt formatting helpers
-│   │   │   └── pipeline.py            # Pipeline definition (7 nodes)
-│   │   └── sa_slide_generation_autogen/
-│   │       ├── agent.py               # PPTGenerationAgent definition
-│   │       ├── agent_helpers.py       # Helper functions (imports from MA modules)
-│   │       ├── nodes.py               # Pipeline nodes
-│   │       ├── pipeline.py            # Pipeline definition (4 nodes)
-│   │       └── tools.py               # Tools (imports from MA modules)
-│   └── utils/                         # True utilities only
-│       ├── fonts.py              # System font detection
-│       └── instruction_parser.py # YAML parser for slide requirements
-└── requirements.txt
+│   └── ppt_generation/
+│       ├── sample/               # Input data
+│       │   ├── slide_generation_requirements.yaml
+│       │   └── sales_50_products.csv
+│       ├── prompts/              # Prompt templates
+│       │   ├── ma/               # Multi-agent prompts (8 files)
+│       │   └── sa/               # Single-agent prompts (2 files)
+│       ├── intermediate/         # Intermediate outputs
+│       │   ├── ma/
+│       │   │   ├── slide_configs_parsed.json
+│       │   │   └── slide_content.json
+│       │   └── sa/
+│       │       ├── slide_configs_parsed.json
+│       │       └── slide_content.json
+│       └── output/               # Final presentations
+│           ├── ma/
+│           │   └── sales_analysis.pptx
+│           └── sa/
+│               └── sales_analysis.pptx
+│
+└── src/ppt_autogen_workflow/
+    ├── base/                     # Shared infrastructure (self-sufficient)
+    │   ├── __init__.py           # Exports base classes and utilities
+    │   ├── agent.py              # BaseAgent with structured output support
+    │   ├── output_models.py      # Pydantic models (ChartOutput, SummaryOutput, etc.)
+    │   ├── tools.py              # Shared tool builders (data analysis, chart, summary)
+    │   ├── preprocessing.py      # Shared preprocessing functions (parse_instructions_yaml, parse_slide_requirements)
+    │   ├── postprocessing.py     # Shared postprocessing functions (assemble_presentation, create_slide, combine_presentations)
+    │   └── utils.py              # Shared utilities (format_prompt, SYSTEM_FONT)
+    │
+    ├── datasets/
+    │   └── autogen_model_client.py  # LLM client dataset
+    │
+    ├── pipelines/
+    │   ├── ma_slide_generation_autogen/  # Complete MA pipeline (self-contained)
+    │   │   ├── agent.py          # PlannerAgent, ChartGeneratorAgent, SummarizerAgent, CriticAgent
+    │   │   ├── nodes.py          # parse_ma_slide_requirements, orchestrate_multi_agent_workflow
+    │   │   ├── pipeline.py       # Full pipeline: preprocessing + agentic + postprocessing
+    │   │   └── utils.py          # format_ma_prompts (pipeline-specific)
+    │   │
+    │   └── sa_slide_generation_autogen/  # Complete SA pipeline (self-contained)
+    │       ├── agent.py          # PPTGenerationAgent
+    │       ├── nodes.py          # parse_sa_slide_requirements, run_ppt_agent
+    │       ├── pipeline.py       # Full pipeline: preprocessing + agentic + postprocessing
+    │       └── utils.py          # format_sa_prompts (pipeline-specific)
+    │
+    ├── pipeline_registry.py      # Registers full pipelines
+    └── settings.py
 ```
 
 ## Troubleshooting
@@ -377,78 +389,15 @@ Prompts use placeholders that are filled during agent compilation.
 - Check agent logs for tool invocation errors
 - Ensure chart/summary generation tools are working
 
-**Matplotlib GUI errors on macOS**
-- The code uses 'Agg' backend automatically
-- If issues persist, ensure matplotlib is properly installed
-
 **Agent not using tools**
 - Check that tools are properly built with sales data
 - Verify agent system prompts instruct tool usage
 - Review agent response logs for tool invocation
 
-### Debugging
-
-Enable verbose logging:
-
-```bash
-kedro run --pipeline=ma_slide_generation_autogen --verbose
-```
-
-Check intermediate outputs:
-- Requirements: `data/ppt_generation/intermediate/ma/requirements/`
-- Charts: `data/ppt_generation/intermediate/ma/charts/`
-- Summaries: `data/ppt_generation/intermediate/ma/summaries/`
-
-## Key Design Patterns
-
-### 1. LLM Context Node Pattern
-- `llm_context_node` bundles LLM + prompts + tools into `LLMContext` objects
-- `tool()` helper associates tool builder functions with Kedro dataset inputs
-- Clean separation of concerns: context creation vs. agent execution
-
-### 2. Simple Agent Creation
-- Agents accept `LLMContext` directly in constructor
-- Configuration via class attributes (`agent_name`, `system_prompt_key`)
-- One-liner instantiation: `MyAgent(llm_context).compile()`
-- No factory functions needed - just use the class constructor
-
-### 3. Deterministic vs Agentic Separation
-- **Deterministic nodes**: `parse_requirements`, `assemble_presentation` (no LLM calls)
-- **LLM context nodes**: Bundle LLM + prompts + tools
-- **Agentic nodes**: `run_ppt_agent`, `orchestrate_agents` (LLM-powered)
-- Clear boundaries make testing and debugging easier
-
-### 4. Domain Module Architecture (MA Pipeline)
-- Agent-specific code colocated by domain (`chart/`, `summary/`, `planner/`, `critic/`, `presentation/`)
-- Each module contains: `agent.py`, business logic file, and `tools.py`
-- Clear data flow traceability: trace imports within same folder (1 hop vs 4 hops before)
-- SA pipeline reuses logic via imports from MA modules
-
-### 5. Configuration Separation
-- **`catalog.yml`**: Data catalog (input, intermediate, output datasets)
-- **`genai-config.yml`**: GenAI config (LLM client + prompt datasets)
-- **`parameters.yml`**: Pipeline parameters (styling, layout, QA settings)
-- Prompts and LLM config kept together for easier management
-
-### 6. Prompt Separation
-- Prompts stored in YAML files as `LangChainPromptDataset`
-- Accessed via `LLMContext.prompts` dictionary
-- Easy to modify without code changes
-
-### 7. Tool-Based Data Access
-- Sales data captured in tool closures via tool builder functions
-- Agents access data through tools, not direct parameters
-- Clean separation between data and logic
-
-### 8. Structured Output
-- Pydantic models for agent outputs (`ChartOutput`, `SummaryOutput`, `PlanOutput`, `QAFeedbackOutput`)
-- Type-safe responses from agents
-- Consistent data structures across pipelines
-
-### 9. Error Handling
-- Chart generation raises `ChartGenerationError` on failure (no silent fallbacks)
-- Summary generation has graceful fallbacks with logging
-- Clear error messages with context for debugging
+**Pipeline execution errors**
+- Ensure all required datasets exist (check catalog.yml)
+- Verify pipeline dependencies are correct
+- Check that base module functions are properly imported
 
 ## License
 

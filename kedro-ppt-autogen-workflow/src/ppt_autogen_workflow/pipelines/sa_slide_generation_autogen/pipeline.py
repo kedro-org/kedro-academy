@@ -1,38 +1,31 @@
-"""Single-agent AutoGen PPT generation pipeline.
-
-This pipeline demonstrates clear separation between:
-1. Deterministic data preparation (parse_requirements)
-2. LLM context assembly (llm_context_node)
-3. Agentic content generation (run_ppt_agent)
-4. Deterministic presentation assembly (assemble_presentation)
-"""
+"""Single-agent AutoGen pipeline"""
 
 from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
-from .nodes import parse_requirements, run_ppt_agent, assemble_presentation
-from .tools import build_tools
+from .nodes import run_ppt_agent
+
+# Import shared tool builder from base
+from ppt_autogen_workflow.base.tools import build_sa_tools
+# Import preprocessing and postprocessing from base
+from ppt_autogen_workflow.base.postprocessing import assemble_presentation
+from .nodes import parse_sa_slide_requirements
 
 
-def create_pipeline(**kwargs) -> Pipeline:
-    """Create the single-agent AutoGen PPT generation pipeline.
-
-    Pipeline structure (4 nodes):
-        1. parse_requirements: Parse YAML requirements (deterministic)
-        2. llm_context_node: Bundle LLM + prompts + tools into LLMContext
-        3. run_ppt_agent: Generate charts and summaries (agentic)
-        4. assemble_presentation: Create final PowerPoint (deterministic)
-    """
+def create_pipeline() -> Pipeline:
+    """Create the single-agent AutoGen pipeline with preprocessing and postprocessing."""
     return pipeline([
-        # Step 1: Parse requirements (deterministic)
+        # Preprocessing: Parse slide requirements
         node(
-            func=parse_requirements,
+            func=parse_sa_slide_requirements,
             inputs="slide_generation_requirements",
             outputs="sa_slide_configs",
-            name="parse_requirements",
-            tags=["deterministic", "data_preparation"],
+            name="sa_parse_slide_requirements",
+            tags=["preprocessing", "deterministic", "requirements_parsing"],
         ),
-        # Step 2: Create LLM context
+
+        # Step 1: Create LLM context
+        # Single agent gets all tools bundled together
         llm_context_node(
             outputs="ppt_llm_context",
             llm="llm_autogen",
@@ -40,10 +33,11 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "ppt_generator_system_prompt",
                 "ppt_generator_user_prompt",
             ],
-            tools=[tool(build_tools, "sales_data")],
-            name="create_ppt_context",
+            tools=[tool(build_sa_tools, "sales_data", "params:styling")],
+            name="sa_create_ppt_context",
         ),
-        # Step 3: Run agent (agentic)
+
+        # Step 2: Run single agent
         node(
             func=run_ppt_agent,
             inputs=[
@@ -51,15 +45,20 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "sa_slide_configs",
             ],
             outputs="sa_slide_content",
-            name="run_ppt_agent",
-            tags=["autogen", "agentic", "single_agent"],
+            name="sa_run_ppt_agent",
+            tags=["sa_autogen", "agentic"],
         ),
-        # Step 4: Assemble presentation (deterministic)
+
+        # Postprocessing: Assemble presentation
         node(
             func=assemble_presentation,
-            inputs="sa_slide_content",
+            inputs=[
+                "sa_slide_content",
+                "params:layout",
+                "params:styling",
+            ],
             outputs="sales_analysis_sa",
-            name="assemble_presentation",
-            tags=["deterministic", "assembly"],
+            name="sa_assemble_presentation",
+            tags=["postprocessing", "deterministic", "presentation_assembly"],
         ),
     ])

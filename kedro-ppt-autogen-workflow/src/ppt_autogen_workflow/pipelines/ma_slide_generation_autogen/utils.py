@@ -1,21 +1,16 @@
-"""Helper functions for multi-agent orchestration.
+"""Utility functions for multi-agent AutoGen pipeline.
 
-This module contains helper functions used by the orchestrate_multi_agent_workflow node.
-These are separated from nodes.py to keep node functions focused on pipeline logic.
+This module contains helper functions needed for the multi-agent
+orchestration workflow.
 """
 from __future__ import annotations
 
 from typing import Any
 
-
-def format_prompt(template: Any, **kwargs) -> str:
-    """Format a prompt template with given kwargs."""
-    if hasattr(template, 'format'):
-        return template.format(**kwargs)
-    return str(template)
+from ppt_autogen_workflow.base.utils import format_prompt
 
 
-def format_all_prompts(
+def format_ma_prompts(
     planner_slides: dict[str, Any],
     chart_slides: dict[str, Any],
     summarizer_slides: dict[str, Any],

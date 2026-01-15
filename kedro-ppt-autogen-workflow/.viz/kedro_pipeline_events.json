@@ -1,28 +1,7 @@
 [
   {
     "event": "before_pipeline_run",
-    "timestamp": "2026-01-09T02:41:43.919194+00:00"
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "sales_data",
-    "node_id": "e71743a9",
-    "status": "Available",
-    "size": 2461
-  },
-  {
-    "event": "after_node_run",
-    "node": "init_tools_node",
-    "node_id": "2e7e68a2",
-    "duration": 0.007117166998796165,
-    "status": "success"
-  },
-  {
-    "event": "after_dataset_saved",
-    "dataset": "tools",
-    "node_id": "0284c6ac",
-    "status": "Available",
-    "size": 0
+    "timestamp": "2026-01-15T22:26:10.435847+00:00"
   },
   {
     "event": "after_dataset_loaded",
@@ -40,22 +19,36 @@
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "tools",
-    "node_id": "0284c6ac",
+    "dataset": "chart_generator_user_prompt",
+    "node_id": "6fba7a6e",
+    "status": "Available",
+    "size": 442
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "sales_data",
+    "node_id": "e71743a9",
+    "status": "Available",
+    "size": 2461
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "params:styling",
+    "node_id": "7d88a070",
     "status": "Available",
     "size": 0
   },
   {
     "event": "after_node_run",
-    "node": "compile_chart_generator_agent",
-    "node_id": "2f04f891",
-    "duration": 0.0022801249870099127,
+    "node": "ma_create_chart_context",
+    "node_id": "cc40c12a",
+    "duration": 0.0011393749882699922,
     "status": "success"
   },
   {
     "event": "after_dataset_saved",
-    "dataset": "compiled_chart_agent",
-    "node_id": "76008f92",
+    "dataset": "chart_context",
+    "node_id": "240eeaf7",
     "status": "Available",
     "size": 0
   },
@@ -75,22 +68,22 @@
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "tools",
-    "node_id": "0284c6ac",
+    "dataset": "critic_user_prompt",
+    "node_id": "b2a584ec",
     "status": "Available",
-    "size": 0
+    "size": 887
   },
   {
     "event": "after_node_run",
-    "node": "compile_critic_agent",
-    "node_id": "48e9eb0b",
-    "duration": 0.001917292014695704,
+    "node": "ma_create_critic_context",
+    "node_id": "f3e8c3a7",
+    "duration": 0.0004509590071393177,
     "status": "success"
   },
   {
     "event": "after_dataset_saved",
-    "dataset": "compiled_critic_agent",
-    "node_id": "a0907e74",
+    "dataset": "critic_context",
+    "node_id": "8cebe12f",
     "status": "Available",
     "size": 0
   },
@@ -110,22 +103,29 @@
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "tools",
-    "node_id": "0284c6ac",
+    "dataset": "planner_user_prompt",
+    "node_id": "e306e228",
     "status": "Available",
-    "size": 0
+    "size": 646
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "sales_data",
+    "node_id": "e71743a9",
+    "status": "Available",
+    "size": 2461
   },
   {
     "event": "after_node_run",
-    "node": "compile_planner_agent",
-    "node_id": "ae7db5c1",
-    "duration": 0.0018209580448456109,
+    "node": "ma_create_planner_context",
+    "node_id": "a1cdd95f",
+    "duration": 0.00042862498958129436,
     "status": "success"
   },
   {
     "event": "after_dataset_saved",
-    "dataset": "compiled_planner_agent",
-    "node_id": "a2d32c03",
+    "dataset": "planner_context",
+    "node_id": "c99f0cf1",
     "status": "Available",
     "size": 0
   },
@@ -141,91 +141,14 @@
     "dataset": "summarizer_system_prompt",
     "node_id": "b186068b",
     "status": "Available",
-    "size": 630
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "tools",
-    "node_id": "0284c6ac",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_node_run",
-    "node": "compile_summarizer_agent",
-    "node_id": "09f0a186",
-    "duration": 0.0017742920317687094,
-    "status": "success"
-  },
-  {
-    "event": "after_dataset_saved",
-    "dataset": "compiled_summarizer_agent",
-    "node_id": "c2715a45",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "compiled_planner_agent",
-    "node_id": "a2d32c03",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "compiled_chart_agent",
-    "node_id": "76008f92",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "compiled_summarizer_agent",
-    "node_id": "c2715a45",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "compiled_critic_agent",
-    "node_id": "a0907e74",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "planner_user_prompt",
-    "node_id": "e306e228",
-    "status": "Available",
-    "size": 646
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "chart_generator_user_prompt",
-    "node_id": "6fba7a6e",
-    "status": "Available",
-    "size": 683
+    "size": 1190
   },
   {
     "event": "after_dataset_loaded",
     "dataset": "summarizer_user_prompt",
     "node_id": "9deb8a7b",
     "status": "Available",
-    "size": 793
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "critic_user_prompt",
-    "node_id": "b2a584ec",
-    "status": "Available",
-    "size": 514
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "instructions_yaml",
-    "node_id": "fa2bcacc",
-    "status": "Available",
-    "size": 2365
+    "size": 777
   },
   {
     "event": "after_dataset_loaded",
@@ -235,42 +158,133 @@
     "size": 2461
   },
   {
+    "event": "after_node_run",
+    "node": "ma_create_summarizer_context",
+    "node_id": "8042d5f2",
+    "duration": 0.00038316599966492504,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "summarizer_context",
+    "node_id": "da15139b",
+    "status": "Available",
+    "size": 0
+  },
+  {
     "event": "after_dataset_loaded",
-    "dataset": "params:user_query",
-    "node_id": "ca0b4bce",
+    "dataset": "slide_generation_requirements",
+    "node_id": "065031fa",
+    "status": "Available",
+    "size": 2173
+  },
+  {
+    "event": "after_node_run",
+    "node": "ma_parse_slide_requirements",
+    "node_id": "4a5f06f5",
+    "duration": 0.0003741670079762116,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "ma_slide_configs",
+    "node_id": "428c0de2",
+    "status": "Available",
+    "size": 96
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "planner_context",
+    "node_id": "c99f0cf1",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "chart_context",
+    "node_id": "240eeaf7",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "summarizer_context",
+    "node_id": "da15139b",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "critic_context",
+    "node_id": "8cebe12f",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "ma_slide_configs",
+    "node_id": "428c0de2",
+    "status": "Available",
+    "size": 96
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "params:quality_assurance",
+    "node_id": "c52e212b",
     "status": "Available",
     "size": 0
   },
   {
     "event": "after_node_run",
-    "node": "orchestrate_agents",
-    "node_id": "5dfccd28",
-    "duration": 77.03820383298444,
+    "node": "ma_orchestrate_agents",
+    "node_id": "f9ef2a39",
+    "duration": 105.09098762499343,
     "status": "success"
   },
   {
     "event": "after_dataset_saved",
-    "dataset": "final_presentation",
-    "node_id": "b0f39235",
+    "dataset": "ma_slide_content",
+    "node_id": "0b3eaf30",
     "status": "Available",
-    "size": 224
+    "size": 96
   },
   {
-    "event": "after_dataset_saved",
-    "dataset": "slide_charts",
-    "node_id": "4e050cb2",
+    "event": "after_dataset_loaded",
+    "dataset": "ma_slide_content",
+    "node_id": "0b3eaf30",
+    "status": "Available",
+    "size": 96
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "params:layout",
+    "node_id": "5ee6e557",
     "status": "Available",
     "size": 0
   },
   {
-    "event": "after_dataset_saved",
-    "dataset": "slide_summaries",
-    "node_id": "1be73a98",
+    "event": "after_dataset_loaded",
+    "dataset": "params:styling",
+    "node_id": "7d88a070",
     "status": "Available",
     "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "ma_assemble_presentation",
+    "node_id": "3d720130",
+    "duration": 0.034944250000989996,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "sales_analysis_ma",
+    "node_id": "76317ba0",
+    "status": "Available",
+    "size": 160
   },
   {
     "event": "after_pipeline_run",
-    "timestamp": "2026-01-09T02:43:01.286218+00:00"
+    "timestamp": "2026-01-15T22:28:00.069890+00:00"
   }
 ]
