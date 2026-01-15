@@ -9,17 +9,15 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import tempfile
 from pathlib import Path
 
-import matplotlib
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
 from pptx import Presentation
 
 from .agent import PPTGenerationAgent
 from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
+from ppt_autogen_workflow.pipelines.ma_slide_generation_autogen.chart import (
+    ChartGenerationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +31,13 @@ def generate_chart(
         agent: Compiled PPT generation agent
         user_prompt: Formatted user prompt for the slide
         slide_key: Unique identifier for the slide
-        chart_instruction: Chart instruction for fallback
+        chart_instruction: Chart instruction (for error context)
 
     Returns:
         Path to the generated chart image
+
+    Raises:
+        ChartGenerationError: If chart generation fails or produces invalid output
     """
     try:
         query = f"{user_prompt}\n\nTask: Generate a chart using the generate_sales_chart tool."
@@ -46,22 +47,19 @@ def generate_chart(
         if chart_path and Path(chart_path).exists():
             return chart_path
 
-        # Fallback: create placeholder chart
-        logger.warning(f"Chart not generated for {slide_key}, creating placeholder")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.text(0.5, 0.5, f"Chart for {slide_key}\n{chart_instruction[:50]}...",
-                ha='center', va='center', fontsize=12, wrap=True)
-        ax.set_title(f"Chart: {slide_key}")
+        # Chart generation failed - raise error instead of silent fallback
+        raise ChartGenerationError(
+            f"Chart generation for '{slide_key}' did not produce a valid file. "
+            f"Instruction: {chart_instruction[:100]}..."
+        )
 
-        temp_dir = Path(tempfile.mkdtemp())
-        fallback_path = temp_dir / f"chart_{slide_key}.png"
-        fig.savefig(fallback_path, dpi=300, bbox_inches='tight')
-        plt.close(fig)
-        return str(fallback_path)
-
+    except ChartGenerationError:
+        raise
     except Exception as e:
         logger.error(f"Error generating chart for {slide_key}: {str(e)}")
-        return ""
+        raise ChartGenerationError(
+            f"Chart generation failed for '{slide_key}': {str(e)}"
+        ) from e
 
 
 def generate_summary(

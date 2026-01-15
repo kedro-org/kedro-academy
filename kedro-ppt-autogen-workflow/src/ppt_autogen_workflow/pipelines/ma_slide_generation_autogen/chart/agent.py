@@ -7,18 +7,18 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import tempfile
 from pathlib import Path
 
-import matplotlib
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
 from ppt_autogen_workflow.base import AgentContext, BaseAgent, ChartOutput
 
 logger = logging.getLogger(__name__)
+
+
+class ChartGenerationError(Exception):
+    """Raised when chart generation fails."""
+    pass
 
 
 class ChartGeneratorAgent(BaseAgent["ChartGeneratorAgent"]):
@@ -57,10 +57,13 @@ def generate_chart(
         chart_agent: Compiled chart generator agent
         query: Formatted query for chart generation
         slide_key: Unique identifier for the slide
-        instruction: Chart instruction for fallback
+        instruction: Chart instruction (for error context)
 
     Returns:
         Path to the generated chart image
+
+    Raises:
+        ChartGenerationError: If chart generation fails or produces invalid output
     """
     try:
         chart_output: ChartOutput = asyncio.run(chart_agent.invoke(query))
@@ -69,19 +72,16 @@ def generate_chart(
         if chart_path and Path(chart_path).exists():
             return chart_path
 
-        # Fallback: create placeholder chart
-        logger.warning(f"Chart not generated for {slide_key}, creating placeholder")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.text(0.5, 0.5, f"Chart for {slide_key}\n{instruction[:50]}...",
-                ha='center', va='center', fontsize=12, wrap=True)
-        ax.set_title(f"Chart: {slide_key}")
+        # Chart generation failed - raise error instead of silent fallback
+        raise ChartGenerationError(
+            f"Chart generation for '{slide_key}' did not produce a valid file. "
+            f"Instruction: {instruction[:100]}..."
+        )
 
-        temp_dir = Path(tempfile.mkdtemp())
-        fallback_path = temp_dir / f"chart_{slide_key}.png"
-        fig.savefig(fallback_path, dpi=300, bbox_inches='tight')
-        plt.close(fig)
-        return str(fallback_path)
-
+    except ChartGenerationError:
+        raise
     except Exception as e:
         logger.error(f"Error generating chart for {slide_key}: {str(e)}")
-        return ""
+        raise ChartGenerationError(
+            f"Chart generation failed for '{slide_key}': {str(e)}"
+        ) from e
