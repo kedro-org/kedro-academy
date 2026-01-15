@@ -69,6 +69,11 @@ sa_slide_summaries:
   filepath: data/ppt_generation/intermediate/sa/slide_summaries.json
   versioned: true
 
+sa_slide_content:
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/sa/slide_content.json
+  versioned: true
+
 
 # ==============================================================================
 # OUTPUT - Single-Agent Pipeline

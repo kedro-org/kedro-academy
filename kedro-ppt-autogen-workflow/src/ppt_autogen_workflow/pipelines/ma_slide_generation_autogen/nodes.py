@@ -131,6 +131,7 @@ def orchestrate_multi_agent_workflow(
     # Run multi-agent workflow
     slide_chart_paths = {}
     slide_summaries = {}
+    slide_content = {}
 
     for slide_key, config in planner_slides.items():
         # Planner analyzes requirements
@@ -148,7 +149,15 @@ def orchestrate_multi_agent_workflow(
         summary_text = generate_summary(
             summarizer_agent, summary_query, slide_key, config.get('summary_instruction', '')
         )
-        slide_summaries[slide_key] = format_summary_text(summary_text)
+        formatted_summary = format_summary_text(summary_text)
+        slide_summaries[slide_key] = formatted_summary
+
+        # Bundle content for assembly
+        slide_content[slide_key] = {
+            'slide_title': config['slide_title'],
+            'chart_path': chart_path,
+            'summary': formatted_summary,
+        }
 
         # QA review
         run_qa_review(
@@ -156,27 +165,27 @@ def orchestrate_multi_agent_workflow(
             config['slide_title'], chart_path, summary_text, config
         )
 
-    # Package results - include planner_slides for assemble_presentation
+    # Package results with layout and styling for assembly
     return slide_chart_paths, slide_summaries, {
-        'slides': planner_slides,
+        'slides': slide_content,
         'layout': layout_params,
         'styling': styling_params,
     }
 
 
 def assemble_presentation(
-    slide_chart_paths: dict[str, str],
-    slide_summaries: dict[str, str],
     slide_configs: dict[str, Any],
 ) -> Any:
-    """Assemble final presentation from generated charts and summaries.
+    """Assemble final presentation from generated slide content.
 
     This is a deterministic node that creates slides from the agent-generated content.
 
     Args:
-        slide_chart_paths: Dict mapping slide_key to chart image path
-        slide_summaries: Dict mapping slide_key to formatted summary text
-        slide_configs: Dict containing slide metadata and layout/styling params
+        slide_configs: Dict containing:
+            - slides: Dict mapping slide_key to content dict with
+              slide_title, chart_path, and summary
+            - layout: Layout parameters for presentation
+            - styling: Styling parameters for presentation
 
     Returns:
         Combined PowerPoint presentation
@@ -187,10 +196,10 @@ def assemble_presentation(
         styling_params = slide_configs.get('styling', {})
 
         slide_presentations = []
-        for slide_key, config in slides.items():
-            slide_title = config['slide_title']
-            chart_path = slide_chart_paths.get(slide_key, '')
-            summary = slide_summaries.get(slide_key, '')
+        for slide_key, content in slides.items():
+            slide_title = content['slide_title']
+            chart_path = content.get('chart_path', '')
+            summary = content.get('summary', '')
 
             chart = chart_path if chart_path and Path(chart_path).exists() else ""
             slide_prs = create_slide(

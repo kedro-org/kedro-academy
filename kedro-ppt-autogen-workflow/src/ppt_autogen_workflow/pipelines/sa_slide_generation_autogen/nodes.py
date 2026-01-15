@@ -63,18 +63,20 @@ def parse_requirements(
 def run_ppt_agent(
     llm_context: LLMContext,
     slide_configs: dict[str, Any],
-) -> tuple[dict[str, str], dict[str, str]]:
+) -> tuple[dict[str, str], dict[str, str], dict[str, Any]]:
     """Run PPT agent to generate charts and summaries.
 
     This is the agentic node that uses the LLM to generate content.
-    It receives parsed requirements and outputs raw chart paths and summaries.
+    It receives parsed requirements and outputs raw chart paths, summaries,
+    and combined slide content for assembly.
 
     Args:
         llm_context: LLMContext containing llm, prompts, and tools
         slide_configs: Parsed slide configurations from parse_requirements
 
     Returns:
-        Tuple of (slide_chart_paths, slide_summaries)
+        Tuple of (slide_chart_paths, slide_summaries, slide_content)
+        where slide_content bundles everything needed for assembly
     """
     try:
         # Create the PPT agent directly from LLMContext
@@ -103,6 +105,7 @@ def run_ppt_agent(
         # Generate charts and summaries for each slide
         slide_chart_paths = {}
         slide_summaries = {}
+        slide_content = {}
 
         for slide_key, config in slides.items():
             user_prompt = formatted_prompts.get(slide_key, '')
@@ -117,9 +120,17 @@ def run_ppt_agent(
             summary_text = generate_summary(
                 agent, user_prompt, slide_key, chart_path
             )
-            slide_summaries[slide_key] = format_summary_text(summary_text)
+            formatted_summary = format_summary_text(summary_text)
+            slide_summaries[slide_key] = formatted_summary
 
-        return slide_chart_paths, slide_summaries
+            # Bundle content for assembly
+            slide_content[slide_key] = {
+                'slide_title': config['slide_title'],
+                'chart_path': chart_path,
+                'summary': formatted_summary,
+            }
+
+        return slide_chart_paths, slide_summaries, slide_content
 
     except Exception as e:
         logger.error(f"PPT agent execution failed: {str(e)}", exc_info=True)
@@ -127,30 +138,26 @@ def run_ppt_agent(
 
 
 def assemble_presentation(
-    slide_chart_paths: dict[str, str],
-    slide_summaries: dict[str, str],
-    slide_configs: dict[str, Any],
+    slide_content: dict[str, Any],
 ) -> Any:
-    """Assemble final presentation from generated charts and summaries.
+    """Assemble final presentation from generated slide content.
 
     This is a deterministic node that creates slides from the agent-generated content.
 
     Args:
-        slide_chart_paths: Dict mapping slide_key to chart image path
-        slide_summaries: Dict mapping slide_key to formatted summary text
-        slide_configs: Dict containing slide metadata
+        slide_content: Dict mapping slide_key to content dict with
+            slide_title, chart_path, and summary
 
     Returns:
         Combined PowerPoint presentation
     """
     try:
-        slides = slide_configs.get('slides', {})
         slide_presentations = []
 
-        for slide_key, config in slides.items():
-            slide_title = config['slide_title']
-            chart_path = slide_chart_paths.get(slide_key, '')
-            summary = slide_summaries.get(slide_key, '')
+        for slide_key, content in slide_content.items():
+            slide_title = content['slide_title']
+            chart_path = content.get('chart_path', '')
+            summary = content.get('summary', '')
 
             chart = chart_path if chart_path and Path(chart_path).exists() else ""
             slide_prs = create_slide(

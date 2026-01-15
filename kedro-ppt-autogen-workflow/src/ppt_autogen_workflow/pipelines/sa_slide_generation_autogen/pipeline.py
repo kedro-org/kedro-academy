@@ -50,14 +50,14 @@ def create_pipeline(**kwargs) -> Pipeline:
                 "ppt_llm_context",
                 "sa_slide_configs",
             ],
-            outputs=["sa_slide_chart_paths", "sa_slide_summaries"],
+            outputs=["sa_slide_chart_paths", "sa_slide_summaries", "sa_slide_content"],
             name="run_ppt_agent",
             tags=["autogen", "agentic", "single_agent"],
         ),
         # Step 4: Assemble presentation (deterministic)
         node(
             func=assemble_presentation,
-            inputs=["sa_slide_chart_paths", "sa_slide_summaries", "sa_slide_configs"],
+            inputs="sa_slide_content",
             outputs="sales_analysis_sa",
             name="assemble_presentation",
             tags=["deterministic", "assembly"],
