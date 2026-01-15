@@ -9,9 +9,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from autogen_ext.models.openai import OpenAIChatCompletionClient
-
-from ppt_autogen_workflow.base import AgentContext, BaseAgent, ChartOutput
+from ppt_autogen_workflow.base import BaseAgent, ChartOutput
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +20,15 @@ class ChartGenerationError(Exception):
 
 
 class ChartGeneratorAgent(BaseAgent["ChartGeneratorAgent"]):
-    """Agent responsible for generating data visualizations."""
+    """Agent responsible for generating data visualizations.
+
+    Usage:
+        agent = ChartGeneratorAgent(llm_context).compile()
+        output = await agent.invoke(chart_requirements)
+    """
+
+    agent_name = "ChartGeneratorAgent"
+    system_prompt_key = "chart_generator_system_prompt"
 
     async def invoke(self, chart_requirements: str) -> ChartOutput:
         """Invoke the chart generator agent to create charts.
@@ -31,21 +37,6 @@ class ChartGeneratorAgent(BaseAgent["ChartGeneratorAgent"]):
             ChartOutput with chart_path and status
         """
         return await self._run_with_output(chart_requirements, ChartOutput)
-
-
-def create_chart_generator_agent(
-    model_client: OpenAIChatCompletionClient,
-    system_prompt: str,
-    tools: list,
-) -> ChartGeneratorAgent:
-    """Create a chart generator agent for data visualization."""
-    context = AgentContext(
-        model_client=model_client,
-        tools=tools,
-        system_prompt=system_prompt,
-        agent_name="ChartGeneratorAgent",
-    )
-    return ChartGeneratorAgent(context).compile()
 
 
 def generate_chart(

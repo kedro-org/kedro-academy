@@ -8,15 +8,21 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from autogen_ext.models.openai import OpenAIChatCompletionClient
-
-from ppt_autogen_workflow.base import AgentContext, BaseAgent, SummaryOutput
+from ppt_autogen_workflow.base import BaseAgent, SummaryOutput
 
 logger = logging.getLogger(__name__)
 
 
 class SummarizerAgent(BaseAgent["SummarizerAgent"]):
-    """Agent responsible for generating slide summaries."""
+    """Agent responsible for generating slide summaries.
+
+    Usage:
+        agent = SummarizerAgent(llm_context).compile()
+        output = await agent.invoke(content_to_summarize)
+    """
+
+    agent_name = "SummarizerAgent"
+    system_prompt_key = "summarizer_system_prompt"
 
     async def invoke(self, content_to_summarize: str) -> SummaryOutput:
         """Invoke the summarizer agent to create slide summaries.
@@ -25,21 +31,6 @@ class SummarizerAgent(BaseAgent["SummarizerAgent"]):
             SummaryOutput with summary_text and status
         """
         return await self._run_with_output(content_to_summarize, SummaryOutput)
-
-
-def create_summarizer_agent(
-    model_client: OpenAIChatCompletionClient,
-    system_prompt: str,
-    tools: list,
-) -> SummarizerAgent:
-    """Create a summarizer agent for slide content creation."""
-    context = AgentContext(
-        model_client=model_client,
-        tools=tools,
-        system_prompt=system_prompt,
-        agent_name="SummarizerAgent",
-    )
-    return SummarizerAgent(context).compile()
 
 
 def generate_summary(

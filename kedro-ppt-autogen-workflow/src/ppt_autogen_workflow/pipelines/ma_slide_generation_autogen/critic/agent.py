@@ -10,15 +10,21 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from autogen_ext.models.openai import OpenAIChatCompletionClient
-
-from ppt_autogen_workflow.base import AgentContext, BaseAgent, QAFeedbackOutput
+from ppt_autogen_workflow.base import BaseAgent, QAFeedbackOutput
 
 logger = logging.getLogger(__name__)
 
 
 class CriticAgent(BaseAgent["CriticAgent"]):
-    """Agent responsible for QA and feedback on slides."""
+    """Agent responsible for QA and feedback on slides.
+
+    Usage:
+        agent = CriticAgent(llm_context).compile()
+        output = await agent.invoke(slide_content)
+    """
+
+    agent_name = "CriticAgent"
+    system_prompt_key = "critic_system_prompt"
 
     async def invoke(self, slide_content: str) -> QAFeedbackOutput:
         """Invoke the critic agent to review and provide feedback on slides.
@@ -27,21 +33,6 @@ class CriticAgent(BaseAgent["CriticAgent"]):
             QAFeedbackOutput with feedback, overall_score, and status
         """
         return await self._run_with_output(slide_content, QAFeedbackOutput)
-
-
-def create_critic_agent(
-    model_client: OpenAIChatCompletionClient,
-    system_prompt: str,
-    tools: list,
-) -> CriticAgent:
-    """Create a critic agent for slide quality assurance."""
-    context = AgentContext(
-        model_client=model_client,
-        tools=tools,
-        system_prompt=system_prompt,
-        agent_name="CriticAgent",
-    )
-    return CriticAgent(context).compile()
 
 
 def run_qa_review(

@@ -7,42 +7,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from kedro.pipeline.llm_context import LLMContext
-
-
-def create_agent_from_context(
-    context: LLMContext,
-    system_prompt_key: str,
-    create_agent_func,
-) -> Any:
-    """Create an agent from LLMContext.
-
-    Args:
-        context: LLMContext containing llm, prompts, and tools
-        system_prompt_key: Key for the system prompt in context.prompts
-        create_agent_func: Function to create the agent
-
-    Returns:
-        Compiled agent instance
-    """
-    model_client = context.llm
-    system_prompt = context.prompts.get(system_prompt_key)
-
-    # Flatten tools - tool builder functions return lists of FunctionTools
-    tools = []
-    for tool_or_list in context.tools.values():
-        if isinstance(tool_or_list, list):
-            tools.extend(tool_or_list)
-        else:
-            tools.append(tool_or_list)
-
-    system_prompt_text = (
-        system_prompt.format() if hasattr(system_prompt, 'format')
-        else str(system_prompt)
-    )
-
-    return create_agent_func(model_client, system_prompt_text, tools)
-
 
 def format_prompt(template: Any, **kwargs) -> str:
     """Format a prompt template with given kwargs."""

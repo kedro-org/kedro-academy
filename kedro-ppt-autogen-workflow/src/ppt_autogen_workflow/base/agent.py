@@ -7,13 +7,13 @@ eliminate code duplication.
 
 from __future__ import annotations
 
+import json
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_ext.models.openai import OpenAIChatCompletionClient
+from kedro.pipeline.llm_context import LLMContext
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -22,68 +22,77 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound="BaseAgent")
 
 
-@dataclass
-class AgentContext:
-    """Configuration context for AutoGen agents.
-
-    Attributes:
-        model_client: The OpenAI chat completion client for LLM calls
-        tools: List of tools available to the agent
-        system_prompt: The system message defining agent behavior
-        agent_name: Unique identifier for the agent
-    """
-    model_client: OpenAIChatCompletionClient
-    tools: list[Any] = field(default_factory=list)
-    system_prompt: str = ""
-    agent_name: str = "Agent"
-
-
 class BaseAgent(ABC, Generic[T]):
     """Base class for all AutoGen agents with shared functionality.
 
     This abstract base class provides common implementation for:
-    - Agent initialization and compilation
+    - Agent initialization from LLMContext
     - Structured output handling via Pydantic models
 
-    Subclasses implement the invoke() method and use _run_with_output()
-    to get typed responses.
+    Subclasses define their agent_name and system_prompt_key as class attributes,
+    then implement the invoke() method using _run_with_output().
 
     Example:
         ```python
         class MyAgent(BaseAgent["MyAgent"]):
+            agent_name = "MyAgent"
+            system_prompt_key = "my_system_prompt"
+
             async def invoke(self, task: str) -> MyOutput:
                 return await self._run_with_output(task, MyOutput)
+
+        # Usage:
+        agent = MyAgent(llm_context).compile()
         ```
     """
 
-    def __init__(self, context: AgentContext) -> None:
-        """Initialize the agent with configuration context.
+    # Subclasses must define these
+    agent_name: str = "Agent"
+    system_prompt_key: str = ""
+
+    def __init__(self, llm_context: LLMContext) -> None:
+        """Initialize the agent with LLMContext.
 
         Args:
-            context: AgentContext containing model client, tools, and prompts
+            llm_context: LLMContext containing llm, prompts, and tools
         """
-        self.context = context
+        self._llm_context = llm_context
         self._agent: AssistantAgent | None = None
 
     def compile(self: T) -> T:
         """Compile and initialize the AutoGen AssistantAgent.
 
-        Creates the underlying AutoGen AssistantAgent with the configured
-        model client, tools, and system prompt.
+        Creates the underlying AutoGen AssistantAgent using components
+        from the LLMContext.
 
         Returns:
             Self for method chaining
         """
-        logger.info(f"Compiling {self.context.agent_name} agent...")
+        logger.info(f"Compiling {self.agent_name} agent...")
 
-        self._agent = AssistantAgent(
-            name=self.context.agent_name,
-            model_client=self.context.model_client,
-            tools=self.context.tools,
-            system_message=self.context.system_prompt,
+        # Extract system prompt
+        system_prompt = self._llm_context.prompts.get(self.system_prompt_key)
+        system_prompt_text = (
+            system_prompt.format() if hasattr(system_prompt, 'format')
+            else str(system_prompt) if system_prompt else ""
         )
 
-        logger.info(f"  {self.context.agent_name} agent compiled successfully")
+        # Flatten tools - tool builder functions return lists of FunctionTools
+        tools = []
+        for tool_or_list in self._llm_context.tools.values():
+            if isinstance(tool_or_list, list):
+                tools.extend(tool_or_list)
+            else:
+                tools.append(tool_or_list)
+
+        self._agent = AssistantAgent(
+            name=self.agent_name,
+            model_client=self._llm_context.llm,
+            tools=tools,
+            system_message=system_prompt_text,
+        )
+
+        logger.info(f"  {self.agent_name} agent compiled successfully")
         return self
 
     def _ensure_compiled(self) -> None:
@@ -94,7 +103,7 @@ class BaseAgent(ABC, Generic[T]):
         """
         if not self._agent:
             raise RuntimeError(
-                f"{self.context.agent_name} not compiled. Call compile() first."
+                f"{self.agent_name} not compiled. Call compile() first."
             )
 
     async def _run_with_output(
@@ -137,8 +146,6 @@ class BaseAgent(ABC, Generic[T]):
         Returns:
             Parsed model instance or None if parsing fails
         """
-        import json
-
         if not hasattr(msg, 'content'):
             return None
 

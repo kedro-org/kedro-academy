@@ -15,16 +15,13 @@ from typing import Any
 from pptx import Presentation
 from kedro.pipeline.llm_context import LLMContext
 
-# Import from new module structure
-from .planner import create_planner_agent
-from .chart import create_chart_generator_agent, generate_chart
-from .summary import create_summarizer_agent, generate_summary
-from .critic import create_critic_agent, run_qa_review
+# Import agent classes directly - no factory functions needed
+from .planner import PlannerAgent
+from .chart import ChartGeneratorAgent, generate_chart
+from .summary import SummarizerAgent, generate_summary
+from .critic import CriticAgent, run_qa_review
 from .presentation import create_slide, combine_presentations, format_summary_text
-from .orchestration_helpers import (
-    create_agent_from_context,
-    format_all_prompts,
-)
+from .orchestration_helpers import format_all_prompts
 from ppt_autogen_workflow.utils.instruction_parser import parse_instructions_yaml
 
 logger = logging.getLogger(__name__)
@@ -116,19 +113,11 @@ def orchestrate_multi_agent_workflow(
     chart_slides = slide_configs.get('chart_slides', {})
     summarizer_slides = slide_configs.get('summarizer_slides', {})
 
-    # Create agents from LLMContext objects
-    planner_agent = create_agent_from_context(
-        planner_context, "planner_system_prompt", create_planner_agent
-    )
-    chart_agent = create_agent_from_context(
-        chart_context, "chart_generator_system_prompt", create_chart_generator_agent
-    )
-    summarizer_agent = create_agent_from_context(
-        summarizer_context, "summarizer_system_prompt", create_summarizer_agent
-    )
-    critic_agent = create_agent_from_context(
-        critic_context, "critic_system_prompt", create_critic_agent
-    )
+    # Create agents directly from LLMContext
+    planner_agent = PlannerAgent(planner_context).compile()
+    chart_agent = ChartGeneratorAgent(chart_context).compile()
+    summarizer_agent = SummarizerAgent(summarizer_context).compile()
+    critic_agent = CriticAgent(critic_context).compile()
 
     # Format prompts
     critic_user_prompt = critic_context.prompts.get("critic_user_prompt")

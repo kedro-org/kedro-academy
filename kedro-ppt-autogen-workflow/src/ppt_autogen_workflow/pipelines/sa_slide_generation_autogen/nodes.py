@@ -13,7 +13,7 @@ from typing import Any
 
 from kedro.pipeline.llm_context import LLMContext
 
-from .agent import create_ppt_agent
+from .agent import PPTGenerationAgent
 from .agent_helpers import (
     generate_chart,
     generate_summary,
@@ -77,24 +77,11 @@ def run_ppt_agent(
         Tuple of (slide_chart_paths, slide_summaries)
     """
     try:
-        # Extract components from LLMContext
-        model_client = llm_context.llm
-        system_prompt = llm_context.prompts.get("ppt_generator_system_prompt")
+        # Create the PPT agent directly from LLMContext
+        agent = PPTGenerationAgent(llm_context).compile()
+
+        # Get user prompt template for formatting
         user_prompt_template = llm_context.prompts.get("ppt_generator_user_prompt")
-
-        # Flatten tools - tool builder functions return lists of FunctionTools
-        tools = []
-        for tool_or_list in llm_context.tools.values():
-            if isinstance(tool_or_list, list):
-                tools.extend(tool_or_list)
-            else:
-                tools.append(tool_or_list)
-
-        # Format system prompt
-        system_prompt_text = system_prompt.format() if hasattr(system_prompt, 'format') else str(system_prompt)
-
-        # Create the PPT agent
-        agent = create_ppt_agent(model_client, system_prompt_text, tools)
 
         # Format user prompts for each slide
         slides = slide_configs.get('slides', {})
