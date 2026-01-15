@@ -1,18 +1,56 @@
 from datetime import datetime
 import logging
+from typing import Any
 
-from kedro.pipeline import LLMContext
+import pandas as pd
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
-from .agent import ResponseGenerationAgent
-from ...utils import log_message
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+
+from .agent import ResponseGenerationAgentOpenAI
+from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
+from ...datasets.openai_model_dataset import OpenAIModelConfig
+from ...utils import log_message, AgentContext
 
 logger = logging.getLogger(__name__)
 
 
+def init_tools(
+    db_engine: Engine, docs: pd.DataFrame, docs_matches: int
+) -> dict[str, Any]:
+    """Assemble all tools used by the response generation agent."""
+    return {
+        "lookup_docs": build_lookup_docs(docs, docs_matches),
+        "get_user_claims": build_get_user_claims(db_engine),
+        "create_claim": build_create_claim(db_engine),
+    }
+
+
+def init_response_generation_context(
+    llm_openai: OpenAIModelConfig,
+    tool_prompt: PromptTemplate,
+    response_prompt: ChatPromptTemplate,
+    tools: dict[str, Any],
+) -> AgentContext:
+    """
+    Initialize the AgentContext for response generation.
+    - Binds LLM and tools.
+    - Attaches tool prompt and response prompt.
+    """
+    ctx = AgentContext(agent_id="response_generation_agent")
+    ctx.llm = llm_openai
+
+    for name, fn in tools.items():
+        ctx.add_tool(name, fn)
+
+    ctx.add_prompt("tool_prompt", tool_prompt)
+    ctx.add_prompt("response_prompt", response_prompt)
+    return ctx
+
+
 def generate_response(
-    response_generation_context: LLMContext,
+    response_generation_context: AgentContext,
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
@@ -30,7 +68,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentOpenAI(context=response_generation_context)
         agent.compile()
 
         context = {

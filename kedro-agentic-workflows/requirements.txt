@@ -1,3 +1,5 @@
+autogen-agentchat
+autogen-ext[openai]
 ipython>=8.10
 jupyterlab>=3.0
 notebook
@@ -7,3 +9,4 @@ kedro-viz>=12.2.0
 langgraph~=1.0.0
 scikit-learn~=1.7.2
 questionary~=2.1.1
+openai-agents

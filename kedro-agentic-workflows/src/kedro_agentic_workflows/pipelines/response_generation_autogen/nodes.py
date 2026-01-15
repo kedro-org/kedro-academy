@@ -1,18 +1,55 @@
 from datetime import datetime
 import logging
+from typing import Callable
 
-from kedro.pipeline import LLMContext
+from autogen_ext.models.openai import OpenAIChatCompletionClient
 from langchain_core.messages import AIMessage
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+import pandas as pd
 from sqlalchemy import text, Engine
 
-from .agent import ResponseGenerationAgent
-from ...utils import log_message
+from .agent import ResponseGenerationAgentAutogen
+from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
+from ...utils import log_message, AgentContext
 
 logger = logging.getLogger(__name__)
 
 
+def init_tools(
+    db_engine: Engine, docs: pd.DataFrame, docs_matches: int
+) -> dict[str, Callable]:
+    """Assemble all tools used by the response generation agent."""
+    return {
+        "lookup_docs": build_lookup_docs(docs, docs_matches),
+        "get_user_claims": build_get_user_claims(db_engine),
+        "create_claim": build_create_claim(db_engine),
+    }
+
+
+def init_response_generation_context(
+    llm: OpenAIChatCompletionClient,
+    tool_prompt: PromptTemplate,
+    response_prompt: ChatPromptTemplate,
+    tools: dict[str, Callable],
+) -> AgentContext:
+    """
+    Initialize the AgentContext for response generation.
+    - Binds LLM and tools.
+    - Attaches tool prompt and response prompt.
+    """
+    ctx = AgentContext(agent_id="response_generation_agent")
+    ctx.llm = llm
+
+    for name, fn in tools.items():
+        ctx.add_tool(name, fn)
+
+    ctx.add_prompt("tool_prompt", tool_prompt)
+    ctx.add_prompt("response_prompt", response_prompt)
+    return ctx
+
+
 def generate_response(
-    response_generation_context: LLMContext,
+    response_generation_context: AgentContext,
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
@@ -30,7 +67,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentAutogen(context=response_generation_context)
         agent.compile()
 
         context = {
