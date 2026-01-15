@@ -13,7 +13,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             llm_context_node(
                 name="response_agent_context_node",
                 outputs="response_generation_context",
-                llm="llm",
+                llm="llm_openai",
                 prompts=["tool_prompt", "response_prompt"],
                 tools=[
                     tool(build_get_user_claims, "db_engine"),

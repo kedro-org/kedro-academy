@@ -5,7 +5,7 @@ from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
-from .agent import ResponseGenerationAgent
+from .agent import ResponseGenerationAgentAutogen
 from ...utils import log_message
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgent(context=response_generation_context)
+        agent = ResponseGenerationAgentAutogen(context=response_generation_context)
         agent.compile()
 
         context = {
