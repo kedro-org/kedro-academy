@@ -142,3 +142,39 @@ def parse_slide_requirements(
             }
 
         return {'slides': sa_slides}
+
+
+def parse_ma_slide_requirements(
+    slide_generation_requirements: dict[str, Any],
+) -> dict[str, Any]:
+    """Parse slide generation requirements for MA pipeline.
+
+    Wrapper function for parse_slide_requirements with pipeline_type="ma".
+
+    Args:
+        slide_generation_requirements: Raw slide configuration from YAML
+
+    Returns:
+        Dictionary with MA slide configurations:
+        - planner_slides: For planner agent
+        - chart_slides: For chart generator agent
+        - summarizer_slides: For summarizer agent
+    """
+    return parse_slide_requirements(slide_generation_requirements, pipeline_type="ma")
+
+
+def parse_sa_slide_requirements(
+    slide_generation_requirements: dict[str, Any],
+) -> dict[str, Any]:
+    """Parse slide generation requirements for SA pipeline.
+
+    Wrapper function for parse_slide_requirements with pipeline_type="sa".
+
+    Args:
+        slide_generation_requirements: Raw slide configuration from YAML
+
+    Returns:
+        Dictionary with SA slide configurations:
+        - slides: Unified slide configurations for single agent
+    """
+    return parse_slide_requirements(slide_generation_requirements, pipeline_type="sa")

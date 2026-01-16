@@ -12,23 +12,16 @@ from ppt_autogen_workflow.base.tools import (
     build_summarizer_tools,
     build_critic_tools,
 )
-# Import preprocessing and postprocessing from base
-from ppt_autogen_workflow.base.postprocessing import assemble_presentation
-from .nodes import parse_ma_slide_requirements
 
 
 def create_pipeline() -> Pipeline:
-    """Create the multi-agent AutoGen pipeline with preprocessing and postprocessing."""
+    """Create the multi-agent AutoGen pipeline.
+    
+    Note: Preprocessing and postprocessing are handled by separate pipelines.
+    This pipeline expects ma_slide_configs to be available from preprocessing
+    and produces ma_slide_content for postprocessing.
+    """
     return pipeline([
-        # Preprocessing: Parse slide requirements
-        node(
-            func=parse_ma_slide_requirements,
-            inputs="slide_generation_requirements",
-            outputs="ma_slide_configs",
-            name="ma_parse_slide_requirements",
-            tags=["preprocessing", "deterministic", "requirements_parsing"],
-        ),
-
         # Steps 1-4: Context nodes - Bundle LLM + prompts + tools for each agent
         llm_context_node(
             outputs="planner_context",
@@ -79,24 +72,11 @@ def create_pipeline() -> Pipeline:
                 "chart_context",
                 "summarizer_context",
                 "critic_context",
-                "ma_slide_configs",
+                "slide_configs",
                 "params:quality_assurance",
             ],
-            outputs="ma_slide_content",
+            outputs="slide_content",
             name="ma_orchestrate_agents",
-            tags=["ma_autogen", "agentic"],
+            tags=["ma"],
         ),
-
-        # Postprocessing: Assemble presentation
-        node(
-            func=assemble_presentation,
-            inputs=[
-                "ma_slide_content",
-                "params:layout",
-                "params:styling",
-            ],
-            outputs="sales_analysis_ma",
-            name="ma_assemble_presentation",
-            tags=["postprocessing", "deterministic", "presentation_assembly"],
-        ),
-    ])
+    ], namespace="ma", parameters={"params:quality_assurance": "params:quality_assurance", "params:styling": "params:styling"})

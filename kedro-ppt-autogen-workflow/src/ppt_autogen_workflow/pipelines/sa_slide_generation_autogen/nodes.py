@@ -9,24 +9,8 @@ from kedro.pipeline.llm_context import LLMContext
 from .agent import PPTGenerationAgent
 from .utils import format_sa_prompts
 from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
-from ppt_autogen_workflow.base.preprocessing import parse_slide_requirements
 
 logger = logging.getLogger(__name__)
-
-
-def parse_sa_slide_requirements(
-    slide_generation_requirements: dict[str, Any],
-) -> dict[str, Any]:
-    """Parse slide generation requirements for SA pipeline.
-
-    Args:
-        slide_generation_requirements: Raw slide configuration from YAML
-
-    Returns:
-        Dictionary with SA slide configurations:
-        - slides: Unified slide configurations for single agent
-    """
-    return parse_slide_requirements(slide_generation_requirements, pipeline_type="sa")
 
 
 def run_ppt_agent(
