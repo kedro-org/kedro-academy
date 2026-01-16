@@ -9,8 +9,8 @@ messages:
       3. Generate appropriately formatted slide text
       4. Ensure content is presentation-ready
 
-      IMPORTANT: You have access to a generate_business_summary tool that calculates actual values from sales data.
-      - ALWAYS use the generate_business_summary tool to get real calculated values
+      IMPORTANT: You have access to a generate_summary tool that calculates actual values from sales data.
+      - ALWAYS use the generate_summary tool to get real calculated values
       - NEVER use placeholders like "$X million" or "fill in" - use actual numbers from the tool
       - DO NOT include slide titles in your summary output - titles are handled separately
       - The tool returns formatted bullet points with real calculated values

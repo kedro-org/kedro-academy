@@ -6,8 +6,8 @@ messages:
       {slide_config}
 
       Please:
-      1. Use the 'generate_sales_chart' tool to create the chart based on the chart instruction
-      2. Use the 'generate_business_summary' tool to create the summary based on the summary instruction
+      1. Use the 'generate_chart' tool to create the chart based on the chart instruction
+      2. Use the 'generate_summary' tool to create the summary based on the summary instruction
       3. Ensure the chart and summary align with the slide title
       4. Return the chart path and summary text
 

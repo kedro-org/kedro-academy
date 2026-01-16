@@ -7,7 +7,6 @@ from typing import Any
 from kedro.pipeline.llm_context import LLMContext
 
 from .agent import PPTGenerationAgent
-from .utils import format_sa_prompts
 from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
 
 logger = logging.getLogger(__name__)
@@ -34,26 +33,30 @@ def run_ppt_agent(
         # Create the PPT agent directly from LLMContext
         agent = PPTGenerationAgent(llm_context).compile()
 
-        # Get user prompt template and format prompts for each slide
-        user_prompt_template = llm_context.prompts.get("ppt_generator_user_prompt")
+        # Extract slides from unified format
         slides = sa_slide_configs.get('slides', {})
-        formatted_prompts = format_sa_prompts(slides, user_prompt_template)
 
         # Generate charts and summaries for each slide
         slide_content = {}
 
         for slide_key, config in slides.items():
-            user_prompt = formatted_prompts.get(slide_key, '')
-
-            # Generate chart - agent uses generate_chart tool with instruction
-            # Agent analyzes instruction and generates chart from data
-            chart_query = f"{user_prompt}\n\nTask: Generate a chart using the generate_chart tool. Provide the chart instruction from the slide config and let the tool analyze the data and create the chart."
+            # Generate chart with focused query
+            chart_instruction = config.get('chart_instruction', '')
+            chart_query = (
+                f"For slide '{config['slide_title']}', create a chart.\n\n"
+                f"Chart Instruction: {chart_instruction}\n\n"
+                f"Call the generate_chart tool with the instruction above to create the chart."
+            )
             chart_output: ChartOutput = asyncio.run(agent.invoke_for_chart(chart_query))
             chart_path = chart_output.chart_path if chart_output.chart_path else ""
 
-            # Generate summary - agent uses generate_summary tool with instruction
-            # Agent analyzes instruction and generates insights from data
-            summary_query = f"{user_prompt}\n\nTask: Generate a summary using the generate_summary tool. Provide the summary instruction from the slide config and let the tool analyze the data and generate insights."
+            # Generate summary with focused query (separate from chart)
+            summary_instruction = config.get('summary_instruction', '')
+            summary_query = (
+                f"For slide '{config['slide_title']}', create a summary.\n\n"
+                f"Summary Instruction: {summary_instruction}\n\n"
+                f"Call the generate_summary tool with the instruction above to generate the summary."
+            )
             summary_output: SummaryOutput = asyncio.run(agent.invoke_for_summary(summary_query))
             summary_text = summary_output.summary_text if summary_output.summary_text else ""
 

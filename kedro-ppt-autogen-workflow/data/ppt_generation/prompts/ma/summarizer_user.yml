@@ -7,7 +7,7 @@ messages:
       Chart Status: {chart_status}
 
       IMPORTANT INSTRUCTIONS:
-      1. Use the generate_business_summary tool to get actual calculated values from the sales data
+      1. Use the generate_summary tool to get actual calculated values from the sales data
       2. DO NOT include the slide title in your summary output - the title is handled separately
       3. DO NOT use placeholders like "$X million" - use actual calculated values from the tool
       4. Follow the summary instruction exactly as specified
