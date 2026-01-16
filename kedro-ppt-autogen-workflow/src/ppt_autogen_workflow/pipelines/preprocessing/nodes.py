@@ -64,117 +64,31 @@ def parse_instructions_yaml(
 
 def parse_slide_requirements(
     slide_generation_requirements: dict[str, Any],
-    pipeline_type: str = "ma",
 ) -> dict[str, Any]:
-    """Parse slide generation requirements from YAML into structured format.
+    """Parse slide generation requirements from YAML into unified format.
 
-    This deterministic function prepares slide configurations for MA or SA pipelines.
-    It extracts slide titles, chart instructions, and summary instructions.
+    This deterministic function prepares slide configurations for both MA and SA pipelines.
+    It extracts slide titles, chart instructions, and summary instructions into a unified
+    format that works for any pipeline type.
 
     Args:
         slide_generation_requirements: Raw slide configuration from YAML
-        pipeline_type: Type of pipeline - "ma" for multi-agent or "sa" for single-agent
 
     Returns:
-        For MA pipeline:
-            Dictionary with:
-            - planner_slides: For planner agent
-            - chart_slides: For chart generator agent
-            - summarizer_slides: For summarizer agent
-        For SA pipeline:
-            Dictionary with:
-            - slides: Unified slide configurations for single agent
+        Dictionary with 'slides' key containing slide configurations.
+        Each slide has: slide_title, chart_instruction, summary_instruction, data_context
     """
     slide_definitions = parse_instructions_yaml(slide_generation_requirements)
     data_context = "Sales data available through agent tools"
 
-    if pipeline_type.lower() == "ma":
-        # MA pipeline needs separate views for each agent
-        planner_slides = {}
-        chart_slides = {}
-        summarizer_slides = {}
-
-        for slide_key, slide_config in slide_definitions.items():
-            objective = slide_config.get('objective', {})
-            slide_title = objective.get('slide_title', slide_key)
-            chart_instruction = objective.get('chart_instruction', '')
-            summary_instruction = objective.get('summary_instruction', '')
-
-            planner_slides[slide_key] = {
-                'slide_title': slide_title,
-                'chart_instruction': chart_instruction,
-                'summary_instruction': summary_instruction,
-                'data_context': data_context,
-            }
-
-            chart_slides[slide_key] = {
-                'slide_title': slide_title,
-                'chart_instruction': chart_instruction,
-                'data_context': data_context,
-            }
-
-            summarizer_slides[slide_key] = {
-                'slide_title': slide_title,
-                'summary_instruction': summary_instruction,
-                'data_context': data_context,
-            }
-
-        return {
-            'planner_slides': planner_slides,
-            'chart_slides': chart_slides,
-            'summarizer_slides': summarizer_slides,
+    slides = {}
+    for slide_key, slide_config in slide_definitions.items():
+        objective = slide_config.get('objective', {})
+        slides[slide_key] = {
+            'slide_title': objective.get('slide_title', slide_key),
+            'chart_instruction': objective.get('chart_instruction', ''),
+            'summary_instruction': objective.get('summary_instruction', ''),
+            'data_context': data_context,
         }
-    else:
-        # SA pipeline needs unified view
-        sa_slides = {}
 
-        for slide_key, slide_config in slide_definitions.items():
-            objective = slide_config.get('objective', {})
-            slide_title = objective.get('slide_title', slide_key)
-            chart_instruction = objective.get('chart_instruction', '')
-            summary_instruction = objective.get('summary_instruction', '')
-
-            sa_slides[slide_key] = {
-                'slide_title': slide_title,
-                'chart_instruction': chart_instruction,
-                'summary_instruction': summary_instruction,
-                'data_context': data_context,
-            }
-
-        return {'slides': sa_slides}
-
-
-def parse_ma_slide_requirements(
-    slide_generation_requirements: dict[str, Any],
-) -> dict[str, Any]:
-    """Parse slide generation requirements for MA pipeline.
-
-    Wrapper function for parse_slide_requirements with pipeline_type="ma".
-
-    Args:
-        slide_generation_requirements: Raw slide configuration from YAML
-
-    Returns:
-        Dictionary with MA slide configurations:
-        - planner_slides: For planner agent
-        - chart_slides: For chart generator agent
-        - summarizer_slides: For summarizer agent
-    """
-    return parse_slide_requirements(slide_generation_requirements, pipeline_type="ma")
-
-
-def parse_sa_slide_requirements(
-    slide_generation_requirements: dict[str, Any],
-) -> dict[str, Any]:
-    """Parse slide generation requirements for SA pipeline.
-
-    Wrapper function for parse_slide_requirements with pipeline_type="sa".
-
-    Args:
-        slide_generation_requirements: Raw slide configuration from YAML
-
-    Returns:
-        Dictionary with SA slide configurations:
-        - slides: Unified slide configurations for single agent
-    """
-    return parse_slide_requirements(slide_generation_requirements, pipeline_type="sa")
+    return {'slides': slides}

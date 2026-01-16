@@ -30,7 +30,7 @@ def orchestrate_multi_agent_workflow(
     chart_context: LLMContext,
     summarizer_context: LLMContext,
     critic_context: LLMContext,
-    ma_slide_configs: dict[str, Any],
+    slide_configs: dict[str, Any],
     quality_assurance_params: dict[str, Any],
 ) -> dict[str, Any]:
     """Orchestrate multi-agent workflow to generate charts and summaries.
@@ -43,16 +43,14 @@ def orchestrate_multi_agent_workflow(
         chart_context: LLMContext for chart generator agent
         summarizer_context: LLMContext for summarizer agent
         critic_context: LLMContext for critic agent
-        ma_slide_configs: Pre-parsed slide configurations from preprocessing
+        slide_configs: Pre-parsed slide configurations from preprocessing (unified format)
         quality_assurance_params: QA parameters for critic
 
     Returns:
         Dict containing slide content (chart_paths and summaries) for assembly
     """
-    # Extract parsed requirements
-    planner_slides = ma_slide_configs.get('planner_slides', {})
-    chart_slides = ma_slide_configs.get('chart_slides', {})
-    summarizer_slides = ma_slide_configs.get('summarizer_slides', {})
+    # Extract slides from unified format (same as SA)
+    slides = slide_configs.get('slides', {})
 
     # Create agents directly from LLMContext
     planner_agent = PlannerAgent(planner_context).compile()
@@ -60,10 +58,10 @@ def orchestrate_multi_agent_workflow(
     summarizer_agent = SummarizerAgent(summarizer_context).compile()
     critic_agent = CriticAgent(critic_context).compile()
 
-    # Format prompts
+    # Format prompts using unified slides
     critic_user_prompt = critic_context.prompts.get("critic_user_prompt")
     planner_prompts, chart_prompts, summarizer_prompts = format_ma_prompts(
-        planner_slides, chart_slides, summarizer_slides,
+        slides,
         planner_context.prompts.get("planner_user_prompt"),
         chart_context.prompts.get("chart_generator_user_prompt"),
         summarizer_context.prompts.get("summarizer_user_prompt"),
@@ -72,7 +70,7 @@ def orchestrate_multi_agent_workflow(
     # Run multi-agent workflow
     slide_content = {}
 
-    for slide_key, config in planner_slides.items():
+    for slide_key, config in slides.items():
         # Planner analyzes requirements - agent uses analyze_data tool based on instructions
         asyncio.run(planner_agent.invoke(planner_prompts[slide_key]))
 

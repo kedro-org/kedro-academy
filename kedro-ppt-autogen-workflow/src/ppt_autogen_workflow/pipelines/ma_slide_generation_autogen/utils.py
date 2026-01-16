@@ -11,19 +11,15 @@ from ppt_autogen_workflow.base.utils import format_prompt
 
 
 def format_ma_prompts(
-    planner_slides: dict[str, Any],
-    chart_slides: dict[str, Any],
-    summarizer_slides: dict[str, Any],
+    slides: dict[str, Any],
     planner_user_prompt: Any,
     chart_user_prompt: Any,
     summarizer_user_prompt: Any,
 ) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
-    """Format prompts for all agents and slides.
+    """Format prompts for all agents using unified slides format.
 
     Args:
-        planner_slides: Planner slide configurations
-        chart_slides: Chart slide configurations
-        summarizer_slides: Summarizer slide configurations
+        slides: Unified slide configurations (same format as SA)
         planner_user_prompt: Planner user prompt template
         chart_user_prompt: Chart user prompt template
         summarizer_user_prompt: Summarizer user prompt template
@@ -31,9 +27,12 @@ def format_ma_prompts(
     Returns:
         Tuple of (planner_prompts, chart_prompts, summarizer_prompts)
     """
-    # Format planner prompts
     planner_prompts = {}
-    for slide_key, config in planner_slides.items():
+    chart_prompts = {}
+    summarizer_prompts = {}
+
+    for slide_key, config in slides.items():
+        # Format planner prompt
         planner_prompts[slide_key] = format_prompt(
             planner_user_prompt,
             slide_title=config['slide_title'],
@@ -42,9 +41,7 @@ def format_ma_prompts(
             data_context=config['data_context']
         )
 
-    # Format chart prompts
-    chart_prompts = {}
-    for slide_key, config in chart_slides.items():
+        # Format chart prompt
         chart_config_str = (
             f"Slide Title: {config['slide_title']}\n"
             f"Chart Instruction: {config['chart_instruction']}\n"
@@ -55,9 +52,7 @@ def format_ma_prompts(
         else:
             chart_prompts[slide_key] = str(chart_user_prompt).replace("{chart_config}", chart_config_str)
 
-    # Format summarizer prompts (with placeholder for chart_status)
-    summarizer_prompts = {}
-    for slide_key, config in summarizer_slides.items():
+        # Format summarizer prompt (with placeholder for chart_status)
         summarizer_config_str = (
             f"Summary Instruction: {config['summary_instruction']}\n"
             f"Data Context: {config['data_context']}"
