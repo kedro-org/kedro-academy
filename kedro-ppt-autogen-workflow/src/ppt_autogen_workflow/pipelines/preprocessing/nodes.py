@@ -15,6 +15,26 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Agent-specific field projections for MA pipeline
+AGENT_VIEWS = {
+    "planner_slides": [
+        "slide_title",
+        "chart_instruction",
+        "summary_instruction",
+        "data_context",
+    ],
+    "chart_slides": [
+        "slide_title",
+        "chart_instruction",
+        "data_context",
+    ],
+    "summarizer_slides": [
+        "slide_title",
+        "summary_instruction",
+        "data_context",
+    ],
+}
+
 
 def parse_slide_instructions(
     slide_generation_requirements: dict[str, Any],
@@ -82,7 +102,7 @@ def prepare_sa_slides(
     """Prepare unified slide view for single-agent pipeline.
 
     This is the third node in the SA preprocessing pipeline.
-    Wraps base slides in a unified format.
+    SA agent gets all fields for each slide in a unified format.
 
     Args:
         base_slides: Output from extract_slide_objectives
@@ -91,20 +111,45 @@ def prepare_sa_slides(
         Dictionary with 'slides' key containing all slide configurations.
     """
     return {"slides": base_slides}
+
+
+def _project_agent_view(
+    base_slides: dict[str, dict[str, Any]],
+    fields: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Project only specified fields for each slide.
+
+    Args:
+        base_slides: Full slide configurations
+        fields: List of field names to include
+
+    Returns:
+        Slides with only the specified fields.
+    """
+    return {
+        slide_key: {field: slide[field] for field in fields if field in slide}
+        for slide_key, slide in base_slides.items()
+    }
 
 
 def prepare_ma_slides(
     base_slides: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Prepare slide view for multi-agent pipeline.
+    """Prepare agent-specific slide views for multi-agent pipeline.
 
     This is the third node in the MA preprocessing pipeline.
-    Currently uses the same unified format as SA for compatibility.
+    Each MA agent gets only the fields relevant to its task:
+    - planner_slides: all fields (to plan the full slide)
+    - chart_slides: slide_title, chart_instruction, data_context
+    - summarizer_slides: slide_title, summary_instruction, data_context
 
     Args:
         base_slides: Output from extract_slide_objectives
 
     Returns:
-        Dictionary with 'slides' key containing all slide configurations.
+        Dictionary with agent-specific slide views.
     """
-    return {"slides": base_slides}
+    return {
+        agent_name: _project_agent_view(base_slides, fields)
+        for agent_name, fields in AGENT_VIEWS.items()
+    }

@@ -17,7 +17,10 @@ from .nodes import (
 
 
 def create_sa_preprocessing_pipeline() -> Pipeline:
-    """Create the SA preprocessing pipeline with 3 nodes."""
+    """Create the SA preprocessing pipeline with 3 nodes.
+
+    Returns unified format: {"slides": {...}}
+    """
     return Pipeline([
         node(
             func=parse_slide_instructions,
@@ -44,7 +47,15 @@ def create_sa_preprocessing_pipeline() -> Pipeline:
 
 
 def create_ma_preprocessing_pipeline() -> Pipeline:
-    """Create the MA preprocessing pipeline with 3 nodes."""
+    """Create the MA preprocessing pipeline with 3 nodes.
+
+    Returns agent-specific views:
+    {
+        "planner_slides": {...},
+        "chart_slides": {...},
+        "summarizer_slides": {...}
+    }
+    """
     return Pipeline([
         node(
             func=parse_slide_instructions,
