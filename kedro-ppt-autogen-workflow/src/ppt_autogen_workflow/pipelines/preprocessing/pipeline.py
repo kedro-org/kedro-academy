@@ -1,40 +1,79 @@
-"""Preprocessing pipeline for parsing slide generation requirements."""
+"""Preprocessing pipeline for parsing slide generation requirements.
+
+This module defines preprocessing pipelines with 3 nodes each:
+1. parse_slide_instructions - Parse raw YAML
+2. extract_slide_objectives - Extract common objectives
+3. prepare_sa_slides / prepare_ma_slides - Pipeline-specific preparation
+"""
 
 from kedro.pipeline import Pipeline, node
 
-from .nodes import parse_slide_requirements
+from .nodes import (
+    parse_slide_instructions,
+    extract_slide_objectives,
+    prepare_sa_slides,
+    prepare_ma_slides,
+)
 
 
-# Base pipeline that can be reused with namespaces
-# Note: This uses parse_slide_requirements which accepts pipeline_type parameter
-# In the registry, we'll create namespaced versions with different parameters
-_base_parse_pipeline = Pipeline([
-    node(
-        func=parse_slide_requirements,
-        inputs="slide_generation_requirements",
-        outputs="slide_configs",  # Generic output name
-        name="parse_slide_requirements",
-        # pipeline_type will be passed via parameters in namespaced versions
-    ),
-])
+def create_sa_preprocessing_pipeline() -> Pipeline:
+    """Create the SA preprocessing pipeline with 3 nodes."""
+    return Pipeline([
+        node(
+            func=parse_slide_instructions,
+            inputs="slide_generation_requirements",
+            outputs="slide_definitions",
+            name="parse_slide_instructions",
+            tags=["preprocessing", "deterministic"],
+        ),
+        node(
+            func=extract_slide_objectives,
+            inputs="slide_definitions",
+            outputs="base_slides",
+            name="extract_slide_objectives",
+            tags=["preprocessing", "deterministic"],
+        ),
+        node(
+            func=prepare_sa_slides,
+            inputs="base_slides",
+            outputs="slide_configs",
+            name="prepare_sa_slides",
+            tags=["preprocessing", "deterministic"],
+        ),
+    ])
+
+
+def create_ma_preprocessing_pipeline() -> Pipeline:
+    """Create the MA preprocessing pipeline with 3 nodes."""
+    return Pipeline([
+        node(
+            func=parse_slide_instructions,
+            inputs="slide_generation_requirements",
+            outputs="slide_definitions",
+            name="parse_slide_instructions",
+            tags=["preprocessing", "deterministic"],
+        ),
+        node(
+            func=extract_slide_objectives,
+            inputs="slide_definitions",
+            outputs="base_slides",
+            name="extract_slide_objectives",
+            tags=["preprocessing", "deterministic"],
+        ),
+        node(
+            func=prepare_ma_slides,
+            inputs="base_slides",
+            outputs="slide_configs",
+            name="prepare_ma_slides",
+            tags=["preprocessing", "deterministic"],
+        ),
+    ])
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    """Create the preprocessing pipeline.
-    
-    This pipeline parses slide generation requirements.
-    Returns a base pipeline that should be reused with namespaces in the registry.
-    
-    Note: To use namespaces effectively, create namespaced versions in the registry:
-    - MA version: namespace="ma", outputs={"slide_configs": "ma_slide_configs"}, 
-                  parameters={"params:pipeline_type": "ma"} (if using params)
-    - SA version: namespace="sa", outputs={"slide_configs": "sa_slide_configs"},
-                  parameters={"params:pipeline_type": "sa"} (if using params)
-    
-    However, since parse_slide_requirements uses a function parameter (not params),
-    we need to use wrapper functions. See pipeline_registry.py for namespace examples.
-    
+    """Create the default preprocessing pipeline (SA version).
+
     Returns:
-        Base pipeline that processes slide_generation_requirements into slide_configs
+        SA preprocessing pipeline with 3 nodes
     """
-    return _base_parse_pipeline
+    return create_sa_preprocessing_pipeline()

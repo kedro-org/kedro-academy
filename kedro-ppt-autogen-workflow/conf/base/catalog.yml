@@ -7,9 +7,20 @@
   filepath: data/ppt_generation/sample/sales_50_products.csv
 
 
+# Preprocessing intermediate outputs (3 nodes per Elena's review)
+"{namespace}.slide_definitions":
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/{namespace}/slide_definitions.json
+  versioned: true
+
+"{namespace}.base_slides":
+  type: json.JSONDataset
+  filepath: data/ppt_generation/intermediate/{namespace}/base_slides.json
+  versioned: true
+
 "{namespace}.slide_configs":
   type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/{namespace}/slide_configs_parsed.json
+  filepath: data/ppt_generation/intermediate/{namespace}/slide_configs.json
   versioned: true
 
 "{namespace}.slide_content":

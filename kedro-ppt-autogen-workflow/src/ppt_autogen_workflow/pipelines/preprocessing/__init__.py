@@ -1,10 +1,13 @@
-"""
-This is a boilerplate pipeline 'preprocessing'
-generated using Kedro 1.1.1
-"""
+"""Preprocessing pipeline for slide generation requirements."""
 
-from .pipeline import create_pipeline
+from .pipeline import (
+    create_pipeline,
+    create_sa_preprocessing_pipeline,
+    create_ma_preprocessing_pipeline,
+)
 
-__all__ = ["create_pipeline"]
-
-__version__ = "0.1"
+__all__ = [
+    "create_pipeline",
+    "create_sa_preprocessing_pipeline",
+    "create_ma_preprocessing_pipeline",
+]
