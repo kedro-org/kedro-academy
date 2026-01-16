@@ -21,26 +21,8 @@ from .agent import (
     CriticAgent,
 )
 from .utils import format_ma_prompts
-from ppt_autogen_workflow.base.preprocessing import parse_slide_requirements
 
 logger = logging.getLogger(__name__)
-
-
-def parse_ma_slide_requirements(
-    slide_generation_requirements: dict[str, Any],
-) -> dict[str, Any]:
-    """Parse slide generation requirements for MA pipeline.
-
-    Args:
-        slide_generation_requirements: Raw slide configuration from YAML
-
-    Returns:
-        Dictionary with MA slide configurations:
-        - planner_slides: For planner agent
-        - chart_slides: For chart generator agent
-        - summarizer_slides: For summarizer agent
-    """
-    return parse_slide_requirements(slide_generation_requirements, pipeline_type="ma")
 
 
 def orchestrate_multi_agent_workflow(

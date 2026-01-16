@@ -1,65 +1,24 @@
-# ============================================================================
-# DATA CATALOG - AutoGen PPT Generation Pipeline
-# ============================================================================
-
-# ==============================================================================
-# INPUT DATASETS
-# ==============================================================================
-
-slide_generation_requirements:
+"{namespace}.slide_generation_requirements":
   type: yaml.YAMLDataset
   filepath: data/ppt_generation/sample/slide_generation_requirements.yaml
 
-sales_data:
+"{namespace}.sales_data":
   type: pandas.CSVDataset
   filepath: data/ppt_generation/sample/sales_50_products.csv
 
 
-# ==============================================================================
-# INTERMEDIATE DATASETS - Multi-Agent Pipeline
-# ==============================================================================
-
-ma_slide_configs:
+"{namespace}.slide_configs":
   type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/slide_configs_parsed.json
+  filepath: data/ppt_generation/intermediate/{namespace}/slide_configs_parsed.json
   versioned: true
 
-ma_slide_content:
+"{namespace}.slide_content":
   type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/ma/slide_content.json
+  filepath: data/ppt_generation/intermediate/{namespace}/slide_content.json
   versioned: true
 
-
-# ==============================================================================
-# OUTPUT - Multi-Agent Pipeline
-# ==============================================================================
-
-sales_analysis_ma:
+"{namespace}.sales_analysis":
   type: openxml.PptxDataset
-  filepath: data/ppt_generation/output/ma/sales_analysis.pptx
+  filepath: data/ppt_generation/output/{namespace}/sales_analysis.pptx
   versioned: true
 
-
-# ==============================================================================
-# INTERMEDIATE DATASETS - Single-Agent Pipeline
-# ==============================================================================
-
-sa_slide_configs:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/sa/slide_configs_parsed.json
-  versioned: true
-
-sa_slide_content:
-  type: json.JSONDataset
-  filepath: data/ppt_generation/intermediate/sa/slide_content.json
-  versioned: true
-
-
-# ==============================================================================
-# OUTPUT - Single-Agent Pipeline
-# ==============================================================================
-
-sales_analysis_sa:
-  type: openxml.PptxDataset
-  filepath: data/ppt_generation/output/sa/sales_analysis.pptx
-  versioned: true

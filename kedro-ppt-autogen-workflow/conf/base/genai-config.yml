@@ -6,7 +6,7 @@
 # LLM MODEL CLIENT
 # ==============================================================================
 
-llm_autogen:
+"{namespace}.llm_autogen":
   type: ppt_autogen_workflow.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
   kwargs:
     model: "gpt-4o"
@@ -18,56 +18,56 @@ llm_autogen:
 # PROMPTS - Multi-Agent Pipeline
 # ==============================================================================
 
-planner_system_prompt:
+ma.planner_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/planner_system.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-planner_user_prompt:
+ma.planner_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/planner_user.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-chart_generator_system_prompt:
+ma.chart_generator_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/chart_generator_system.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-chart_generator_user_prompt:
+ma.chart_generator_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/chart_generator_user.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-summarizer_system_prompt:
+ma.summarizer_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/summarizer_system.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-summarizer_user_prompt:
+ma.summarizer_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/summarizer_user.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-critic_system_prompt:
+ma.critic_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/critic_system.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-critic_user_prompt:
+ma.critic_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/ma/critic_user.yml
   template: ChatPromptTemplate
@@ -79,14 +79,14 @@ critic_user_prompt:
 # PROMPTS - Single-Agent Pipeline
 # ==============================================================================
 
-ppt_generator_system_prompt:
+sa.ppt_generator_system_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/sa/ppt_generator_system.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
-ppt_generator_user_prompt:
+sa.ppt_generator_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/ppt_generation/prompts/sa/ppt_generator_user.yml
   template: ChatPromptTemplate

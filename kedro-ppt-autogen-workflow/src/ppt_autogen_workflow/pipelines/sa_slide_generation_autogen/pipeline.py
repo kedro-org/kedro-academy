@@ -7,23 +7,16 @@ from .nodes import run_ppt_agent
 
 # Import shared tool builder from base
 from ppt_autogen_workflow.base.tools import build_sa_tools
-# Import preprocessing and postprocessing from base
-from ppt_autogen_workflow.base.postprocessing import assemble_presentation
-from .nodes import parse_sa_slide_requirements
 
 
 def create_pipeline() -> Pipeline:
-    """Create the single-agent AutoGen pipeline with preprocessing and postprocessing."""
-    return pipeline([
-        # Preprocessing: Parse slide requirements
-        node(
-            func=parse_sa_slide_requirements,
-            inputs="slide_generation_requirements",
-            outputs="sa_slide_configs",
-            name="sa_parse_slide_requirements",
-            tags=["preprocessing", "deterministic", "requirements_parsing"],
-        ),
-
+    """Create the single-agent AutoGen pipeline.
+    
+    Note: Preprocessing and postprocessing are handled by separate pipelines.
+    This pipeline expects sa_slide_configs to be available from preprocessing
+    and produces sa_slide_content for postprocessing.
+    """
+    return Pipeline([
         # Step 1: Create LLM context
         # Single agent gets all tools bundled together
         llm_context_node(
@@ -42,23 +35,10 @@ def create_pipeline() -> Pipeline:
             func=run_ppt_agent,
             inputs=[
                 "ppt_llm_context",
-                "sa_slide_configs",
+                "slide_configs",
             ],
-            outputs="sa_slide_content",
+            outputs="slide_content",
             name="sa_run_ppt_agent",
-            tags=["sa_autogen", "agentic"],
+            tags=["sa"],
         ),
-
-        # Postprocessing: Assemble presentation
-        node(
-            func=assemble_presentation,
-            inputs=[
-                "sa_slide_content",
-                "params:layout",
-                "params:styling",
-            ],
-            outputs="sales_analysis_sa",
-            name="sa_assemble_presentation",
-            tags=["postprocessing", "deterministic", "presentation_assembly"],
-        ),
-    ])
+    ], namespace="sa", parameters={"params:styling": "params:styling"})

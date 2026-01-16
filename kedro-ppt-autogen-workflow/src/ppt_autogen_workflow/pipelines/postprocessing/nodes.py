@@ -346,3 +346,4 @@ def assemble_presentation(
         slide.shapes.title.text = "Presentation Assembly Error"
         slide.placeholders[1].text = f"Error: {str(e)}"
         return prs
+
