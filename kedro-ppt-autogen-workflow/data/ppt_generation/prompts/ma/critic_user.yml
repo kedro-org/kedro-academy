@@ -1,0 +1,28 @@
+messages:
+  - role: user
+    content: |
+      Please review and provide feedback on the following slide content:
+
+      Slide Content:
+      {slide_content}
+
+      Expected Requirements:
+      {expected_requirements}
+
+      Quality Standards: {quality_standards}
+      Review Criteria: {review_criteria}
+
+      Please validate:
+      1. Does the generated slide content match the expected requirements?
+      2. Does the chart align with the chart instruction?
+      3. Does the summary align with the summary instruction?
+      4. Is the slide title correct?
+
+      Please provide:
+      1. Overall quality assessment (score 1-10)
+      2. Specific areas for improvement
+      3. Actionable recommendations
+      4. Compliance with presentation best practices
+      5. Validation against expected requirements
+
+      Return structured feedback that can guide improvements to the slides.
