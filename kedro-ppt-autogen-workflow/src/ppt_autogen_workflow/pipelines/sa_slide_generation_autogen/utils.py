@@ -1,8 +1,4 @@
-"""Utility functions for single-agent AutoGen pipeline.
-
-This module contains helper functions needed for the single-agent
-orchestration workflow.
-"""
+"""Utility functions for single-agent AutoGen pipeline."""
 from __future__ import annotations
 
 from typing import Any
@@ -14,15 +10,7 @@ def format_sa_prompts(
     slides: dict[str, Any],
     user_prompt_template: Any,
 ) -> dict[str, str]:
-    """Format prompts for all slides in single-agent pipeline.
-
-    Args:
-        slides: Slide configurations from preprocessing
-        user_prompt_template: User prompt template for PPT generation
-
-    Returns:
-        Dictionary mapping slide_key to formatted prompt string
-    """
+    """Format prompts for all slides."""
     formatted_prompts = {}
 
     for slide_key, config in slides.items():

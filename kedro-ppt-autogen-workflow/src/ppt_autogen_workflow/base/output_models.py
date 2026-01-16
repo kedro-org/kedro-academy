@@ -1,9 +1,4 @@
-"""Pydantic models for structured agent output.
-
-These models define the expected output structure from agents,
-enabling AutoGen to return validated, typed responses instead
-of raw text that requires manual parsing.
-"""
+"""Pydantic models for structured agent output."""
 from pydantic import BaseModel, Field
 
 

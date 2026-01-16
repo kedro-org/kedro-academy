@@ -5,18 +5,11 @@ from kedro.pipeline import Pipeline, node
 from .nodes import assemble_presentation
 
 
-# Base pipeline that can be reused with namespaces
-# This base pipeline uses generic input/output names that will be mapped
-# to specific names when reused in the registry
 _base_assembly_pipeline = Pipeline([
     node(
         func=assemble_presentation,
-        inputs=[
-            "slide_content",  # Generic input - will be mapped to ma_slide_content or sa_slide_content
-            "params:layout",
-            "params:styling",
-        ],
-        outputs="presentation",  # Generic output - will be mapped to sales_analysis_ma or sales_analysis_sa
+        inputs=["slide_content", "params:layout", "params:styling"],
+        outputs="presentation",
         name="assemble_presentation",
     ),
 ])

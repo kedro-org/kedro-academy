@@ -1,6 +1,7 @@
-"""Kedro nodes for single-agent AutoGen PPT generation pipeline."""
+"""Single-agent AutoGen PPT generation nodes."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -16,31 +17,13 @@ def run_ppt_agent(
     llm_context: LLMContext,
     sa_slide_configs: dict[str, Any],
 ) -> dict[str, Any]:
-    """Run PPT agent to generate charts and summaries.
-
-    This is the agentic node that uses the LLM to generate content.
-    
-    Args:
-        llm_context: LLMContext containing llm, prompts, and tools
-        sa_slide_configs: Pre-parsed slide configurations from preprocessing
-
-    Returns:
-        Dict mapping slide_key to content dict with slide_title, chart_path, summary
-    """
-    import asyncio
-
+    """Run PPT agent to generate charts and summaries for each slide."""
     try:
-        # Create the PPT agent directly from LLMContext
         agent = PPTGenerationAgent(llm_context).compile()
-
-        # Extract slides from unified format
         slides = sa_slide_configs.get('slides', {})
-
-        # Generate charts and summaries for each slide
         slide_content = {}
 
         for slide_key, config in slides.items():
-            # Generate chart with focused query
             chart_instruction = config.get('chart_instruction', '')
             chart_query = (
                 f"For slide '{config['slide_title']}', create a chart.\n\n"
@@ -50,7 +33,6 @@ def run_ppt_agent(
             chart_output: ChartOutput = asyncio.run(agent.invoke_for_chart(chart_query))
             chart_path = chart_output.chart_path if chart_output.chart_path else ""
 
-            # Generate summary with focused query (separate from chart)
             summary_instruction = config.get('summary_instruction', '')
             summary_query = (
                 f"For slide '{config['slide_title']}', create a summary.\n\n"
@@ -60,7 +42,6 @@ def run_ppt_agent(
             summary_output: SummaryOutput = asyncio.run(agent.invoke_for_summary(summary_query))
             summary_text = summary_output.summary_text if summary_output.summary_text else ""
 
-            # Bundle content for assembly
             slide_content[slide_key] = {
                 'slide_title': config['slide_title'],
                 'chart_path': chart_path,

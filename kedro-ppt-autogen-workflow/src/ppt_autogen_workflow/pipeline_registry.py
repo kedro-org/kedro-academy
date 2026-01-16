@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from kedro.pipeline import Pipeline
+from kedro.framework.project import find_pipelines
 
 from ppt_autogen_workflow.pipelines.preprocessing import (
     create_sa_preprocessing_pipeline,
@@ -11,7 +12,6 @@ from ppt_autogen_workflow.pipelines.preprocessing import (
 from ppt_autogen_workflow.pipelines.postprocessing import create_pipeline as create_postprocessing_pipeline
 from ppt_autogen_workflow.pipelines.sa_slide_generation_autogen import create_pipeline as create_sa_pipeline
 from ppt_autogen_workflow.pipelines.ma_slide_generation_autogen import create_pipeline as create_ma_pipeline
-from kedro.framework.project import find_pipelines
 
 
 def register_pipelines() -> dict[str, Pipeline]:
@@ -43,7 +43,7 @@ def register_pipelines() -> dict[str, Pipeline]:
     sa_agent_pipeline = create_sa_pipeline()
     ma_agent_pipeline = create_ma_pipeline()
 
-    # Create namespaced preprocessing pipelines (3 nodes each per Elena's suggestion)
+    # Create namespaced preprocessing pipelines
     preprocessing_sa = Pipeline(sa_preprocessing, namespace="sa", outputs={"slide_configs": "sa.slide_configs"})
     preprocessing_ma = Pipeline(ma_preprocessing, namespace="ma", outputs={"slide_configs": "ma.slide_configs"})
     

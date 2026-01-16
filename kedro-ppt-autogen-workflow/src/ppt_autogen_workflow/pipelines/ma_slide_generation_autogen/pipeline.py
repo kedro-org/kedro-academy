@@ -4,8 +4,6 @@ from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
 from .nodes import orchestrate_multi_agent_workflow
-
-# Import shared tool builders from base
 from ppt_autogen_workflow.base.tools import (
     build_data_analysis_tools,
     build_chart_generator_tools,
@@ -15,14 +13,8 @@ from ppt_autogen_workflow.base.tools import (
 
 
 def create_pipeline() -> Pipeline:
-    """Create the multi-agent AutoGen pipeline.
-    
-    Note: Preprocessing and postprocessing are handled by separate pipelines.
-    This pipeline expects ma_slide_configs to be available from preprocessing
-    and produces ma_slide_content for postprocessing.
-    """
+    """Create the multi-agent AutoGen pipeline."""
     return pipeline([
-        # Steps 1-4: Context nodes - Bundle LLM + prompts + tools for each agent
         llm_context_node(
             outputs="planner_context",
             llm="llm_autogen",
@@ -63,8 +55,6 @@ def create_pipeline() -> Pipeline:
             tools=[tool(build_critic_tools)],
             name="ma_create_critic_context",
         ),
-
-        # Step 5: Orchestration node - Run multi-agent workflow
         node(
             func=orchestrate_multi_agent_workflow,
             inputs=[

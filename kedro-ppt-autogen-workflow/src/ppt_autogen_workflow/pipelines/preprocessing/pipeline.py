@@ -1,10 +1,4 @@
-"""Preprocessing pipeline for parsing slide generation requirements.
-
-This module defines preprocessing pipelines with 3 nodes each:
-1. parse_slide_instructions - Parse raw YAML
-2. extract_slide_objectives - Extract common objectives
-3. prepare_sa_slides / prepare_ma_slides - Pipeline-specific preparation
-"""
+"""Preprocessing pipelines for SA and MA slide generation."""
 
 from kedro.pipeline import Pipeline, node
 
@@ -82,9 +76,5 @@ def create_ma_preprocessing_pipeline() -> Pipeline:
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    """Create the default preprocessing pipeline (SA version).
-
-    Returns:
-        SA preprocessing pipeline with 3 nodes
-    """
+    """Create the default preprocessing pipeline (SA version)."""
     return create_sa_preprocessing_pipeline()

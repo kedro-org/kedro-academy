@@ -13,55 +13,22 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-# Type variable for generic agent typing
 T = TypeVar("T", bound="BaseAgent")
 
+
 class BaseAgent(ABC, Generic[T]):
-    """Base class for all AutoGen agents with shared functionality.
+    """Base class for AutoGen agents with LLMContext integration."""
 
-    This abstract base class provides common implementation for:
-    - Agent initialization from LLMContext
-    - Structured output handling via Pydantic models
-
-    Subclasses define their agent_name and system_prompt_key as class attributes,
-    then implement the invoke() method using _run_with_output().
-
-    Example:
-        ```python
-        class MyAgent(BaseAgent["MyAgent"]):
-            agent_name = "MyAgent"
-            system_prompt_key = "my_system_prompt"
-
-            async def invoke(self, task: str) -> MyOutput:
-                return await self._run_with_output(task, MyOutput)
-
-        # Usage:
-        agent = MyAgent(llm_context).compile()
-        ```
-    """
-
-    # Subclasses must define these
     agent_name: str = "Agent"
     system_prompt_key: str = ""
 
     def __init__(self, llm_context: LLMContext) -> None:
-        """Initialize the agent with LLMContext.
-
-        Args:
-            llm_context: LLMContext containing llm, prompts, and tools
-        """
+        """Initialize the agent with LLMContext."""
         self._llm_context = llm_context
         self._agent: AssistantAgent | None = None
 
     def compile(self: T) -> T:
-        """Compile and initialize the AutoGen AssistantAgent.
-
-        Creates the underlying AutoGen AssistantAgent using components
-        from the LLMContext.
-
-        Returns:
-            Self for method chaining
-        """
+        """Compile and initialize the AutoGen AssistantAgent."""
         logger.info(f"Compiling {self.agent_name} agent...")
 
         # Extract system prompt
@@ -90,11 +57,7 @@ class BaseAgent(ABC, Generic[T]):
         return self
 
     def _ensure_compiled(self) -> None:
-        """Ensure the agent has been compiled before invocation.
-
-        Raises:
-            RuntimeError: If compile() has not been called
-        """
+        """Ensure the agent has been compiled before invocation."""
         if not self._agent:
             raise RuntimeError(
                 f"{self.agent_name} not compiled. Call compile() first."
@@ -103,18 +66,7 @@ class BaseAgent(ABC, Generic[T]):
     async def _run_with_output(
         self, task: str, output_type: type[BaseModel]
     ) -> BaseModel:
-        """Run agent and return structured output.
-
-        Runs the agent and parses the response into a Pydantic model.
-        Looks for tool results first, then tries to parse raw content.
-
-        Args:
-            task: The task for the agent to process
-            output_type: Pydantic model class for structured output
-
-        Returns:
-            Instance of output_type with agent's response
-        """
+        """Run agent and return structured output as Pydantic model."""
         self._ensure_compiled()
         result = await self._agent.run(task=task)
 
@@ -125,21 +77,12 @@ class BaseAgent(ABC, Generic[T]):
                 if parsed:
                     return parsed
 
-        # Return default instance if parsing fails
         return output_type()
 
     def _try_parse_message(
         self, msg: Any, output_type: type[BaseModel]
     ) -> BaseModel | None:
-        """Try to parse a message into the output type.
-
-        Args:
-            msg: Message from agent response
-            output_type: Pydantic model class to parse into
-
-        Returns:
-            Parsed model instance or None if parsing fails
-        """
+        """Try to parse a message into the output type."""
         if not hasattr(msg, 'content'):
             return None
 
@@ -170,15 +113,5 @@ class BaseAgent(ABC, Generic[T]):
 
     @abstractmethod
     async def invoke(self, task: str) -> Any:
-        """Invoke the agent with a task.
-
-        Subclasses must implement this method to define their specific
-        invocation logic and output structure.
-
-        Args:
-            task: The task or query for the agent to process
-
-        Returns:
-            Agent-specific output (dict, Pydantic model, etc.)
-        """
+        """Invoke the agent with a task."""
         pass

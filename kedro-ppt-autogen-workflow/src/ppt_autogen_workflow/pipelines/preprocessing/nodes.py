@@ -1,13 +1,4 @@
-"""Preprocessing functions for parsing instructions and preparing slide configurations.
-
-This module contains deterministic functions that prepare data for
-the agentic pipelines. No LLM calls or agent logic here.
-
-The preprocessing pipeline has 3 nodes:
-1. parse_slide_instructions - Parse raw YAML into slide definitions
-2. extract_slide_objectives - Extract objectives shared by SA and MA
-3. prepare_sa_slides / prepare_ma_slides - Pipeline-specific preparation
-"""
+"""Preprocessing functions for slide configuration preparation."""
 from __future__ import annotations
 
 import logging
@@ -39,17 +30,7 @@ AGENT_VIEWS = {
 def parse_slide_instructions(
     slide_generation_requirements: dict[str, Any],
 ) -> dict[str, Any]:
-    """Parse raw YAML slide instructions into normalized definitions.
-
-    This is the first node in the preprocessing pipeline.
-    Extracts slide definitions from the 'iterative_slide_generation' section.
-
-    Args:
-        slide_generation_requirements: Dictionary loaded from instructions.yaml file
-
-    Returns:
-        Dictionary mapping slide keys to slide definitions with 'objective' key.
-    """
+    """Parse raw YAML slide instructions into normalized definitions."""
     slide_definitions = {}
 
     if "iterative_slide_generation" in slide_generation_requirements:
@@ -69,18 +50,7 @@ def extract_slide_objectives(
     slide_definitions: dict[str, Any],
     data_context: str = "Sales data available through agent tools",
 ) -> dict[str, dict[str, Any]]:
-    """Prepare deterministic slide objectives shared by SA and MA pipelines.
-
-    This is the second node in the preprocessing pipeline.
-    Extracts slide_title, chart_instruction, summary_instruction from objectives.
-
-    Args:
-        slide_definitions: Output from parse_slide_instructions
-        data_context: Context string describing available data
-
-    Returns:
-        Dictionary mapping slide keys to objective dictionaries.
-    """
+    """Extract slide objectives (title, chart/summary instructions) from definitions."""
     slides = {}
 
     for slide_key, slide_config in slide_definitions.items():
@@ -117,15 +87,7 @@ def _project_agent_view(
     base_slides: dict[str, dict[str, Any]],
     fields: list[str],
 ) -> dict[str, dict[str, Any]]:
-    """Project only specified fields for each slide.
-
-    Args:
-        base_slides: Full slide configurations
-        fields: List of field names to include
-
-    Returns:
-        Slides with only the specified fields.
-    """
+    """Project only specified fields for each slide."""
     return {
         slide_key: {field: slide[field] for field in fields if field in slide}
         for slide_key, slide in base_slides.items()

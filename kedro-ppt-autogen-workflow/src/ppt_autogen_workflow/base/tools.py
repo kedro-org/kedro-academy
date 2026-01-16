@@ -1,8 +1,4 @@
-"""Shared agent tools for MA and SA pipelines.
-
-These tools give agents access to raw data and let them analyze on demand.
-Agents receive data and instructions, then perform actual analysis.
-"""
+"""Shared agent tools for MA and SA pipelines."""
 from __future__ import annotations
 
 import json
@@ -20,26 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def _render_chart(config: dict[str, Any], styling_params: dict[str, Any]) -> plt.Figure:
-    """Render a chart based on configuration.
-    
-    This is a self-contained chart rendering function that creates matplotlib
-    figures for different chart types. It should not depend on pipeline code.
-    
-    Args:
-        config: Chart configuration dict with:
-            - chart_type: "bar", "horizontal_bar", "pie", or "line"
-            - x_column: Column name for x-axis/categories
-            - y_column: Column name for y-axis/values
-            - data_subset: List of dicts containing the data
-            - primary_color: Primary color hex code
-            - secondary_color: Secondary color hex code
-            - title: Chart title
-        styling_params: Styling parameters dict
-    
-    Returns:
-        matplotlib Figure object
-    """
-    # Convert data_subset to DataFrame
+    """Render a chart based on configuration."""
     df = pd.DataFrame(config.get("data_subset", []))
     
     if df.empty:
@@ -134,29 +111,9 @@ def _render_chart(config: dict[str, Any], styling_params: dict[str, Any]) -> plt
 
 
 def build_data_analysis_tools(sales_data: pd.DataFrame) -> list[Callable]:
-    """Build data analysis tools that let agents query raw data.
-
-    Agents can query data based on what they actually need from instructions.
-    No pre-computation - agents analyze on demand.
-
-    Args:
-        sales_data: Raw sales DataFrame
-
-    Returns:
-        List of tool functions for data analysis
-    """
+    """Build data analysis tools that let agents query raw data."""
     def analyze_data(query: str) -> str:
-        """Analyze sales data based on a natural language query.
-
-        Agent provides a query describing what analysis is needed.
-        Tool performs the analysis and returns results.
-
-        Args:
-            query: Natural language query describing desired analysis
-
-        Returns:
-            JSON string with analysis results
-        """
+        """Analyze sales data based on a natural language query."""
         try:
             df = sales_data.copy()
             query_lower = query.lower()
@@ -216,31 +173,9 @@ def build_chart_generator_tools(
     sales_data: pd.DataFrame,
     styling: dict[str, Any],
 ) -> list[Callable]:
-    """Build chart generator tools that let agents generate charts from data.
-
-    Agents provide chart instruction and data subset, tool generates chart.
-    No pre-computed configs - agents decide what chart to create.
-
-    Args:
-        sales_data: Raw sales DataFrame
-        styling: Styling parameters for charts
-
-    Returns:
-        List of tool functions for chart generator agent
-    """
+    """Build chart generator tools that let agents generate charts from data."""
     def generate_chart(instruction: str, data_subset: list[dict[str, Any]] | None = None) -> str:
-        """Generate a chart from instruction and data.
-
-        Agent provides instruction and optionally a data subset.
-        Tool parses instruction, filters data if needed, and generates chart.
-
-        Args:
-            instruction: Natural language chart instruction
-            data_subset: Optional pre-filtered data (if agent already filtered)
-
-        Returns:
-            JSON string with chart_path and status
-        """
+        """Generate a chart from instruction and data."""
         try:
             # Use provided data subset or full data
             if data_subset:
@@ -328,30 +263,9 @@ def build_chart_generator_tools(
 def build_summarizer_tools(
     sales_data: pd.DataFrame,
 ) -> list[Callable]:
-    """Build summarizer tools that let agents analyze data and generate summaries.
-
-    Agents provide instruction, tool analyzes data and generates insights.
-    No pre-computed bullet points - agents generate insights from data.
-
-    Args:
-        sales_data: Raw sales DataFrame
-
-    Returns:
-        List of tool functions for summarizer agent
-    """
+    """Build summarizer tools that let agents analyze data and generate summaries."""
     def generate_summary(instruction: str, data_subset: list[dict[str, Any]] | None = None) -> str:
-        """Generate summary by analyzing data based on instruction.
-
-        Agent provides instruction describing what summary is needed.
-        Tool analyzes data and generates insights.
-
-        Args:
-            instruction: Natural language summary instruction
-            data_subset: Optional pre-filtered data (if agent already filtered)
-
-        Returns:
-            JSON string with summary_text and status
-        """
+        """Generate summary by analyzing data based on instruction."""
         try:
             # Use provided data subset or full data
             if data_subset:
@@ -432,12 +346,7 @@ def build_summarizer_tools(
 
 
 def build_critic_tools() -> list[Callable]:
-    """Build critic tools (no data dependencies).
-
-    Returns:
-        List of tool functions for critic agent
-    """
-    # Critic tools don't need data - they review generated content
+    """Build critic tools (no data dependencies)."""
     return []
 
 
@@ -445,25 +354,10 @@ def build_sa_tools(
     sales_data: pd.DataFrame,
     styling: dict[str, Any],
 ) -> list[Callable]:
-    """Build all tools for single-agent pipeline.
-
-    The SA agent gets all tools in one bundle since it handles
-    all tasks (analysis, charts, summaries) by itself.
-
-    Args:
-        sales_data: Raw sales DataFrame
-        styling: Styling parameters for charts
-
-    Returns:
-        List of all tool functions for single agent
-    """
-    # Combine all tools into one bundle
+    """Build all tools for single-agent pipeline."""
     analysis_tools = build_data_analysis_tools(sales_data)
     chart_tools = build_chart_generator_tools(sales_data, styling)
     summary_tools = build_summarizer_tools(sales_data)
-
-    # Return all tools for the single agent
     all_tools = analysis_tools + chart_tools + summary_tools
-
     logger.info(f"Built {len(all_tools)} tools for single agent")
     return all_tools

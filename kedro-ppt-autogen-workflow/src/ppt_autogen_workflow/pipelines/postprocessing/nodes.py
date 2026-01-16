@@ -1,8 +1,4 @@
-"""Postprocessing functions for creating PowerPoint presentations.
-
-This module contains deterministic functions for assembling presentations
-from agent-generated content. These functions are reusable by both MA and SA pipelines.
-"""
+"""Postprocessing functions for creating PowerPoint presentations."""
 from __future__ import annotations
 
 import io
@@ -177,20 +173,7 @@ def create_slide(
     layout_params: dict[str, Any] | None = None,
     styling_params: dict[str, Any] | None = None,
 ) -> Presentation:
-    """Create a PowerPoint slide with chart and summary.
-
-    This is a pure function that returns a Presentation object.
-
-    Args:
-        slide_title: Title for the slide
-        chart_path: Path to the chart image file
-        summary_text: Summary text content (bullet points)
-        layout_params: Layout parameters (positions, dimensions)
-        styling_params: Styling parameters (fonts, colors)
-
-    Returns:
-        python-pptx Presentation object containing the slide
-    """
+    """Create a PowerPoint slide with chart and summary."""
     layout = layout_params or {}
     styling = styling_params or {}
 
@@ -269,16 +252,7 @@ def create_slide(
 def combine_presentations(
     presentations: list[Presentation],
 ) -> Presentation:
-    """Combine multiple presentations into one.
-
-    This is a pure function that returns a combined Presentation object.
-
-    Args:
-        presentations: List of Presentation objects to combine
-
-    Returns:
-        Combined Presentation object
-    """
+    """Combine multiple presentations into one."""
     combined_prs = Presentation()
     slides_combined = 0
 
@@ -302,21 +276,7 @@ def assemble_presentation(
     layout_params: dict[str, Any] | None = None,
     styling_params: dict[str, Any] | None = None,
 ) -> Any:
-    """Assemble final presentation from generated slide content.
-
-    This is a deterministic function that creates slides from the agent-generated content.
-    Works for both MA and SA pipelines by handling different input structures.
-
-    Args:
-        slide_content: Dict containing slides. Can be either:
-            - Direct dict mapping slide_key to content (SA format)
-            - Dict with 'slides' key containing the slide dict (MA format)
-        layout_params: Optional layout parameters for presentation
-        styling_params: Optional styling parameters for presentation
-
-    Returns:
-        Combined PowerPoint presentation
-    """
+    """Assemble final presentation from generated slide content."""
     try:
         # Handle both formats: MA wraps in 'slides' key, SA is direct dict
         slides = slide_content.get('slides', slide_content)
