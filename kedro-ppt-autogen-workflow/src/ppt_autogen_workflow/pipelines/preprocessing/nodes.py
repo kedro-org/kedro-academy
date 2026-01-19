@@ -1,30 +1,15 @@
-"""Preprocessing functions for slide configuration preparation."""
+"""Shared preprocessing functions for slide configuration preparation.
+
+This module contains only the shared preprocessing logic used by both
+SA and MA pipelines. Pipeline-specific preparation functions
+(prepare_sa_slides, prepare_ma_slides) are in their respective pipeline modules.
+"""
 from __future__ import annotations
 
 import logging
 from typing import Any
 
 logger = logging.getLogger(__name__)
-
-# Agent-specific field projections for MA pipeline
-AGENT_VIEWS = {
-    "planner_slides": [
-        "slide_title",
-        "chart_instruction",
-        "summary_instruction",
-        "data_context",
-    ],
-    "chart_slides": [
-        "slide_title",
-        "chart_instruction",
-        "data_context",
-    ],
-    "summarizer_slides": [
-        "slide_title",
-        "summary_instruction",
-        "data_context",
-    ],
-}
 
 
 def parse_slide_instructions(
@@ -64,54 +49,3 @@ def extract_slide_objectives(
         }
 
     return slides
-
-
-def prepare_sa_slides(
-    base_slides: dict[str, dict[str, Any]],
-) -> dict[str, Any]:
-    """Prepare unified slide view for single-agent pipeline.
-
-    This is the third node in the SA preprocessing pipeline.
-    SA agent gets all fields for each slide in a unified format.
-
-    Args:
-        base_slides: Output from extract_slide_objectives
-
-    Returns:
-        Dictionary with 'slides' key containing all slide configurations.
-    """
-    return {"slides": base_slides}
-
-
-def _project_agent_view(
-    base_slides: dict[str, dict[str, Any]],
-    fields: list[str],
-) -> dict[str, dict[str, Any]]:
-    """Project only specified fields for each slide."""
-    return {
-        slide_key: {field: slide[field] for field in fields if field in slide}
-        for slide_key, slide in base_slides.items()
-    }
-
-
-def prepare_ma_slides(
-    base_slides: dict[str, dict[str, Any]],
-) -> dict[str, Any]:
-    """Prepare agent-specific slide views for multi-agent pipeline.
-
-    This is the third node in the MA preprocessing pipeline.
-    Each MA agent gets only the fields relevant to its task:
-    - planner_slides: all fields (to plan the full slide)
-    - chart_slides: slide_title, chart_instruction, data_context
-    - summarizer_slides: slide_title, summary_instruction, data_context
-
-    Args:
-        base_slides: Output from extract_slide_objectives
-
-    Returns:
-        Dictionary with agent-specific slide views.
-    """
-    return {
-        agent_name: _project_agent_view(base_slides, fields)
-        for agent_name, fields in AGENT_VIEWS.items()
-    }

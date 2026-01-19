@@ -18,6 +18,59 @@ from .utils import format_ma_prompts
 
 logger = logging.getLogger(__name__)
 
+# Agent-specific field projections for MA pipeline
+AGENT_VIEWS = {
+    "planner_slides": [
+        "slide_title",
+        "chart_instruction",
+        "summary_instruction",
+        "data_context",
+    ],
+    "chart_slides": [
+        "slide_title",
+        "chart_instruction",
+        "data_context",
+    ],
+    "summarizer_slides": [
+        "slide_title",
+        "summary_instruction",
+        "data_context",
+    ],
+}
+
+
+def _project_agent_view(
+    base_slides: dict[str, dict[str, Any]],
+    fields: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Project only specified fields for each slide."""
+    return {
+        slide_key: {field: slide[field] for field in fields if field in slide}
+        for slide_key, slide in base_slides.items()
+    }
+
+
+def prepare_ma_slides(
+    base_slides: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Prepare agent-specific slide views for multi-agent pipeline.
+
+    Each MA agent gets only the fields relevant to its task:
+    - planner_slides: all fields (to plan the full slide)
+    - chart_slides: slide_title, chart_instruction, data_context
+    - summarizer_slides: slide_title, summary_instruction, data_context
+
+    Args:
+        base_slides: Output from extract_slide_objectives
+
+    Returns:
+        Dictionary with agent-specific slide views.
+    """
+    return {
+        agent_name: _project_agent_view(base_slides, fields)
+        for agent_name, fields in AGENT_VIEWS.items()
+    }
+
 
 def orchestrate_multi_agent_workflow(
     planner_context: LLMContext,

@@ -3,13 +3,23 @@
 from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
-from .nodes import run_ppt_agent
+from .nodes import prepare_sa_slides, run_ppt_agent
 from ppt_autogen_workflow.base.tools import build_sa_tools
 
 
 def create_pipeline() -> Pipeline:
-    """Create the single-agent AutoGen pipeline."""
+    """Create the single-agent AutoGen pipeline.
+
+    Includes prepare_sa_slides node for input formatting.
+    """
     return Pipeline([
+        node(
+            func=prepare_sa_slides,
+            inputs="base_slides",
+            outputs="slide_configs",
+            name="sa_prepare_slides",
+            tags=["sa", "deterministic"],
+        ),
         llm_context_node(
             outputs="ppt_llm_context",
             llm="llm_autogen",

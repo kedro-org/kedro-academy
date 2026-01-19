@@ -13,6 +13,22 @@ from ppt_autogen_workflow.base import ChartOutput, SummaryOutput
 logger = logging.getLogger(__name__)
 
 
+def prepare_sa_slides(
+    base_slides: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Prepare unified slide view for single-agent pipeline.
+
+    SA agent gets all fields for each slide in a unified format.
+
+    Args:
+        base_slides: Output from extract_slide_objectives
+
+    Returns:
+        Dictionary with 'slides' key containing all slide configurations.
+    """
+    return {"slides": base_slides}
+
+
 def run_ppt_agent(
     llm_context: LLMContext,
     sa_slide_configs: dict[str, Any],

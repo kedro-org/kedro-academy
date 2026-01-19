@@ -3,7 +3,7 @@
 from kedro.pipeline import Pipeline, pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
-from .nodes import orchestrate_multi_agent_workflow
+from .nodes import prepare_ma_slides, orchestrate_multi_agent_workflow
 from ppt_autogen_workflow.base.tools import (
     build_data_analysis_tools,
     build_chart_generator_tools,
@@ -13,8 +13,18 @@ from ppt_autogen_workflow.base.tools import (
 
 
 def create_pipeline() -> Pipeline:
-    """Create the multi-agent AutoGen pipeline."""
+    """Create the multi-agent AutoGen pipeline.
+
+    Includes prepare_ma_slides node for agent-specific input formatting.
+    """
     return pipeline([
+        node(
+            func=prepare_ma_slides,
+            inputs="base_slides",
+            outputs="slide_configs",
+            name="ma_prepare_slides",
+            tags=["ma", "deterministic"],
+        ),
         llm_context_node(
             outputs="planner_context",
             llm="llm_autogen",
