@@ -25,7 +25,6 @@ def create_pipeline() -> Pipeline:
             llm="llm_autogen",
             prompts=[
                 "ppt_generator_system_prompt",
-                "ppt_generator_user_prompt",
                 "chart_generator_user_prompt",
                 "summary_generator_user_prompt",
             ],
