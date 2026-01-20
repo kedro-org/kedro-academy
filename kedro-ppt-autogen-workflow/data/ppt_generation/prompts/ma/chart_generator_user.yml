@@ -11,4 +11,4 @@ messages:
       3. Ensure the chart is professional and presentation-ready
       4. Validate that the chart aligns with the slide title
 
-      Generate the chart according to the specific requirements.
+      Task: Generate a chart using the generate_chart tool. Provide the chart instruction and let the tool analyze the data and create the chart.

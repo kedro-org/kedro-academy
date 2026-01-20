@@ -14,4 +14,4 @@ messages:
       5. Generate content that is concise and presentation-ready
       6. Create bullet points that are executive-appropriate with real numbers
 
-      Generate the summary using actual calculated values from the data.
+      Task: Generate a summary using the generate_summary tool. Provide the summary instruction and let the tool analyze the data and generate insights.

@@ -104,20 +104,12 @@ def orchestrate_multi_agent_workflow(
     for slide_key, planner_config in planner_slides.items():
         asyncio.run(planner_agent.invoke(planner_prompts[slide_key]))
 
-        chart_query = (
-            f"{chart_prompts[slide_key]}\n\n"
-            f"Task: Generate a chart using the generate_chart tool. "
-            f"Provide the chart instruction and let the tool analyze the data and create the chart."
-        )
+        chart_query = chart_prompts[slide_key]
         chart_output = asyncio.run(chart_agent.invoke(chart_query))
         chart_path = chart_output.chart_path if hasattr(chart_output, 'chart_path') else ""
 
         chart_status = f"Chart generated: {chart_path}" if chart_path else "Chart generation in progress"
-        summary_query = (
-            f"{summarizer_prompts[slide_key].replace('{chart_status}', chart_status)}\n\n"
-            f"Task: Generate a summary using the generate_summary tool. "
-            f"Provide the summary instruction and let the tool analyze the data and generate insights."
-        )
+        summary_query = summarizer_prompts[slide_key].replace('{chart_status}', chart_status)
         summary_output = asyncio.run(summarizer_agent.invoke(summary_query))
         summary_text = summary_output.summary_text if hasattr(summary_output, 'summary_text') else ""
 
