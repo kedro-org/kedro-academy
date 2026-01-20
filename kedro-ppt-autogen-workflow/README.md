@@ -40,72 +40,17 @@ Two pipeline patterns are available for generating presentations:
 
 ### Single-Agent (SA) Pipeline
 
-A unified agent handles all content generation tasks using a comprehensive toolset.
-
-```mermaid
-flowchart TD
-    subgraph SA["Single-Agent Pipeline"]
-        SA_PREP[prepare_sa_slides]
-        SA_CTX[LLM Context Node]
-        SA_AGENT[PPT Generator Agent]
-
-        SA_PREP --> SA_CTX
-        SA_CTX --> SA_AGENT
-
-        subgraph Tools["Agent Tools"]
-            T1[generate_chart]
-            T2[generate_summary]
-        end
-
-        SA_AGENT --> Tools
-    end
-
-    BASE[base_slides] --> SA_PREP
-    SA_AGENT --> CONTENT[slide_content]
-```
-
-**PPT Generator Agent**:
+A unified **PPT Generator Agent** handles all content generation tasks using a comprehensive toolset. The agent:
 - Receives slide configurations with chart and summary instructions
 - Calls `generate_chart` tool to create visualizations from data
 - Calls `generate_summary` tool to create contextual bullet points
 - Returns structured output for each slide
 
+**Pipeline flow**: `prepare_sa_slides` → `LLM Context Node` → `run_ppt_agent`
+
 ### Multi-Agent (MA) Pipeline
 
-Specialized agents collaborate to produce higher-quality content through separation of concerns.
-
-```mermaid
-flowchart TD
-    subgraph MA["Multi-Agent Pipeline"]
-        MA_PREP[prepare_ma_slides]
-
-        subgraph Contexts["LLM Context Nodes"]
-            CTX1[Planner Context]
-            CTX2[Chart Context]
-            CTX3[Summarizer Context]
-            CTX4[Critic Context]
-        end
-
-        ORCH[Orchestrate Agents]
-
-        MA_PREP --> Contexts
-        Contexts --> ORCH
-    end
-
-    subgraph Agents["Specialized Agents"]
-        A1[Planner Agent]
-        A2[Chart Generator Agent]
-        A3[Summarizer Agent]
-        A4[Critic Agent]
-    end
-
-    ORCH --> Agents
-
-    BASE[base_slides] --> MA_PREP
-    Agents --> CONTENT[slide_content]
-```
-
-**Agent Responsibilities**:
+Specialized agents collaborate to produce higher-quality content through separation of concerns:
 
 | Agent | Role | Tools |
 |-------|------|-------|
@@ -114,50 +59,8 @@ flowchart TD
 | **Summarizer** | Generates insight bullet points | `generate_summary` |
 | **Critic** | Reviews quality, provides feedback | QA tools |
 
-## Kedro + AutoGen Integration
+**Pipeline flow**: `prepare_ma_slides` → 4x `LLM Context Nodes` → `orchestrate_multi_agent_workflow`
 
-```mermaid
-flowchart TB
-    subgraph Kedro["Kedro Framework"]
-        CAT[Data Catalog]
-        PARAMS[Parameters]
-        CREDS[Credentials]
-        REG[Pipeline Registry]
-    end
-
-    subgraph AutoGen["AutoGen Framework"]
-        CLIENT[Model Client]
-        AGENT[Assistant Agent]
-        TOOLS[Function Tools]
-    end
-
-    subgraph Pipeline["Pipeline Execution"]
-        LLM_CTX[llm_context_node]
-        NODE[Agent Node]
-    end
-
-    CAT --> LLM_CTX
-    PARAMS --> LLM_CTX
-    CREDS --> CLIENT
-    CLIENT --> AGENT
-    TOOLS --> AGENT
-    LLM_CTX --> NODE
-    AGENT --> NODE
-    REG --> Pipeline
-```
-
-**Kedro manages**:
-- Data access through the catalog (sales data, prompts, intermediate outputs)
-- Credentials for LLM API access
-- Pipeline orchestration with namespace isolation
-- Parameter configuration (styling, layout, QA settings)
-- Logging and reproducibility
-
-**AutoGen provides**:
-- `AssistantAgent` for LLM-powered reasoning
-- Function tools for data analysis and chart generation
-- Structured output parsing via Pydantic models
-- Async execution for agent invocations
 
 ## Project Structure
 
@@ -266,36 +169,6 @@ flowchart TB
 |----------|--------------|-------------|----------------|-------|
 | SA       | 2 (shared)   | 3           | 1 (shared)     | **6** |
 | MA       | 2 (shared)   | 6           | 1 (shared)     | **9** |
-
-## Required Data
-
-### Input Files
-
-| File | Description | Location |
-|------|-------------|----------|
-| Slide Requirements | YAML with slide objectives, chart/summary instructions | `data/ppt_generation/sample/slide_generation_requirements.yaml` |
-| Sales Data | CSV with product sales data for analysis | `data/ppt_generation/sample/sales_50_products.csv` |
-
-### Prompt Templates
-
-| Agent | Files | Location |
-|-------|-------|----------|
-| SA - PPT Generator | System + User prompts | `data/ppt_generation/prompts/sa/` |
-| MA - Planner | System + User prompts | `data/ppt_generation/prompts/ma/planner_*.yml` |
-| MA - Chart Generator | System + User prompts | `data/ppt_generation/prompts/ma/chart_generator_*.yml` |
-| MA - Summarizer | System + User prompts | `data/ppt_generation/prompts/ma/summarizer_*.yml` |
-| MA - Critic | System + User prompts | `data/ppt_generation/prompts/ma/critic_*.yml` |
-
-## Project Purpose
-
-This initiative showcases:
-
-- **Deterministic + Agentic separation**: Clear boundaries between preprocessing, agent execution, and postprocessing phases
-- **Namespace isolation**: SA and MA pipelines run independently with separate data artifacts
-- **Tool-based data access**: Agents query raw data dynamically rather than receiving pre-computed metrics
-- **Structured outputs**: Pydantic models ensure reliable parsing of agent responses
-- **Pipeline composition**: Shared preprocessing and postprocessing reused across pipeline variants
-- **Kedro best practices**: Proper use of catalog, parameters, credentials, and pipeline registry
 
 ## Setup Instructions
 
