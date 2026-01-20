@@ -1,0 +1,58 @@
+# ============================================================================
+# AUTOGEN PPT GENERATION PARAMETERS
+# ============================================================================
+
+# ============================================================================
+# STYLING PARAMETERS
+# ============================================================================
+
+# Chart colors (hex codes)
+styling:
+  # Brand/primary color for charts and titles
+  brand_color: "#1F4E79"
+  # Secondary color for chart elements and grids
+  chart_secondary_color: "#DDDDDD"
+  # Color palette for pie charts and multi-series charts
+  chart_colors:
+    - "#1F4E79"
+    - "#D0582A"
+    - "#70AD47"
+    - "#FFC000"
+    - "#5B9BD5"
+    - "#A5A5A5"
+  # Title text color (RGB tuple)
+  title_color_rgb: [31, 78, 121]
+  # Body text color (RGB tuple)
+  text_color_rgb: [51, 51, 51]
+
+  # Font sizes (points)
+  title_size: 28
+  text_size_small: 11
+  paragraph_spacing: 8
+
+# ============================================================================
+# LAYOUT PARAMETERS
+# ============================================================================
+
+layout:
+  # Content positioning (inches)
+  content_left: 0.5
+  content_top: 1.3
+  # Chart dimensions (inches)
+  chart_width: 5.0
+  chart_height: 5.0
+  # Summary text box dimensions (inches)
+  summary_width: 4.0
+  summary_spacing: 0.5
+  # Title positioning (inches)
+  title_left: 0.5
+  title_top: 0.3
+  title_width: 9.0
+  title_height: 0.8
+
+# ============================================================================
+# QUALITY ASSURANCE PARAMETERS
+# ============================================================================
+quality_assurance:
+  quality_standards: "Professional presentation standards with clear messaging"
+  review_criteria: "Score 1-10, check chart/summary alignment, provide improvement recommendations"

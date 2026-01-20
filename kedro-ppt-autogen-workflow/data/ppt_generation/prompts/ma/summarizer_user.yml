@@ -1,0 +1,17 @@
+messages:
+  - role: user
+    content: |
+      Please create a slide summary based on the following requirements:
+
+      {summarizer_config}
+      Chart Status: {chart_status}
+
+      IMPORTANT INSTRUCTIONS:
+      1. Use the generate_summary tool to get actual calculated values from the sales data
+      2. DO NOT include the slide title in your summary output - the title is handled separately
+      3. DO NOT use placeholders like "$X million" - use actual calculated values from the tool
+      4. Follow the summary instruction exactly as specified
+      5. Generate content that is concise and presentation-ready
+      6. Create bullet points that are executive-appropriate with real numbers
+
+      Task: Generate a summary using the generate_summary tool. Provide the summary instruction and let the tool analyze the data and generate insights.
