@@ -128,7 +128,10 @@ def orchestrate_multi_agent_workflow(
         }
 
         chart_available = 'Available' if chart_path and Path(chart_path).exists() else 'Not available'
-        summary_preview = summary_text[:300] if summary_text else 'Not available'
+        if summary_text:
+            summary_preview = summary_text[:300] + ('...' if len(summary_text) > 300 else '')
+        else:
+            summary_preview = 'Not available'
 
         slide_content_str = (
             f"Slide Title: {planner_config['slide_title']}\n"
