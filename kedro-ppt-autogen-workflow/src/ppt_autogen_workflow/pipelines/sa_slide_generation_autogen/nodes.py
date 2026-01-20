@@ -39,21 +39,22 @@ def run_ppt_agent(
         slides = sa_slide_configs.get('slides', {})
         slide_content = {}
 
+        chart_user_prompt = llm_context.prompts.get("chart_generator_user_prompt")
+        summary_user_prompt = llm_context.prompts.get("summary_generator_user_prompt")
+
         for slide_key, config in slides.items():
             chart_instruction = config.get('chart_instruction', '')
-            chart_query = (
-                f"For slide '{config['slide_title']}', create a chart.\n\n"
-                f"Chart Instruction: {chart_instruction}\n\n"
-                f"Call the generate_chart tool with the instruction above to create the chart."
+            chart_query = chart_user_prompt.format(
+                slide_title=config['slide_title'],
+                chart_instruction=chart_instruction,
             )
             chart_output: ChartOutput = asyncio.run(agent.invoke_for_chart(chart_query))
             chart_path = chart_output.chart_path if chart_output.chart_path else ""
 
             summary_instruction = config.get('summary_instruction', '')
-            summary_query = (
-                f"For slide '{config['slide_title']}', create a summary.\n\n"
-                f"Summary Instruction: {summary_instruction}\n\n"
-                f"Call the generate_summary tool with the instruction above to generate the summary."
+            summary_query = summary_user_prompt.format(
+                slide_title=config['slide_title'],
+                summary_instruction=summary_instruction,
             )
             summary_output: SummaryOutput = asyncio.run(agent.invoke_for_summary(summary_query))
             summary_text = summary_output.summary_text if summary_output.summary_text else ""

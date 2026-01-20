@@ -1,0 +1,8 @@
+messages:
+  - role: user
+    content: |
+      For slide '{slide_title}', create a chart.
+
+      Chart Instruction: {chart_instruction}
+
+      Call the generate_chart tool with the instruction above to create the chart.

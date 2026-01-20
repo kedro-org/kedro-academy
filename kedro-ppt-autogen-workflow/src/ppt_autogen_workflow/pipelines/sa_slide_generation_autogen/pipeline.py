@@ -26,6 +26,8 @@ def create_pipeline() -> Pipeline:
             prompts=[
                 "ppt_generator_system_prompt",
                 "ppt_generator_user_prompt",
+                "chart_generator_user_prompt",
+                "summary_generator_user_prompt",
             ],
             tools=[tool(build_sa_tools, "sales_data", "params:styling")],
             name="sa_create_ppt_context",
