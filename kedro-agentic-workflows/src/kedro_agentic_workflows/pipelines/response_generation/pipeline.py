@@ -1,6 +1,8 @@
 from kedro.pipeline import Pipeline, node, pipeline, llm_context_node, tool
 
 from .nodes import (
+    generate_code_preview,
+    generate_mermaid_preview,
     generate_response,
     log_response_and_end_session,
 )
@@ -31,6 +33,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 ],
                 outputs="final_response",
                 name="generate_response_node",
+                preview_fn=generate_mermaid_preview
             ),
             node(
                 func=log_response_and_end_session,

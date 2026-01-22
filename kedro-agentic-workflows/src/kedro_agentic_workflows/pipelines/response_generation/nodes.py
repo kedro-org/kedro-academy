@@ -2,6 +2,8 @@ from datetime import datetime
 import logging
 
 from kedro.pipeline import LLMContext
+from kedro.pipeline.preview_contract import MermaidPreview, TextPreview
+
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
 
@@ -9,6 +11,44 @@ from .agent import ResponseGenerationAgent
 from ...utils import log_message
 
 logger = logging.getLogger(__name__)
+
+
+def make_preview_fn(data_sample):
+    """Create a preview function with captured context."""
+    def preview_fn() -> TextPreview:
+        return TextPreview(content=data_sample, meta={"language": "python"})
+    return preview_fn
+
+
+def generate_code_preview() -> TextPreview:
+    """Generate a code preview with syntax highlighting.
+
+    Returns:
+        TextPreview object with code content and language metadata
+    """
+    code = """def calculate_metrics(data):
+    \"\"\"Calculate key performance metrics.\"\"\"
+    import pandas as pd
+
+    metrics = {
+        'mean': data.mean(),
+        'median': data.median(),
+        'std': data.std()
+    }
+
+    return pd.DataFrame(metrics)
+
+# Example usage
+result = calculate_metrics(my_dataframe)
+print(result)"""
+
+    return TextPreview(content=code, meta={"language": "python"})
+
+
+def generate_mermaid_preview() -> MermaidPreview:
+    compiled = ResponseGenerationAgent.graph().compile()
+    mermaid = compiled.get_graph().draw_mermaid()
+    return MermaidPreview(content=mermaid)
 
 
 def generate_response(

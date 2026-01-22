@@ -57,32 +57,60 @@ class ResponseGenerationAgent(KedroAgent):
         structured_llm = self.context.llm.with_structured_output(ResponseOutput)
         self.response_chain = self.context.prompts["response_prompt"] | structured_llm
 
-    def compile(self):
-        """Compile the state graph for response generation."""
+    @staticmethod
+    def _build_graph(
+        *,
+        tool_calling_node,
+        tools_node,
+        generate_response_node,
+        tools_condition_fn,
+    ) -> StateGraph:
         builder = StateGraph(AgentState)
 
-        builder.add_node(
-            "tool_calling_llm",
-            partial(tool_calling_llm, llm_with_tools=self.llm_with_tools),
-        )
-        builder.add_node("tools", ToolNode(self.tools))
-        builder.add_node(
-            "generate_response",
-            partial(generate_response, response_chain=self.response_chain),
-        )
+        builder.add_node("tool_calling_llm", tool_calling_node)
+        builder.add_node("tools", tools_node)
+        builder.add_node("generate_response", generate_response_node)
 
         builder.add_edge(START, "tool_calling_llm")
         builder.add_conditional_edges(
             "tool_calling_llm",
-            tools_condition,
+            tools_condition_fn,
             {"tools": "tools", "none": "generate_response"},
         )
         builder.add_edge("tools", "generate_response")
         builder.add_edge("generate_response", END)
 
-        # Compile with memory persistence
+        return builder
+
+    @staticmethod
+    def graph() -> StateGraph:
+        return ResponseGenerationAgent._build_graph(
+            tool_calling_node=lambda x: x,
+            tools_node=lambda x: x,
+            generate_response_node=lambda x: x,
+            tools_condition_fn=lambda _: "none",
+        )
+
+    def compile(self):
         self.memory = MemorySaver()
-        self.compiled_graph = builder.compile(checkpointer=self.memory)
+
+        builder = self._build_graph(
+            tool_calling_node=partial(
+                tool_calling_llm,
+                llm_with_tools=self.llm_with_tools,
+            ),
+            tools_node=ToolNode(self.tools),
+            generate_response_node=partial(
+                generate_response,
+                response_chain=self.response_chain,
+            ),
+            tools_condition_fn=tools_condition,
+        )
+
+        self.compiled_graph = builder.compile(
+            checkpointer=self.memory
+        )
+
 
     def invoke(self, context: dict, config: dict | None = None) -> Any:
         """
