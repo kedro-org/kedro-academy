@@ -24,13 +24,11 @@ def create_pipeline(**kwargs) -> Pipeline:
             inputs="slide_generation_requirements",
             outputs="slide_definitions",
             name="parse_slide_instructions",
-            tags=["preprocessing", "deterministic"],
         ),
         node(
             func=extract_slide_objectives,
             inputs="slide_definitions",
             outputs="base_slides",
             name="extract_slide_objectives",
-            tags=["preprocessing", "deterministic"],
         ),
     ])

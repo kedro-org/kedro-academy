@@ -1,6 +1,6 @@
 """Multi-agent AutoGen pipeline."""
 
-from kedro.pipeline import Pipeline, pipeline, node
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
 from .nodes import prepare_ma_slides, orchestrate_multi_agent_workflow
@@ -17,13 +17,12 @@ def create_pipeline() -> Pipeline:
 
     Includes prepare_ma_slides node for agent-specific input formatting.
     """
-    return pipeline([
+    return Pipeline([
         node(
             func=prepare_ma_slides,
             inputs="base_slides",
             outputs="slide_configs",
             name="ma_prepare_slides",
-            tags=["ma", "deterministic"],
         ),
         llm_context_node(
             outputs="planner_context",
@@ -77,6 +76,5 @@ def create_pipeline() -> Pipeline:
             ],
             outputs="slide_content",
             name="ma_orchestrate_agents",
-            tags=["ma"],
         ),
     ], namespace="ma", parameters={"params:quality_assurance": "params:quality_assurance", "params:styling": "params:styling"})

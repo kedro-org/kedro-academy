@@ -139,29 +139,12 @@ Specialized agents collaborate to produce higher-quality content through separat
 
 ## Pipeline Architecture
 
-```mermaid
-flowchart TB
-    subgraph Shared["Shared Pipelines"]
-        PRE["Preprocessing<br/>(2 nodes)"]
-        POST["Postprocessing<br/>(1 node)"]
-    end
+### Multi Agent Pipeline
+![MA Pipeline](docs/images/pipeline_ma.png)
 
-    subgraph SA_Full["SA Pipeline (6 nodes total)"]
-        SA_AGT["SA Agent<br/>(3 nodes)"]
-    end
+### Single Agent Pipeline
+![SA Pipeline](docs/images/pipeline_sa.png)
 
-    subgraph MA_Full["MA Pipeline (9 nodes total)"]
-        MA_AGT["MA Agent<br/>(6 nodes)"]
-    end
-
-    PRE -->|sa.base_slides| SA_AGT
-    PRE -->|ma.base_slides| MA_AGT
-    SA_AGT -->|sa.slide_content| POST
-    MA_AGT -->|ma.slide_content| POST
-
-    POST -->|sa.sales_analysis.pptx| OUT1[SA Output]
-    POST -->|ma.sales_analysis.pptx| OUT2[MA Output]
-```
 
 ### Node Breakdown
 
@@ -217,18 +200,9 @@ llm_autogen:
 ### 4. Run Pipelines
 
 ```bash
-# Single-Agent Pipeline (faster)
-kedro run --pipeline=sa_slide_generation_autogen
-
-# Multi-Agent Pipeline (more sophisticated)
-kedro run --pipeline=ma_slide_generation_autogen
-
-# Both pipelines
-kedro run
-
-# Run by namespace
-kedro run --namespace sa
-kedro run --namespace ma
+# Run by namespaces
+kedro run --namespaces sa
+kedro run --namespaces ma
 ```
 
 ### 5. Check Outputs

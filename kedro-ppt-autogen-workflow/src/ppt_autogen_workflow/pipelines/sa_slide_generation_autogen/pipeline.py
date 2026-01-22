@@ -1,6 +1,6 @@
 """Single-agent AutoGen pipeline."""
 
-from kedro.pipeline import Pipeline, pipeline, node
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
 from .nodes import prepare_sa_slides, run_ppt_agent
@@ -18,7 +18,6 @@ def create_pipeline() -> Pipeline:
             inputs="base_slides",
             outputs="slide_configs",
             name="sa_prepare_slides",
-            tags=["sa", "deterministic"],
         ),
         llm_context_node(
             outputs="ppt_llm_context",
@@ -39,6 +38,5 @@ def create_pipeline() -> Pipeline:
             ],
             outputs="slide_content",
             name="sa_run_ppt_agent",
-            tags=["sa"],
         ),
     ], namespace="sa", parameters={"params:styling": "params:styling"})
