@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 import json
-from typing import Any
+import inspect
+import textwrap
+from typing import Any, Callable
 
 from kedro.pipeline import LLMContext
+from kedro.pipeline.preview_contract import TextPreview
 from langchain_core.messages import ToolMessage, BaseMessage
 from langchain.schema import HumanMessage, AIMessage
 from sqlalchemy import Engine, text
@@ -72,3 +75,26 @@ def log_message(
                 "content": json.dumps(content, default=str),  # ensure JSON serializable
             },
         )
+
+
+def make_code_preview_fn(*funcs: Callable):
+    """Create a preview function with captured callable context."""
+    def preview_fn() -> TextPreview:
+        sources: list[str] = []
+
+        for func in funcs:
+            try:
+                source = inspect.getsource(func)
+                source = textwrap.dedent(source)
+            except (OSError, TypeError):
+                name = getattr(func, "__qualname__", repr(func))
+                source = f"# Source unavailable for {name}"
+
+            sources.append(source)
+
+        return TextPreview(
+            content="\n\n".join(sources),
+            meta={"language": "python"},
+        )
+
+    return preview_fn
