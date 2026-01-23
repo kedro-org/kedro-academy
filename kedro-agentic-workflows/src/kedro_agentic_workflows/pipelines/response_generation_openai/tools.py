@@ -1,4 +1,3 @@
-from typing import Callable
 
 from agents import function_tool, FunctionTool
 import pandas as pd

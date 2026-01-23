@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 
 from kedro.pipeline import LLMContext
-from kedro.pipeline.preview_contract import MermaidPreview, TextPreview
+from kedro.pipeline.preview_contract import MermaidPreview
 
 from langchain_core.messages import AIMessage
 from sqlalchemy import text, Engine
