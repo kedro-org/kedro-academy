@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from kedro.pipeline import LLMContext
+from kedro.pipeline.preview_contract import MermaidPreview
 from langfuse.langchain import CallbackHandler
 from langchain_core.messages import HumanMessage, AIMessage
 import pandas as pd
@@ -12,6 +13,12 @@ from .agent import IntentDetectionAgent
 from ...utils import log_message
 
 logger = logging.getLogger(__name__)
+
+
+def generate_mermaid_preview() -> MermaidPreview:
+    compiled = IntentDetectionAgent.graph().compile()
+    mermaid = compiled.get_graph().draw_mermaid()
+    return MermaidPreview(content=mermaid)
 
 
 def create_session(user_id: int) -> pd.DataFrame:
