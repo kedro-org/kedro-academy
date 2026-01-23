@@ -54,14 +54,24 @@ def _render_chart(config: dict[str, Any], styling_params: dict[str, Any]) -> plt
     # Render based on chart type
     if chart_type == "pie":
         # Pie chart
-        ax.pie(
+        colors_to_use = chart_colors[:len(y_data)] if len(chart_colors) >= len(y_data) else chart_colors * (len(y_data) // len(chart_colors) + 1)
+        colors_to_use = colors_to_use[:len(y_data)]
+
+        wedges, texts, autotexts = ax.pie(
             y_data,
             labels=x_data,
             autopct='%1.1f%%',
-            colors=chart_colors[:len(y_data)] if len(chart_colors) >= len(y_data) else [primary_color] * len(y_data),
+            colors=colors_to_use,
             startangle=90,
         )
-        ax.set_title(title, fontsize=14, fontweight='bold', color=primary_color)
+        # Style the percentage labels
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+        # Add legend
+        ax.legend(wedges, x_data, title="Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+        # Ensure pie chart is circular
+        ax.set_aspect('equal')
         
     elif chart_type == "horizontal_bar":
         # Horizontal bar chart
@@ -221,6 +231,13 @@ def build_chart_generator_tools(
                 if f"top {n}" in instruction_lower:
                     top_n = n
                     break
+
+            # For pie charts with "distribution by" or "by [column]", aggregate the data
+            if chart_type == "pie" and x_column and y_column:
+                if "distribution" in instruction_lower or f"by {x_column.lower()}" in instruction_lower:
+                    # Aggregate data by the x_column (e.g., Product_Category)
+                    df = df.groupby(x_column, as_index=False)[y_column].sum()
+                    df = df.sort_values(y_column, ascending=False)
 
             # Filter data if top_n specified
             if top_n and y_column:
