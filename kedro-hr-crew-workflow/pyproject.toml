@@ -63,3 +63,6 @@ attr = "hr_recruiting.__version__"
 [tool.setuptools.packages.find]
 where = [ "src",]
 namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "a2de15e4412348239fda4b2cc3aef0a9"

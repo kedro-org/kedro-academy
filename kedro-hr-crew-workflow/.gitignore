@@ -41,3 +41,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Credentials
+conf/local/credentials.yml

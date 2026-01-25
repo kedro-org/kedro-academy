@@ -4,9 +4,9 @@
 # LLM Model Client for CrewAI
 llm_crew_ai:
   type: hr_recruiting.datasets.crew_model_client.CrewAILLMDataset
-  model: ${params:llm.model_name}
+  model: gpt-4o-mini
   kwargs:
-    temperature: ${params:llm.temperature}
+    temperature: 0.1
   credentials: openai
 
 # Prompt Datasets

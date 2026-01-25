@@ -243,7 +243,7 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 3. **Set up credentials**:
    ```bash
    # Copy the template
-   cp conf/local/credentials.example.yml conf/local/credentials.yml
+   cp conf/local/cred.yml.example conf/local/credentials.yml
    
    # Add your API keys
    # Edit conf/local/credentials.yml
