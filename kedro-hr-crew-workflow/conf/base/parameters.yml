@@ -1,0 +1,10 @@
+# Project parameters
+
+# Evidence extraction
+evidence:
+  max_snippet_length: 200
+
+# LLM configuration
+llm:
+  model_name: "gpt-4o-mini"
+  temperature: 0.1

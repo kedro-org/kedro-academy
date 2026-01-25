@@ -1,0 +1,449 @@
+# HR Recruiting Agentic Workflow
+
+An HR recruiting system that uses AI agents to screen candidates, match job requirements, and generate reports. Built with Kedro for data pipeline orchestration and CrewAI for multi-agent workflows.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [CrewAI Integration](#crewai-integration)
+- [Kedro Features Used](#kedro-features-used)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Configuration](#configuration)
+
+## Overview
+
+This project automates the HR candidate screening process:
+
+1. **Parse** job postings and resumes from Word documents
+2. **Normalize** data into structured formats
+3. **Extract** evidence snippets from candidate profiles
+4. **Screen** candidates using AI agents (CrewAI)
+5. **Generate** professional HR reports
+
+The system uses a combination of:
+- **Deterministic pipelines** for data processing (parsing, normalization)
+- **Agentic pipelines** for intelligent screening (AI agents making decisions)
+
+## Architecture
+
+### Pipeline Flow
+
+```
+Jobs Pipeline (Deterministic)
+  └─> Parse Job Posting → Normalize Job Posting
+
+Applications Pipeline (Deterministic)
+  └─> Parse Resume → Normalize Candidate Profile → Extract Evidence Snippets
+
+Screening Pipeline (Agentic - CrewAI)
+  └─> Requirements Matcher Agent → Resume Evaluator Agent → Communications Drafter Agent
+  └─> Output: Screening Result
+
+Reporting Pipeline (Deterministic)
+  └─> Validate Screening Result → Generate HR Report
+```
+
+### Key Components
+
+- **Deterministic Pipelines**: Process data using fixed rules (parsing, validation)
+- **Agentic Pipeline**: Uses AI agents to make intelligent decisions (screening, evaluation)
+- **Tools**: Reusable functions that agents can use (matching, scoring, policy checking)
+- **Configuration Datasets**: Versioned YAML files for templates, rules, and parameters
+
+## Project Structure
+
+```
+kedro-hr-crew-workflow/
+├── conf/
+│   ├── base/
+│   │   ├── catalog.yml          # Data datasets (Word docs, JSON files, configs)
+│   │   ├── genai-config.yml     # AI datasets (LLM, prompts, traces)
+│   │   └── parameters.yml        # Project parameters
+│   └── local/
+│       └── credentials.yml      # API keys (gitignored)
+│
+├── data/
+│   └── hr_recruiting/
+│       ├── prompts/              # Prompt datasets (YAML)
+│       │   ├── *_agent_system_prompt.yml    # Agent instructions
+│       │   └── *_user_prompt.yml            # Task descriptions
+│       ├── sample/               # Sample data and configs
+│       │   ├── raw_job_posting.docx
+│       │   ├── raw_resume_*.docx
+│       │   ├── email_templates.yml          # Email templates
+│       │   ├── policy_rules.yml             # Policy validation rules
+│       │   ├── scoring_config.yml           # Scoring weights
+│       │   └── matching_config.yml          # Matching parameters
+│       ├── intermediate/        # Processed data (JSON)
+│       └── output/               # Generated reports (Word docs)
+│
+└── src/
+    └── hr_recruiting/
+        ├── base/
+        │   ├── models.py         # Pydantic data models
+        │   ├── agent.py          # Base agent class for CrewAI
+        │   └── utils.py          # Shared utility functions
+        │
+        ├── datasets/
+        │   └── crew_model_client.py  # CrewAI LLM client
+        │
+        └── pipelines/
+            ├── jobs/              # Job posting processing
+            │   ├── nodes.py       # Parse and normalize job postings
+            │   └── pipeline.py
+            │
+            ├── applications/      # Resume processing
+            │   ├── nodes.py       # Parse resume, extract evidence
+            │   └── pipeline.py
+            │
+            ├── screening/         # AI agent screening
+            │   ├── agents.py      # Agent class definitions
+            │   ├── tools.py       # Agent tools (matching, scoring, etc.)
+            │   ├── nodes.py       # Crew orchestration
+            │   └── pipeline.py
+            │
+            └── reporting/         # Report generation
+                ├── nodes.py       # Validate and generate reports
+                └── pipeline.py
+```
+
+## CrewAI Integration
+
+### What is CrewAI?
+
+CrewAI is a framework for building multi-agent AI systems. It allows you to:
+- Create specialized AI agents with specific roles
+- Give agents tools to perform tasks
+- Orchestrate agents working together
+- Get structured outputs from agent workflows
+
+### CrewAI Components Used
+
+1. **Agents**: Specialized AI assistants
+   - `RequirementsMatcherAgent`: Matches job requirements to candidate evidence
+   - `ResumeEvaluatorAgent`: Evaluates candidates and provides recommendations
+   - `CommsDrafterAgent`: Drafts professional email communications
+
+2. **Tools**: Functions agents can use
+   - `Requirements Matcher`: Matches requirements to evidence snippets
+   - `Scoring Tool`: Calculates match scores
+   - `Policy Check`: Validates email compliance
+   - `Email Draft Tool`: Generates email templates
+
+3. **Crew**: Orchestrates agents working together
+   - Creates tasks for each agent
+   - Manages agent communication
+   - Executes the workflow
+
+### How We Integrated CrewAI with Kedro
+
+1. **Base Agent Class** (`base/agent.py`):
+   - Wraps CrewAI agents with Kedro's `LLMContext`
+   - Extracts role, goal, and backstory from prompt datasets
+   - Manages agent compilation and tool assignment
+
+2. **Tool Builders** (`screening/tools.py`):
+   - Functions that create CrewAI tools from Kedro datasets
+   - Tools receive data from Kedro catalog (job postings, evidence, configs)
+   - Tools are versioned and configurable via YAML files
+
+3. **LLM Context Nodes** (`screening/pipeline.py`):
+   - Kedro's `llm_context_node` creates agent contexts
+   - Each context includes: LLM, prompts, and tools
+   - Contexts are passed to the orchestrator
+
+4. **Orchestrator Node** (`screening/nodes.py`):
+   - Creates CrewAI agents from contexts
+   - Builds tasks and crew
+   - Executes the agentic workflow
+   - Extracts and structures results
+
+## Kedro Features Used
+
+### 1. Prompt Datasets
+
+**What they are**: YAML files containing prompts for AI agents.
+
+**How we use them**:
+- Agent system prompts define agent roles and behavior
+- Task user prompts define what agents should do
+- Stored in `data/hr_recruiting/prompts/`
+- Configured in `conf/base/genai-config.yml`
+
+**Benefits**:
+- Easy to update without code changes
+- Can A/B test different prompts
+
+### 2. LLM Context Nodes
+
+**What they are**: Kedro's special node type for AI workflows that bundles LLM, prompts, and tools together.
+
+**How we use them**:
+- Each agent gets its own `llm_context_node`
+- Context includes: LLM model, system/user prompts, and tools
+- Tools are built from datasets (job postings, evidence, configs)
+
+**Benefits**:
+- Clean separation of AI configuration
+- Easy to swap LLM models
+- Tools automatically get the right data
+
+### 3. Trace Datasets
+
+**What they are**: Observability datasets that track AI agent execution.
+
+**How we use them**:
+- Configured in `genai-config.yml`
+- Tracks agent calls, tool usage, and responses
+- Enables debugging and monitoring
+
+**Benefits**:
+- See what agents are doing
+- Debug issues in production
+- Monitor performance and costs
+
+### 4. Configuration Datasets
+
+**What they are**: YAML files with configurable parameters.
+
+**How we use them**:
+- `email_templates.yml`: Email templates for different recommendations
+- `policy_rules.yml`: Rules for validating emails
+- `scoring_config.yml`: Weights for calculating scores
+- `matching_config.yml`: Parameters for matching requirements
+
+**Benefits**:
+- No hardcoded values in code
+- Easy to tune and experiment
+- Business users can update configs
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.9+
+- OpenAI API key (or other LLM provider)
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd kedro-hr-crew-workflow
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+3. **Set up credentials**:
+   ```bash
+   # Copy the template
+   cp conf/local/credentials.example.yml conf/local/credentials.yml
+   
+   # Add your API keys
+   # Edit conf/local/credentials.yml
+   ```
+
+4. **Create sample documents** (optional):
+   ```bash
+   python scripts/create_sample_documents.py
+   ```
+
+### Configuration
+
+#### 1. LLM Configuration
+
+Edit `conf/base/parameters.yml`:
+```yaml
+llm:
+  model_name: "gpt-4o-mini"  # or "gpt-4", "gpt-3.5-turbo", etc.
+  temperature: 0.1            # Lower = more deterministic
+```
+
+#### 2. Credentials
+
+Edit `conf/local/credentials.yml`:
+```yaml
+# OpenAI Credentials for CrewAI
+openai:
+  api_key: "${oc.env:OPENAI_API_KEY}"
+  base_url: "${oc.env:OPENAI_API_BASE}"
+
+# Langfuse credentials (for trace datasets)
+langfuse_credentials:
+  public_key: "your-langfuse-public-key"
+  secret_key: "your-langfuse-secret-key"
+  host: "https://cloud.langfuse.com"
+  openai:
+    openai_api_key: "${oc.env:OPENAI_API_KEY}"
+    openai_api_base: "${oc.env:OPENAI_API_BASE}"
+```
+
+#### 3. Data Paths
+
+Update `conf/base/catalog.yml` to point to your documents:
+```yaml
+raw_job_posting:
+  type: openxml.DocxDataset
+  filepath: data/hr_recruiting/sample/raw_job_posting.docx
+
+raw_resume:
+  type: openxml.DocxDataset
+  filepath: data/hr_recruiting/sample/raw_resume_data_scientist.docx
+```
+
+## Usage
+
+### Running the Full Pipeline
+
+```bash
+kedro run
+```
+
+This runs all pipelines in sequence:
+1. Jobs pipeline (parse job posting)
+2. Applications pipeline (parse resume, extract evidence)
+3. Screening pipeline (AI agents evaluate candidate)
+4. Reporting pipeline (generate HR report)
+
+### Running Individual Pipelines
+
+```bash
+# Just process the job posting
+kedro run --pipeline jobs
+
+# Just process the resume
+kedro run --pipeline applications
+
+# Just run screening (requires processed job and resume)
+kedro run --pipeline screening
+
+# Just generate report (requires screening result)
+kedro run --pipeline reporting
+```
+
+### Viewing Pipeline Visualization
+
+```bash
+kedro viz
+```
+
+Opens a web interface showing the pipeline structure and data flow.
+
+### Customizing Behavior
+
+#### Update Email Templates
+
+Edit `data/hr_recruiting/sample/email_templates.yml`:
+```yaml
+proceed:
+  subject: "Application Update: {job_title}"
+  body: |
+    Dear {candidate_name},
+    ...
+```
+
+#### Adjust Scoring Weights
+
+Edit `data/hr_recruiting/sample/scoring_config.yml`:
+```yaml
+weights:
+  must_have_coverage: 0.7  # Increase to weight must-haves more
+  avg_confidence: 0.3
+```
+
+#### Modify Policy Rules
+
+Edit `data/hr_recruiting/sample/policy_rules.yml`:
+```yaml
+inappropriate_words:
+  - "guaranteed"
+  - "promise"
+  # Add more words to flag
+```
+
+#### Update Agent Prompts
+
+Edit files in `data/hr_recruiting/prompts/`:
+- `*_agent_system_prompt.yml`: Change agent behavior
+- `*_user_prompt.yml`: Change task descriptions
+
+## How Kedro Features Shaped the Project
+
+### LLM Context Nodes
+
+**Before**: LLM configuration was scattered across code, making it hard to manage.
+
+**With Kedro**: `llm_context_node` provides:
+- Centralized LLM configuration
+- Automatic tool building from datasets
+- Clean separation of AI logic from business logic
+- Easy model swapping (just change the dataset)
+
+### Trace Datasets
+
+**Before**: No visibility into what AI agents were doing.
+
+**With Kedro**: Trace datasets enable:
+- Observing agent decisions
+- Debugging failures
+- Monitoring costs
+- Auditing AI behavior
+
+### Configuration Datasets
+
+**Before**: Business rules were hardcoded (email templates, scoring weights, etc.).
+
+**With Kedro**: Configuration datasets allow:
+- Business users to update rules
+- Experimenting with different configurations
+- Versioning configuration changes
+- Environment-specific configs (dev, staging, prod)
+
+## Key Design Decisions
+
+1. **Separation of Deterministic and Agentic**: Clear split between rule-based processing and AI decision-making
+2. **Tool Builders**: Tools are built from datasets, making them data-driven
+3. **Base Agent Pattern**: Reusable agent class following kedro-academy patterns
+4. **Configuration-Driven**: All business logic in YAML configs, not code
+5. **Modular Pipelines**: Each pipeline is self-contained and testable
+
+## Output
+
+After running the pipeline, you'll find:
+
+- **Screening Result** (`data/hr_recruiting/intermediate/screening_result.json`):
+  - Match score
+  - Recommendation (proceed/review/reject)
+  - Strengths and gaps
+  - Risk flags
+  - Email draft
+
+- **HR Report** (`data/hr_recruiting/output/hr_report.docx`):
+  - Professional Word document
+  - Executive summary
+  - Detailed match results
+  - Email draft
+  - QA suggestions
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Missing API Key**: Ensure `conf/local/credentials.yml` has your OpenAI API key
+2. **Missing Documents**: Check that Word documents exist in the paths specified in `catalog.yml`
+3. **Import Errors**: Make sure you've installed dependencies with `pip install -e ".[dev]"`
+4. **LLM Errors**: Check your API key and model name in `parameters.yml`
+
+## Next Steps
+
+- Customize agent prompts for your use case
+- Adjust scoring weights based on your requirements
+- Add more tools for agents to use
+- Integrate with your HR systems
+- Add more validation rules

@@ -1,0 +1,22 @@
+# Policy Rules for HR Candidate Communications
+# These rules are used by the policy_check_tool to validate email drafts
+
+# Words that indicate promises or guarantees (should be avoided)
+inappropriate_words:
+  - "guaranteed"
+  - "promise"
+  - "definitely"
+
+# Protected classes that should not be referenced in communications (EEO compliance)
+protected_classes:
+  - "age"
+  - "race"
+  - "religion"
+  - "gender"
+  - "national origin"
+
+# Inconsistent language patterns to check
+inconsistency_checks:
+  - pattern: "congratulations"
+    when_recommendation: "reject"
+    message: "Inconsistent messaging: rejection with congratulatory language"

@@ -1,0 +1,68 @@
+# GenAI Configuration
+# This file contains all agentic/LLM-related dataset configurations
+
+# LLM Model Client for CrewAI
+llm_crew_ai:
+  type: hr_recruiting.datasets.crew_model_client.CrewAILLMDataset
+  model: ${params:llm.model_name}
+  kwargs:
+    temperature: ${params:llm.temperature}
+  credentials: openai
+
+# Prompt Datasets
+# All prompts use LangChain PromptDataset
+# Following CrewAI pattern: agents.yaml (system prompts) and tasks.yaml (user prompts)
+
+# Agent System Prompts (similar to agents.yaml)
+# Each agent has a system prompt with role, goal, and backstory
+requirements_matcher_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/requirements_matcher_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_evaluator_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/resume_evaluator_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+comms_drafter_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/comms_drafter_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+# Task User Prompts (similar to tasks.yaml)
+# Each task has a user prompt with description, expected_output, and agent assignment
+requirements_matching_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/requirements_matching_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_evaluation_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/resume_evaluation_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+email_draft_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/email_draft_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+
+# Trace Datasets for Observability
+# Using LangfuseTraceDataset for tracing
+hr_crew_ai_trace:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: openai

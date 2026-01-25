@@ -1,0 +1,76 @@
+# Data Catalog
+# This file defines the datasets used in the project
+
+# Raw input data
+# Job postings and resumes are Word documents (.docx)
+raw_job_posting:
+  type: openxml.DocxDataset
+  filepath: data/hr_recruiting/sample/raw_job_posting.docx
+
+raw_resume:
+  type: openxml.DocxDataset
+  filepath: data/hr_recruiting/sample/raw_resume_data_scientist.docx
+
+# Intermediate processed data
+parsed_job_description:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/parsed_jd.json
+
+parsed_resume:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/parsed_resume.json
+
+# Validated and normalized data with pydantic models
+normalized_job_posting:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/job_posting.json
+
+normalized_candidate_profile:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/candidate_profile.json
+
+# Evidence snippets
+evidence_snippets:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/evidence_snippets.json
+
+# Model inputs
+screening_input:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/screening_input.json
+
+# Model outputs
+screening_result_raw:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/screening_result_raw.json
+
+# Validated and structured screening results
+screening_result:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/screening_result.json
+
+# Reports which are human readable and can be used 
+# to communicate the screening result to the candidate
+hr_report:
+  type: openxml.DocxDataset
+  filepath: data/hr_recruiting/output/hr_report.docx
+
+# Email templates for candidate communications
+email_templates:
+  type: yaml.YAMLDataset
+  filepath: data/hr_recruiting/sample/email_templates.yml
+
+# Policy rules for email validation
+policy_rules:
+  type: yaml.YAMLDataset
+  filepath: data/hr_recruiting/sample/policy_rules.yml
+
+# Scoring configuration for match score calculation
+scoring_config:
+  type: yaml.YAMLDataset
+  filepath: data/hr_recruiting/sample/scoring_config.yml
+
+# Matching configuration for requirements matcher
+matching_config:
+  type: yaml.YAMLDataset
+  filepath: data/hr_recruiting/sample/matching_config.yml

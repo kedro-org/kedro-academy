@@ -1,0 +1,104 @@
+"""Domain models for HR recruiting workflow."""
+
+from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class Requirements(BaseModel):
+    """Job requirements structure."""
+
+    must_have: list[str] = Field(default_factory=list, description="Must-have requirements")
+    nice_to_have: list[str] = Field(default_factory=list, description="Nice-to-have requirements")
+
+
+class JobPosting(BaseModel):
+    """Job posting model."""
+
+    job_id: str = Field(description="Unique job identifier")
+    title: str = Field(description="Job title")
+    location: str = Field(description="Job location")
+    requirements: Requirements = Field(description="Job requirements")
+    raw_jd_text: str = Field(description="Raw job description text")
+
+
+class WorkHistory(BaseModel):
+    """Work history entry."""
+
+    company: str
+    role: str
+    duration: str
+    description: str
+
+
+class Education(BaseModel):
+    """Education entry."""
+
+    institution: str
+    degree: str
+    field: str | None = None
+    year: str | None = None
+
+
+class CandidateProfile(BaseModel):
+    """Candidate profile model."""
+
+    candidate_id: str = Field(description="Unique candidate identifier")
+    name: str = Field(description="Candidate name")
+    email: str = Field(description="Candidate email")
+    skills: list[str] = Field(default_factory=list, description="List of skills")
+    work_history: list[WorkHistory] = Field(default_factory=list, description="Work history")
+    education: list[Education] = Field(default_factory=list, description="Education background")
+    raw_resume_text: str = Field(description="Raw resume text")
+
+
+class Application(BaseModel):
+    """Application model."""
+
+    application_id: str = Field(description="Unique application identifier")
+    job_id: str = Field(description="Job identifier")
+    candidate_id: str = Field(description="Candidate identifier")
+    submitted_at: datetime = Field(description="Submission timestamp")
+    status: str = Field(default="pending", description="Application status")
+    artifacts: dict[str, Any] = Field(default_factory=dict, description="Additional artifacts")
+
+
+class EvidenceSnippet(BaseModel):
+    """Evidence snippet for matching."""
+
+    snippet_id: str = Field(description="Unique snippet identifier")
+    text: str = Field(description="Snippet text")
+    source: str = Field(description="Source field (e.g., 'work_history', 'skills')")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
+
+class MatchResult(BaseModel):
+    """Requirement match result."""
+
+    requirement: str = Field(description="Matched requirement")
+    snippet_ids: list[str] = Field(description="Matching snippet IDs")
+    confidence: float = Field(ge=0.0, le=1.0, description="Match confidence score")
+
+
+class EmailDraft(BaseModel):
+    """Email draft model."""
+
+    subject: str = Field(description="Email subject")
+    body: str = Field(description="Email body")
+    placeholders: dict[str, str] = Field(default_factory=dict, description="Template placeholders")
+
+
+class ScreeningResult(BaseModel):
+    """Screening result model."""
+
+    application_id: str = Field(description="Application identifier")
+    match_score: float = Field(ge=0.0, le=100.0, description="Overall match score (0-100)")
+    must_have_coverage: float = Field(ge=0.0, le=1.0, description="Must-have requirements coverage")
+    gaps: list[str] = Field(default_factory=list, description="Identified gaps")
+    strengths: list[str] = Field(default_factory=list, description="Candidate strengths")
+    risk_flags: list[str] = Field(default_factory=list, description="Risk flags")
+    recommendation: str = Field(description="Recommendation (e.g., 'proceed', 'reject', 'review')")
+    email_draft: EmailDraft | None = Field(default=None, description="Drafted email")
+    qa_suggestions: list[str] = Field(default_factory=list, description="QA suggestions")
+    match_results: list[MatchResult] = Field(default_factory=list, description="Detailed match results")

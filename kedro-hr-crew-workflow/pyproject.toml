@@ -1,0 +1,65 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.9"
+name = "hr_recruiting"
+readme = "README.md"
+dynamic = [ "version",]
+dependencies = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+    "kedro @ git+https://github.com/kedro-org/kedro.git@main",
+    "kedro-datasets[pandas,yaml,openxml,langfuse,langchain-langchainpromptdataset]>=3",
+    "langchain>=0.1.0",
+    "langchain-openai>=0.0.5",
+    "langfuse>=2.0.0",
+    "crewai>=0.28.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-docx>=1.0.0",
+]
+
+[project.scripts]
+hr_recruiting = "hr_recruiting.__main__:main"
+
+[project.optional-dependencies]
+dev = [ "pytest-cov~=3.0", "pytest-mock>=1.7.1, <2.0", "pytest~=7.2", "ruff~=0.12.0",]
+
+[tool.kedro]
+package_name = "hr_recruiting"
+project_name = "HR Recruiting"
+kedro_init_version = "1.0.0"
+tools = "['Linting', 'Testing', 'Data Structure']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+
+[project.entry-points."kedro.hooks"]
+
+[tool.pytest.ini_options]
+addopts = "--cov-report term-missing --cov src/hr_recruiting -ra"
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = [ "pragma: no cover", "raise NotImplementedError",]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [ "F", "W", "E", "I", "UP", "PL", "T201",]
+ignore = [ "E501",]
+
+[tool.setuptools.dynamic.version]
+attr = "hr_recruiting.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false

@@ -1,0 +1,26 @@
+# Resume Evaluation Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent, context
+
+messages:
+  - role: user
+    content: |
+      description: Conduct a comprehensive evaluation of the candidate against the job requirements. Analyze the candidate's qualifications, identify strengths and gaps, assess risk factors, and provide a clear recommendation. Consider all available evidence and provide a detailed, evidence-based assessment.
+      
+      expected_output: A comprehensive ScreeningResult object containing: match_score (overall match score 0-100), must_have_coverage (coverage of must-have requirements 0.0-1.0), gaps (list of identified gaps), strengths (list of candidate strengths), risk_flags (list of any risk flags), recommendation (proceed/reject/review), qa_suggestions (suggestions for quality assurance), and match_results (detailed match results from requirements matching). Format as valid JSON matching the ScreeningResult schema.
+      
+      agent: resume_evaluator
+      
+      context: requirements_matching_task
+      
+      Job Requirements:
+      {{job_requirements}}
+      
+      Candidate Profile:
+      {{candidate_profile}}
+      
+      Evidence Snippets:
+      {{evidence_snippets}}
+      
+      Match Results from Requirements Matcher:
+      {{match_results}}

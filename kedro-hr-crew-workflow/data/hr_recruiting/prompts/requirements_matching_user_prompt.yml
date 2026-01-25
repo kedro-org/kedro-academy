@@ -1,0 +1,18 @@
+# Requirements Matching Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent
+
+messages:
+  - role: user
+    content: |
+      description: Match job must-have requirements against candidate evidence snippets. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
+      
+      expected_output: A structured list of MatchResult objects, each containing: requirement (the specific job requirement being matched), snippet_ids (list of evidence snippet IDs that support this requirement), and confidence (confidence score 0.0-1.0 indicating match strength). Format as valid JSON matching the MatchResult schema.
+      
+      agent: requirements_matcher
+      
+      Job Must-Have Requirements:
+      {{must_have_requirements}}
+      
+      Candidate Evidence Snippets:
+      {{evidence_snippets}}
