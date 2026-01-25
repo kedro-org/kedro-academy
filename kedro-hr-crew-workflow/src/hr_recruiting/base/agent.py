@@ -124,11 +124,16 @@ class BaseAgent(ABC, Generic[T]):
         # Create CrewAI Agent
         # CrewAI uses role, goal, backstory to structure the agent
         # The system prompt content is used as backstory
+        # Note: llm may be a factory (callable) due to pickle constraints, so call it if needed
+        llm = self._llm_context.llm
+        if callable(llm) and not hasattr(llm, "call"):
+            llm = llm()
+
         self._agent = Agent(
             role=role,
             goal=goal,
             backstory=backstory,
-            llm=self._llm_context.llm,
+            llm=llm,
             tools=tools,
             verbose=True,
             allow_delegation=False,
