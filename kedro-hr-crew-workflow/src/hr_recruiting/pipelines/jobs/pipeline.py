@@ -9,15 +9,7 @@ from hr_recruiting.pipelines.jobs.nodes import (
 
 
 def create_pipeline() -> Pipeline:
-    """Create the jobs pipeline.
-
-    This pipeline handles deterministic processing of job postings:
-    1. Parse raw job posting document
-    2. Normalize to structured job posting format
-
-    Returns:
-        Configured Pipeline object
-    """
+    """Create jobs pipeline for processing job postings."""
     return Pipeline(
         [
             # Parse raw job posting

@@ -1,7 +1,7 @@
 {
   "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
-  "match_score": 59.88888888888889,
-  "must_have_coverage": 0.5555555555555556,
+  "match_score": 59.89,
+  "must_have_coverage": 0.56,
   "gaps": [
     "Experience with version control systems (Git) and CI/CD pipelines",
     "Bachelor's degree in Computer Science, Engineering, or related field",
@@ -16,15 +16,14 @@
   "recommendation": "review",
   "email_draft": {
     "subject": "Application Update: Senior Software Engineer - Backend",
-    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Clarify the candidate's experience with version control systems and CI/CD pipelines.\n- Verify the educational background to ensure it meets the requirement.\n\nBest regards,\nHR Team\n",
+    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Consider asking the candidate about their practical experience with CI/CD pipelines and system design patterns during the interview.\n\nBest regards,\nHR Team\n",
     "placeholders": {
       "candidate_name": "Sarah Chen",
       "job_title": "Senior Software Engineer - Backend"
     }
   },
   "qa_suggestions": [
-    "Clarify the candidate's experience with version control systems and CI/CD pipelines.",
-    "Verify the educational background to ensure it meets the requirement."
+    "Consider asking the candidate about their practical experience with CI/CD pipelines and system design patterns during the interview."
   ],
   "match_results": [
     {

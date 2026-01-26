@@ -9,11 +9,7 @@ from hr_recruiting.pipelines.screening import create_pipeline as create_screenin
 
 
 def register_pipelines() -> dict[str, Pipeline]:
-    """Register the project's pipelines.
-
-    Returns:
-        A mapping from pipeline names to Pipeline objects.
-    """
+    """Register the project's pipelines."""
     # Individual pipelines
     jobs_pipeline = create_jobs_pipeline()
     applications_pipeline = create_applications_pipeline()

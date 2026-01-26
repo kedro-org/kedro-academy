@@ -39,17 +39,8 @@ application:
   type: json.JSONDataset
   filepath: data/hr_recruiting/intermediate/application.json
 
-# Model inputs
-screening_input:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/screening_input.json
-
-# Model outputs
-screening_result_raw:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/screening_result_raw.json
-
-# Validated and structured screening results
+# Model outputs - validated screening results
+# Results are validated in the screening pipeline (extract_screening_result)
 screening_result:
   type: json.JSONDataset
   filepath: data/hr_recruiting/intermediate/screening_result.json

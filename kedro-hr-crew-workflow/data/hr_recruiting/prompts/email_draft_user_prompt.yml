@@ -5,9 +5,10 @@
 messages:
   - role: user
     content: |
-      description: Draft a professional, empathetic email to the candidate based on the screening recommendation. Use the Email Draft Tool to create the email - the tool has access to the candidate's name and job title. The email should acknowledge their application, provide clear next steps, maintain a positive and respectful tone, and include appropriate feedback when relevant. Use the candidate's actual name from the tool, not a placeholder.
+      description: Draft a professional, empathetic email to the candidate based on the screening recommendation. Use the Email Draft Tool to create the email - the tool has access to the candidate's name and job title. The email should acknowledge their application, provide clear next steps, maintain a positive and respectful tone, and include appropriate feedback when relevant. Use the candidate's actual name from the tool, not a placeholder. Take the ScreeningResult from the previous task (resume_evaluation_task) and add the email_draft field to it, then output the complete ScreeningResult.
       
-      expected_output: An EmailDraft object containing: subject (professional email subject line), body (well-crafted email body with appropriate tone that includes the candidate's name and relevant details), and placeholders (candidate_name and job_title). Format as valid JSON matching the EmailDraft schema.
+      expected_output: A complete ScreeningResult object containing all fields from the previous evaluation task (application_id, match_score, must_have_coverage, gaps, strengths, risk_flags, recommendation, qa_suggestions, match_results) plus the email_draft field (EmailDraft object with subject, body, and placeholders). Format as valid JSON matching the ScreeningResult schema:
+      {{screening_result_schema_json}}
       
       agent: comms_drafter
       

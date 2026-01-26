@@ -10,17 +10,7 @@ from hr_recruiting.pipelines.jobs.helper import (
 
 
 def parse_job_description(raw_job_doc: Any) -> dict[str, Any]:
-    """Parse raw job posting Word document.
-
-    This is a deterministic function that extracts text from a Word document.
-    Uses python-docx to parse .docx files.
-
-    Args:
-        raw_job_doc: python-docx Document object containing job posting
-
-    Returns:
-        Parsed job description with extracted text
-    """
+    """Parse raw job posting Word document."""
     # Extract all text from the document
     raw_text = extract_text_from_document(raw_job_doc)
     
@@ -43,19 +33,7 @@ def parse_job_description(raw_job_doc: Any) -> dict[str, Any]:
 
 
 def normalize_job_posting(parsed_jd: dict[str, Any]) -> dict[str, Any]:
-    """Normalize job posting to structured format.
-
-    This is a deterministic node that converts parsed data to JobPosting model.
-    The parsed data comes from Word document parsing, which extracts raw text.
-    This function parses the raw text to extract structured fields like title,
-    location, and requirements in a single efficient pass.
-
-    Args:
-        parsed_jd: Parsed job description data from Word document
-
-    Returns:
-        Normalized job posting as dictionary
-    """
+    """Normalize job posting to structured format."""
     raw_text = parsed_jd.get("raw_jd_text", "")
     lines = raw_text.split("\n")
     

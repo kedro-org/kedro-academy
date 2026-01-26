@@ -18,14 +18,7 @@ os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
 
 
 def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:
-    """Extract text and candidate_id from raw resume document.
-
-    Args:
-        raw_resume_doc: python-docx Document object
-
-    Returns:
-        Dictionary with candidate_id and raw_resume_text
-    """
+    """Extract text and candidate_id from raw resume document."""
     raw_text = extract_text_from_document(raw_resume_doc)
     
     candidate_id = "unknown"
@@ -44,21 +37,7 @@ def run_resume_parsing_crew(
     resume_parser_context: LLMContext,
     parsed_resume: dict[str, Any],
 ) -> dict[str, Any]:
-    """Run CrewAI crew for resume parsing and normalization.
-
-    This function creates a single-agent crew that:
-    1. Parses raw resume text
-    2. Extracts structured candidate information
-    3. Normalizes to CandidateProfile format
-    4. Extracts evidence snippets
-
-    Args:
-        resume_parser_context: LLMContext for resume parser agent
-        parsed_resume: Parsed resume data with raw_resume_text and candidate_id
-
-    Returns:
-        Dictionary with "candidate_profile" and "evidence_snippets" keys
-    """
+    """Run CrewAI crew for resume parsing and normalization."""
     # Create agent
     agent = create_resume_parser_agent_with_tools(resume_parser_context)
 
@@ -99,14 +78,7 @@ def run_resume_parsing_crew(
 def split_resume_parsing_result(
     resume_parsing_result: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Split resume parsing result into separate candidate profile and evidence snippets.
-
-    Args:
-        resume_parsing_result: Dictionary with "candidate_profile" and "evidence_snippets" keys
-
-    Returns:
-        Tuple of (candidate_profile dict, evidence_snippets dict with candidate_id and snippets)
-    """
+    """Split resume parsing result into candidate profile and evidence snippets."""
     candidate_profile = resume_parsing_result.get("candidate_profile") or {}
     evidence_snippets = resume_parsing_result.get("evidence_snippets") or {
         "candidate_id": "unknown",

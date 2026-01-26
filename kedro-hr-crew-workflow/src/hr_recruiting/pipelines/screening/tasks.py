@@ -74,30 +74,17 @@ def create_resume_evaluation_task(
     
     # Format prompt with empty strings and schema JSON to extract content
     user_prompt = context.prompts.get("resume_evaluation_user_prompt")
-    if user_prompt:
-        try:
-            formatted = user_prompt.format(
-                job_requirements="",
-                candidate_profile="",
-                evidence_snippets="",
-                match_results="",
-                screening_result_schema_json=screening_result_schema_json,
-            )
-            prompt_content = str(formatted[-1].content if isinstance(formatted, list) and formatted and hasattr(formatted[-1], "content") else formatted)
-        except Exception:
-            # Fallback: try to format manually
-            prompt_str = str(user_prompt)
-            # Replace placeholders manually if needed
-            replacements = {
-                "{{screening_result_schema_json}}": screening_result_schema_json,
-                "{screening_result_schema_json}": screening_result_schema_json,
-            }
-            for placeholder, value in replacements.items():
-                if placeholder in prompt_str:
-                    prompt_str = prompt_str.replace(placeholder, value)
-            prompt_content = prompt_str
-    else:
-        prompt_content = ""
+    if not user_prompt:
+        raise ValueError("resume_evaluation_user_prompt not found in context")
+    
+    formatted = user_prompt.format(
+        job_requirements="",
+        candidate_profile="",
+        evidence_snippets="",
+        match_results="",
+        screening_result_schema_json=screening_result_schema_json,
+    )
+    prompt_content = str(formatted[-1].content if isinstance(formatted, list) and formatted and hasattr(formatted[-1], "content") else formatted)
     
     description = extract_field_from_prompt(prompt_content, "description")
     if not description:
@@ -127,23 +114,26 @@ def create_email_draft_task(
     Returns:
         Configured Task instance
     """
-    # Format prompt with empty strings to extract content (same approach as applications pipeline)
+    # Get schema JSON from Pydantic model
+    screening_result_schema_json = json.dumps(
+        ScreeningResult.model_json_schema(), indent=2
+    )
+    
+    # Format prompt with empty strings and schema JSON to extract content
     user_prompt = context.prompts.get("email_draft_user_prompt")
-    if user_prompt:
-        try:
-            formatted = user_prompt.format(
-                candidate_name="",
-                job_title="",
-                recommendation="",
-                match_score="",
-                strengths="",
-                gaps="",
-            )
-            prompt_content = str(formatted[-1].content if isinstance(formatted, list) and formatted and hasattr(formatted[-1], "content") else formatted)
-        except Exception:
-            prompt_content = str(user_prompt)
-    else:
-        prompt_content = ""
+    if not user_prompt:
+        raise ValueError("email_draft_user_prompt not found in context")
+    
+    formatted = user_prompt.format(
+        candidate_name="",
+        job_title="",
+        recommendation="",
+        match_score="",
+        strengths="",
+        gaps="",
+        screening_result_schema_json=screening_result_schema_json,
+    )
+    prompt_content = str(formatted[-1].content if isinstance(formatted, list) and formatted and hasattr(formatted[-1], "content") else formatted)
     
     description = extract_field_from_prompt(prompt_content, "description")
     if not description:

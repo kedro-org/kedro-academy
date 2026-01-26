@@ -28,20 +28,7 @@ def orchestrate_screening_crew(
     resume_evaluator_context: LLMContext,
     comms_drafter_context: LLMContext,
 ) -> dict[str, Any]:
-    """Orchestrate CrewAI crew execution for screening workflow.
-
-    This node creates agents, tasks, and crew, then executes the agentic workflow.
-    Consumes LLMContext objects from llm_context_node outputs.
-
-    Args:
-        requirements_matcher_context: LLMContext for requirements matcher agent
-        resume_evaluator_context: LLMContext for resume evaluator agent
-        comms_drafter_context: LLMContext for communications drafter agent
-        screening_result_schema_template: Schema template dictionary from YAML dataset
-
-    Returns:
-        Screening result as dictionary
-    """
+    """Orchestrate CrewAI crew execution for screening workflow."""
     # Create agents with tools
     requirements_matcher = create_requirements_matcher_agent_with_tools(
         requirements_matcher_context

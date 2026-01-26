@@ -164,16 +164,8 @@ def extract_email_draft(task_output: str) -> dict[str, Any]:
             raw_draft = parsed
         
         # Validate using EmailDraft model
-        try:
-            email_draft_obj = EmailDraft(**raw_draft)
-            email_draft = email_draft_obj.model_dump()
-        except Exception:
-            # Fallback to raw data if validation fails
-            email_draft.update({
-                "subject": raw_draft.get("subject", "Application Update"),
-                "body": raw_draft.get("body", ""),
-                "placeholders": raw_draft.get("placeholders", {}),
-            })
+        email_draft_obj = EmailDraft(**raw_draft)
+        email_draft = email_draft_obj.model_dump()
     
     return email_draft
 
@@ -205,6 +197,9 @@ def extract_screening_result(crew_result: Any) -> dict[str, Any]:
         # Extract task outputs from crew result using shared utility
         task_outputs = extract_task_outputs_from_crew_result(crew_result)
         
+        if not task_outputs:
+            return screening_result
+        
         # First, try to parse the final output as a complete ScreeningResult
         # (since we instructed the final task to output in ScreeningResult format)
         if task_outputs:
@@ -212,14 +207,13 @@ def extract_screening_result(crew_result: Any) -> dict[str, Any]:
             parsed_result = parse_json_from_text(final_output)
             
             # If we got a complete ScreeningResult, validate and use it
+            # Check for required ScreeningResult fields before validation
             if parsed_result and isinstance(parsed_result, dict):
-                try:
-                    # Validate against ScreeningResult schema
+                required_fields = ["application_id", "match_score", "must_have_coverage", "recommendation"]
+                if all(field in parsed_result for field in required_fields):
+                    # Validate against ScreeningResult schema - strict validation
                     validated = ScreeningResult(**parsed_result)
                     return validated.model_dump()
-                except Exception:
-                    # If validation fails, fall through to partial extraction
-                    pass
         
         # Process individual task outputs (assuming order: requirements, evaluation, email)
         if len(task_outputs) >= 1:
@@ -235,7 +229,8 @@ def extract_screening_result(crew_result: Any) -> dict[str, Any]:
         
         if len(task_outputs) >= 2:
             # Second task: resume evaluation
-            eval_data = extract_evaluation_data(str(task_outputs[1]))
+            second_task_output = str(task_outputs[1])
+            eval_data = extract_evaluation_data(second_task_output)
             screening_result.update(eval_data)
         
         if len(task_outputs) >= 3:
@@ -244,13 +239,12 @@ def extract_screening_result(crew_result: Any) -> dict[str, Any]:
             parsed = parse_json_from_text(final_output_str)
             
             if parsed and isinstance(parsed, dict):
-                # Check if it's a complete ScreeningResult
-                if "application_id" in parsed and "match_score" in parsed:
-                    try:
-                        validated = ScreeningResult(**parsed)
-                        return validated.model_dump()
-                    except Exception:
-                        pass
+                # Check if it's a complete ScreeningResult (must have all required fields)
+                required_fields = ["application_id", "match_score", "must_have_coverage", "recommendation"]
+                if all(field in parsed for field in required_fields):
+                    # Validate against ScreeningResult schema - strict validation
+                    validated = ScreeningResult(**parsed)
+                    return validated.model_dump()
                 
                 # Otherwise, extract just email_draft
                 if "email_draft" in parsed:
@@ -263,8 +257,8 @@ def extract_screening_result(crew_result: Any) -> dict[str, Any]:
                 screening_result["email_draft"] = email_draft
         
     except Exception as e:
-        # Log error but continue with defaults
-        print(f"Error parsing crew result: {e}")  # noqa: T201
+        # Re-raise exception to make failures visible
+        raise ValueError(f"Error parsing crew result: {e}") from e
     
     # Ensure all required fields have valid defaults
     if screening_result["email_draft"] is None:

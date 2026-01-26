@@ -10,17 +10,7 @@ from hr_recruiting.pipelines.applications.nodes import (
 
 
 def create_pipeline() -> Pipeline:
-    """Create the applications pipeline with agentic processing.
-
-    This pipeline handles agentic processing of resumes:
-    1. Parse raw resume document (extract text)
-    2. Create LLM context for resume parser agent
-    3. Run CrewAI crew execution for parsing and normalization
-    4. Output normalized candidate profile and evidence snippets
-
-    Returns:
-        Configured Pipeline object
-    """
+    """Create applications pipeline with agentic processing."""
     return Pipeline(
         [
             # Parse raw resume (extract text only - deterministic)
