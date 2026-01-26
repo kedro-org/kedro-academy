@@ -70,13 +70,16 @@ kedro-hr-crew-workflow/
 │       ├── prompts/              # Prompt datasets (YAML)
 │       │   ├── *_agent_system_prompt.yml    # Agent instructions
 │       │   └── *_user_prompt.yml            # Task descriptions
-│       ├── sample/               # Sample data and configs
-│       │   ├── raw_job_posting.docx
-│       │   ├── raw_resume_*.docx
+│       ├── config/               # Configuration files (YAML)
 │       │   ├── email_templates.yml          # Email templates
 │       │   ├── policy_rules.yml             # Policy validation rules
 │       │   ├── scoring_config.yml           # Scoring weights
-│       │   └── matching_config.yml          # Matching parameters
+│       │   ├── matching_config.yml          # Matching parameters
+│       │   ├── resume_parsing_schema_template.yml    # Resume parsing schema
+│       │   └── screening_result_schema_template.yml  # Screening result schema
+│       ├── sample/               # Sample data files
+│       │   ├── raw_job_posting.docx
+│       │   └── raw_resume_*.docx
 │       ├── intermediate/        # Processed data (JSON)
 │       └── output/               # Generated reports (Word docs)
 │
@@ -339,7 +342,7 @@ Opens a web interface showing the pipeline structure and data flow.
 
 #### Update Email Templates
 
-Edit `data/hr_recruiting/sample/email_templates.yml`:
+Edit `data/hr_recruiting/config/email_templates.yml`:
 ```yaml
 proceed:
   subject: "Application Update: {job_title}"
@@ -350,7 +353,7 @@ proceed:
 
 #### Adjust Scoring Weights
 
-Edit `data/hr_recruiting/sample/scoring_config.yml`:
+Edit `data/hr_recruiting/config/scoring_config.yml`:
 ```yaml
 weights:
   must_have_coverage: 0.7  # Increase to weight must-haves more
@@ -359,7 +362,7 @@ weights:
 
 #### Modify Policy Rules
 
-Edit `data/hr_recruiting/sample/policy_rules.yml`:
+Edit `data/hr_recruiting/config/policy_rules.yml`:
 ```yaml
 inappropriate_words:
   - "guaranteed"

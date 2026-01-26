@@ -13,21 +13,29 @@ from crewai.tools import tool
 
 
 def build_requirements_matcher_tool(
+    application: dict[str, Any],
     normalized_job_posting: dict[str, Any],
-    evidence_snippets: list[dict[str, Any]],
+    evidence_snippets: dict[str, Any],
     matching_config: dict[str, Any],
 ) -> Any:
     """Build requirements matcher tool from datasets.
 
     Args:
+        application: Application object with application_id, job_id, candidate_id
         normalized_job_posting: Normalized job posting data
-        evidence_snippets: List of evidence snippets
+        evidence_snippets: Dictionary with candidate_id and snippets array
         matching_config: Matching configuration with parameters
 
     Returns:
         CrewAI tool object
     """
     job_requirements = normalized_job_posting.get("requirements", {})
+    
+    # Extract IDs from Application object
+    application_id = application.get("application_id", "unknown_unknown")
+    
+    # Get the actual snippets list
+    snippets_list = evidence_snippets.get("snippets", [])
     
     # Extract matching parameters from config
     min_word_length = matching_config.get("min_word_length", 3)
@@ -43,16 +51,81 @@ def build_requirements_matcher_tool(
     nice_to_have_increment = nice_to_have_conf.get("increment", 0.1)
     nice_to_have_max = nice_to_have_conf.get("max", 0.8)
 
+    # Get stop words and technical terms from config
+    stop_words_list = matching_config.get("stop_words", [])
+    stop_words = set(word.lower() for word in stop_words_list)
+    
+    technical_terms_list = matching_config.get("technical_terms", [])
+    technical_terms = set(term.lower() for term in technical_terms_list)
+
+    def extract_meaningful_keywords(text: str) -> list[str]:
+        """Extract meaningful keywords from text, filtering stop words and prioritizing technical terms.
+        
+        Args:
+            text: Input text to extract keywords from
+            
+        Returns:
+            List of meaningful keywords
+        """
+        # Split into words, lowercase, remove punctuation
+        words = [word.lower().strip('.,!?;:()[]{}"\'') for word in text.split()]
+        # Filter: min length, not stop word, and meaningful
+        keywords = [
+            word for word in words
+            if len(word) > min_word_length
+            and word not in stop_words
+            and word.isalnum()  # Only alphanumeric
+        ]
+        return keywords
+
+    def calculate_match_score(req_keywords: list[str], snippet_keywords: list[str]) -> float:
+        """Calculate match score based on keyword overlap, prioritizing technical terms.
+        
+        Args:
+            req_keywords: Keywords from requirement
+            snippet_keywords: Keywords from snippet
+            
+        Returns:
+            Match score (0.0 to 1.0)
+        """
+        if not req_keywords:
+            return 0.0
+        
+        # Count matches, with higher weight for technical terms
+        matches = 0
+        technical_matches = 0
+        
+        snippet_keywords_set = set(snippet_keywords)
+        for keyword in req_keywords:
+            if keyword in snippet_keywords_set:
+                matches += 1
+                if keyword in technical_terms:
+                    technical_matches += 1
+        
+        # Require at least 2 matches (or 1 technical term match)
+        if matches < 2 and technical_matches == 0:
+            return 0.0
+        
+        # Calculate base score: percentage of keywords matched
+        base_score = matches / len(req_keywords)
+        
+        # Boost score if technical terms matched
+        technical_boost = technical_matches * 0.2  # 20% boost per technical match
+        
+        return min(1.0, base_score + technical_boost)
+
     @tool("Requirements Matcher")
-    def requirements_matcher_tool() -> list[dict[str, Any]]:
+    def requirements_matcher_tool() -> dict[str, Any]:
         """Match job requirements to evidence snippets from candidate profile.
 
         This tool performs evidence-based matching of job must-have and nice-to-have
-        requirements to candidate evidence snippets. It returns match results with
-        confidence scores and snippet IDs.
+        requirements to candidate evidence snippets. It uses improved matching logic:
+        - Filters out stop words
+        - Requires at least 2 meaningful keyword matches (or 1 technical term)
+        - Prioritizes technical terms over common words
 
         Returns:
-            List of match results with requirement, snippet_ids, and confidence
+            Dictionary with application_id and match_results (list of match results)
         """
         matches: list[dict[str, Any]] = []
         must_have = job_requirements.get("must_have", [])
@@ -61,14 +134,24 @@ def build_requirements_matcher_tool(
         # Match must-have requirements
         for req in must_have:
             matching_snippets = []
-            for snippet in evidence_snippets:
-                snippet_text = snippet.get("text", "").lower()
-                req_lower = req.lower()
-                # Simple keyword matching (in production, use more sophisticated matching)
-                if any(word in snippet_text for word in req_lower.split() if len(word) > min_word_length):
+            req_keywords = extract_meaningful_keywords(req)
+            
+            if not req_keywords:  # Skip if no meaningful keywords
+                continue
+            
+            for snippet in snippets_list:
+                snippet_text = snippet.get("text", "")
+                snippet_keywords = extract_meaningful_keywords(snippet_text)
+                
+                # Calculate match score
+                match_score = calculate_match_score(req_keywords, snippet_keywords)
+                
+                # Only consider it a match if score is above threshold (at least 2 keywords or 1 technical)
+                if match_score > 0.0:
                     matching_snippets.append(snippet.get("snippet_id"))
 
             if matching_snippets:
+                # Confidence based on number of matching snippets and match quality
                 confidence = min(
                     must_have_max,
                     must_have_base + len(matching_snippets) * must_have_increment
@@ -82,10 +165,20 @@ def build_requirements_matcher_tool(
         # Match nice-to-have requirements
         for req in nice_to_have:
             matching_snippets = []
-            for snippet in evidence_snippets:
-                snippet_text = snippet.get("text", "").lower()
-                req_lower = req.lower()
-                if any(word in snippet_text for word in req_lower.split() if len(word) > min_word_length):
+            req_keywords = extract_meaningful_keywords(req)
+            
+            if not req_keywords:  # Skip if no meaningful keywords
+                continue
+            
+            for snippet in snippets_list:
+                snippet_text = snippet.get("text", "")
+                snippet_keywords = extract_meaningful_keywords(snippet_text)
+                
+                # Calculate match score
+                match_score = calculate_match_score(req_keywords, snippet_keywords)
+                
+                # Only consider it a match if score is above threshold
+                if match_score > 0.0:
                     matching_snippets.append(snippet.get("snippet_id"))
 
             if matching_snippets:
@@ -99,7 +192,10 @@ def build_requirements_matcher_tool(
                     "confidence": confidence,
                 })
 
-        return matches
+        return {
+            "application_id": application_id,
+            "match_results": matches,
+        }
 
     return requirements_matcher_tool
 
@@ -237,20 +333,27 @@ def build_policy_check_tool(policy_rules: dict[str, Any]) -> Any:
     return policy_check_tool
 
 
-def build_email_draft_tool(email_templates: dict[str, Any]) -> Any:
+def build_email_draft_tool(
+    application: dict[str, Any],
+    email_templates: dict[str, Any],
+) -> Any:
     """Build email draft tool with templates from prompt dataset.
 
     Args:
+        application: Application object with application_id, job_id, candidate_id, and artifacts (candidate_name, job_title)
         email_templates: Email templates dictionary from prompt dataset
 
     Returns:
         CrewAI tool object
     """
+    # Extract candidate_name and job_title from Application artifacts
+    artifacts = application.get("artifacts", {})
+    candidate_name = artifacts.get("candidate_name", "Candidate")
+    job_title = artifacts.get("job_title", "Position")
+    
     @tool("Email Draft Tool")
     def email_draft_tool(
         recommendation: str,
-        candidate_name: str,
-        job_title: str,
         next_steps: list[str],
     ) -> dict[str, Any]:
         """Draft email communication based on recommendation.
@@ -259,8 +362,6 @@ def build_email_draft_tool(email_templates: dict[str, Any]) -> Any:
 
         Args:
             recommendation: Recommendation (proceed, review, reject)
-            candidate_name: Candidate's name
-            job_title: Job title
             next_steps: List of next steps or suggestions
 
         Returns:

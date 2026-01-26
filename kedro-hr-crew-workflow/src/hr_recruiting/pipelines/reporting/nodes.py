@@ -5,7 +5,7 @@ from typing import Any
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-from hr_recruiting.base.models import ScreeningResult
+from hr_recruiting.pipelines.screening.models import ScreeningResult
 
 
 def validate_screening_result(screening_result_raw: dict[str, Any]) -> dict[str, Any]:

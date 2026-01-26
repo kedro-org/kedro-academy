@@ -1,0 +1,80 @@
+{
+  "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
+  "match_score": 59.88888888888889,
+  "must_have_coverage": 0.5555555555555556,
+  "gaps": [
+    "Experience with version control systems (Git) and CI/CD pipelines",
+    "Bachelor's degree in Computer Science, Engineering, or related field",
+    "Knowledge of system design patterns and best practices"
+  ],
+  "strengths": [
+    "Strong proficiency in Python, Java, or Go",
+    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+    "Knowledge of containerization technologies (Docker, Kubernetes)"
+  ],
+  "risk_flags": [],
+  "recommendation": "review",
+  "email_draft": {
+    "subject": "Application Update: Senior Software Engineer - Backend",
+    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Clarify the candidate's experience with version control systems and CI/CD pipelines.\n- Verify the educational background to ensure it meets the requirement.\n\nBest regards,\nHR Team\n",
+    "placeholders": {
+      "candidate_name": "Sarah Chen",
+      "job_title": "Senior Software Engineer - Backend"
+    }
+  },
+  "qa_suggestions": [
+    "Clarify the candidate's experience with version control systems and CI/CD pipelines.",
+    "Verify the educational background to ensure it meets the requirement."
+  ],
+  "match_results": [
+    {
+      "requirement": "Strong proficiency in Python, Java, or Go",
+      "snippet_ids": [
+        "skill_1",
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "requirement": "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+      "snippet_ids": [
+        "skill_20",
+        "skill_21",
+        "skill_22"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "requirement": "Knowledge of containerization technologies (Docker, Kubernetes)",
+      "snippet_ids": [
+        "skill_18",
+        "skill_19",
+        "work_1"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "requirement": "Experience with version control systems (Git) and CI/CD pipelines",
+      "snippet_ids": [
+        "work_1"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "requirement": "Bachelor's degree in Computer Science, Engineering, or related field",
+      "snippet_ids": [
+        "edu_2"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "requirement": "Knowledge of system design patterns and best practices",
+      "snippet_ids": [
+        "work_1"
+      ],
+      "confidence": 0.5
+    }
+  ]
+}

@@ -5,9 +5,9 @@
 messages:
   - role: user
     content: |
-      description: Match job must-have requirements against candidate evidence snippets. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
+      description: Match job must-have requirements against candidate evidence snippets. Use the Requirements Matcher tool to perform the matching. The tool will return both application_id and match_results. Include the application_id from the tool output in your response. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
       
-      expected_output: A structured list of MatchResult objects, each containing: requirement (the specific job requirement being matched), snippet_ids (list of evidence snippet IDs that support this requirement), and confidence (confidence score 0.0-1.0 indicating match strength). Format as valid JSON matching the MatchResult schema.
+      expected_output: A JSON object containing: application_id (string, generated from candidate_id and job_id), and match_results (array of MatchResult objects). Each MatchResult contains: requirement (the specific job requirement being matched), snippet_ids (list of evidence snippet IDs that support this requirement), and confidence (confidence score 0.0-1.0 indicating match strength). Use the application_id from the Requirements Matcher tool output. Format as valid JSON with both application_id and match_results keys.
       
       agent: requirements_matcher
       

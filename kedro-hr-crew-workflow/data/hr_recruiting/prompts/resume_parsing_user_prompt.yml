@@ -56,3 +56,11 @@ messages:
       10. Validate that all extracted information exists in the resume text before including it
       
       Return ONLY valid JSON with "candidate_profile" and "evidence_snippets" keys. Do not include any explanatory text, only the JSON.
+      
+      Schema Definitions:
+      
+      CandidateProfile Schema:
+      {{candidate_profile_schema_json}}
+      
+      EvidenceSnippet Schema:
+      {{evidence_snippets_schema_json}}

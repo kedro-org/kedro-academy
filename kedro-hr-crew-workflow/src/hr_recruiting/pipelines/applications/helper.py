@@ -4,49 +4,15 @@ This module contains helper functions used by the applications pipeline nodes
 for resume parsing, prompt formatting, and result extraction.
 """
 
-import json
-import re
 from typing import Any
 
 from kedro.pipeline.llm_context import LLMContext
 
-from hr_recruiting.base.models import CandidateProfile, EvidenceSnippet
-from hr_recruiting.base.utils import extract_task_outputs_from_crew_result
-
-
-def parse_json_from_text(text: str) -> dict[str, Any] | None:
-    """Extract JSON from text that may contain markdown or other formatting.
-
-    Args:
-        text: Text that may contain JSON
-
-    Returns:
-        Parsed JSON dictionary or None if parsing fails
-    """
-    if not text:
-        return None
-
-    # Try to find JSON in code blocks
-    json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
-    if json_match:
-        try:
-            return json.loads(json_match.group(1))
-        except json.JSONDecodeError:
-            pass
-
-    # Try to find JSON object directly
-    json_match = re.search(r"\{.*\}", text, re.DOTALL)
-    if json_match:
-        try:
-            return json.loads(json_match.group(0))
-        except json.JSONDecodeError:
-            pass
-
-    # Try parsing the entire text
-    try:
-        return json.loads(text.strip())
-    except json.JSONDecodeError:
-        return None
+from hr_recruiting.pipelines.applications.models import CandidateProfile, EvidenceSnippet
+from hr_recruiting.base.utils import (
+    extract_task_outputs_from_crew_result,
+    parse_json_from_text,
+)
 
 
 def format_schema_info(schema_template: dict[str, Any]) -> str:
@@ -58,6 +24,8 @@ def format_schema_info(schema_template: dict[str, Any]) -> str:
     Returns:
         Formatted string with schema information
     """
+    import json
+    
     try:
         # Get dynamic schemas from Pydantic models
         candidate_profile_schema_json = json.dumps(
@@ -101,7 +69,7 @@ def format_resume_parsing_prompt(
     raw_resume_text: str,
     candidate_id: str,
 ) -> str:
-    """Format the resume parsing user prompt with actual values.
+    """Format the resume parsing user prompt with actual values and schema JSON.
 
     Args:
         context: LLMContext containing prompts
@@ -109,20 +77,32 @@ def format_resume_parsing_prompt(
         candidate_id: Candidate identifier to include in prompt
 
     Returns:
-        Formatted prompt string
+        Formatted prompt string with schema JSON injected
 
     Raises:
         ValueError: If prompt is missing or formatting fails
     """
+    import json
+    
     user_prompt = context.prompts.get("resume_parsing_user_prompt")
     if not user_prompt:
         raise ValueError("resume_parsing_user_prompt not found in LLMContext")
+    
+    # Get schema JSON from Pydantic models
+    candidate_profile_schema_json = json.dumps(
+        CandidateProfile.model_json_schema(), indent=2
+    )
+    evidence_snippets_schema_json = json.dumps(
+        EvidenceSnippet.model_json_schema(), indent=2
+    )
     
     try:
         # Try formatting with LangChain's format method first
         formatted_prompt = user_prompt.format(
             raw_resume_text=raw_resume_text,
             candidate_id=candidate_id,
+            candidate_profile_schema_json=candidate_profile_schema_json,
+            evidence_snippets_schema_json=evidence_snippets_schema_json,
         )
         
         # Extract the string content
@@ -133,14 +113,26 @@ def format_resume_parsing_prompt(
         
         # Handle double braces in YAML templates ({{var}} -> {var} for Python format, then replace)
         # If formatting didn't work (double braces weren't replaced), manually replace them
-        if "{{raw_resume_text}}" in prompt_str or "{{candidate_id}}" in prompt_str:
-            prompt_str = prompt_str.replace("{{raw_resume_text}}", raw_resume_text)
-            prompt_str = prompt_str.replace("{{candidate_id}}", candidate_id)
+        replacements = {
+            "{{raw_resume_text}}": raw_resume_text,
+            "{{candidate_id}}": candidate_id,
+            "{{candidate_profile_schema_json}}": candidate_profile_schema_json,
+            "{{evidence_snippets_schema_json}}": evidence_snippets_schema_json,
+        }
+        for placeholder, value in replacements.items():
+            if placeholder in prompt_str:
+                prompt_str = prompt_str.replace(placeholder, value)
         
         # Also handle single braces in case they weren't formatted
-        if "{raw_resume_text}" in prompt_str or "{candidate_id}" in prompt_str:
-            prompt_str = prompt_str.replace("{raw_resume_text}", raw_resume_text)
-            prompt_str = prompt_str.replace("{candidate_id}", candidate_id)
+        single_brace_replacements = {
+            "{raw_resume_text}": raw_resume_text,
+            "{candidate_id}": candidate_id,
+            "{candidate_profile_schema_json}": candidate_profile_schema_json,
+            "{evidence_snippets_schema_json}": evidence_snippets_schema_json,
+        }
+        for placeholder, value in single_brace_replacements.items():
+            if placeholder in prompt_str:
+                prompt_str = prompt_str.replace(placeholder, value)
         
         return prompt_str
     except Exception as e:
@@ -165,6 +157,33 @@ def validate_extracted_data(
     return validated
 
 
+def create_candidate_profile(
+    candidate_data: dict[str, Any],
+    raw_resume_text: str = "",
+) -> dict[str, Any]:
+    """Create CandidateProfile model from structured data.
+
+    Args:
+        candidate_data: Extracted candidate profile data
+        raw_resume_text: Original resume text for validation
+
+    Returns:
+        CandidateProfile dictionary (validated model dumped to dict) or None if validation fails
+    """
+    # Ensure raw_resume_text is included
+    if raw_resume_text:
+        candidate_data = validate_extracted_data(candidate_data, raw_resume_text)
+    
+    # Validate and create CandidateProfile model
+    try:
+        candidate_profile = CandidateProfile(**candidate_data)
+        return candidate_profile.model_dump()
+    except Exception as e:
+        # Log error but continue with the data
+        print(f"Error validating candidate_profile: {e}")  # noqa: T201
+        return candidate_data
+
+
 
 
 def _extract_candidate_profile(
@@ -185,18 +204,8 @@ def _extract_candidate_profile(
     
     candidate_data = parsed["candidate_profile"]
     
-    # Validate structure and preserve raw_resume_text
-    if raw_resume_text:
-        candidate_data = validate_extracted_data(candidate_data, raw_resume_text)
-    
-    # Validate and return candidate_profile
-    try:
-        candidate_profile = CandidateProfile(**candidate_data)
-        return candidate_profile.model_dump()
-    except Exception as e:
-        # Log error but continue with the data
-        print(f"Error validating candidate_profile: {e}")  # noqa: T201
-        return candidate_data
+    # Create CandidateProfile model using helper function
+    return create_candidate_profile(candidate_data, raw_resume_text)
 
 
 def _extract_evidence_snippets(parsed: dict[str, Any]) -> list[dict[str, Any]]:
@@ -230,19 +239,25 @@ def _extract_evidence_snippets(parsed: dict[str, Any]) -> list[dict[str, Any]]:
 def extract_resume_parsing_result(
     crew_result: Any,
     raw_resume_text: str = "",
+    candidate_id: str = "unknown",
 ) -> dict[str, Any]:
     """Extract and structure resume parsing result from crew execution.
 
     Args:
         crew_result: Result from crew.kickoff()
         raw_resume_text: Original resume text for validation
+        candidate_id: Candidate identifier to add to evidence snippets
 
     Returns:
         Dictionary with "candidate_profile" and "evidence_snippets" keys
     """
     result = {
         "candidate_profile": None,
-        "evidence_snippets": [],
+        "evidence_snippets": {
+            "candidate_id": candidate_id,
+            "candidate_name": "Unknown",
+            "snippets": [],
+        },
     }
 
     try:
@@ -263,10 +278,23 @@ def extract_resume_parsing_result(
             return result
         
         # Extract candidate profile
-        result["candidate_profile"] = _extract_candidate_profile(parsed, raw_resume_text)
+        candidate_profile = _extract_candidate_profile(parsed, raw_resume_text)
+        result["candidate_profile"] = candidate_profile
+        
+        # Extract candidate_name from profile for evidence_snippets
+        candidate_name = "Unknown"
+        if candidate_profile and isinstance(candidate_profile, dict):
+            candidate_name = candidate_profile.get("name", "Unknown")
         
         # Extract evidence snippets
-        result["evidence_snippets"] = _extract_evidence_snippets(parsed)
+        snippets = _extract_evidence_snippets(parsed)
+        
+        # Structure evidence_snippets with candidate_id and candidate_name as root keys
+        result["evidence_snippets"] = {
+            "candidate_id": candidate_id,
+            "candidate_name": candidate_name,
+            "snippets": snippets,
+        }
 
     except Exception as e:
         print(f"Error parsing crew result: {e}")  # noqa: T201

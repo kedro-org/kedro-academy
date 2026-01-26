@@ -24,3 +24,8 @@ messages:
       
       Match Results from Requirements Matcher:
       {{match_results}}
+      
+      Schema Definition:
+      
+      ScreeningResult Schema:
+      {{screening_result_schema_json}}

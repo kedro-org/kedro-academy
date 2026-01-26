@@ -4,8 +4,8 @@ from typing import Any
 
 from hr_recruiting.base.utils import extract_text_from_document
 from hr_recruiting.pipelines.jobs.helper import (
+    create_job_posting,
     parse_job_fields,
-    validate_job_posting,
 )
 
 
@@ -62,17 +62,14 @@ def normalize_job_posting(parsed_jd: dict[str, Any]) -> dict[str, Any]:
     # Extract all fields
     parsed_fields = parse_job_fields(lines)
     
-    job_data = {
-        "job_id": parsed_jd.get("job_id", "unknown"),
-        "title": parsed_fields["title"],
-        "location": parsed_fields["location"],
-        "requirements": {
+    # Create JobPosting model using helper function
+    return create_job_posting(
+        job_id=parsed_jd.get("job_id", "unknown"),
+        title=parsed_fields["title"],
+        location=parsed_fields["location"],
+        requirements={
             "must_have": parsed_fields["must_have"],
             "nice_to_have": parsed_fields["nice_to_have"],
         },
-        "raw_jd_text": raw_text,
-    }
-
-    # Validate using Pydantic model
-    job_posting = validate_job_posting(job_data)
-    return job_posting.model_dump()
+        raw_jd_text=raw_text,
+    )

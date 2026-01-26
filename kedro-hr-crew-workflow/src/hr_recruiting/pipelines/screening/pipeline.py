@@ -15,17 +15,30 @@ def create_pipeline() -> Pipeline:
     """Create screening pipeline with agentic processing.
 
     This pipeline handles:
-    1. Create LLM context for each agent (requirements_matcher, resume_evaluator, comms_drafter)
-    2. Orchestrate CrewAI crew execution
-    3. Output screening_result_raw
+    1. Create Application object from candidate profile and job posting
+    2. Create LLM context for each agent (requirements_matcher, resume_evaluator, comms_drafter)
+    3. Orchestrate CrewAI crew execution
+    4. Output screening_result_raw
 
     Following PR 99 pattern with llm_context_nodes and orchestrator node.
 
     Returns:
         Configured Pipeline object
     """
+    from hr_recruiting.pipelines.screening.helper import create_application
+    
     return Pipeline(
         [
+            # Create Application object from candidate profile and job posting
+            node(
+                func=create_application,
+                inputs=[
+                    "normalized_candidate_profile",
+                    "normalized_job_posting",
+                ],
+                outputs="application",
+                name="create_application",
+            ),
             # Create context for requirements matcher agent
             llm_context_node(
                 outputs="requirements_matcher_context",
@@ -37,6 +50,7 @@ def create_pipeline() -> Pipeline:
                 tools=[
                     tool(
                         build_requirements_matcher_tool,
+                        "application",
                         "normalized_job_posting",
                         "evidence_snippets",
                         "matching_config",
@@ -76,6 +90,7 @@ def create_pipeline() -> Pipeline:
                 tools=[
                     tool(
                         build_email_draft_tool,
+                        "application",
                         "email_templates",
                     ),
                     tool(

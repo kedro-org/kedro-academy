@@ -1,0 +1,11 @@
+{
+  "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
+  "job_id": "SE_BACKEND_001",
+  "candidate_id": "DS_CANDIDATE_001",
+  "submitted_at": "2026-01-26T02:56:40.384290",
+  "status": "pending",
+  "artifacts": {
+    "candidate_name": "Sarah Chen",
+    "job_title": "Senior Software Engineer - Backend"
+  }
+}

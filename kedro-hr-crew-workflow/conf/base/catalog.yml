@@ -34,6 +34,11 @@ evidence_snippets:
   type: json.JSONDataset
   filepath: data/hr_recruiting/intermediate/evidence_snippets.json
 
+# Application object linking candidate and job
+application:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/application.json
+
 # Model inputs
 screening_input:
   type: json.JSONDataset
@@ -55,27 +60,24 @@ hr_report:
   type: openxml.DocxDataset
   filepath: data/hr_recruiting/output/hr_report.docx
 
+# Configuration files for pipeline behavior
 # Email templates for candidate communications
 email_templates:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/sample/email_templates.yml
+  filepath: data/hr_recruiting/config/email_templates.yml
 
 # Policy rules for email validation
 policy_rules:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/sample/policy_rules.yml
+  filepath: data/hr_recruiting/config/policy_rules.yml
 
 # Scoring configuration for match score calculation
 scoring_config:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/sample/scoring_config.yml
+  filepath: data/hr_recruiting/config/scoring_config.yml
 
 # Matching configuration for requirements matcher
 matching_config:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/sample/matching_config.yml
+  filepath: data/hr_recruiting/config/matching_config.yml
 
-# Schema template for resume parsing
-resume_parsing_schema_template:
-  type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/sample/resume_parsing_schema_template.yml

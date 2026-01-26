@@ -47,7 +47,6 @@ def create_pipeline() -> Pipeline:
                 inputs=[
                     "resume_parser_context",
                     "parsed_resume",
-                    "resume_parsing_schema_template",
                 ],
                 outputs="resume_parsing_result",
                 name="run_resume_parsing_crew",

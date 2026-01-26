@@ -1,56 +1,9 @@
-"""Domain models for HR recruiting workflow."""
+"""Pydantic models for screening pipeline."""
 
 from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
-
-
-class Requirements(BaseModel):
-    """Job requirements structure."""
-
-    must_have: list[str] = Field(default_factory=list, description="Must-have requirements")
-    nice_to_have: list[str] = Field(default_factory=list, description="Nice-to-have requirements")
-
-
-class JobPosting(BaseModel):
-    """Job posting model."""
-
-    job_id: str = Field(description="Unique job identifier")
-    title: str = Field(description="Job title")
-    location: str = Field(description="Job location")
-    requirements: Requirements = Field(description="Job requirements")
-    raw_jd_text: str = Field(description="Raw job description text")
-
-
-class WorkHistory(BaseModel):
-    """Work history entry."""
-
-    company: str
-    role: str
-    duration: str
-    description: str
-
-
-class Education(BaseModel):
-    """Education entry."""
-
-    institution: str
-    degree: str
-    field: str | None = None
-    year: str | None = None
-
-
-class CandidateProfile(BaseModel):
-    """Candidate profile model."""
-
-    candidate_id: str = Field(description="Unique candidate identifier")
-    name: str = Field(description="Candidate name")
-    email: str = Field(description="Candidate email")
-    skills: list[str] = Field(default_factory=list, description="List of skills")
-    work_history: list[WorkHistory] = Field(default_factory=list, description="Work history")
-    education: list[Education] = Field(default_factory=list, description="Education background")
-    raw_resume_text: str = Field(description="Raw resume text")
 
 
 class Application(BaseModel):
@@ -62,15 +15,6 @@ class Application(BaseModel):
     submitted_at: datetime = Field(description="Submission timestamp")
     status: str = Field(default="pending", description="Application status")
     artifacts: dict[str, Any] = Field(default_factory=dict, description="Additional artifacts")
-
-
-class EvidenceSnippet(BaseModel):
-    """Evidence snippet for matching."""
-
-    snippet_id: str = Field(description="Unique snippet identifier")
-    text: str = Field(description="Snippet text")
-    source: str = Field(description="Source field (e.g., 'work_history', 'skills')")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class MatchResult(BaseModel):

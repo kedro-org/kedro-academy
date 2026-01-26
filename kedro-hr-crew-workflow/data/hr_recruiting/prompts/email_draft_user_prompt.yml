@@ -5,16 +5,14 @@
 messages:
   - role: user
     content: |
-      description: Draft a professional, empathetic email to the candidate based on the screening recommendation. The email should acknowledge their application, provide clear next steps, maintain a positive and respectful tone, and include appropriate feedback when relevant.
+      description: Draft a professional, empathetic email to the candidate based on the screening recommendation. Use the Email Draft Tool to create the email - the tool has access to the candidate's name and job title. The email should acknowledge their application, provide clear next steps, maintain a positive and respectful tone, and include appropriate feedback when relevant. Use the candidate's actual name from the tool, not a placeholder.
       
-      expected_output: An EmailDraft object containing: subject (professional email subject line), body (well-crafted email body with appropriate tone), and placeholders (any dynamic placeholders used in the email). Format as valid JSON matching the EmailDraft schema.
+      expected_output: An EmailDraft object containing: subject (professional email subject line), body (well-crafted email body with appropriate tone that includes the candidate's name and relevant details), and placeholders (candidate_name and job_title). Format as valid JSON matching the EmailDraft schema.
       
       agent: comms_drafter
       
       context: resume_evaluation_task
       
-      Candidate Name: {{candidate_name}}
-      Job Title: {{job_title}}
       Recommendation: {{recommendation}}
       Match Score: {{match_score}}
       Key Strengths: {{strengths}}

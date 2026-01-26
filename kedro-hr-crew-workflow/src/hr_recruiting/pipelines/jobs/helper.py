@@ -6,7 +6,7 @@ for job posting parsing and normalization.
 
 from typing import Any
 
-from hr_recruiting.base.models import JobPosting
+from hr_recruiting.pipelines.jobs.models import JobPosting
 
 
 def validate_job_posting(data: dict[str, Any]) -> JobPosting:
@@ -25,6 +25,40 @@ def validate_job_posting(data: dict[str, Any]) -> JobPosting:
         return JobPosting(**data)
     except Exception as e:
         raise ValueError(f"Job posting validation failed: {e}") from e
+
+
+def create_job_posting(
+    job_id: str,
+    title: str,
+    location: str,
+    requirements: dict[str, Any],
+    raw_jd_text: str,
+) -> dict[str, Any]:
+    """Create JobPosting model from structured data.
+
+    Args:
+        job_id: Unique job identifier
+        title: Job title
+        location: Job location
+        requirements: Dictionary with must_have and nice_to_have lists
+        raw_jd_text: Raw job description text
+
+    Returns:
+        JobPosting dictionary (validated model dumped to dict)
+
+    Raises:
+        ValueError: If validation fails
+    """
+    job_data = {
+        "job_id": job_id,
+        "title": title,
+        "location": location,
+        "requirements": requirements,
+        "raw_jd_text": raw_jd_text,
+    }
+    
+    job_posting = validate_job_posting(job_data)
+    return job_posting.model_dump()
 
 
 def parse_job_fields(lines: list[str]) -> dict[str, Any]:

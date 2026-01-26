@@ -3,18 +3,15 @@
 import os
 from typing import Any
 
-from crewai import Crew, Task
+from crewai import Crew
 from kedro.pipeline.llm_context import LLMContext
 
 from hr_recruiting.base.utils import execute_crew_with_retry, extract_text_from_document
 from hr_recruiting.pipelines.applications.agents import (
     create_resume_parser_agent_with_tools,
 )
-from hr_recruiting.pipelines.applications.helper import (
-    extract_resume_parsing_result,
-    format_resume_parsing_prompt,
-    format_schema_info,
-)
+from hr_recruiting.pipelines.applications.helper import extract_resume_parsing_result
+from hr_recruiting.pipelines.applications.tasks import create_resume_parsing_task
 
 # Disable CrewAI telemetry to avoid connection errors
 os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
@@ -46,7 +43,6 @@ def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:
 def run_resume_parsing_crew(
     resume_parser_context: LLMContext,
     parsed_resume: dict[str, Any],
-    resume_parsing_schema_template: dict[str, Any],
 ) -> dict[str, Any]:
     """Run CrewAI crew for resume parsing and normalization.
 
@@ -59,7 +55,6 @@ def run_resume_parsing_crew(
     Args:
         resume_parser_context: LLMContext for resume parser agent
         parsed_resume: Parsed resume data with raw_resume_text and candidate_id
-        resume_parsing_schema_template: Schema template dictionary from YAML dataset
 
     Returns:
         Dictionary with "candidate_profile" and "evidence_snippets" keys
@@ -71,22 +66,12 @@ def run_resume_parsing_crew(
     raw_resume_text = parsed_resume.get("raw_resume_text", "")
     candidate_id = parsed_resume.get("candidate_id", "unknown")
 
-    # Format the prompt with actual values
-    task_description = format_resume_parsing_prompt(
+    # Create task (schema JSON is injected from Pydantic models in format_resume_parsing_prompt)
+    task = create_resume_parsing_task(
         resume_parser_context,
+        agent,
         raw_resume_text,
         candidate_id,
-    )
-
-    # Add schema information to task description from template
-    schema_info = format_schema_info(resume_parsing_schema_template)
-    task_description += f"\n\n{schema_info}"
-
-    # Create task
-    task = Task(
-        description=task_description,
-        agent=agent,
-        expected_output="A JSON object with 'candidate_profile' and 'evidence_snippets' keys, both matching their respective schemas.",
     )
 
     # Create crew
@@ -101,7 +86,7 @@ def run_resume_parsing_crew(
     result = execute_crew_with_retry(crew)
 
     # Extract and structure results
-    parsed_result = extract_resume_parsing_result(result, raw_resume_text)
+    parsed_result = extract_resume_parsing_result(result, raw_resume_text, candidate_id)
     
     # Ensure candidate_id is set correctly
     if parsed_result.get("candidate_profile"):
@@ -113,15 +98,19 @@ def run_resume_parsing_crew(
 
 def split_resume_parsing_result(
     resume_parsing_result: dict[str, Any],
-) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """Split resume parsing result into separate candidate profile and evidence snippets.
 
     Args:
         resume_parsing_result: Dictionary with "candidate_profile" and "evidence_snippets" keys
 
     Returns:
-        Tuple of (candidate_profile dict, evidence_snippets list)
+        Tuple of (candidate_profile dict, evidence_snippets dict with candidate_id and snippets)
     """
     candidate_profile = resume_parsing_result.get("candidate_profile") or {}
-    evidence_snippets = resume_parsing_result.get("evidence_snippets") or []
+    evidence_snippets = resume_parsing_result.get("evidence_snippets") or {
+        "candidate_id": "unknown",
+        "candidate_name": "Unknown",
+        "snippets": [],
+    }
     return (candidate_profile, evidence_snippets)

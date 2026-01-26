@@ -1,5 +1,7 @@
 """Shared utility functions used across pipelines."""
 
+import json
+import re
 import time
 from typing import Any
 
@@ -29,6 +31,41 @@ def extract_text_from_document(doc: Document) -> str:
                     text_parts.append(cell.text.strip())
     
     return "\n".join(text_parts)
+
+
+def parse_json_from_text(text: str) -> dict[str, Any] | None:
+    """Extract JSON from text that may contain markdown or other formatting.
+
+    Args:
+        text: Text that may contain JSON
+
+    Returns:
+        Parsed JSON dictionary or None if parsing fails
+    """
+    if not text:
+        return None
+
+    # Try to find JSON in code blocks
+    json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if json_match:
+        try:
+            return json.loads(json_match.group(1))
+        except json.JSONDecodeError:
+            pass
+
+    # Try to find JSON object directly
+    json_match = re.search(r"\{.*\}", text, re.DOTALL)
+    if json_match:
+        try:
+            return json.loads(json_match.group(0))
+        except json.JSONDecodeError:
+            pass
+
+    # Try parsing the entire text
+    try:
+        return json.loads(text.strip())
+    except json.JSONDecodeError:
+        return None
 
 
 def execute_crew_with_retry(
@@ -84,3 +121,27 @@ def extract_task_outputs_from_crew_result(crew_result: Any) -> list[Any]:
         return [crew_result]
     
     return []
+
+
+def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | None:
+    """Extract a field value from prompt content string.
+
+    The prompt content contains fields like "description: ..." and "expected_output: ..."
+    This function extracts the value for a given field.
+
+    Args:
+        prompt_content: The prompt content string
+        field_name: Name of the field to extract (e.g., "description", "expected_output")
+
+    Returns:
+        The field value or None if not found
+    """
+    if not prompt_content:
+        return None
+    
+    # Pattern to match "field_name: value" where value can span multiple lines
+    pattern = rf"^{field_name}:\s*(.+?)(?=\n\s*\w+:|$)"
+    match = re.search(pattern, prompt_content, re.MULTILINE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return None
