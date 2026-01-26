@@ -4,15 +4,65 @@ This module contains helper functions used by the applications pipeline nodes
 for resume parsing, prompt formatting, and result extraction.
 """
 
+from datetime import datetime
 from typing import Any
 
 from kedro.pipeline.llm_context import LLMContext
 
-from hr_recruiting.pipelines.applications.models import CandidateProfile, EvidenceSnippet
+from hr_recruiting.pipelines.applications.models import Application, CandidateProfile, EvidenceSnippet
 from hr_recruiting.base.utils import (
     extract_task_outputs_from_crew_result,
     parse_json_from_text,
 )
+
+
+def create_application(
+    normalized_candidate_profile: dict[str, Any],
+    job_metadata: dict[str, Any],
+) -> dict[str, Any]:
+    """Create Application object from candidate profile and job metadata.
+
+    Args:
+        normalized_candidate_profile: Normalized candidate profile dictionary
+        job_metadata: Job metadata dictionary with job_id, title, location
+
+    Returns:
+        Application dictionary with application_id, job_id, candidate_id, and artifacts
+    """
+    # Validate required fields - fail if missing
+    if "candidate_id" not in normalized_candidate_profile:
+        raise ValueError("candidate_id not found in normalized_candidate_profile")
+    candidate_id = normalized_candidate_profile["candidate_id"]
+    
+    if "job_id" not in job_metadata:
+        raise ValueError("job_id not found in job_metadata")
+    job_id = job_metadata["job_id"]
+    
+    application_id = f"{candidate_id}_{job_id}"
+
+    # Extract candidate_name and job_title for use in email drafting
+    if "name" not in normalized_candidate_profile:
+        raise ValueError("name not found in normalized_candidate_profile")
+    candidate_name = normalized_candidate_profile["name"]
+    
+    if "title" not in job_metadata:
+        raise ValueError("title not found in job_metadata")
+    job_title = job_metadata["title"]
+
+    application = Application(
+        application_id=application_id,
+        job_id=job_id,
+        candidate_id=candidate_id,
+        submitted_at=datetime.now(),
+        status="pending",
+        artifacts={
+            "candidate_name": candidate_name,
+            "job_title": job_title,
+        },
+    )
+
+    # Use mode='json' to serialize datetime objects to ISO format strings
+    return application.model_dump(mode='json')
 
 
 def format_schema_info(schema_template: dict[str, Any]) -> str:

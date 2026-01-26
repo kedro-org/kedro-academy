@@ -7,7 +7,7 @@ messages:
     content: |
       description: Conduct a comprehensive evaluation of the candidate against the job requirements. Analyze the candidate's qualifications, identify strengths and gaps, assess risk factors, and provide a clear recommendation. Consider all available evidence and provide a detailed, evidence-based assessment.
       
-      expected_output: A comprehensive ScreeningResult object containing: match_score (overall match score 0-100), must_have_coverage (coverage of must-have requirements 0.0-1.0), gaps (list of identified gaps), strengths (list of candidate strengths), risk_flags (list of any risk flags), recommendation (proceed/reject/review), qa_suggestions (suggestions for quality assurance), and match_results (detailed match results from requirements matching). Format as valid JSON matching the ScreeningResult schema.
+      expected_output: A comprehensive ScreeningResult object containing: application_id (from requirements matching task output), candidate_name (from requirements matching task output), job_title (from requirements matching task output), match_score (overall match score 0-100), must_have_coverage (coverage of must-have requirements 0.0-1.0), gaps (list of identified gaps), strengths (list of candidate strengths), risk_flags (list of any risk flags), recommendation (proceed/reject/review), qa_suggestions (suggestions for quality assurance), and match_results (detailed match results from requirements matching task). You must include application_id, candidate_name, and job_title from the requirements matching task output. Format as valid JSON matching the ScreeningResult schema.
       
       agent: resume_evaluator
       

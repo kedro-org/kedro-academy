@@ -6,59 +6,62 @@ for job posting parsing and normalization.
 
 from typing import Any
 
-from hr_recruiting.pipelines.jobs.models import JobPosting
+from hr_recruiting.pipelines.jobs.models import JobMetadata, JobRequirements
 
 
-def validate_job_posting(data: dict[str, Any]) -> JobPosting:
-    """Validate and create JobPosting model.
-
-    Args:
-        data: Raw job posting data
-
-    Returns:
-        Validated JobPosting model
-
-    Raises:
-        ValueError: If validation fails
-    """
-    try:
-        return JobPosting(**data)
-    except Exception as e:
-        raise ValueError(f"Job posting validation failed: {e}") from e
-
-
-def create_job_posting(
+def create_job_metadata(
     job_id: str,
     title: str,
     location: str,
-    requirements: dict[str, Any],
-    raw_jd_text: str,
 ) -> dict[str, Any]:
-    """Create JobPosting model from structured data.
+    """Create JobMetadata model from structured data.
 
     Args:
         job_id: Unique job identifier
         title: Job title
         location: Job location
-        requirements: Dictionary with must_have and nice_to_have lists
-        raw_jd_text: Raw job description text
 
     Returns:
-        JobPosting dictionary (validated model dumped to dict)
+        JobMetadata dictionary (validated model dumped to dict)
 
     Raises:
         ValueError: If validation fails
     """
-    job_data = {
-        "job_id": job_id,
-        "title": title,
-        "location": location,
-        "requirements": requirements,
-        "raw_jd_text": raw_jd_text,
-    }
-    
-    job_posting = validate_job_posting(job_data)
-    return job_posting.model_dump()
+    try:
+        job_metadata = JobMetadata(
+            job_id=job_id,
+            title=title,
+            location=location,
+        )
+        return job_metadata.model_dump()
+    except Exception as e:
+        raise ValueError(f"Job metadata validation failed: {e}") from e
+
+
+def create_job_requirements(
+    job_id: str,
+    requirements: dict[str, Any],
+) -> dict[str, Any]:
+    """Create JobRequirements model from structured data.
+
+    Args:
+        job_id: Unique job identifier
+        requirements: Dictionary with must_have and nice_to_have lists
+
+    Returns:
+        JobRequirements dictionary (validated model dumped to dict)
+
+    Raises:
+        ValueError: If validation fails
+    """
+    try:
+        job_requirements = JobRequirements(
+            job_id=job_id,
+            requirements=requirements,
+        )
+        return job_requirements.model_dump()
+    except Exception as e:
+        raise ValueError(f"Job requirements validation failed: {e}") from e
 
 
 def parse_job_fields(lines: list[str]) -> dict[str, Any]:

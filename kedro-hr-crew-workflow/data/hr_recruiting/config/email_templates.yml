@@ -8,9 +8,6 @@ proceed:
 
     Thank you for your interest in the {job_title} position. We are pleased to inform you that your application has progressed to the next stage.
 
-    Next steps:
-    {next_steps_list}
-
     We look forward to speaking with you soon.
 
     Best regards,
@@ -22,8 +19,6 @@ review:
     Dear {candidate_name},
 
     Thank you for your application for the {job_title} position. We are currently reviewing your application and will be in touch shortly.
-
-    {next_steps_list}
 
     Best regards,
     HR Team

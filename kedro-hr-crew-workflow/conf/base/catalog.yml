@@ -7,43 +7,33 @@ raw_job_posting:
   type: openxml.DocxDataset
   filepath: data/hr_recruiting/sample/jobs/raw_job_posting.docx
 
+# Jobs pipeline outputs
+job_metadata:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/jobs/job_metadata.json
+
+job_requirements:
+  type: json.JSONDataset
+  filepath: data/hr_recruiting/intermediate/jobs/job_requirements.json
+
 raw_resume:
   type: openxml.DocxDataset
   filepath: data/hr_recruiting/sample/resumes/raw_resume_data_scientist.docx
 
-# Intermediate processed data
-parsed_job_description:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/parsed_jd.json
-
-parsed_resume:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/parsed_resume.json
-
-# Validated and normalized data with pydantic models
-normalized_job_posting:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/job_posting.json
-
-normalized_candidate_profile:
-  type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/candidate_profile.json
-
 # Evidence snippets
 evidence_snippets:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/evidence_snippets.json
+  filepath: data/hr_recruiting/intermediate/applications/evidence_snippets.json
 
 # Application object linking candidate and job
 application:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/application.json
+  filepath: data/hr_recruiting/intermediate/applications/application.json
 
-# Model outputs - validated screening results
-# Results are validated in the screening pipeline (extract_screening_result)
+# Screening pipeline outputs
 screening_result:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/screening_result.json
+  filepath: data/hr_recruiting/intermediate/screening/screening_result.json
 
 # Reports which are human readable and can be used 
 # to communicate the screening result to the candidate
@@ -71,4 +61,3 @@ scoring_config:
 matching_config:
   type: yaml.YAMLDataset
   filepath: data/hr_recruiting/config/matching_config.yml
-

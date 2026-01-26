@@ -18,14 +18,22 @@ os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
 
 
 def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:
-    """Extract text and candidate_id from raw resume document."""
+    """Extract text and candidate_id from raw resume document.
+    
+    Raises:
+        ValueError: If candidate_id cannot be extracted from document properties
+    """
     raw_text = extract_text_from_document(raw_resume_doc)
     
-    candidate_id = "unknown"
+    # Try to extract candidate_id from document properties
+    candidate_id = None
     if hasattr(raw_resume_doc.core_properties, "title") and raw_resume_doc.core_properties.title:
         candidate_id = raw_resume_doc.core_properties.title
     elif hasattr(raw_resume_doc.core_properties, "subject") and raw_resume_doc.core_properties.subject:
         candidate_id = raw_resume_doc.core_properties.subject
+    
+    if not candidate_id:
+        raise ValueError("candidate_id not found in resume document properties (title or subject)")
     
     return {
         "candidate_id": candidate_id,
@@ -41,9 +49,14 @@ def run_resume_parsing_crew(
     # Create agent
     agent = create_resume_parser_agent_with_tools(resume_parser_context)
 
-    # Get raw resume text and candidate_id
-    raw_resume_text = parsed_resume.get("raw_resume_text", "")
-    candidate_id = parsed_resume.get("candidate_id", "unknown")
+    # Get raw resume text and candidate_id - fail if missing
+    if "raw_resume_text" not in parsed_resume:
+        raise ValueError("raw_resume_text not found in parsed_resume")
+    raw_resume_text = parsed_resume["raw_resume_text"]
+    
+    if "candidate_id" not in parsed_resume:
+        raise ValueError("candidate_id not found in parsed_resume")
+    candidate_id = parsed_resume["candidate_id"]
 
     # Create task (schema JSON is injected from Pydantic models in format_resume_parsing_prompt)
     task = create_resume_parsing_task(
@@ -78,11 +91,27 @@ def run_resume_parsing_crew(
 def split_resume_parsing_result(
     resume_parsing_result: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Split resume parsing result into candidate profile and evidence snippets."""
-    candidate_profile = resume_parsing_result.get("candidate_profile") or {}
-    evidence_snippets = resume_parsing_result.get("evidence_snippets") or {
-        "candidate_id": "unknown",
-        "candidate_name": "Unknown",
-        "snippets": [],
-    }
+    """Split resume parsing result into candidate profile and evidence snippets.
+    
+    Raises:
+        ValueError: If required fields are missing
+    """
+    if "candidate_profile" not in resume_parsing_result:
+        raise ValueError("candidate_profile not found in resume_parsing_result")
+    candidate_profile = resume_parsing_result["candidate_profile"]
+    
+    if "evidence_snippets" not in resume_parsing_result:
+        raise ValueError("evidence_snippets not found in resume_parsing_result")
+    evidence_snippets = resume_parsing_result["evidence_snippets"]
+    
+    # Validate evidence_snippets structure
+    if not isinstance(evidence_snippets, dict):
+        raise ValueError("evidence_snippets must be a dictionary")
+    if "candidate_id" not in evidence_snippets:
+        raise ValueError("candidate_id not found in evidence_snippets")
+    if "candidate_name" not in evidence_snippets:
+        raise ValueError("candidate_name not found in evidence_snippets")
+    if "snippets" not in evidence_snippets:
+        raise ValueError("snippets not found in evidence_snippets")
+    
     return (candidate_profile, evidence_snippets)

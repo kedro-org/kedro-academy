@@ -1,7 +1,7 @@
 [
   {
     "event": "before_pipeline_run",
-    "timestamp": "2026-01-26T16:06:14.978567+00:00"
+    "timestamp": "2026-01-26T22:25:16.545527+00:00"
   },
   {
     "event": "after_dataset_loaded",
@@ -28,7 +28,7 @@
     "event": "after_node_run",
     "node": "create_resume_parser_context",
     "node_id": "50816308",
-    "duration": 0.0012812080021831207,
+    "duration": 0.0020138340041739866,
     "status": "success"
   },
   {
@@ -49,7 +49,7 @@
     "event": "after_node_run",
     "node": "parse_job_description",
     "node_id": "8fcf3da3",
-    "duration": 0.004026542002975475,
+    "duration": 0.0033475000018370338,
     "status": "success"
   },
   {
@@ -57,7 +57,7 @@
     "dataset": "parsed_job_description",
     "node_id": "1b313676",
     "status": "Available",
-    "size": 2521
+    "size": 0
   },
   {
     "event": "after_dataset_loaded",
@@ -70,7 +70,7 @@
     "event": "after_node_run",
     "node": "parse_resume_text",
     "node_id": "999d6318",
-    "duration": 0.003190416995494161,
+    "duration": 0.0027263750016572885,
     "status": "success"
   },
   {
@@ -78,28 +78,7 @@
     "dataset": "parsed_resume",
     "node_id": "4635b276",
     "status": "Available",
-    "size": 2433
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "parsed_job_description",
-    "node_id": "1b313676",
-    "status": "Available",
-    "size": 2521
-  },
-  {
-    "event": "after_node_run",
-    "node": "normalize_job_posting",
-    "node_id": "efda83f0",
-    "duration": 0.0006371250055963174,
-    "status": "success"
-  },
-  {
-    "event": "after_dataset_saved",
-    "dataset": "normalized_job_posting",
-    "node_id": "2463ef8e",
-    "status": "Available",
-    "size": 3674
+    "size": 0
   },
   {
     "event": "after_dataset_loaded",
@@ -113,13 +92,13 @@
     "dataset": "parsed_resume",
     "node_id": "4635b276",
     "status": "Available",
-    "size": 2433
+    "size": 0
   },
   {
     "event": "after_node_run",
     "node": "run_resume_parsing_crew",
     "node_id": "67e7e696",
-    "duration": 61.48381966699526,
+    "duration": 61.46481825000228,
     "status": "success"
   },
   {
@@ -128,6 +107,34 @@
     "node_id": "58f07ec0",
     "status": "Available",
     "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "parsed_job_description",
+    "node_id": "1b313676",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_node_run",
+    "node": "split_job_posting",
+    "node_id": "829c0c96",
+    "duration": 0.0005827920031151734,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "job_metadata",
+    "node_id": "b5b5ebcd",
+    "status": "Available",
+    "size": 144
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "job_requirements",
+    "node_id": "a1111136",
+    "status": "Available",
+    "size": 1173
   },
   {
     "event": "after_dataset_loaded",
@@ -148,14 +155,14 @@
     "dataset": "resume_evaluation_user_prompt",
     "node_id": "1237336f",
     "status": "Available",
-    "size": 1488
+    "size": 1766
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "normalized_job_posting",
-    "node_id": "2463ef8e",
+    "dataset": "job_requirements",
+    "node_id": "a1111136",
     "status": "Available",
-    "size": 3674
+    "size": 1173
   },
   {
     "event": "after_dataset_loaded",
@@ -165,17 +172,10 @@
     "size": 442
   },
   {
-    "event": "after_dataset_loaded",
-    "dataset": "policy_rules",
-    "node_id": "530292d1",
-    "status": "Available",
-    "size": 639
-  },
-  {
     "event": "after_node_run",
     "node": "create_resume_evaluator_context",
-    "node_id": "941d7805",
-    "duration": 0.001222291997692082,
+    "node_id": "a0852804",
+    "duration": 0.0007036669994704425,
     "status": "success"
   },
   {
@@ -196,7 +196,7 @@
     "event": "after_node_run",
     "node": "split_resume_parsing_result",
     "node_id": "1badc46c",
-    "duration": 0.0004449580010259524,
+    "duration": 0.00035395799932302907,
     "status": "success"
   },
   {
@@ -204,7 +204,7 @@
     "dataset": "normalized_candidate_profile",
     "node_id": "ef0428f4",
     "status": "Available",
-    "size": 4659
+    "size": 0
   },
   {
     "event": "after_dataset_saved",
@@ -218,20 +218,20 @@
     "dataset": "normalized_candidate_profile",
     "node_id": "ef0428f4",
     "status": "Available",
-    "size": 4659
+    "size": 0
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "normalized_job_posting",
-    "node_id": "2463ef8e",
+    "dataset": "job_metadata",
+    "node_id": "b5b5ebcd",
     "status": "Available",
-    "size": 3674
+    "size": 144
   },
   {
     "event": "after_node_run",
     "node": "create_application",
-    "node_id": "e3efbb8a",
-    "duration": 0.0003913340042345226,
+    "node_id": "db2e67c2",
+    "duration": 0.0005590000000665896,
     "status": "success"
   },
   {
@@ -240,62 +240,6 @@
     "node_id": "d2005cc2",
     "status": "Available",
     "size": 308
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "llm_crew_ai",
-    "node_id": "3e5dae7b",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "comms_drafter_agent_system_prompt",
-    "node_id": "9e02f1ff",
-    "status": "Available",
-    "size": 868
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "email_draft_user_prompt",
-    "node_id": "3260bfb9",
-    "status": "Available",
-    "size": 1463
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "application",
-    "node_id": "d2005cc2",
-    "status": "Available",
-    "size": 308
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "email_templates",
-    "node_id": "aa4acdfb",
-    "status": "Available",
-    "size": 1173
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "policy_rules",
-    "node_id": "530292d1",
-    "status": "Available",
-    "size": 639
-  },
-  {
-    "event": "after_node_run",
-    "node": "create_comms_drafter_context",
-    "node_id": "23f08e4d",
-    "duration": 0.0009354170033475384,
-    "status": "success"
-  },
-  {
-    "event": "after_dataset_saved",
-    "dataset": "comms_drafter_context",
-    "node_id": "919ae538",
-    "status": "Available",
-    "size": 0
   },
   {
     "event": "after_dataset_loaded",
@@ -316,7 +260,7 @@
     "dataset": "requirements_matching_user_prompt",
     "node_id": "2d2f532c",
     "status": "Available",
-    "size": 1370
+    "size": 1516
   },
   {
     "event": "after_dataset_loaded",
@@ -327,10 +271,10 @@
   },
   {
     "event": "after_dataset_loaded",
-    "dataset": "normalized_job_posting",
-    "node_id": "2463ef8e",
+    "dataset": "job_requirements",
+    "node_id": "a1111136",
     "status": "Available",
-    "size": 3674
+    "size": 1173
   },
   {
     "event": "after_dataset_loaded",
@@ -349,8 +293,8 @@
   {
     "event": "after_node_run",
     "node": "create_requirements_matcher_context",
-    "node_id": "93c5a15f",
-    "duration": 0.0008229999948525801,
+    "node_id": "1b2c3c6c",
+    "duration": 0.0007188340023276396,
     "status": "success"
   },
   {
@@ -375,17 +319,10 @@
     "size": 0
   },
   {
-    "event": "after_dataset_loaded",
-    "dataset": "comms_drafter_context",
-    "node_id": "919ae538",
-    "status": "Available",
-    "size": 0
-  },
-  {
     "event": "after_node_run",
     "node": "orchestrate_screening_crew",
-    "node_id": "1e090b8e",
-    "duration": 116.17073741599597,
+    "node_id": "a4fed27a",
+    "duration": 49.96425066699885,
     "status": "success"
   },
   {
@@ -393,20 +330,55 @@
     "dataset": "screening_result",
     "node_id": "8609b0de",
     "status": "Available",
-    "size": 2708
+    "size": 2237
   },
   {
     "event": "after_dataset_loaded",
     "dataset": "screening_result",
     "node_id": "8609b0de",
     "status": "Available",
-    "size": 2708
+    "size": 2237
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "email_templates",
+    "node_id": "aa4acdfb",
+    "status": "Available",
+    "size": 1111
+  },
+  {
+    "event": "after_node_run",
+    "node": "create_email_draft",
+    "node_id": "b1c7aa6d",
+    "duration": 0.00040574999729869887,
+    "status": "success"
+  },
+  {
+    "event": "after_dataset_saved",
+    "dataset": "email_draft",
+    "node_id": "2ad9fce7",
+    "status": "Available",
+    "size": 0
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "screening_result",
+    "node_id": "8609b0de",
+    "status": "Available",
+    "size": 2237
+  },
+  {
+    "event": "after_dataset_loaded",
+    "dataset": "email_draft",
+    "node_id": "2ad9fce7",
+    "status": "Available",
+    "size": 0
   },
   {
     "event": "after_node_run",
     "node": "generate_hr_report",
-    "node_id": "2c0ec164",
-    "duration": 0.020991583005525172,
+    "node_id": "1b3fb75f",
+    "duration": 0.023396958997182082,
     "status": "success"
   },
   {
@@ -414,10 +386,10 @@
     "dataset": "hr_report",
     "node_id": "38c0371f",
     "status": "Available",
-    "size": 37900
+    "size": 37926
   },
   {
     "event": "after_pipeline_run",
-    "timestamp": "2026-01-26T16:09:13.667073+00:00"
+    "timestamp": "2026-01-26T22:27:09.119235+00:00"
   }
 ]

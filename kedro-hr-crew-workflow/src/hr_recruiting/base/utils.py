@@ -127,7 +127,8 @@ def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | Non
     """Extract a field value from prompt content string.
 
     The prompt content contains fields like "description: ..." and "expected_output: ..."
-    This function extracts the value for a given field.
+    This function extracts the value for a given field. Handles fields that may be
+    indented or at the start of lines.
 
     Args:
         prompt_content: The prompt content string
@@ -139,9 +140,18 @@ def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | Non
     if not prompt_content:
         return None
     
-    # Pattern to match "field_name: value" where value can span multiple lines
-    pattern = rf"^{field_name}:\s*(.+?)(?=\n\s*\w+:|$)"
+    # Pattern to match "field_name: value" where field may have leading whitespace
+    # and value can span multiple lines until next field or end of string
+    # Try with optional leading whitespace first
+    pattern = rf"^\s*{field_name}:\s*(.+?)(?=\n\s*\w+:|$)"
     match = re.search(pattern, prompt_content, re.MULTILINE | re.DOTALL)
     if match:
         return match.group(1).strip()
+    
+    # Try without ^ anchor (field anywhere in content)
+    pattern = rf"\s*{field_name}:\s*(.+?)(?=\n\s*\w+:|$)"
+    match = re.search(pattern, prompt_content, re.MULTILINE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    
     return None

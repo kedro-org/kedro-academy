@@ -1,8 +1,20 @@
 """Pydantic models for applications pipeline."""
 
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+
+class Application(BaseModel):
+    """Application model linking candidate to job."""
+
+    application_id: str = Field(description="Unique application identifier")
+    job_id: str = Field(description="Job identifier")
+    candidate_id: str = Field(description="Candidate identifier")
+    submitted_at: datetime = Field(description="Submission timestamp")
+    status: str = Field(default="pending", description="Application status")
+    artifacts: dict[str, Any] = Field(default_factory=dict, description="Additional artifacts")
 
 
 class WorkHistory(BaseModel):

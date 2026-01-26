@@ -3,8 +3,8 @@
 from kedro.pipeline import Pipeline, node
 
 from hr_recruiting.pipelines.jobs.nodes import (
-    normalize_job_posting,
     parse_job_description,
+    split_job_posting,
 )
 
 
@@ -19,12 +19,12 @@ def create_pipeline() -> Pipeline:
                 outputs="parsed_job_description",
                 name="parse_job_description",
             ),
-            # Normalize to structured format
+            # Split into metadata and requirements
             node(
-                func=normalize_job_posting,
+                func=split_job_posting,
                 inputs="parsed_job_description",
-                outputs="normalized_job_posting",
-                name="normalize_job_posting",
+                outputs=["job_metadata", "job_requirements"],
+                name="split_job_posting",
             ),
         ]
     )

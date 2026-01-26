@@ -1,7 +1,7 @@
 """Helper functions for reporting pipeline.
 
 This module contains helper functions used by the reporting pipeline nodes
-for document generation and formatting.
+for email drafting, document generation, and formatting.
 """
 
 import re
@@ -10,7 +10,63 @@ from typing import Any
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+from hr_recruiting.pipelines.reporting.models import EmailDraft
 from hr_recruiting.pipelines.screening.models import ScreeningResult
+
+
+def draft_email(
+    screening_result: dict[str, Any],
+    email_templates: dict[str, Any],
+) -> dict[str, Any]:
+    """Draft email communication based on screening result and templates.
+
+    This is a deterministic function that creates an email draft from templates.
+
+    Args:
+        screening_result: Screening result with candidate_name, job_title, recommendation, qa_suggestions
+        email_templates: Email templates dictionary from config
+
+    Returns:
+        EmailDraft dictionary with subject, body, and placeholders
+    """
+    # Validate screening result first - fail if required fields are missing
+    validated_result = ScreeningResult(**screening_result)
+    
+    # Extract candidate_name and job_title from validated result
+    candidate_name = validated_result.candidate_name
+    job_title = validated_result.job_title
+
+    # Get recommendation from validated result
+    recommendation = validated_result.recommendation.lower()
+
+    # Get template for the recommendation type, default to review if not found
+    template = email_templates.get(recommendation, email_templates.get("review", {}))
+
+    # Replace placeholders in template
+    subject_template = template.get("subject", "Application Update: {job_title}")
+    body_template = template.get("body", "")
+
+    subject = subject_template.format(
+        candidate_name=candidate_name,
+        job_title=job_title,
+    )
+
+    body = body_template.format(
+        candidate_name=candidate_name,
+        job_title=job_title,
+    )
+
+    # Validate using EmailDraft model
+    email_draft = EmailDraft(
+        subject=subject,
+        body=body,
+        placeholders={
+            "candidate_name": candidate_name,
+            "job_title": job_title,
+        },
+    )
+
+    return email_draft.model_dump()
 
 
 def setup_document(result: ScreeningResult) -> Document:

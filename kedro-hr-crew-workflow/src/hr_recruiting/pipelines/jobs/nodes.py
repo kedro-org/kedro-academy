@@ -4,7 +4,8 @@ from typing import Any
 
 from hr_recruiting.base.utils import extract_text_from_document
 from hr_recruiting.pipelines.jobs.helper import (
-    create_job_posting,
+    create_job_metadata,
+    create_job_requirements,
     parse_job_fields,
 )
 
@@ -32,22 +33,39 @@ def parse_job_description(raw_job_doc: Any) -> dict[str, Any]:
     }
 
 
-def normalize_job_posting(parsed_jd: dict[str, Any]) -> dict[str, Any]:
-    """Normalize job posting to structured format."""
+def split_job_posting(parsed_jd: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Split job posting into metadata and requirements.
+
+    Args:
+        parsed_jd: Parsed job description dictionary
+
+    Returns:
+        Tuple of (job_metadata, job_requirements) dictionaries
+    """
     raw_text = parsed_jd.get("raw_jd_text", "")
     lines = raw_text.split("\n")
     
     # Extract all fields
     parsed_fields = parse_job_fields(lines)
     
-    # Create JobPosting model using helper function
-    return create_job_posting(
-        job_id=parsed_jd.get("job_id", "unknown"),
+    if "job_id" not in parsed_jd:
+        raise ValueError("job_id not found in parsed_jd")
+    job_id = parsed_jd["job_id"]
+    
+    # Create JobMetadata for applications pipeline
+    job_metadata = create_job_metadata(
+        job_id=job_id,
         title=parsed_fields["title"],
         location=parsed_fields["location"],
+    )
+    
+    # Create JobRequirements for screening pipeline
+    job_requirements = create_job_requirements(
+        job_id=job_id,
         requirements={
             "must_have": parsed_fields["must_have"],
             "nice_to_have": parsed_fields["nice_to_have"],
         },
-        raw_jd_text=raw_text,
     )
+    
+    return job_metadata, job_requirements

@@ -12,7 +12,6 @@ from kedro.pipeline.llm_context import LLMContext
 from hr_recruiting.base.agent import BaseAgent
 
 
-
 class RequirementsMatcherAgent(BaseAgent["RequirementsMatcherAgent"]):
     """Agent responsible for matching job requirements to candidate evidence.
 
@@ -35,18 +34,6 @@ class ResumeEvaluatorAgent(BaseAgent["ResumeEvaluatorAgent"]):
 
     agent_name = "ResumeEvaluatorAgent"
     system_prompt_key = "resume_evaluator_agent_system_prompt"
-
-
-class CommsDrafterAgent(BaseAgent["CommsDrafterAgent"]):
-    """Agent responsible for drafting professional email communications.
-
-    Usage:
-        agent = CommsDrafterAgent(llm_context).compile()
-        # Agent is used within CrewAI tasks, not directly invoked
-    """
-
-    agent_name = "CommsDrafterAgent"
-    system_prompt_key = "comms_drafter_agent_system_prompt"
 
 
 def create_requirements_matcher_agent_with_tools(
@@ -77,21 +64,5 @@ def create_resume_evaluator_agent_with_tools(
         Configured Agent instance with tools
     """
     agent_wrapper = ResumeEvaluatorAgent(context)
-    agent_wrapper.compile()
-    return agent_wrapper.agent
-
-
-def create_comms_drafter_agent_with_tools(
-    context: LLMContext,
-) -> Agent:
-    """Create communications drafter agent with tools from context.
-
-    Args:
-        context: LLMContext containing LLM, prompts, and tools
-
-    Returns:
-        Configured Agent instance with tools
-    """
-    agent_wrapper = CommsDrafterAgent(context)
     agent_wrapper.compile()
     return agent_wrapper.agent

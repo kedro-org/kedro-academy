@@ -1,30 +1,27 @@
 {
   "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
+  "candidate_name": "Sarah Chen",
+  "job_title": "Senior Software Engineer - Backend",
   "match_score": 59.89,
   "must_have_coverage": 0.56,
   "gaps": [
-    "Experience with version control systems (Git) and CI/CD pipelines is only moderately covered.",
-    "Bachelor's degree in a related field is only moderately covered.",
-    "Knowledge of system design patterns and best practices is the least covered."
+    "Limited experience with version control systems (Git) and CI/CD pipelines",
+    "Bachelor's degree not strongly supported",
+    "Knowledge of system design patterns and best practices is weak"
   ],
   "strengths": [
-    "Strong proficiency in Python, Java, or Go (high confidence).",
-    "Solid understanding of relational databases and NoSQL databases (high confidence).",
-    "Knowledge of containerization technologies (high confidence)."
+    "Strong proficiency in Python, Java, or Go",
+    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+    "Knowledge of containerization technologies (Docker, Kubernetes)"
   ],
-  "risk_flags": [],
+  "risk_flags": [
+    "Low confidence in version control and CI/CD experience",
+    "Weak educational background support"
+  ],
   "recommendation": "review",
-  "email_draft": {
-    "subject": "Application Update: Senior Software Engineer - Backend",
-    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Clarify the candidate's experience with version control systems and CI/CD pipelines.\n- Verify the educational background to ensure it meets the job requirements.\n\nBest regards,\nHR Team\n",
-    "placeholders": {
-      "candidate_name": "Sarah Chen",
-      "job_title": "Senior Software Engineer - Backend"
-    }
-  },
   "qa_suggestions": [
-    "Clarify the candidate's experience with version control systems and CI/CD pipelines.",
-    "Verify the educational background to ensure it meets the job requirements."
+    "Consider a technical interview to assess practical skills in version control and CI/CD",
+    "Verify educational qualifications and consider additional certifications"
   ],
   "match_results": [
     {

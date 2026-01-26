@@ -1,7 +1,9 @@
 """Applications pipeline - agentic processing with CrewAI."""
 
-from kedro.pipeline import Pipeline, llm_context_node, node
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline.llm_context import llm_context_node
 
+from hr_recruiting.pipelines.applications.helper import create_application
 from hr_recruiting.pipelines.applications.nodes import (
     parse_resume_text,
     run_resume_parsing_crew,
@@ -48,6 +50,16 @@ def create_pipeline() -> Pipeline:
                 inputs="resume_parsing_result",
                 outputs=["normalized_candidate_profile", "evidence_snippets"],
                 name="split_resume_parsing_result",
+            ),
+            # Create Application object from candidate profile and job metadata
+            node(
+                func=create_application,
+                inputs=[
+                    "normalized_candidate_profile",
+                    "job_metadata",
+                ],
+                outputs="application",
+                name="create_application",
             ),
         ]
     )
