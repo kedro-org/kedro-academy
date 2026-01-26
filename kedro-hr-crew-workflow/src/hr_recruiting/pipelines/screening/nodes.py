@@ -1,6 +1,5 @@
 """Screening pipeline nodes - agentic processing with CrewAI."""
 
-import os
 from typing import Any
 
 from crewai import Crew
@@ -16,9 +15,6 @@ from hr_recruiting.pipelines.screening.tasks import (
     create_requirements_matching_task,
     create_resume_evaluation_task,
 )
-
-# Disable CrewAI telemetry to avoid connection errors
-os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
 
 
 def orchestrate_screening_crew(
@@ -44,11 +40,12 @@ def orchestrate_screening_crew(
         resume_evaluator,
     )
 
-    # Create crew
+    # Create crew with telemetry and tracing disabled
     crew = Crew(
         agents=[requirements_matcher, resume_evaluator],
         tasks=[requirements_task, evaluation_task],
         verbose=True,
+        tracing=False,
     )
 
     # Execute crew with retry logic for connection errors

@@ -1,6 +1,5 @@
 """Applications pipeline nodes - agentic processing with CrewAI."""
 
-import os
 from typing import Any
 
 from crewai import Crew
@@ -12,9 +11,6 @@ from hr_recruiting.pipelines.applications.agents import (
 )
 from hr_recruiting.pipelines.applications.helper import extract_resume_parsing_result
 from hr_recruiting.pipelines.applications.tasks import create_resume_parsing_task
-
-# Disable CrewAI telemetry to avoid connection errors
-os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
 
 
 def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:
