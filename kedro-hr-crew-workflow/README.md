@@ -33,18 +33,19 @@ The system uses a combination of:
 
 ```
 Jobs Pipeline (Deterministic)
-  └─> Parse Job Posting → Normalize Job Posting
+  └─> Parse Job Posting → Split into Job Metadata & Job Requirements
 
 Applications Pipeline (Agentic - CrewAI)
   └─> Parse Resume Text → Resume Parser Agent → Split Results
-  └─> Output: Candidate Profile + Evidence Snippets
+  └─> Create Application (links candidate to job)
+  └─> Output: Evidence Snippets + Application
 
 Screening Pipeline (Agentic - CrewAI)
-  └─> Create Application → Requirements Matcher Agent → Resume Evaluator Agent → Communications Drafter Agent
-  └─> Output: Validated Screening Result
+  └─> Requirements Matcher Agent → Resume Evaluator Agent
+  └─> Output: Validated Screening Result (includes email_draft)
 
 Reporting Pipeline (Deterministic)
-  └─> Generate HR Report from Screening Result
+  └─> Draft Email → Generate HR Report
 ```
 
 ### Key Components
@@ -52,7 +53,7 @@ Reporting Pipeline (Deterministic)
 - **Deterministic Pipelines**: Process data using fixed rules (parsing, validation, report generation)
 - **Agentic Pipelines**: Use AI agents to make intelligent decisions (resume parsing, screening, evaluation)
 - **Pydantic Models**: Type-safe data validation and serialization
-- **Tools**: Reusable functions that agents can use (matching, scoring, policy checking, email drafting)
+- **Tools**: Reusable functions that agents can use (matching, scoring)
 - **Configuration Datasets**: Versioned YAML files for templates, rules, and parameters
 
 ## Project Structure
@@ -63,7 +64,7 @@ kedro-hr-crew-workflow/
 │   ├── base/
 │   │   ├── catalog.yml          # Data datasets (Word docs, JSON files, configs)
 │   │   ├── genai-config.yml     # AI datasets (LLM, prompts)
-│   │   └── parameters.yml        # Project parameters
+│   │   └── parameters.yml       # Project parameters
 │   └── local/
 │       └── credentials.yml      # API keys (gitignored)
 │
@@ -83,8 +84,17 @@ kedro-hr-crew-workflow/
 │       │   └── resumes/
 │       │       ├── raw_resume_data_scientist.docx
 │       │       └── raw_resume_software_engineer.docx
-│       ├── intermediate/         # Processed data (JSON)
+│       ├── intermediate/         # Processed data (organized by pipeline)
+│       │   ├── jobs/
+│       │   │   ├── job_metadata.json
+│       │   │   └── job_requirements.json
+│       │   ├── applications/
+│       │   │   ├── evidence_snippets.json
+│       │   │   └── application.json
+│       │   └── screening/
+│       │       └── screening_result.json
 │       └── output/               # Generated reports (Word docs)
+│           └── hr_report.docx
 │
 └── src/
     └── hr_recruiting/
@@ -97,29 +107,30 @@ kedro-hr-crew-workflow/
         │
         └── pipelines/
             ├── jobs/              # Job posting processing
-            │   ├── models.py      # JobPosting, Requirements models
+            │   ├── models.py      # JobMetadata, JobRequirements, Requirements models
             │   ├── helper.py      # Helper functions
-            │   ├── nodes.py       # Parse and normalize job postings
+            │   ├── nodes.py       # Parse and split job postings
             │   └── pipeline.py
             │
             ├── applications/      # Resume processing (agentic)
-            │   ├── models.py      # CandidateProfile, EvidenceSnippet, WorkHistory, Education models
+            │   ├── models.py      # CandidateProfile, EvidenceSnippet, WorkHistory, Education, Application models
             │   ├── agents.py      # Agent factory functions
             │   ├── tasks.py       # Task creation functions
-            │   ├── helper.py     # Helper functions
+            │   ├── helper.py      # Helper functions
             │   ├── nodes.py       # Parse resume, run crew
             │   └── pipeline.py
             │
             ├── screening/         # AI agent screening
-            │   ├── models.py     # Application, MatchResult, EmailDraft, ScreeningResult models
+            │   ├── models.py     # MatchResult, ScreeningResult models
             │   ├── agents.py     # Agent factory functions
             │   ├── tasks.py      # Task creation functions
-            │   ├── tools.py      # Agent tools (matching, scoring, etc.)
+            │   ├── tools.py      # Agent tools (matching, scoring)
             │   ├── helper.py     # Helper functions
             │   ├── nodes.py      # Crew orchestration
             │   └── pipeline.py
             │
             └── reporting/        # Report generation
+                ├── models.py     # EmailDraft model
                 ├── helper.py     # Document formatting functions
                 ├── nodes.py      # Generate reports
                 └── pipeline.py
@@ -139,15 +150,12 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 
 1. **Agents**: Specialized AI assistants
    - `ResumeParserAgent`: Parses resumes and extracts structured candidate information
-   - `RequirementsMatcherAgent`: Matches job requirements to candidate evidence
+   - `RequirementsMatcherAgent`: Matches job requirements to candidate evidence snippets
    - `ResumeEvaluatorAgent`: Evaluates candidates and provides recommendations
-   - `CommsDrafterAgent`: Drafts professional email communications
 
 2. **Tools**: Functions agents can use
-   - `Requirements Matcher`: Matches requirements to evidence snippets with stop word filtering
+   - `Requirements Matcher`: Matches requirements to evidence snippets with stop word filtering, technical term prioritization, and confidence scoring
    - `Scoring Tool`: Calculates match scores based on configuration
-   - `Policy Check`: Validates email compliance with policy rules
-   - `Email Draft Tool`: Generates personalized email templates
 
 3. **Crew**: Orchestrates agents working together
    - Creates tasks for each agent
@@ -163,7 +171,7 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 
 2. **Tool Builders** (`screening/tools.py`):
    - Functions that create CrewAI tools from Kedro datasets
-   - Tools receive data from Kedro catalog (job postings, evidence, configs)
+   - Tools receive data from Kedro catalog (job requirements, evidence, configs)
    - Tools are versioned and configurable via YAML files
 
 3. **LLM Context Nodes**:
@@ -202,7 +210,7 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 **How we use them**:
 - Each agent gets its own `llm_context_node`
 - Context includes: LLM model, system/user prompts, and tools
-- Tools are built from datasets (job postings, evidence, configs)
+- Tools are built from datasets (job requirements, evidence, configs)
 
 **Benefits**:
 - Clean separation of AI configuration
@@ -217,7 +225,7 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 - `email_templates.yml`: Email templates for different recommendations
 - `policy_rules.yml`: Rules for validating emails
 - `scoring_config.yml`: Weights for calculating scores
-- `matching_config.yml`: Parameters for matching requirements (stop words, thresholds)
+- `matching_config.yml`: Parameters for matching requirements (stop words, thresholds, technical terms)
 
 **Benefits**:
 - No hardcoded values in code
@@ -319,18 +327,18 @@ kedro run
 ```
 
 This runs all pipelines in sequence:
-1. Jobs pipeline (parse job posting)
-2. Applications pipeline (parse resume with AI agent, extract evidence)
-3. Screening pipeline (AI agents evaluate candidate)
+1. Jobs pipeline (parse job posting, split into metadata and requirements)
+2. Applications pipeline (parse resume with AI agent, extract evidence, create application)
+3. Screening pipeline (AI agents evaluate candidate and match requirements)
 4. Reporting pipeline (generate HR report)
 
 ### Running Individual Pipelines
 
 ```bash
-# Just process the job posting
+# Just process the job postings
 kedro run --pipeline jobs
 
-# Just process the resume
+# Just process the job applications
 kedro run --pipeline applications
 
 # Just run screening (requires processed job and resume)
@@ -388,8 +396,16 @@ stop_words:
   - "the"
   - "a"
   - "an"
-min_keyword_matches: 2
-prioritize_technical_terms: true
+min_word_length: 3
+confidence:
+  must_have:
+    base: 0.5
+    increment: 0.1
+    max: 0.9
+technical_terms:
+  - "python"
+  - "docker"
+  - "kubernetes"
 ```
 
 #### Update Agent Prompts
@@ -440,19 +456,53 @@ Edit files in `data/hr_recruiting/prompts/`:
 6. **Modular Pipelines**: Each pipeline is self-contained with helper functions, models, and nodes
 7. **Schema Injection**: Pydantic model schemas are injected into prompts dynamically, avoiding hardcoded schema descriptions
 8. **Strict Validation**: No fallback code - failures are immediately visible
+9. **Organized Intermediate Data**: Intermediate files are organized by pipeline (jobs/, applications/, screening/)
+10. **Job Posting Split**: Job postings are split into `job_metadata` (for applications pipeline) and `job_requirements` (for screening pipeline) to reduce coupling
+
+## Data Models
+
+### Jobs Pipeline Models
+- `JobMetadata`: job_id, title, location
+- `JobRequirements`: job_id, requirements (must_have, nice_to_have)
+
+### Applications Pipeline Models
+- `CandidateProfile`: candidate_id, name, email, skills, work_history, education, raw_resume_text
+- `EvidenceSnippet`: snippet_id, text, source, metadata
+- `Application`: application_id, job_id, candidate_id, submitted_at, status, artifacts
+- `WorkHistory`: company, role, duration, description
+- `Education`: institution, degree, field, year
+
+### Screening Pipeline Models
+- `MatchResult`: requirement, snippet_ids, confidence
+- `ScreeningResult`: application_id, candidate_name, job_title, match_score, must_have_coverage, gaps, strengths, risk_flags, recommendation, qa_suggestions, match_results
+
+### Reporting Pipeline Models
+- `EmailDraft`: subject, body, placeholders
 
 ## Output
 
 After running the pipeline, you'll find:
 
-- **Screening Result** (`data/hr_recruiting/intermediate/screening_result.json`):
+- **Job Metadata** (`data/hr_recruiting/intermediate/jobs/job_metadata.json`):
+  - Job ID, title, location
+
+- **Job Requirements** (`data/hr_recruiting/intermediate/jobs/job_requirements.json`):
+  - Job ID, must-have and nice-to-have requirements
+
+- **Evidence Snippets** (`data/hr_recruiting/intermediate/applications/evidence_snippets.json`):
+  - Candidate ID, candidate name, and array of evidence snippets with IDs, text, source, and metadata
+
+- **Application** (`data/hr_recruiting/intermediate/applications/application.json`):
+  - Application ID (candidate_id_job_id), job_id, candidate_id, submitted_at, status, artifacts (candidate_name, job_title)
+
+- **Screening Result** (`data/hr_recruiting/intermediate/screening/screening_result.json`):
   - Application ID (candidate_id_job_id)
+  - Candidate name and job title
   - Match score (0-100)
   - Recommendation (proceed/review/reject)
   - Must-have coverage (0.0-1.0)
   - Strengths and gaps
   - Risk flags
-  - Email draft with subject and body
   - QA suggestions
   - Detailed match results
 
@@ -475,6 +525,7 @@ After running the pipeline, you'll find:
 3. **Import Errors**: Make sure you've installed dependencies with `pip install -e ".[dev]"`
 4. **LLM Errors**: Check your API key and model name in `genai-config.yml`
 5. **Validation Errors**: Check that Pydantic models match the data structure - errors will surface immediately without fallbacks
+6. **Deprecation Warning**: If you see a warning about `pipeline_name`, this is from Kedro's main branch and can be safely ignored
 
 ## Next Steps
 
