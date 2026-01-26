@@ -52,9 +52,11 @@ class IntentDetectionAgent(KedroAgent):
     Agent that classifies user queries into intents.
 
     Flow:
-        1. detect_intent → classify the user query
-        2. clarify_intent → ask for clarification if ambiguous
-        3. update_context → append classification result to messages
+        1. detect_intent → classify the user query.
+        2. clarify_intent → ask for clarification if ambiguous.
+        3. update_context → append classification result to messages.
+
+    Uses LangGraph with memory checkpointing.
     """
 
     def __init__(self, context: LLMContext):
