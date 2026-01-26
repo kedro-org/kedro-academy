@@ -47,11 +47,6 @@ email_templates:
   type: yaml.YAMLDataset
   filepath: data/hr_recruiting/config/email_templates.yml
 
-# Policy rules for email validation
-policy_rules:
-  type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/config/policy_rules.yml
-
 # Scoring configuration for match score calculation
 scoring_config:
   type: yaml.YAMLDataset

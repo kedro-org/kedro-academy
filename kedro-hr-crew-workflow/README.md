@@ -75,7 +75,6 @@ kedro-hr-crew-workflow/
 │       │   └── *_user_prompt.yml            # Task descriptions
 │       ├── config/               # Configuration files (YAML)
 │       │   ├── email_templates.yml          # Email templates
-│       │   ├── policy_rules.yml             # Policy validation rules
 │       │   ├── scoring_config.yml           # Scoring weights
 │       │   └── matching_config.yml          # Matching parameters
 │       ├── sample/               # Sample data files
@@ -223,7 +222,6 @@ CrewAI is a framework for building multi-agent AI systems. It allows you to:
 
 **How we use them**:
 - `email_templates.yml`: Email templates for different recommendations
-- `policy_rules.yml`: Rules for validating emails
 - `scoring_config.yml`: Weights for calculating scores
 - `matching_config.yml`: Parameters for matching requirements (stop words, thresholds, technical terms)
 
@@ -376,16 +374,6 @@ Edit `data/hr_recruiting/config/scoring_config.yml`:
 weights:
   must_have_coverage: 0.7  # Increase to weight must-haves more
   avg_confidence: 0.3
-```
-
-#### Modify Policy Rules
-
-Edit `data/hr_recruiting/config/policy_rules.yml`:
-```yaml
-inappropriate_words:
-  - "guaranteed"
-  - "promise"
-  # Add more words to flag
 ```
 
 #### Update Matching Configuration
