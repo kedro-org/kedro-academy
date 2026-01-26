@@ -13,9 +13,6 @@ dependencies = [
     "notebook",
     "kedro @ git+https://github.com/kedro-org/kedro.git@main",
     "kedro-datasets[pandas,yaml,openxml,langfuse,langchain-langchainpromptdataset]>=3",
-    "langchain>=0.1.0",
-    "langchain-openai>=0.0.5",
-    "langfuse>=2.0.0",
     "crewai>=0.28.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
@@ -63,6 +60,3 @@ attr = "hr_recruiting.__version__"
 [tool.setuptools.packages.find]
 where = [ "src",]
 namespaces = false
-
-[tool.kedro_telemetry]
-project_id = "a2de15e4412348239fda4b2cc3aef0a9"

@@ -1,6 +1,7 @@
 """Screening pipeline nodes - agentic processing with CrewAI."""
 
 import json
+import os
 import re
 from typing import Any
 
@@ -8,11 +9,18 @@ from crewai import Agent, Crew, Task
 from kedro.pipeline.llm_context import LLMContext
 
 from hr_recruiting.base.models import ScreeningResult
-from hr_recruiting.pipelines.screening.agents import (
-    CommsDrafterAgent,
-    RequirementsMatcherAgent,
-    ResumeEvaluatorAgent,
+from hr_recruiting.base.utils import (
+    execute_crew_with_retry,
+    extract_task_outputs_from_crew_result,
 )
+from hr_recruiting.pipelines.screening.agents import (
+    create_comms_drafter_agent_with_tools,
+    create_requirements_matcher_agent_with_tools,
+    create_resume_evaluator_agent_with_tools,
+)
+
+# Disable CrewAI telemetry to avoid connection errors
+os.environ["CREWAI_TELEMETRY_OPT_OUT"] = "true"
 
 
 def _get_screening_result_schema() -> str:
@@ -43,54 +51,6 @@ Required fields:
 Return ONLY valid JSON matching this schema, no additional text.
 """
     return schema_description.strip()
-
-
-def _create_requirements_matcher_agent_with_tools(
-    context: LLMContext,
-) -> Agent:
-    """Create requirements matcher agent with tools from context.
-
-    Args:
-        context: LLMContext containing LLM, prompts, and tools
-
-    Returns:
-        Configured Agent instance with tools
-    """
-    agent_wrapper = RequirementsMatcherAgent(context)
-    agent_wrapper.compile()
-    return agent_wrapper.agent
-
-
-def _create_resume_evaluator_agent_with_tools(
-    context: LLMContext,
-) -> Agent:
-    """Create resume evaluator agent with tools from context.
-
-    Args:
-        context: LLMContext containing LLM, prompts, and tools
-
-    Returns:
-        Configured Agent instance with tools
-    """
-    agent_wrapper = ResumeEvaluatorAgent(context)
-    agent_wrapper.compile()
-    return agent_wrapper.agent
-
-
-def _create_comms_drafter_agent_with_tools(
-    context: LLMContext,
-) -> Agent:
-    """Create communications drafter agent with tools from context.
-
-    Args:
-        context: LLMContext containing LLM, prompts, and tools
-
-    Returns:
-        Configured Agent instance with tools
-    """
-    agent_wrapper = CommsDrafterAgent(context)
-    agent_wrapper.compile()
-    return agent_wrapper.agent
 
 
 def _create_requirements_matching_task(
@@ -203,16 +163,6 @@ def _create_screening_crew(
     )
 
 
-def _execute_crew(crew: Crew) -> Any:
-    """Execute CrewAI crew and return result.
-
-    Args:
-        crew: Configured Crew instance
-
-    Returns:
-        Crew execution result
-    """
-    return crew.kickoff()
 
 
 def _parse_json_from_text(text: str) -> dict[str, Any] | None:
@@ -371,20 +321,8 @@ def _extract_screening_result(crew_result: Any) -> dict[str, Any]:
     }
     
     try:
-        # CrewAI result structure: crew_result contains task outputs
-        # Access task outputs - the structure may vary based on CrewAI version
-        task_outputs = []
-        
-        # Try different ways to access task outputs
-        if hasattr(crew_result, "tasks_output"):
-            task_outputs = crew_result.tasks_output
-        elif hasattr(crew_result, "tasks"):
-            task_outputs = [task.output for task in crew_result.tasks if hasattr(task, "output")]
-        elif isinstance(crew_result, list):
-            task_outputs = crew_result
-        elif isinstance(crew_result, str):
-            # If result is a single string, treat it as the final task output
-            task_outputs = [crew_result]
+        # Extract task outputs from crew result using shared utility
+        task_outputs = extract_task_outputs_from_crew_result(crew_result)
         
         # First, try to parse the final output as a complete ScreeningResult
         # (since we instructed the final task to output in ScreeningResult format)
@@ -478,13 +416,13 @@ def orchestrate_screening_crew(
         Screening result as dictionary
     """
     # Create agents with tools
-    requirements_matcher = _create_requirements_matcher_agent_with_tools(
+    requirements_matcher = create_requirements_matcher_agent_with_tools(
         requirements_matcher_context
     )
-    resume_evaluator = _create_resume_evaluator_agent_with_tools(
+    resume_evaluator = create_resume_evaluator_agent_with_tools(
         resume_evaluator_context
     )
-    comms_drafter = _create_comms_drafter_agent_with_tools(
+    comms_drafter = create_comms_drafter_agent_with_tools(
         comms_drafter_context
     )
 
@@ -512,8 +450,8 @@ def orchestrate_screening_crew(
         email_task,
     )
 
-    # Execute crew
-    crew_result = _execute_crew(crew)
+    # Execute crew with retry logic for connection errors
+    crew_result = execute_crew_with_retry(crew)
 
     # Extract and structure result (raw, not validated)
     # Validation will be done in the reporting pipeline

@@ -5,6 +5,10 @@ orchestration workflow using CrewAI.
 """
 
 from __future__ import annotations
+
+from crewai import Agent
+from kedro.pipeline.llm_context import LLMContext
+
 from hr_recruiting.base.agent import BaseAgent
 
 
@@ -43,3 +47,51 @@ class CommsDrafterAgent(BaseAgent["CommsDrafterAgent"]):
 
     agent_name = "CommsDrafterAgent"
     system_prompt_key = "comms_drafter_agent_system_prompt"
+
+
+def create_requirements_matcher_agent_with_tools(
+    context: LLMContext,
+) -> Agent:
+    """Create requirements matcher agent with tools from context.
+
+    Args:
+        context: LLMContext containing LLM, prompts, and tools
+
+    Returns:
+        Configured Agent instance with tools
+    """
+    agent_wrapper = RequirementsMatcherAgent(context)
+    agent_wrapper.compile()
+    return agent_wrapper.agent
+
+
+def create_resume_evaluator_agent_with_tools(
+    context: LLMContext,
+) -> Agent:
+    """Create resume evaluator agent with tools from context.
+
+    Args:
+        context: LLMContext containing LLM, prompts, and tools
+
+    Returns:
+        Configured Agent instance with tools
+    """
+    agent_wrapper = ResumeEvaluatorAgent(context)
+    agent_wrapper.compile()
+    return agent_wrapper.agent
+
+
+def create_comms_drafter_agent_with_tools(
+    context: LLMContext,
+) -> Agent:
+    """Create communications drafter agent with tools from context.
+
+    Args:
+        context: LLMContext containing LLM, prompts, and tools
+
+    Returns:
+        Configured Agent instance with tools
+    """
+    agent_wrapper = CommsDrafterAgent(context)
+    agent_wrapper.compile()
+    return agent_wrapper.agent

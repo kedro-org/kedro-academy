@@ -1,0 +1,41 @@
+# Resume Parsing Schema Template
+# This template defines the schema formatting instructions for resume parsing tasks
+# Dynamic schema JSON will be injected at runtime from Pydantic models
+
+# Candidate Profile Schema Instructions
+candidate_profile_schema:
+  description: |
+    The candidate_profile must be a valid JSON object matching this CandidateProfile schema:
+    {candidate_profile_schema_json}
+    
+    Required fields:
+    - candidate_id (string): Candidate identifier
+    - name (string): Candidate's full name
+    - email (string): Candidate's email address
+    - skills (array of strings): List of skills
+    - work_history (array of objects): Each with company (string), role (string), duration (string), description (string)
+    - education (array of objects): Each with institution (string), degree (string), field (string or null), year (string or null)
+    - raw_resume_text (string): Original resume text
+    
+    Return ONLY valid JSON matching this schema.
+
+# Evidence Snippets Schema Instructions
+evidence_snippets_schema:
+  description: |
+    The evidence_snippets must be an array of valid JSON objects matching this EvidenceSnippet schema:
+    {evidence_snippets_schema_json}
+    
+    Required fields for each snippet:
+    - snippet_id (string): Unique identifier (e.g., "skill_1", "work_1", "edu_1")
+    - text (string): Snippet text content
+    - source (string): Source field ("skills", "work_history", or "education")
+    - metadata (object): Additional metadata (e.g., company, role for work_history)
+    
+    Return ONLY valid JSON array matching this schema.
+
+# Output Format Instructions
+output_format:
+  description: |
+    The output must be a JSON object with two keys:
+    - "candidate_profile": CandidateProfile object
+    - "evidence_snippets": Array of EvidenceSnippet objects

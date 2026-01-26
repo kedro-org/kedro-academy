@@ -1,0 +1,58 @@
+# Resume Parsing Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent, context
+
+messages:
+  - role: user
+    content: |
+      description: Parse the raw resume text and extract structured candidate information including name, email, skills, work history, and education. Normalize the data into the CandidateProfile format and extract evidence snippets for downstream matching.
+      
+      expected_output: A JSON object containing two keys: "candidate_profile" (normalized CandidateProfile object) and "evidence_snippets" (list of evidence snippet objects). The candidate_profile must include: candidate_id (string), name (string), email (string), skills (array of strings), work_history (array of objects with company, role, duration, description), education (array of objects with institution, degree, field, year), and raw_resume_text (string). The evidence_snippets must be an array of objects with snippet_id, text, source, and metadata fields. Format as valid JSON matching the schemas provided.
+      
+      agent: resume_parser
+      
+      Raw Resume Text:
+      {{raw_resume_text}}
+      
+      Candidate ID:
+      {{candidate_id}}
+      
+      CRITICAL RULES - READ CAREFULLY:
+      - ONLY extract information that is EXPLICITLY stated in the provided resume text above
+      - NEVER invent, infer, guess, or create information that is not present in the resume
+      - NEVER use information from your training data or general knowledge
+      - If information is missing, use these defaults:
+        * name: "Unknown" (if name not found)
+        * email: "unknown@example.com" (if email not found)
+        * skills: [] (empty array if no skills section found)
+        * work_history: [] (empty array if no work experience found)
+        * education: [] (empty array if no education found)
+        * field: null (if no field/minor mentioned)
+        * year: null (if no year mentioned)
+      - Extract text EXACTLY as written in the resume - do not paraphrase or summarize
+      - If you cannot find a piece of information, use the default value - do not make it up
+      
+      Instructions:
+      1. Extract the candidate's name from the resume (typically at the top). If not found, use "Unknown"
+      2. Extract email address (look for "Email:" or email patterns). If not found, use "unknown@example.com"
+      3. Extract all skills from the Technical Skills, Skills, or similar sections. Extract each skill as a separate string. If no skills section found, return empty array []
+      4. Extract work history entries with:
+         - Company name (extract exactly as written)
+         - Job role/title (extract exactly as written)
+         - Duration/date range (extract exactly as written)
+         - Description/achievements (combine all achievement points exactly as written, preserve original text)
+      5. Extract education entries with:
+         - Institution name (extract exactly as written)
+         - Degree name (extract exactly as written)
+         - Field/Minor/Relevant Coursework (extract if "Minor:" or "Relevant Coursework:" is mentioned, otherwise null)
+         - Year of completion (only if explicitly mentioned, otherwise null)
+      6. Create evidence snippets from:
+         - Each skill (source: "skills", snippet_id format: "skill_1", "skill_2", etc.)
+         - Each work history entry (source: "work_history", snippet_id format: "work_1", "work_2", etc., include role, company, duration, and description in text)
+         - Each education entry (source: "education", snippet_id format: "edu_1", "edu_2", etc., include degree, institution, year, field in text)
+      7. Ensure all dates, names, and text are extracted EXACTLY as written - do not modify or infer
+      8. Handle variations in section names and formatting, but only extract what is actually present
+      9. Preserve the original raw_resume_text exactly as provided in the candidate_profile
+      10. Validate that all extracted information exists in the resume text before including it
+      
+      Return ONLY valid JSON with "candidate_profile" and "evidence_snippets" keys. Do not include any explanatory text, only the JSON.

@@ -2,26 +2,11 @@
 
 from typing import Any
 
-from hr_recruiting.base.models import JobPosting
 from hr_recruiting.base.utils import extract_text_from_document
-
-
-def validate_job_posting(data: dict[str, Any]) -> JobPosting:
-    """Validate and create JobPosting model.
-
-    Args:
-        data: Raw job posting data
-
-    Returns:
-        Validated JobPosting model
-
-    Raises:
-        ValueError: If validation fails
-    """
-    try:
-        return JobPosting(**data)
-    except Exception as e:
-        raise ValueError(f"Job posting validation failed: {e}") from e
+from hr_recruiting.pipelines.jobs.helper import (
+    parse_job_fields,
+    validate_job_posting,
+)
 
 
 def parse_job_description(raw_job_doc: Any) -> dict[str, Any]:
@@ -62,8 +47,8 @@ def normalize_job_posting(parsed_jd: dict[str, Any]) -> dict[str, Any]:
 
     This is a deterministic node that converts parsed data to JobPosting model.
     The parsed data comes from Word document parsing, which extracts raw text.
-    In a production implementation, this would use NLP/LLM to extract structured
-    data (title, location, requirements) from the raw text.
+    This function parses the raw text to extract structured fields like title,
+    location, and requirements in a single efficient pass.
 
     Args:
         parsed_jd: Parsed job description data from Word document
@@ -71,18 +56,21 @@ def normalize_job_posting(parsed_jd: dict[str, Any]) -> dict[str, Any]:
     Returns:
         Normalized job posting as dictionary
     """
-    # In a real implementation, this would use NLP/LLM to extract structured data
-    # from the raw_jd_text. For now, we create a simple structure with defaults.
-    # The raw text is preserved for downstream agentic processing.
+    raw_text = parsed_jd.get("raw_jd_text", "")
+    lines = raw_text.split("\n")
+    
+    # Extract all fields
+    parsed_fields = parse_job_fields(lines)
+    
     job_data = {
         "job_id": parsed_jd.get("job_id", "unknown"),
-        "title": parsed_jd.get("metadata", {}).get("title", "Unknown Position"),
-        "location": parsed_jd.get("metadata", {}).get("location", "Remote"),
+        "title": parsed_fields["title"],
+        "location": parsed_fields["location"],
         "requirements": {
-            "must_have": parsed_jd.get("metadata", {}).get("must_have", []),
-            "nice_to_have": parsed_jd.get("metadata", {}).get("nice_to_have", []),
+            "must_have": parsed_fields["must_have"],
+            "nice_to_have": parsed_fields["nice_to_have"],
         },
-        "raw_jd_text": parsed_jd.get("raw_jd_text", ""),
+        "raw_jd_text": raw_text,
     }
 
     # Validate using Pydantic model

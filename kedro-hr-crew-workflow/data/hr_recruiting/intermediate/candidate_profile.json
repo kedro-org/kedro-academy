@@ -1,0 +1,68 @@
+{
+  "candidate_id": "DS_CANDIDATE_001",
+  "name": "Sarah Chen",
+  "email": "sarah.chen@email.com",
+  "skills": [
+    "Python",
+    "R",
+    "SQL",
+    "Scala",
+    "Scikit-learn",
+    "TensorFlow",
+    "PyTorch",
+    "XGBoost",
+    "NLP",
+    "Computer Vision",
+    "Pandas",
+    "NumPy",
+    "Spark",
+    "Airflow",
+    "Jupyter",
+    "AWS (SageMaker, S3, EC2)",
+    "GCP",
+    "Docker",
+    "Kubernetes",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Tableau",
+    "Matplotlib",
+    "Seaborn",
+    "Plotly"
+  ],
+  "work_history": [
+    {
+      "company": "DataCorp Analytics",
+      "role": "Senior Data Scientist",
+      "duration": "Jan 2021 - Present",
+      "description": "Developed and deployed ML models that improved customer retention by 25%\nBuilt end-to-end ML pipelines using Python, Spark, and Airflow processing 10TB+ daily\nLed a team of 3 junior data scientists and mentored them on best practices\nCreated recommendation systems using collaborative filtering and deep learning\nCollaborated with engineering teams to productionize models using Docker and Kubernetes"
+    },
+    {
+      "company": "TechStart Inc.",
+      "role": "Data Scientist",
+      "duration": "Jun 2018 - Dec 2020",
+      "description": "Built predictive models for fraud detection reducing false positives by 30%\nPerformed statistical analysis and A/B testing to optimize product features\nDeveloped NLP models for sentiment analysis and text classification\nCreated automated reporting dashboards using Tableau and Python"
+    },
+    {
+      "company": "Analytics Solutions",
+      "role": "Junior Data Analyst",
+      "duration": "Jul 2016 - May 2018",
+      "description": "Performed data analysis and created visualizations for business stakeholders\nCleaned and preprocessed large datasets using Python and SQL\nAssisted in building regression models for sales forecasting"
+    }
+  ],
+  "education": [
+    {
+      "institution": "Stanford University",
+      "degree": "Master of Science in Data Science",
+      "field": "Machine Learning, Statistical Methods, Big Data Analytics",
+      "year": "2016"
+    },
+    {
+      "institution": "UC Berkeley",
+      "degree": "Bachelor of Science in Mathematics",
+      "field": "Computer Science",
+      "year": "2014"
+    }
+  ],
+  "raw_resume_text": "Sarah Chen\nData Scientist | Machine Learning Engineer\nEmail: sarah.chen@email.com | Phone: (555) 123-4567\nLinkedIn: linkedin.com/in/sarahchen | GitHub: github.com/sarahchen\nProfessional Summary\nExperienced Data Scientist with 6+ years of expertise in machine learning, statistical analysis, and data engineering. Proven track record of building predictive models and deploying ML solutions at scale. Strong background in Python, SQL, and cloud platforms. Passionate about leveraging data to drive business decisions and solve complex problems.\nTechnical Skills\nProgramming Languages: Python, R, SQL, Scala\nML/AI: Scikit-learn, TensorFlow, PyTorch, XGBoost, NLP, Computer Vision\nData Tools: Pandas, NumPy, Spark, Airflow, Jupyter\nCloud & Infrastructure: AWS (SageMaker, S3, EC2), GCP, Docker, Kubernetes\nDatabases: PostgreSQL, MongoDB, Redis\nVisualization: Tableau, Matplotlib, Seaborn, Plotly\nWork Experience\nSenior Data Scientist\nDataCorp Analytics | San Francisco, CA | Jan 2021 - Present\nKey Achievements:\nDeveloped and deployed ML models that improved customer retention by 25%\nBuilt end-to-end ML pipelines using Python, Spark, and Airflow processing 10TB+ daily\nLed a team of 3 junior data scientists and mentored them on best practices\nCreated recommendation systems using collaborative filtering and deep learning\nCollaborated with engineering teams to productionize models using Docker and Kubernetes\nData Scientist\nTechStart Inc. | Seattle, WA | Jun 2018 - Dec 2020\nKey Achievements:\nBuilt predictive models for fraud detection reducing false positives by 30%\nPerformed statistical analysis and A/B testing to optimize product features\nDeveloped NLP models for sentiment analysis and text classification\nCreated automated reporting dashboards using Tableau and Python\nJunior Data Analyst\nAnalytics Solutions | Boston, MA | Jul 2016 - May 2018\nKey Achievements:\nPerformed data analysis and created visualizations for business stakeholders\nCleaned and preprocessed large datasets using Python and SQL\nAssisted in building regression models for sales forecasting\nEducation\nMaster of Science in Data Science\nStanford University | Stanford, CA | 2016\nRelevant Coursework: Machine Learning, Statistical Methods, Big Data Analytics\nBachelor of Science in Mathematics\nUC Berkeley | Berkeley, CA | 2014\nMinor: Computer Science"
+}

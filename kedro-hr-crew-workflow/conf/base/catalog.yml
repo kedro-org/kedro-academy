@@ -74,3 +74,8 @@ scoring_config:
 matching_config:
   type: yaml.YAMLDataset
   filepath: data/hr_recruiting/sample/matching_config.yml
+
+# Schema template for resume parsing
+resume_parsing_schema_template:
+  type: yaml.YAMLDataset
+  filepath: data/hr_recruiting/sample/resume_parsing_schema_template.yml

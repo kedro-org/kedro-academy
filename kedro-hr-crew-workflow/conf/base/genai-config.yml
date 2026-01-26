@@ -36,6 +36,13 @@ comms_drafter_agent_system_prompt:
   dataset:
     type: yaml.YAMLDataset
 
+resume_parser_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/resume_parser_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
 # Task User Prompts (similar to tasks.yaml)
 # Each task has a user prompt with description, expected_output, and agent assignment
 requirements_matching_user_prompt:
@@ -55,6 +62,13 @@ resume_evaluation_user_prompt:
 email_draft_user_prompt:
   type: kedro_datasets_experimental.langchain.LangChainPromptDataset
   filepath: data/hr_recruiting/prompts/email_draft_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_parsing_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/hr_recruiting/prompts/resume_parsing_user_prompt.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset

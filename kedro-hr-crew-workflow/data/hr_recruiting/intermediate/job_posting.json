@@ -1,0 +1,28 @@
+{
+  "job_id": "SE_BACKEND_001",
+  "title": "Senior Software Engineer - Backend",
+  "location": "San Francisco, CA (Hybrid - 3 days in office)",
+  "requirements": {
+    "must_have": [
+      "5+ years of professional software development experience",
+      "Strong proficiency in Python, Java, or Go",
+      "Experience with RESTful API design and development",
+      "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+      "Experience with cloud platforms (AWS, GCP, or Azure)",
+      "Knowledge of containerization technologies (Docker, Kubernetes)",
+      "Experience with version control systems (Git) and CI/CD pipelines",
+      "Strong problem-solving skills and attention to detail",
+      "Bachelor's degree in Computer Science, Engineering, or related field"
+    ],
+    "nice_to_have": [
+      "Experience with message queues (RabbitMQ, Kafka, SQS)",
+      "Knowledge of GraphQL API design",
+      "Experience with distributed systems and microservices architecture",
+      "Familiarity with monitoring and observability tools (Prometheus, Grafana, Datadog)",
+      "Open source contributions",
+      "Experience with test-driven development (TDD)",
+      "Knowledge of system design patterns and best practices"
+    ]
+  },
+  "raw_jd_text": "Senior Software Engineer - Backend\nCompany: TechFlow Solutions\nLocation: San Francisco, CA (Hybrid - 3 days in office)\nEmployment Type: Full-time\nJob Description\nWe are seeking an experienced Senior Software Engineer to join our backend engineering team. You will be responsible for designing, developing, and maintaining scalable backend systems that power our platform serving millions of users. This role requires strong technical skills, leadership capabilities, and a passion for building robust, high-performance systems.\nKey Responsibilities\nDesign and develop scalable backend services using Python, Java, and Go\nBuild and maintain RESTful APIs and microservices architecture\nCollaborate with cross-functional teams including product, design, and frontend engineers\nOptimize database queries and improve system performance\nParticipate in code reviews and maintain high code quality standards\nMentor junior engineers and contribute to technical decision-making\nImplement CI/CD pipelines and ensure reliable deployments\nTroubleshoot and resolve production issues in a timely manner\nMust-Have Requirements\n5+ years of professional software development experience\nStrong proficiency in Python, Java, or Go\nExperience with RESTful API design and development\nSolid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)\nExperience with cloud platforms (AWS, GCP, or Azure)\nKnowledge of containerization technologies (Docker, Kubernetes)\nExperience with version control systems (Git) and CI/CD pipelines\nStrong problem-solving skills and attention to detail\nBachelor's degree in Computer Science, Engineering, or related field\nNice-to-Have Requirements\nExperience with message queues (RabbitMQ, Kafka, SQS)\nKnowledge of GraphQL API design\nExperience with distributed systems and microservices architecture\nFamiliarity with monitoring and observability tools (Prometheus, Grafana, Datadog)\nOpen source contributions\nExperience with test-driven development (TDD)\nKnowledge of system design patterns and best practices\nCompensation & Benefits\nSalary Range: $150,000 - $200,000 (based on experience)\nBenefits:\nComprehensive health, dental, and vision insurance\n401(k) with company matching\nFlexible PTO and paid holidays\nProfessional development budget\nStock options\nRemote work flexibility"
+}
