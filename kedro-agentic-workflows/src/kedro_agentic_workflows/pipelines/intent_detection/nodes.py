@@ -18,7 +18,18 @@ logger = logging.getLogger(__name__)
 def generate_mermaid_preview() -> MermaidPreview:
     compiled = IntentDetectionAgent.graph().compile()
     mermaid = compiled.get_graph().draw_mermaid()
-    return MermaidPreview(content=mermaid)
+    # Override the 'first' class to have a visible background
+    mermaid = mermaid.replace(
+        "classDef first fill-opacity:0",
+        "classDef first fill:#50C878,color:#000000",
+    )
+    config = {
+        "themeVariables": {
+            "lineColor": "#F5A623",
+            "nodeTextColor": "#000000",
+        },
+    }
+    return MermaidPreview(content=mermaid, meta=config)
 
 
 def create_session(user_id: int) -> pd.DataFrame:
