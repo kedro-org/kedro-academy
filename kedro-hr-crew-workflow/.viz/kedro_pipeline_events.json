@@ -1,7 +1,7 @@
 [
   {
     "event": "before_pipeline_run",
-    "timestamp": "2026-01-26T15:43:20.764746+00:00"
+    "timestamp": "2026-01-26T16:06:14.978567+00:00"
   },
   {
     "event": "after_dataset_loaded",
@@ -28,7 +28,7 @@
     "event": "after_node_run",
     "node": "create_resume_parser_context",
     "node_id": "50816308",
-    "duration": 0.0012291660023038276,
+    "duration": 0.0012812080021831207,
     "status": "success"
   },
   {
@@ -49,7 +49,7 @@
     "event": "after_node_run",
     "node": "parse_job_description",
     "node_id": "8fcf3da3",
-    "duration": 0.0030355409980984405,
+    "duration": 0.004026542002975475,
     "status": "success"
   },
   {
@@ -70,7 +70,7 @@
     "event": "after_node_run",
     "node": "parse_resume_text",
     "node_id": "999d6318",
-    "duration": 0.0027852089988300577,
+    "duration": 0.003190416995494161,
     "status": "success"
   },
   {
@@ -91,7 +91,7 @@
     "event": "after_node_run",
     "node": "normalize_job_posting",
     "node_id": "efda83f0",
-    "duration": 0.0005127089971210808,
+    "duration": 0.0006371250055963174,
     "status": "success"
   },
   {
@@ -119,7 +119,7 @@
     "event": "after_node_run",
     "node": "run_resume_parsing_crew",
     "node_id": "67e7e696",
-    "duration": 66.76977795799758,
+    "duration": 61.48381966699526,
     "status": "success"
   },
   {
@@ -175,7 +175,7 @@
     "event": "after_node_run",
     "node": "create_resume_evaluator_context",
     "node_id": "941d7805",
-    "duration": 0.0013668329993379302,
+    "duration": 0.001222291997692082,
     "status": "success"
   },
   {
@@ -196,7 +196,7 @@
     "event": "after_node_run",
     "node": "split_resume_parsing_result",
     "node_id": "1badc46c",
-    "duration": 0.000356542004738003,
+    "duration": 0.0004449580010259524,
     "status": "success"
   },
   {
@@ -204,21 +204,21 @@
     "dataset": "normalized_candidate_profile",
     "node_id": "ef0428f4",
     "status": "Available",
-    "size": 4668
+    "size": 4659
   },
   {
     "event": "after_dataset_saved",
     "dataset": "evidence_snippets",
     "node_id": "1d46b1a1",
     "status": "Available",
-    "size": 4979
+    "size": 4970
   },
   {
     "event": "after_dataset_loaded",
     "dataset": "normalized_candidate_profile",
     "node_id": "ef0428f4",
     "status": "Available",
-    "size": 4668
+    "size": 4659
   },
   {
     "event": "after_dataset_loaded",
@@ -231,7 +231,7 @@
     "event": "after_node_run",
     "node": "create_application",
     "node_id": "e3efbb8a",
-    "duration": 0.0004323329994804226,
+    "duration": 0.0003913340042345226,
     "status": "success"
   },
   {
@@ -287,7 +287,7 @@
     "event": "after_node_run",
     "node": "create_comms_drafter_context",
     "node_id": "23f08e4d",
-    "duration": 0.0008380840008612722,
+    "duration": 0.0009354170033475384,
     "status": "success"
   },
   {
@@ -337,7 +337,7 @@
     "dataset": "evidence_snippets",
     "node_id": "1d46b1a1",
     "status": "Available",
-    "size": 4979
+    "size": 4970
   },
   {
     "event": "after_dataset_loaded",
@@ -350,7 +350,7 @@
     "event": "after_node_run",
     "node": "create_requirements_matcher_context",
     "node_id": "93c5a15f",
-    "duration": 0.0006750419997842982,
+    "duration": 0.0008229999948525801,
     "status": "success"
   },
   {
@@ -385,7 +385,7 @@
     "event": "after_node_run",
     "node": "orchestrate_screening_crew",
     "node_id": "1e090b8e",
-    "duration": 114.11294287499913,
+    "duration": 116.17073741599597,
     "status": "success"
   },
   {
@@ -393,20 +393,20 @@
     "dataset": "screening_result",
     "node_id": "8609b0de",
     "status": "Available",
-    "size": 2599
+    "size": 2708
   },
   {
     "event": "after_dataset_loaded",
     "dataset": "screening_result",
     "node_id": "8609b0de",
     "status": "Available",
-    "size": 2599
+    "size": 2708
   },
   {
     "event": "after_node_run",
     "node": "generate_hr_report",
     "node_id": "2c0ec164",
-    "duration": 0.01894775000255322,
+    "duration": 0.020991583005525172,
     "status": "success"
   },
   {
@@ -414,10 +414,10 @@
     "dataset": "hr_report",
     "node_id": "38c0371f",
     "status": "Available",
-    "size": 37832
+    "size": 37900
   },
   {
     "event": "after_pipeline_run",
-    "timestamp": "2026-01-26T15:46:22.088254+00:00"
+    "timestamp": "2026-01-26T16:09:13.667073+00:00"
   }
 ]

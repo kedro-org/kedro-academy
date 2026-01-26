@@ -72,11 +72,3 @@ resume_parsing_user_prompt:
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
-
-
-# Trace Datasets for Observability
-# Using LangfuseTraceDataset for tracing
-hr_crew_ai_trace:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
-  credentials: langfuse_credentials
-  mode: openai

@@ -5,11 +5,11 @@
 # Job postings and resumes are Word documents (.docx)
 raw_job_posting:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/raw_job_posting.docx
+  filepath: data/hr_recruiting/sample/jobs/raw_job_posting.docx
 
 raw_resume:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/raw_resume_data_scientist.docx
+  filepath: data/hr_recruiting/sample/resumes/raw_resume_data_scientist.docx
 
 # Intermediate processed data
 parsed_job_description:

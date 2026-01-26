@@ -3,27 +3,28 @@
   "match_score": 59.89,
   "must_have_coverage": 0.56,
   "gaps": [
-    "Experience with version control systems (Git) and CI/CD pipelines",
-    "Bachelor's degree in Computer Science, Engineering, or related field",
-    "Knowledge of system design patterns and best practices"
+    "Experience with version control systems (Git) and CI/CD pipelines is only moderately covered.",
+    "Bachelor's degree in a related field is only moderately covered.",
+    "Knowledge of system design patterns and best practices is the least covered."
   ],
   "strengths": [
-    "Strong proficiency in Python, Java, or Go",
-    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
-    "Knowledge of containerization technologies (Docker, Kubernetes)"
+    "Strong proficiency in Python, Java, or Go (high confidence).",
+    "Solid understanding of relational databases and NoSQL databases (high confidence).",
+    "Knowledge of containerization technologies (high confidence)."
   ],
   "risk_flags": [],
   "recommendation": "review",
   "email_draft": {
     "subject": "Application Update: Senior Software Engineer - Backend",
-    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Consider asking the candidate about their practical experience with CI/CD pipelines and system design patterns during the interview.\n\nBest regards,\nHR Team\n",
+    "body": "Dear Sarah Chen,\n\nThank you for your application for the Senior Software Engineer - Backend position. We are currently reviewing your application and will be in touch shortly.\n\n- Clarify the candidate's experience with version control systems and CI/CD pipelines.\n- Verify the educational background to ensure it meets the job requirements.\n\nBest regards,\nHR Team\n",
     "placeholders": {
       "candidate_name": "Sarah Chen",
       "job_title": "Senior Software Engineer - Backend"
     }
   },
   "qa_suggestions": [
-    "Consider asking the candidate about their practical experience with CI/CD pipelines and system design patterns during the interview."
+    "Clarify the candidate's experience with version control systems and CI/CD pipelines.",
+    "Verify the educational background to ensure it meets the job requirements."
   ],
   "match_results": [
     {
