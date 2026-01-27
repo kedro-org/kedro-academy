@@ -5,6 +5,7 @@ for resume parsing, prompt formatting, and result extraction.
 """
 
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from kedro.pipeline.llm_context import LLMContext
@@ -14,6 +15,25 @@ from hr_recruiting.base.utils import (
     extract_task_outputs_from_crew_result,
     parse_json_from_text,
 )
+
+
+def build_resume_parsing_preview() -> str:
+    """Read and return agents.py file content.
+    
+    Returns:
+        Content of agents.py file as string
+    """
+    # Get the path to agents.py file relative to this helper file
+    current_file = Path(__file__)
+    agents_file = current_file.parent / "agents.py"
+    
+    # Read the agents.py file content
+    try:
+        agents_content = agents_file.read_text()
+    except FileNotFoundError:
+        agents_content = "agents.py file not found"
+    
+    return agents_content
 
 
 def create_application(

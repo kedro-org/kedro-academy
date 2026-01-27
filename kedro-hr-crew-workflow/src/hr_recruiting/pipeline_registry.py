@@ -26,7 +26,6 @@ def register_pipelines() -> dict[str, Pipeline]:
 
     return {
         "__default__": hr_pipeline,
-        "hr": hr_pipeline,
         "jobs": jobs_pipeline,
         "applications": applications_pipeline,
         "screening": screening_pipeline,

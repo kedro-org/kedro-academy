@@ -13,6 +13,37 @@ from hr_recruiting.base.utils import (
 )
 
 
+def build_screening_graph() -> str:
+    """Build simple Mermaid diagram showing context, agents, and tools.
+    
+    Returns:
+        Mermaid diagram string
+    """
+    return """graph TD
+    
+    CTX1Inputs[LLM + Prompts + Requirements Matcher Tool] --> CTX1[Requirements Matcher Context]
+    AGENT1[RequirementsMatcherAgent + RequirementsMatchingTask]
+    CTX1 --> AGENT1
+    AGENT1OUTPUT[MatchingResults]
+    AGENT1 --> AGENT1OUTPUT
+    
+    
+    CTXInputs[LLM + Prompts + Scoring Tool] --> CTX2[Resume Evaluator Context]
+    AGENT2[ResumeEvaluatorAgent + ResumeEvaluationTask]
+    AGENT1OUTPUT --> AGENT2
+    CTX2 --> AGENT2
+    AGENT2OUTPUT[EvaluationResults]
+    AGENT2 --> AGENT2OUTPUT
+    
+    AGENT2OUTPUT --> OUTPUT[ScreeningResult]
+    
+    style CTX1 fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    style CTX2 fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    style AGENT1 fill:#50C878,stroke:#2D8659,stroke-width:2px,color:#fff
+    style AGENT2 fill:#50C878,stroke:#2D8659,stroke-width:2px,color:#fff
+    style OUTPUT fill:#6C5CE7,stroke:#4A3FA8,stroke-width:2px,color:#fff"""
+
+
 def extract_match_results(task_output: str) -> list[dict[str, Any]]:
     """Extract and validate match results from requirements matching task output.
 

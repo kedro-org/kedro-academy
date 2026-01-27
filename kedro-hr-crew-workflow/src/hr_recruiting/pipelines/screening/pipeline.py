@@ -3,7 +3,10 @@
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
-from hr_recruiting.pipelines.screening.nodes import orchestrate_screening_crew
+from hr_recruiting.pipelines.screening.nodes import (
+    orchestrate_screening_crew,
+    preview_screening_crew,
+)
 from hr_recruiting.pipelines.screening.tools import (
     build_requirements_matcher_tool,
     build_scoring_tool,
@@ -60,6 +63,7 @@ def create_pipeline() -> Pipeline:
                 outputs="screening_result",
                 name="orchestrate_screening_crew",
                 tags=["orchestrator", "agentic"],
+                preview_fn=preview_screening_crew,
             ),
         ]
     )

@@ -4,13 +4,29 @@ from typing import Any
 
 from crewai import Crew
 from kedro.pipeline.llm_context import LLMContext
+from kedro.pipeline.preview_contract import TextPreview
 
 from hr_recruiting.base.utils import execute_crew_with_retry, extract_text_from_document
 from hr_recruiting.pipelines.applications.agents import (
     create_resume_parser_agent_with_tools,
 )
-from hr_recruiting.pipelines.applications.helper import extract_resume_parsing_result
+from hr_recruiting.pipelines.applications.helper import (
+    build_resume_parsing_preview,
+    extract_resume_parsing_result,
+)
 from hr_recruiting.pipelines.applications.tasks import create_resume_parsing_task
+
+
+def preview_resume_parsing_crew() -> TextPreview:
+    """Preview function showing agents.py file content."""
+    agents_content = build_resume_parsing_preview()
+    
+    return TextPreview(
+        content=agents_content,
+        meta={
+            "language": "python"
+        }
+    )
 
 
 def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:

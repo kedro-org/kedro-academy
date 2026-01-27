@@ -6,6 +6,7 @@ from kedro.pipeline.llm_context import llm_context_node
 from hr_recruiting.pipelines.applications.helper import create_application
 from hr_recruiting.pipelines.applications.nodes import (
     parse_resume_text,
+    preview_resume_parsing_crew,
     run_resume_parsing_crew,
     split_resume_parsing_result,
 )
@@ -43,6 +44,7 @@ def create_pipeline() -> Pipeline:
                 outputs="resume_parsing_result",
                 name="run_resume_parsing_crew",
                 tags=["agentic"],
+                preview_fn=preview_resume_parsing_crew,
             ),
             # Split result into separate outputs
             node(
