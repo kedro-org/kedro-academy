@@ -30,7 +30,6 @@ def create_pipeline() -> Pipeline:
                         build_requirements_matcher_tool,
                         "application",
                         "job_requirements",
-                        "evidence_snippets",
                         "matching_config",
                     ),
                 ],

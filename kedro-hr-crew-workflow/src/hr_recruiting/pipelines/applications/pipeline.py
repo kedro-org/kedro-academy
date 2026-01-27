@@ -53,12 +53,13 @@ def create_pipeline() -> Pipeline:
                 outputs=["normalized_candidate_profile", "evidence_snippets"],
                 name="split_resume_parsing_result",
             ),
-            # Create Application object from candidate profile and job metadata
+            # Create Application object from candidate profile, job metadata, and evidence snippets
             node(
                 func=create_application,
                 inputs=[
                     "normalized_candidate_profile",
                     "job_metadata",
+                    "evidence_snippets",
                 ],
                 outputs="application",
                 name="create_application",

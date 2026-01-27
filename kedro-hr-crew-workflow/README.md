@@ -471,8 +471,7 @@ After running the pipeline:
 
 - **`intermediate/jobs/job_metadata.json`** - Structured job metadata
 - **`intermediate/jobs/job_requirements.json`** - Structured job requirements
-- **`intermediate/applications/application.json`** - Application linking candidate to job
-- **`intermediate/applications/evidence_snippets.json`** - Candidate evidence snippets
+- **`intermediate/applications/application.json`** - Application containing parsed candidate information and job metadata required for screening
 - **`intermediate/screening/screening_result.json`** - AI evaluation with recommendation
 - **`reports/hr_report.docx`** - Professional Word document with:
   - Executive summary

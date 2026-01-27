@@ -39,15 +39,17 @@ def build_resume_parsing_preview() -> str:
 def create_application(
     normalized_candidate_profile: dict[str, Any],
     job_metadata: dict[str, Any],
+    evidence_snippets: dict[str, Any],
 ) -> dict[str, Any]:
-    """Create Application object from candidate profile and job metadata.
+    """Create Application object from candidate profile, job metadata, and evidence snippets.
 
     Args:
         normalized_candidate_profile: Normalized candidate profile dictionary
         job_metadata: Job metadata dictionary with job_id, title, location
+        evidence_snippets: Dictionary with candidate_id, candidate_name, and snippets array
 
     Returns:
-        Application dictionary with application_id, job_id, candidate_id, and artifacts
+        Application dictionary with application_id, job_id, candidate_id, artifacts, and evidence_snippets
     """
     # Validate required fields - fail if missing
     if "candidate_id" not in normalized_candidate_profile:
@@ -69,6 +71,20 @@ def create_application(
         raise ValueError("title not found in job_metadata")
     job_title = job_metadata["title"]
 
+    # Extract evidence snippets list
+    if "snippets" not in evidence_snippets:
+        raise ValueError("snippets not found in evidence_snippets")
+    snippets_list = evidence_snippets["snippets"]
+    
+    # Validate snippets are EvidenceSnippet objects
+    validated_snippets = []
+    for snippet_data in snippets_list:
+        try:
+            snippet = EvidenceSnippet(**snippet_data)
+            validated_snippets.append(snippet)
+        except Exception as e:
+            raise ValueError(f"Invalid evidence snippet: {e}") from e
+
     application = Application(
         application_id=application_id,
         job_id=job_id,
@@ -79,6 +95,7 @@ def create_application(
             "candidate_name": candidate_name,
             "job_title": job_title,
         },
+        evidence_snippets=validated_snippets,
     )
 
     # Use mode='json' to serialize datetime objects to ISO format strings

@@ -5,6 +5,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+class EvidenceSnippet(BaseModel):
+    """Evidence snippet for matching."""
+
+    snippet_id: str = Field(description="Unique snippet identifier")
+    text: str = Field(description="Snippet text")
+    source: str = Field(description="Source field (e.g., 'work_history', 'skills')")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 class Application(BaseModel):
     """Application model linking candidate to job."""
@@ -15,6 +22,7 @@ class Application(BaseModel):
     submitted_at: datetime = Field(description="Submission timestamp")
     status: str = Field(default="pending", description="Application status")
     artifacts: dict[str, Any] = Field(default_factory=dict, description="Additional artifacts")
+    evidence_snippets: list[EvidenceSnippet] = Field(default_factory=list, description="Evidence snippets for matching")
 
 
 class WorkHistory(BaseModel):
@@ -46,11 +54,3 @@ class CandidateProfile(BaseModel):
     education: list[Education] = Field(default_factory=list, description="Education background")
     raw_resume_text: str = Field(description="Raw resume text")
 
-
-class EvidenceSnippet(BaseModel):
-    """Evidence snippet for matching."""
-
-    snippet_id: str = Field(description="Unique snippet identifier")
-    text: str = Field(description="Snippet text")
-    source: str = Field(description="Source field (e.g., 'work_history', 'skills')")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")

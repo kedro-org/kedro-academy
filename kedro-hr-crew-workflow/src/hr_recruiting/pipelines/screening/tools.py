@@ -15,15 +15,13 @@ from crewai.tools import tool
 def build_requirements_matcher_tool(
     application: dict[str, Any],
     job_requirements: dict[str, Any],
-    evidence_snippets: dict[str, Any],
     matching_config: dict[str, Any],
 ) -> Any:
     """Build requirements matcher tool from datasets.
 
     Args:
-        application: Application object with application_id, job_id, candidate_id
+        application: Application object with application_id, job_id, candidate_id, and evidence_snippets
         job_requirements: Job requirements data with job_id and requirements
-        evidence_snippets: Dictionary with candidate_id and snippets array
         matching_config: Matching configuration with parameters
 
     Returns:
@@ -47,8 +45,10 @@ def build_requirements_matcher_tool(
         raise ValueError("job_title not found in application.artifacts")
     job_title = artifacts["job_title"]
 
-    # Get the actual snippets list
-    snippets_list = evidence_snippets.get("snippets", [])
+    # Get the actual snippets list from application
+    if "evidence_snippets" not in application:
+        raise ValueError("evidence_snippets not found in application object")
+    snippets_list = application["evidence_snippets"]
 
     # Extract matching parameters from config
     min_word_length = matching_config.get("min_word_length", 3)

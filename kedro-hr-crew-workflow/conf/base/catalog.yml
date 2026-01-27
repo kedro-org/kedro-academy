@@ -20,12 +20,8 @@ raw_resume:
   type: openxml.DocxDataset
   filepath: data/sample/resumes/raw_resume_data_scientist.docx
 
-# Evidence snippets
-evidence_snippets:
-  type: json.JSONDataset
-  filepath: data/intermediate/applications/evidence_snippets.json
-
-# Application object linking candidate and job
+# Application containing parsed candidate information 
+# and job metadata required for screening
 application:
   type: json.JSONDataset
   filepath: data/intermediate/applications/application.json
