@@ -131,8 +131,8 @@ def extract_evaluation_data(task_output: str) -> dict[str, Any]:
     parsed = parse_json_from_text(task_output)
     if parsed and isinstance(parsed, dict):
         evaluation_data.update({
-            "match_score": float(parsed.get("match_score", 0.0)),
-            "must_have_coverage": float(parsed.get("must_have_coverage", 0.0)),
+            "match_score": round(float(parsed.get("match_score", 0.0)), 2),
+            "must_have_coverage": round(float(parsed.get("must_have_coverage", 0.0)), 2),
             "gaps": parsed.get("gaps", []),
             "strengths": parsed.get("strengths", []),
             "risk_flags": parsed.get("risk_flags", []),

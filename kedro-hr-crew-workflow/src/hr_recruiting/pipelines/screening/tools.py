@@ -269,9 +269,13 @@ def build_scoring_tool(
 
         match_score = (must_have_coverage * weight_must_have + avg_confidence * weight_confidence) * 100
 
+        # Round to 2 decimal places
+        match_score_rounded = round(min(match_score_bounds["max"], max(match_score_bounds["min"], match_score)), 2)
+        must_have_coverage_rounded = round(min(coverage_bounds["max"], max(coverage_bounds["min"], must_have_coverage)), 2)
+
         return {
-            "match_score": min(match_score_bounds["max"], max(match_score_bounds["min"], match_score)),
-            "must_have_coverage": min(coverage_bounds["max"], max(coverage_bounds["min"], must_have_coverage)),
+            "match_score": match_score_rounded,
+            "must_have_coverage": must_have_coverage_rounded,
             "must_have_matches": len(must_have_matches),
             "total_matches": len(match_results),
         }

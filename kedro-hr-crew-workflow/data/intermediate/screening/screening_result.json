@@ -6,7 +6,7 @@
   "must_have_coverage": 0.56,
   "gaps": [
     "Limited experience with version control systems (Git) and CI/CD pipelines",
-    "Bachelor's degree not strongly supported",
+    "Bachelor's degree not strongly evidenced",
     "Knowledge of system design patterns and best practices is weak"
   ],
   "strengths": [
@@ -16,12 +16,12 @@
   ],
   "risk_flags": [
     "Low confidence in version control and CI/CD experience",
-    "Weak educational background support"
+    "Weak evidence of formal education in a relevant field"
   ],
   "recommendation": "review",
   "qa_suggestions": [
     "Consider a technical interview to assess practical skills in version control and CI/CD",
-    "Verify educational qualifications and consider additional certifications"
+    "Verify educational qualifications more thoroughly"
   ],
   "match_results": [
     {
