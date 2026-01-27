@@ -39,7 +39,7 @@ screening_result:
 # to communicate the screening result to the candidate
 hr_report:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/output/hr_report.docx
+  filepath: data/hr_recruiting/reports/hr_report.docx
 
 # Configuration files for pipeline behavior
 # Email templates for candidate communications
