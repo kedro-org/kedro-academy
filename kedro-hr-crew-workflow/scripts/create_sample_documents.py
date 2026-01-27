@@ -322,25 +322,29 @@ def create_software_engineer_resume(output_path: Path) -> None:
 if __name__ == "__main__":
     # Create sample directory structure
     project_root = Path(__file__).parent.parent
-    sample_dir = project_root / "data" / "sample"
-    sample_dir.mkdir(parents=True, exist_ok=True)
+    jobs_dir = project_root / "data" / "sample" / "jobs"
+    resumes_dir = project_root / "data" / "sample" / "resumes"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    resumes_dir.mkdir(parents=True, exist_ok=True)
     
     # Create job posting
-    job_posting_path = sample_dir / "raw_job_posting.docx"
+    job_posting_path = jobs_dir / "raw_job_posting.docx"
     create_software_engineer_job_posting(job_posting_path)
     
     # Create resumes
-    data_scientist_resume_path = sample_dir / "raw_resume_data_scientist.docx"
+    data_scientist_resume_path = resumes_dir / "raw_resume_data_scientist.docx"
     create_data_scientist_resume(data_scientist_resume_path)
     
-    software_engineer_resume_path = sample_dir / "raw_resume_software_engineer.docx"
+    software_engineer_resume_path = resumes_dir / "raw_resume_software_engineer.docx"
     create_software_engineer_resume(software_engineer_resume_path)
     
     print("\n" + "="*60)
     print("Sample documents created successfully!")
     print("="*60)
-    print(f"\nCreated files in: {sample_dir}")
-    print("  - raw_job_posting.docx (Software Engineer - Backend)")
-    print("  - raw_resume_data_scientist.docx (Sarah Chen - Data Scientist)")
-    print("  - raw_resume_software_engineer.docx (Michael Rodriguez - Software Engineer)")
+    print(f"\nCreated files:")
+    print(f"  Jobs: {jobs_dir}")
+    print("    - raw_job_posting.docx (Software Engineer - Backend)")
+    print(f"  Resumes: {resumes_dir}")
+    print("    - raw_resume_data_scientist.docx (Sarah Chen - Data Scientist)")
+    print("    - raw_resume_software_engineer.docx (Michael Rodriguez - Software Engineer)")
     print("\nYou can now use these files to test your HR recruiting pipeline!")

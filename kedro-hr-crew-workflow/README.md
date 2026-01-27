@@ -58,7 +58,7 @@ Building production-ready AI agent systems requires more than just agent orchest
 **Solution**: Kedro's PromptDatasets store prompts as YAML files separate from code.
 
 ```yaml
-# data/hr_recruiting/prompts/resume_evaluator_agent_system_prompt.yml
+# data/prompts/resume_evaluator_agent_system_prompt.yml
 role: Senior HR Analyst
 goal: Evaluate candidate qualifications against job requirements
 backstory: |
@@ -107,7 +107,7 @@ llm_context_node(
 **Solution**: Store templates, weights, and rules in YAML configuration files.
 
 ```yaml
-# data/hr_recruiting/config/scoring_config.yml
+# data/config/scoring_config.yml
 weights:
   must_have_coverage: 0.7
   avg_confidence: 0.3
@@ -131,7 +131,7 @@ bounds:
 # conf/base/catalog.yml
 screening_result:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/screening/screening_result.json
+  filepath: data/intermediate/screening/screening_result.json
 ```
 
 **Benefits**:
@@ -162,7 +162,7 @@ screening_result:
 **Solution**: Kedro's convention-based structure organizes everything predictably.
 
 ```
-data/hr_recruiting/
+data/
 ├── prompts/           # AI prompts
 ├── config/            # Business rules & templates
 ├── sample/            # Raw input data
@@ -314,7 +314,7 @@ kedro run --pipeline reporting
 #### Update Email Templates
 
 ```bash
-# Edit data/hr_recruiting/config/email_templates.yml
+# Edit data/config/email_templates.yml
 proceed:
   subject: "Next Steps: {job_title}"
   body: |
@@ -325,7 +325,7 @@ proceed:
 #### Adjust Scoring Weights
 
 ```bash
-# Edit data/hr_recruiting/config/scoring_config.yml
+# Edit data/config/scoring_config.yml
 weights:
   must_have_coverage: 0.8  # Emphasize must-haves more
   avg_confidence: 0.2
@@ -334,7 +334,7 @@ weights:
 #### Modify Agent Prompts
 
 ```bash
-# Edit data/hr_recruiting/prompts/resume_evaluator_agent_system_prompt.yml
+# Edit data/prompts/resume_evaluator_agent_system_prompt.yml
 role: Senior Technical Recruiter
 goal: Evaluate technical candidates for engineering roles
 backstory: |
@@ -354,7 +354,7 @@ kedro-hr-crew-workflow/
 │   └── local/
 │       └── credentials.yml      # API keys (gitignored)
 │
-├── data/hr_recruiting/
+├── data/
 │   ├── prompts/                 # Agent and task prompts (YAML)
 │   │   ├── resume_parser_agent_system_prompt.yml
 │   │   ├── requirements_matcher_agent_system_prompt.yml
@@ -375,7 +375,7 @@ kedro-hr-crew-workflow/
 │   │   ├── applications/        # Evidence snippets + application
 │   │   └── screening/           # Screening results
 │   │
-│   └── reports/                  # Final reports
+│   └── reports/                 # Final reports
 │       └── hr_report.docx
 │
 └── src/hr_recruiting/
@@ -436,11 +436,11 @@ Update `conf/base/catalog.yml` for your documents:
 ```yaml
 raw_job_posting:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/jobs/my_job_posting.docx
+  filepath: data/sample/jobs/my_job_posting.docx
 
 raw_resume:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/resumes/candidate_resume.docx
+  filepath: data/sample/resumes/candidate_resume.docx
 ```
 
 ## Output Data Models

@@ -5,54 +5,54 @@
 # Job postings and resumes are Word documents (.docx)
 raw_job_posting:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/jobs/raw_job_posting.docx
+  filepath: data/sample/jobs/raw_job_posting.docx
 
 # Jobs pipeline outputs
 job_metadata:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/jobs/job_metadata.json
+  filepath: data/intermediate/jobs/job_metadata.json
 
 job_requirements:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/jobs/job_requirements.json
+  filepath: data/intermediate/jobs/job_requirements.json
 
 raw_resume:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/sample/resumes/raw_resume_data_scientist.docx
+  filepath: data/sample/resumes/raw_resume_data_scientist.docx
 
 # Evidence snippets
 evidence_snippets:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/applications/evidence_snippets.json
+  filepath: data/intermediate/applications/evidence_snippets.json
 
 # Application object linking candidate and job
 application:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/applications/application.json
+  filepath: data/intermediate/applications/application.json
 
 # Screening pipeline outputs
 screening_result:
   type: json.JSONDataset
-  filepath: data/hr_recruiting/intermediate/screening/screening_result.json
+  filepath: data/intermediate/screening/screening_result.json
 
 # Reports which are human readable and can be used 
 # to communicate the screening result to the candidate
 hr_report:
   type: openxml.DocxDataset
-  filepath: data/hr_recruiting/reports/hr_report.docx
+  filepath: data/reports/hr_report.docx
 
 # Configuration files for pipeline behavior
 # Email templates for candidate communications
 email_templates:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/config/email_templates.yml
+  filepath: data/config/email_templates.yml
 
 # Scoring configuration for match score calculation
 scoring_config:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/config/scoring_config.yml
+  filepath: data/config/scoring_config.yml
 
 # Matching configuration for requirements matcher
 matching_config:
   type: yaml.YAMLDataset
-  filepath: data/hr_recruiting/config/matching_config.yml
+  filepath: data/config/matching_config.yml
