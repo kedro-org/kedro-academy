@@ -62,10 +62,8 @@ def split_job_posting(parsed_jd: dict[str, Any]) -> tuple[dict[str, Any], dict[s
     # Create JobRequirements for screening pipeline
     job_requirements = create_job_requirements(
         job_id=job_id,
-        requirements={
-            "must_have": parsed_fields["must_have"],
-            "nice_to_have": parsed_fields["nice_to_have"],
-        },
+        must_have=parsed_fields["must_have"],
+        nice_to_have=parsed_fields["nice_to_have"],
     )
     
     return job_metadata, job_requirements

@@ -40,13 +40,15 @@ def create_job_metadata(
 
 def create_job_requirements(
     job_id: str,
-    requirements: dict[str, Any],
+    must_have: list[str],
+    nice_to_have: list[str],
 ) -> dict[str, Any]:
     """Create JobRequirements model from structured data.
 
     Args:
         job_id: Unique job identifier
-        requirements: Dictionary with must_have and nice_to_have lists
+        must_have: List of must-have requirements
+        nice_to_have: List of nice-to-have requirements
 
     Returns:
         JobRequirements dictionary (validated model dumped to dict)
@@ -57,7 +59,8 @@ def create_job_requirements(
     try:
         job_requirements = JobRequirements(
             job_id=job_id,
-            requirements=requirements,
+            must_have=must_have,
+            nice_to_have=nice_to_have,
         )
         return job_requirements.model_dump()
     except Exception as e:

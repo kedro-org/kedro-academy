@@ -29,7 +29,6 @@ def build_requirements_matcher_tool(
     Returns:
         CrewAI tool object
     """
-    requirements = job_requirements.get("requirements", {})
 
     # Extract IDs and names from Application object - fail if missing
     if "application_id" not in application:
@@ -142,8 +141,8 @@ def build_requirements_matcher_tool(
             Dictionary with application_id and match_results (list of match results)
         """
         matches: list[dict[str, Any]] = []
-        must_have = requirements.get("must_have", [])
-        nice_to_have = requirements.get("nice_to_have", [])
+        must_have = job_requirements.get("must_have", [])
+        nice_to_have = job_requirements.get("nice_to_have", [])
 
         # Match must-have requirements
         for req in must_have:
@@ -223,13 +222,13 @@ def build_scoring_tool(
     """Build scoring tool from datasets.
 
     Args:
-        job_requirements: Job requirements data with job_id and requirements
+        job_requirements: Job requirements data with job_id, must_have, and nice_to_have
         scoring_config: Scoring configuration with weights and bounds
 
     Returns:
         CrewAI tool object
     """
-    must_have_requirements = job_requirements.get("requirements", {}).get("must_have", [])
+    must_have_requirements = job_requirements.get("must_have", [])
 
     # Extract weights and bounds from config
     weights = scoring_config.get("weights", {})
