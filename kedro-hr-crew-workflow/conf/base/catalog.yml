@@ -41,18 +41,17 @@ hr_report:
   type: openxml.DocxDataset
   filepath: data/reports/hr_report.docx
 
-# Configuration files for pipeline behavior
-# Email templates for candidate communications
+# Configuration files organized by pipeline
+# Reporting pipeline configuration
 email_templates:
   type: yaml.YAMLDataset
-  filepath: data/config/email_templates.yml
+  filepath: data/config/reporting/email_templates.yml
 
-# Scoring configuration for match score calculation
+# Screening pipeline configuration
 scoring_config:
   type: yaml.YAMLDataset
-  filepath: data/config/scoring_config.yml
+  filepath: data/config/screening/scoring_config.yml
 
-# Matching configuration for requirements matcher
 matching_config:
   type: yaml.YAMLDataset
-  filepath: data/config/matching_config.yml
+  filepath: data/config/screening/matching_config.yml

@@ -58,7 +58,7 @@ Building production-ready AI agent systems requires more than just agent orchest
 **Solution**: Kedro's PromptDatasets store prompts as YAML files separate from code.
 
 ```yaml
-# data/prompts/resume_evaluator_agent_system_prompt.yml
+# data/prompts/screening/resume_evaluator_agent_system_prompt.yml
 role: Senior HR Analyst
 goal: Evaluate candidate qualifications against job requirements
 backstory: |
@@ -334,7 +334,7 @@ weights:
 #### Modify Agent Prompts
 
 ```bash
-# Edit data/prompts/resume_evaluator_agent_system_prompt.yml
+# Edit data/prompts/screening/resume_evaluator_agent_system_prompt.yml
 role: Senior Technical Recruiter
 goal: Evaluate technical candidates for engineering roles
 backstory: |
@@ -355,16 +355,22 @@ kedro-hr-crew-workflow/
 │       └── credentials.yml      # API keys (gitignored)
 │
 ├── data/
-│   ├── prompts/                 # Agent and task prompts (YAML)
-│   │   ├── resume_parser_agent_system_prompt.yml
-│   │   ├── requirements_matcher_agent_system_prompt.yml
-│   │   ├── resume_evaluator_agent_system_prompt.yml
-│   │   └── *_user_prompt.yml
+│   ├── prompts/                 # Agent prompts
+│   │   ├── applications/        # Applications pipeline prompts
+│   │   │   ├── resume_parser_agent_system_prompt.yml
+│   │   │   └── resume_parsing_user_prompt.yml
+│   │   └── screening/           # Screening pipeline prompts
+│   │       ├── requirements_matcher_agent_system_prompt.yml
+│   │       ├── requirements_matching_user_prompt.yml
+│   │       ├── resume_evaluator_agent_system_prompt.yml
+│   │       └── resume_evaluation_user_prompt.yml
 │   │
 │   ├── config/                  # Business rules & templates
-│   │   ├── email_templates.yml
-│   │   ├── scoring_config.yml
-│   │   └── matching_config.yml
+│   │   ├── screening/           # Screening pipeline configuration
+│   │   │   ├── matching_config.yml
+│   │   │   └── scoring_config.yml
+│   │   └── reporting/           # Reporting pipeline configuration
+│   │       └── email_templates.yml
 │   │
 │   ├── sample/                  # Raw input documents
 │   │   ├── jobs/raw_job_posting.docx
@@ -380,7 +386,7 @@ kedro-hr-crew-workflow/
 │
 └── src/hr_recruiting/
     ├── base/
-    │   ├── agent.py             # Base agent class (Kedro + CrewAI integration)
+    │   ├── agent.py             # Base agent class
     │   └── utils.py             # Shared utilities
     │
     ├── datasets/
@@ -388,9 +394,9 @@ kedro-hr-crew-workflow/
     │
     └── pipelines/
         ├── jobs/                # Deterministic job processing
-        ├── applications/        # Agentic resume parsing + application creation
+        ├── applications/        # Agentic application creation (1 agent)
         ├── screening/           # Agentic candidate screening (2 agents)
-        └── reporting/           # Deterministic email + report generation
+        └── reporting/           # Deterministic report generation
 ```
 
 ### Pipeline-Specific Files
