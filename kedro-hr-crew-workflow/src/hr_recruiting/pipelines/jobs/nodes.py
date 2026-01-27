@@ -10,7 +10,7 @@ from hr_recruiting.pipelines.jobs.helper import (
 )
 
 
-def parse_job_description(raw_job_doc: Any) -> dict[str, Any]:
+def parse_job_posting(raw_job_doc: Any) -> dict[str, Any]:
     """Parse raw job posting Word document."""
     # Extract all text from the document
     raw_text = extract_text_from_document(raw_job_doc)

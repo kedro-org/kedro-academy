@@ -7,6 +7,7 @@ class MatchResult(BaseModel):
     """Requirement match result."""
 
     requirement: str = Field(description="Matched requirement")
+    requirement_type: str = Field(description="Requirement type: 'must_have' or 'nice_to_have'")
     snippet_ids: list[str] = Field(description="Matching snippet IDs")
     confidence: float = Field(ge=0.0, le=1.0, description="Match confidence score")
 

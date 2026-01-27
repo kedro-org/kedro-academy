@@ -46,7 +46,6 @@ def create_pipeline() -> Pipeline:
                 tools=[
                     tool(
                         build_scoring_tool,
-                        "job_requirements",
                         "scoring_config",
                     ),
                 ],

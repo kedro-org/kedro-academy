@@ -3,7 +3,7 @@
 from kedro.pipeline import Pipeline, node
 
 from hr_recruiting.pipelines.jobs.nodes import (
-    parse_job_description,
+    parse_job_posting,
     split_job_posting,
 )
 
@@ -14,15 +14,15 @@ def create_pipeline() -> Pipeline:
         [
             # Parse raw job posting
             node(
-                func=parse_job_description,
+                func=parse_job_posting,
                 inputs="raw_job_posting",
-                outputs="parsed_job_description",
-                name="parse_job_description",
+                outputs="parsed_job_posting",
+                name="parse_job_posting",
             ),
             # Split into metadata and requirements
             node(
                 func=split_job_posting,
-                inputs="parsed_job_description",
+                inputs="parsed_job_posting",
                 outputs=["job_metadata", "job_requirements"],
                 name="split_job_posting",
             ),

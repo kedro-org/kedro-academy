@@ -5,10 +5,10 @@ from kedro.pipeline.llm_context import llm_context_node
 
 from hr_recruiting.pipelines.applications.helper import create_application
 from hr_recruiting.pipelines.applications.nodes import (
-    parse_resume_text,
+    parse_raw_resume,
     preview_resume_parsing_crew,
     run_resume_parsing_crew,
-    split_resume_parsing_result,
+    split_resume_parsing_crew_result,
 )
 
 
@@ -18,10 +18,10 @@ def create_pipeline() -> Pipeline:
         [
             # Parse raw resume (extract text only - deterministic)
             node(
-                func=parse_resume_text,
+                func=parse_raw_resume,
                 inputs="raw_resume",
-                outputs="parsed_resume",
-                name="parse_resume_text",
+                outputs="parsed_raw_resume",
+                name="parse_raw_resume",
             ),
             # Create context for resume parser agent
             llm_context_node(
@@ -39,19 +39,19 @@ def create_pipeline() -> Pipeline:
                 func=run_resume_parsing_crew,
                 inputs=[
                     "resume_parser_context",
-                    "parsed_resume",
+                    "parsed_raw_resume",
                 ],
-                outputs="resume_parsing_result",
+                outputs="resume_parsing_crew_result",
                 name="run_resume_parsing_crew",
                 tags=["agentic"],
                 preview_fn=preview_resume_parsing_crew,
             ),
             # Split result into separate outputs
             node(
-                func=split_resume_parsing_result,
-                inputs="resume_parsing_result",
+                func=split_resume_parsing_crew_result,
+                inputs="resume_parsing_crew_result",
                 outputs=["normalized_candidate_profile", "evidence_snippets"],
-                name="split_resume_parsing_result",
+                name="split_resume_parsing_crew_result",
             ),
             # Create Application object from candidate profile, job metadata, and evidence snippets
             node(

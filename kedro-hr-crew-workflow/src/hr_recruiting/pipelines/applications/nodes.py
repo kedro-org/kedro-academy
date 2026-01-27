@@ -29,7 +29,7 @@ def preview_resume_parsing_crew() -> TextPreview:
     )
 
 
-def parse_resume_text(raw_resume_doc: Any) -> dict[str, Any]:
+def parse_raw_resume(raw_resume_doc: Any) -> dict[str, Any]:
     """Extract text and candidate_id from raw resume document.
     
     Raises:
@@ -100,7 +100,7 @@ def run_resume_parsing_crew(
     return parsed_result
 
 
-def split_resume_parsing_result(
+def split_resume_parsing_crew_result(
     resume_parsing_result: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Split resume parsing result into candidate profile and evidence snippets.

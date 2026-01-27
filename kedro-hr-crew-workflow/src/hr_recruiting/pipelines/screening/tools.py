@@ -171,6 +171,7 @@ def build_requirements_matcher_tool(
                 )
                 matches.append({
                     "requirement": req,
+                    "requirement_type": "must_have",
                     "snippet_ids": matching_snippets,
                     "confidence": confidence,
                 })
@@ -201,6 +202,7 @@ def build_requirements_matcher_tool(
                 )
                 matches.append({
                     "requirement": req,
+                    "requirement_type": "nice_to_have",
                     "snippet_ids": matching_snippets,
                     "confidence": confidence,
                 })
@@ -210,26 +212,26 @@ def build_requirements_matcher_tool(
             "candidate_name": candidate_name,
             "job_title": job_title,
             "match_results": matches,
+            "metadata": {
+                "total_must_have_requirements": len(must_have),
+                "total_nice_to_have_requirements": len(nice_to_have),
+            },
         }
 
     return requirements_matcher_tool
 
 
 def build_scoring_tool(
-    job_requirements: dict[str, Any],
     scoring_config: dict[str, Any],
 ) -> Any:
     """Build scoring tool from datasets.
 
     Args:
-        job_requirements: Job requirements data with job_id, must_have, and nice_to_have
         scoring_config: Scoring configuration with weights and bounds
 
     Returns:
         CrewAI tool object
     """
-    must_have_requirements = job_requirements.get("must_have", [])
-
     # Extract weights and bounds from config
     weights = scoring_config.get("weights", {})
     weight_must_have = weights.get("must_have_coverage", 0.7)
@@ -241,24 +243,36 @@ def build_scoring_tool(
 
     @tool("Scoring Tool")
     def scoring_tool(
-        match_results: list[dict[str, Any]],
+        match_results_data: dict[str, Any],
     ) -> dict[str, Any]:
         """Calculate weighted match score based on requirement matches.
 
+        This tool calculates the overall match score and must-have coverage based on
+        match results from the Requirements Matcher. The match_results_data should
+        include both the match_results list and metadata with total requirement counts.
+
         Args:
-            match_results: List of match results from requirements_matcher
+            match_results_data: Dictionary from requirements_matcher tool output containing:
+                - match_results: List of match results (each with requirement, requirement_type, snippet_ids, confidence)
+                - metadata: Dictionary with total_must_have_requirements and total_nice_to_have_requirements
 
         Returns:
             Dictionary with match_score (0-100), must_have_coverage (0-1), and breakdown
         """
+        # Extract match_results and metadata
+        match_results = match_results_data.get("match_results", [])
+        metadata = match_results_data.get("metadata", {})
+        total_must_have_count = metadata.get("total_must_have_requirements", 0)
+
+        # Filter must-have matches using requirement_type field
         must_have_matches = [
             m for m in match_results
-            if m.get("requirement") in must_have_requirements
+            if m.get("requirement_type") == "must_have"
         ]
 
         must_have_coverage = (
-            len(must_have_matches) / len(must_have_requirements)
-            if must_have_requirements else 0.0
+            len(must_have_matches) / total_must_have_count
+            if total_must_have_count > 0 else 0.0
         )
 
         # Calculate overall match score using configurable weights
