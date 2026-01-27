@@ -5,22 +5,13 @@
 messages:
   - role: user
     content: |
-      description: Conduct a comprehensive evaluation of the candidate against the job requirements. Analyze the candidate's qualifications, identify strengths and gaps, assess risk factors, and provide a clear recommendation. Consider all available evidence and provide a detailed, evidence-based assessment.
+      description: Conduct a comprehensive evaluation of the candidate based on the match results from the Requirements Matcher. Use the Scoring Tool to calculate the match score and must-have coverage. Analyze the candidate's qualifications, identify strengths and gaps, assess risk factors, and provide a clear recommendation. Consider all available evidence and provide a detailed, evidence-based assessment.
       
-      expected_output: A comprehensive ScreeningResult object containing: application_id (from requirements matching task output), candidate_name (from requirements matching task output), job_title (from requirements matching task output), match_score (overall match score 0-100), must_have_coverage (coverage of must-have requirements 0.0-1.0), gaps (list of identified gaps), strengths (list of candidate strengths), risk_flags (list of any risk flags), recommendation (proceed/reject/review), qa_suggestions (suggestions for quality assurance), and match_results (detailed match results from requirements matching task). You must include application_id, candidate_name, and job_title from the requirements matching task output. Format as valid JSON matching the ScreeningResult schema.
+      expected_output: A comprehensive ScreeningResult object containing: application_id (from requirements matching task output), candidate_name (from requirements matching task output), job_title (from requirements matching task output), match_score (overall match score 0-100 from Scoring Tool), must_have_coverage (coverage of must-have requirements 0.0-1.0 from Scoring Tool), gaps (list of identified gaps as an array of strings), strengths (list of candidate strengths as an array of strings), risk_flags (list of any risk flags as an array of strings), recommendation (proceed/reject/review), qa_suggestions (suggestions for quality assurance as an array of strings - CRITICAL: must be a list, not a string), and match_results (detailed match results from requirements matching task, including requirement_type field for each match). You must include application_id, candidate_name, and job_title from the requirements matching task output. CRITICAL: qa_suggestions must be an array of strings, not a single string. Format as valid JSON matching the ScreeningResult schema.
       
       agent: resume_evaluator
       
       context: requirements_matching_task
-      
-      Job Requirements:
-      {{job_requirements}}
-      
-      Candidate Profile:
-      {{candidate_profile}}
-      
-      Evidence Snippets:
-      {{evidence_snippets}}
       
       Match Results from Requirements Matcher:
       {{match_results}}

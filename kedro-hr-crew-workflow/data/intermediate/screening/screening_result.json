@@ -5,9 +5,9 @@
   "match_score": 59.89,
   "must_have_coverage": 0.56,
   "gaps": [
-    "Limited experience with version control systems (Git) and CI/CD pipelines",
-    "Bachelor's degree not strongly evidenced",
-    "Knowledge of system design patterns and best practices is weak"
+    "Lacks experience with version control systems (Git) and CI/CD pipelines",
+    "Does not fully meet the requirement for a Bachelor's degree in Computer Science, Engineering, or related field",
+    "Missing some must-have requirements related to system design patterns and best practices"
   ],
   "strengths": [
     "Strong proficiency in Python, Java, or Go",
@@ -15,17 +15,18 @@
     "Knowledge of containerization technologies (Docker, Kubernetes)"
   ],
   "risk_flags": [
-    "Low confidence in version control and CI/CD experience",
-    "Weak evidence of formal education in a relevant field"
+    "Match score below 60 indicates potential concerns with overall qualifications"
   ],
   "recommendation": "review",
   "qa_suggestions": [
-    "Consider a technical interview to assess practical skills in version control and CI/CD",
-    "Verify educational qualifications more thoroughly"
+    "Consider a technical interview to assess practical skills",
+    "Evaluate the candidate's experience with CI/CD pipelines in detail",
+    "Verify educational qualifications to ensure they meet the job requirements"
   ],
   "match_results": [
     {
       "requirement": "Strong proficiency in Python, Java, or Go",
+      "requirement_type": "must_have",
       "snippet_ids": [
         "skill_1",
         "work_1",
@@ -36,6 +37,7 @@
     },
     {
       "requirement": "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+      "requirement_type": "must_have",
       "snippet_ids": [
         "skill_20",
         "skill_21",
@@ -45,6 +47,7 @@
     },
     {
       "requirement": "Knowledge of containerization technologies (Docker, Kubernetes)",
+      "requirement_type": "must_have",
       "snippet_ids": [
         "skill_18",
         "skill_19",
@@ -54,6 +57,7 @@
     },
     {
       "requirement": "Experience with version control systems (Git) and CI/CD pipelines",
+      "requirement_type": "must_have",
       "snippet_ids": [
         "work_1"
       ],
@@ -61,6 +65,7 @@
     },
     {
       "requirement": "Bachelor's degree in Computer Science, Engineering, or related field",
+      "requirement_type": "must_have",
       "snippet_ids": [
         "edu_2"
       ],
@@ -68,6 +73,7 @@
     },
     {
       "requirement": "Knowledge of system design patterns and best practices",
+      "requirement_type": "nice_to_have",
       "snippet_ids": [
         "work_1"
       ],

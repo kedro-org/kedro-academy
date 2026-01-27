@@ -130,6 +130,13 @@ def extract_evaluation_data(task_output: str) -> dict[str, Any]:
     # Try to parse as JSON first
     parsed = parse_json_from_text(task_output)
     if parsed and isinstance(parsed, dict):
+        # Ensure qa_suggestions is a list (convert string to list if needed)
+        qa_suggestions = parsed.get("qa_suggestions", [])
+        if isinstance(qa_suggestions, str):
+            qa_suggestions = [qa_suggestions]
+        elif not isinstance(qa_suggestions, list):
+            qa_suggestions = []
+        
         evaluation_data.update({
             "match_score": round(float(parsed.get("match_score", 0.0)), 2),
             "must_have_coverage": round(float(parsed.get("must_have_coverage", 0.0)), 2),
@@ -137,7 +144,7 @@ def extract_evaluation_data(task_output: str) -> dict[str, Any]:
             "strengths": parsed.get("strengths", []),
             "risk_flags": parsed.get("risk_flags", []),
             "recommendation": parsed.get("recommendation", "review"),
-            "qa_suggestions": parsed.get("qa_suggestions", []),
+            "qa_suggestions": qa_suggestions,
         })
 
     return evaluation_data

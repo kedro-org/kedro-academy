@@ -70,6 +70,10 @@ def create_application(
     if "title" not in job_metadata:
         raise ValueError("title not found in job_metadata")
     job_title = job_metadata["title"]
+    
+    if "location" not in job_metadata:
+        raise ValueError("location not found in job_metadata")
+    location = job_metadata["location"]
 
     # Extract evidence snippets list
     if "snippets" not in evidence_snippets:
@@ -87,13 +91,14 @@ def create_application(
 
     application = Application(
         application_id=application_id,
-        job_id=job_id,
         candidate_id=candidate_id,
+        candidate_name=candidate_name,
         submitted_at=datetime.now(),
         status="pending",
         artifacts={
-            "candidate_name": candidate_name,
+            "job_id": job_id,
             "job_title": job_title,
+            "location": location,
         },
         evidence_snippets=validated_snippets,
     )

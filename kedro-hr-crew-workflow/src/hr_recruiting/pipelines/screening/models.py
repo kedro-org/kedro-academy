@@ -12,6 +12,23 @@ class MatchResult(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0, description="Match confidence score")
 
 
+class RequirementsMatchingMetadata(BaseModel):
+    """Metadata for requirements matching result."""
+
+    total_must_have_requirements: int = Field(description="Total number of must-have requirements")
+    total_nice_to_have_requirements: int = Field(description="Total number of nice-to-have requirements")
+
+
+class RequirementsMatchingResult(BaseModel):
+    """Complete requirements matching result."""
+
+    application_id: str = Field(description="Application identifier")
+    candidate_name: str = Field(description="Candidate name")
+    job_title: str = Field(description="Job title")
+    match_results: list[MatchResult] = Field(description="List of match results")
+    metadata: RequirementsMatchingMetadata = Field(description="Metadata with total requirement counts")
+
+
 class ScreeningResult(BaseModel):
     """Screening result model."""
 

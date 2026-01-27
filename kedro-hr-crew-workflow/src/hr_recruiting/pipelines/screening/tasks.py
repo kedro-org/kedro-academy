@@ -10,7 +10,10 @@ from crewai import Agent, Task
 from kedro.pipeline.llm_context import LLMContext
 
 from hr_recruiting.base.utils import extract_field_from_prompt
-from hr_recruiting.pipelines.screening.models import ScreeningResult
+from hr_recruiting.pipelines.screening.models import (
+    RequirementsMatchingResult,
+    ScreeningResult,
+)
 
 
 def create_requirements_matching_task(
@@ -26,13 +29,22 @@ def create_requirements_matching_task(
     Returns:
         Configured Task instance
     """
-    # Format prompt with empty strings to extract content (same approach as applications pipeline)
+    # Get schema JSON from Pydantic model
+    requirements_matching_result_schema_json = json.dumps(
+        RequirementsMatchingResult.model_json_schema(), indent=2
+    )
+
+    # Format prompt with empty strings and schema JSON to extract content
     user_prompt = context.prompts.get("requirements_matching_user_prompt")
     if not user_prompt:
         raise ValueError("requirements_matching_user_prompt not found in context")
     
     try:
-        formatted = user_prompt.format(must_have_requirements="", evidence_snippets="")
+        formatted = user_prompt.format(
+            must_have_requirements="",
+            evidence_snippets="",
+            requirements_matching_result_schema_json=requirements_matching_result_schema_json,
+        )
         # Extract the string content properly
         if isinstance(formatted, list) and formatted:
             prompt_content = str(formatted[-1].content if hasattr(formatted[-1], "content") else formatted[-1])
@@ -84,9 +96,6 @@ def create_resume_evaluation_task(
 
     try:
         formatted = user_prompt.format(
-            job_requirements="",
-            candidate_profile="",
-            evidence_snippets="",
             match_results="",
             screening_result_schema_json=screening_result_schema_json,
         )

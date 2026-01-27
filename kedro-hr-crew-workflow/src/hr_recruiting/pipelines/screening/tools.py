@@ -20,7 +20,8 @@ def build_requirements_matcher_tool(
     """Build requirements matcher tool from datasets.
 
     Args:
-        application: Application object with application_id, job_id, candidate_id, and evidence_snippets
+        application: Application object with application_id, candidate_id, candidate_name, 
+                     evidence_snippets, and artifacts (containing job_id, job_title, location)
         job_requirements: Job requirements data with job_id and requirements
         matching_config: Matching configuration with parameters
 
@@ -33,13 +34,13 @@ def build_requirements_matcher_tool(
         raise ValueError("application_id not found in application object")
     application_id = application["application_id"]
     
+    if "candidate_name" not in application:
+        raise ValueError("candidate_name not found in application object")
+    candidate_name = application["candidate_name"]
+    
     if "artifacts" not in application:
         raise ValueError("artifacts not found in application object")
     artifacts = application["artifacts"]
-    
-    if "candidate_name" not in artifacts:
-        raise ValueError("candidate_name not found in application.artifacts")
-    candidate_name = artifacts["candidate_name"]
     
     if "job_title" not in artifacts:
         raise ValueError("job_title not found in application.artifacts")
@@ -264,6 +265,17 @@ def build_scoring_tool(
         metadata = match_results_data.get("metadata", {})
         total_must_have_count = metadata.get("total_must_have_requirements", 0)
 
+        # Validate that match_results have requirement_type field
+        missing_requirement_type = [
+            i for i, m in enumerate(match_results)
+            if "requirement_type" not in m
+        ]
+        if missing_requirement_type:
+            raise ValueError(
+                f"match_results missing requirement_type field at indices: {missing_requirement_type}. "
+                f"All match results must include requirement_type ('must_have' or 'nice_to_have')."
+            )
+
         # Filter must-have matches using requirement_type field
         must_have_matches = [
             m for m in match_results
@@ -276,11 +288,13 @@ def build_scoring_tool(
         )
 
         # Calculate overall match score using configurable weights
+        # avg_confidence includes ALL matches (both must-have and nice-to-have)
         avg_confidence = (
             sum(m.get("confidence", 0.0) for m in match_results) / len(match_results)
             if match_results else 0.0
         )
 
+        # Weighted formula: 70% must-have coverage, 30% average confidence
         match_score = (must_have_coverage * weight_must_have + avg_confidence * weight_confidence) * 100
 
         # Round to 2 decimal places

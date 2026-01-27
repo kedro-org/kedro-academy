@@ -17,11 +17,11 @@ class Application(BaseModel):
     """Application model linking candidate to job."""
 
     application_id: str = Field(description="Unique application identifier")
-    job_id: str = Field(description="Job identifier")
     candidate_id: str = Field(description="Candidate identifier")
+    candidate_name: str = Field(description="Candidate name")
     submitted_at: datetime = Field(description="Submission timestamp")
     status: str = Field(default="pending", description="Application status")
-    artifacts: dict[str, Any] = Field(default_factory=dict, description="Additional artifacts")
+    artifacts: dict[str, Any] = Field(default_factory=dict, description="Job-related artifacts (job_id, job_title, location)")
     evidence_snippets: list[EvidenceSnippet] = Field(default_factory=list, description="Evidence snippets for matching")
 
 

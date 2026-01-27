@@ -5,9 +5,9 @@
 messages:
   - role: user
     content: |
-      description: Match job must-have requirements against candidate evidence snippets. Use the Requirements Matcher tool to perform the matching. The tool will return application_id, candidate_name, job_title, and match_results. Include all of these fields from the tool output in your response. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
+      description: Match job must-have requirements against candidate evidence snippets. Use the Requirements Matcher tool to perform the matching. The tool will return application_id, candidate_name, job_title, match_results, and metadata. Include ALL of these fields from the tool output in your response - do not omit any fields. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
       
-      expected_output: A JSON object containing: application_id (string, from tool output), candidate_name (string, from tool output), job_title (string, from tool output), and match_results (array of MatchResult objects). Each MatchResult contains: requirement (the specific job requirement being matched), snippet_ids (list of evidence snippet IDs that support this requirement), and confidence (confidence score 0.0-1.0 indicating match strength). Use the application_id, candidate_name, and job_title directly from the Requirements Matcher tool output. Format as valid JSON with application_id, candidate_name, job_title, and match_results keys.
+      expected_output: A JSON object matching the RequirementsMatchingResult schema. Use the application_id, candidate_name, job_title, match_results, and metadata directly from the Requirements Matcher tool output. CRITICAL: You MUST include ALL fields from the tool output, including the metadata object with total_must_have_requirements and total_nice_to_have_requirements. Format as valid JSON matching the schema below.
       
       agent: requirements_matcher
       
@@ -16,3 +16,8 @@ messages:
       
       Candidate Evidence Snippets:
       {{evidence_snippets}}
+      
+      Schema Definition:
+      
+      RequirementsMatchingResult Schema:
+      {{requirements_matching_result_schema_json}}

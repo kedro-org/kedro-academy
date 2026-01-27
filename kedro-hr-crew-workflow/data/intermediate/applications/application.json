@@ -1,11 +1,200 @@
 {
   "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
-  "job_id": "SE_BACKEND_001",
   "candidate_id": "DS_CANDIDATE_001",
-  "submitted_at": "2026-01-26T21:12:59.577972",
+  "candidate_name": "Sarah Chen",
+  "submitted_at": "2026-01-27T12:26:07.945549",
   "status": "pending",
   "artifacts": {
-    "candidate_name": "Sarah Chen",
-    "job_title": "Senior Software Engineer - Backend"
-  }
+    "job_id": "SE_BACKEND_001",
+    "job_title": "Senior Software Engineer - Backend",
+    "location": "San Francisco, CA (Hybrid - 3 days in office)"
+  },
+  "evidence_snippets": [
+    {
+      "snippet_id": "skill_1",
+      "text": "Python",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_2",
+      "text": "R",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_3",
+      "text": "SQL",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_4",
+      "text": "Scala",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_5",
+      "text": "Scikit-learn",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_6",
+      "text": "TensorFlow",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_7",
+      "text": "PyTorch",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_8",
+      "text": "XGBoost",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_9",
+      "text": "NLP",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_10",
+      "text": "Computer Vision",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_11",
+      "text": "Pandas",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_12",
+      "text": "NumPy",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_13",
+      "text": "Spark",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_14",
+      "text": "Airflow",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_15",
+      "text": "Jupyter",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_16",
+      "text": "AWS (SageMaker, S3, EC2)",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_17",
+      "text": "GCP",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_18",
+      "text": "Docker",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_19",
+      "text": "Kubernetes",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_20",
+      "text": "PostgreSQL",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_21",
+      "text": "MongoDB",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_22",
+      "text": "Redis",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_23",
+      "text": "Tableau",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_24",
+      "text": "Matplotlib",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_25",
+      "text": "Seaborn",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "skill_26",
+      "text": "Plotly",
+      "source": "skills",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "work_1",
+      "text": "Senior Data Scientist at DataCorp Analytics | Jan 2021 - Present: Developed and deployed ML models that improved customer retention by 25% Built end-to-end ML pipelines using Python, Spark, and Airflow processing 10TB+ daily Led a team of 3 junior data scientists and mentored them on best practices Created recommendation systems using collaborative filtering and deep learning Collaborated with engineering teams to productionize models using Docker and Kubernetes",
+      "source": "work_history",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "work_2",
+      "text": "Data Scientist at TechStart Inc. | Jun 2018 - Dec 2020: Built predictive models for fraud detection reducing false positives by 30% Performed statistical analysis and A/B testing to optimize product features Developed NLP models for sentiment analysis and text classification Created automated reporting dashboards using Tableau and Python",
+      "source": "work_history",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "work_3",
+      "text": "Junior Data Analyst at Analytics Solutions | Jul 2016 - May 2018: Performed data analysis and created visualizations for business stakeholders Cleaned and preprocessed large datasets using Python and SQL Assisted in building regression models for sales forecasting",
+      "source": "work_history",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "edu_1",
+      "text": "Master of Science in Data Science from Stanford University | 2016: Machine Learning, Statistical Methods, Big Data Analytics",
+      "source": "education",
+      "metadata": {}
+    },
+    {
+      "snippet_id": "edu_2",
+      "text": "Bachelor of Science in Mathematics from UC Berkeley | 2014: Computer Science",
+      "source": "education",
+      "metadata": {}
+    }
+  ]
 }
