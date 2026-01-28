@@ -1,13 +1,15 @@
 """Shared utility functions used across pipelines."""
 
+import inspect
 import json
 import re
+import textwrap
 import time
-from typing import Any
+from typing import Any, Callable
 
 from crewai import Crew
 from docx import Document
-
+from kedro.pipeline.preview_contract import TextPreview
 
 def extract_text_from_document(doc: Document) -> str:
     """Extract all text from a Word document.
@@ -155,3 +157,25 @@ def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | Non
         return match.group(1).strip()
     
     return None
+
+def make_code_preview_fn(*funcs: Callable):
+    """Create a preview function with captured callable context."""
+    def preview_fn() -> TextPreview:
+        sources: list[str] = []
+
+        for func in funcs:
+            try:
+                source = inspect.getsource(func)
+                source = textwrap.dedent(source)
+            except (OSError, TypeError):
+                name = getattr(func, "__qualname__", repr(func))
+                source = f"# Source unavailable for {name}"
+
+            sources.append(source)
+
+        return TextPreview(
+            content="\n\n".join(sources),
+            meta={"language": "python"},
+        )
+
+    return preview_fn

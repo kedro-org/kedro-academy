@@ -1,5 +1,6 @@
 """Screening pipeline - agentic processing with CrewAI."""
 
+from hr_recruiting.base.utils import make_code_preview_fn
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.llm_context import llm_context_node, tool
 
@@ -34,6 +35,7 @@ def create_pipeline() -> Pipeline:
                     ),
                 ],
                 name="create_requirements_matcher_context",
+                preview_fn=make_code_preview_fn(build_requirements_matcher_tool)
             ),
             # Create context for resume evaluator agent
             llm_context_node(
@@ -50,6 +52,7 @@ def create_pipeline() -> Pipeline:
                     ),
                 ],
                 name="create_resume_evaluator_context",
+                preview_fn=make_code_preview_fn(build_scoring_tool)
             ),
             # Orchestrate crew execution with contexts
             node(
