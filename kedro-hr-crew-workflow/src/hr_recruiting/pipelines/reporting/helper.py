@@ -10,6 +10,7 @@ from typing import Any
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+from hr_recruiting.base.utils import get_model_dump
 from hr_recruiting.pipelines.reporting.models import EmailDraft
 from hr_recruiting.pipelines.screening.models import ScreeningResult
 
@@ -57,7 +58,7 @@ def draft_email(
     )
 
     # Validate using EmailDraft model
-    email_draft = EmailDraft(
+    return get_model_dump(EmailDraft,
         subject=subject,
         body=body,
         placeholders={
@@ -65,8 +66,6 @@ def draft_email(
             "job_title": job_title,
         },
     )
-
-    return email_draft.model_dump()
 
 
 def setup_document(result: ScreeningResult) -> Document:
@@ -78,11 +77,12 @@ def setup_document(result: ScreeningResult) -> Document:
     return doc
 
 
-def add_header(doc: Document, application_id: str) -> None:
+def add_header(doc: Document, result: ScreeningResult) -> None:
     """Add document header with title and application ID."""
-    title = doc.add_heading("Candidate Screening Report", 0)
+    title_text = f"Screening Report for {result.candidate_name}, {result.job_title}"
+    title = doc.add_heading(title_text, 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    doc.add_paragraph(f"Application ID: {application_id}")
+    doc.add_paragraph(f"Application ID: {result.application_id}")
     doc.add_paragraph("")
 
 

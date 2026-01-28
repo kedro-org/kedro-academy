@@ -57,7 +57,7 @@ def generate_hr_report(
     doc = setup_document(result)
 
     # Add header
-    add_header(doc, result.application_id)
+    add_header(doc, result)
 
     # Add executive summary
     add_summary_table(doc, result)
