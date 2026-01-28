@@ -29,6 +29,15 @@ class RequirementsMatchingResult(BaseModel):
     metadata: RequirementsMatchingMetadata = Field(description="Metadata with total requirement counts")
 
 
+class ScoringResult(BaseModel):
+    """Scoring tool result."""
+
+    match_score: float = Field(ge=0.0, le=100.0, description="Overall match score (0-100)")
+    must_have_coverage: float = Field(ge=0.0, le=1.0, description="Must-have requirements coverage (0-1)")
+    must_have_matches: int = Field(ge=0, description="Number of matched must-have requirements")
+    total_matches: int = Field(ge=0, description="Total number of matched requirements")
+
+
 class ScreeningResult(BaseModel):
     """Screening result model."""
 

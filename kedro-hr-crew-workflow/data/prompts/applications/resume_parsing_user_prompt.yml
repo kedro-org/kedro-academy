@@ -57,7 +57,5 @@ messages:
       
       Return ONLY valid JSON with "candidate_profile" and "evidence_snippets" keys. Do not include any explanatory text, only the JSON.
       
-      Schema Definition:
-      
-      ResumeParsingOutput Schema:
-      {{resume_parsing_output_schema_json}}
+      Output Schema:
+      {{output_schema}}

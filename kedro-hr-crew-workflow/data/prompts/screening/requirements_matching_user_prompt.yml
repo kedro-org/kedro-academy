@@ -17,7 +17,5 @@ messages:
       Candidate Evidence Snippets:
       {{evidence_snippets}}
       
-      Schema Definition:
-      
-      RequirementsMatchingResult Schema:
-      {{requirements_matching_result_schema_json}}
+      Output Schema:
+      {{output_schema}}

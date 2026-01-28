@@ -17,9 +17,9 @@
   "risk_flags": [],
   "recommendation": "review",
   "qa_suggestions": [
-    "Consider additional technical assessments to evaluate proficiency in version control and CI/CD.",
-    "Review educational qualifications to ensure they meet the job requirements.",
-    "Assess the candidate's experience with system design patterns during the interview."
+    "Consider additional technical assessments to evaluate proficiency in CI/CD pipelines.",
+    "Verify educational qualifications to ensure they meet the job requirements.",
+    "Assess experience with system design patterns during the interview process."
   ],
   "match_results": [
     {

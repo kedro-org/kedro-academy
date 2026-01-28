@@ -11,6 +11,15 @@ from typing import Any
 
 from crewai.tools import tool
 
+from hr_recruiting.base.utils import get_model_dump
+from hr_recruiting.pipelines.screening.helper import (
+    match_requirements_to_snippets,
+)
+from hr_recruiting.pipelines.screening.models import (
+    RequirementsMatchingMetadata,
+    RequirementsMatchingResult,
+    ScoringResult,
+)
 
 def build_requirements_matcher_tool(
     application: dict[str, Any],
@@ -29,26 +38,11 @@ def build_requirements_matcher_tool(
         CrewAI tool object
     """
 
-    # Extract IDs and names from Application object - fail if missing
-    if "application_id" not in application:
-        raise ValueError("application_id not found in application object")
+    # Extract IDs and names from Application object
     application_id = application["application_id"]
-    
-    if "candidate_name" not in application:
-        raise ValueError("candidate_name not found in application object")
     candidate_name = application["candidate_name"]
-    
-    if "artifacts" not in application:
-        raise ValueError("artifacts not found in application object")
     artifacts = application["artifacts"]
-    
-    if "job_title" not in artifacts:
-        raise ValueError("job_title not found in application.artifacts")
     job_title = artifacts["job_title"]
-
-    # Get the actual snippets list from application
-    if "evidence_snippets" not in application:
-        raise ValueError("evidence_snippets not found in application object")
     snippets_list = application["evidence_snippets"]
 
     # Extract matching parameters from config
@@ -72,62 +66,6 @@ def build_requirements_matcher_tool(
     technical_terms_list = matching_config.get("technical_terms", [])
     technical_terms = set(term.lower() for term in technical_terms_list)
 
-    def extract_meaningful_keywords(text: str) -> list[str]:
-        """Extract meaningful keywords from text, filtering stop words and prioritizing technical terms.
-
-        Args:
-            text: Input text to extract keywords from
-
-        Returns:
-            List of meaningful keywords
-        """
-        # Split into words, lowercase, remove punctuation
-        words = [word.lower().strip('.,!?;:()[]{}"\'') for word in text.split()]
-        # Filter: min length, not stop word, and meaningful
-        keywords = [
-            word for word in words
-            if len(word) > min_word_length
-            and word not in stop_words
-            and word.isalnum()  # Only alphanumeric
-        ]
-        return keywords
-
-    def calculate_match_score(req_keywords: list[str], snippet_keywords: list[str]) -> float:
-        """Calculate match score based on keyword overlap, prioritizing technical terms.
-
-        Args:
-            req_keywords: Keywords from requirement
-            snippet_keywords: Keywords from snippet
-
-        Returns:
-            Match score (0.0 to 1.0)
-        """
-        if not req_keywords:
-            return 0.0
-
-        # Count matches, with higher weight for technical terms
-        matches = 0
-        technical_matches = 0
-
-        snippet_keywords_set = set(snippet_keywords)
-        for keyword in req_keywords:
-            if keyword in snippet_keywords_set:
-                matches += 1
-                if keyword in technical_terms:
-                    technical_matches += 1
-
-        # Require at least 2 matches (or 1 technical term match)
-        if matches < 2 and technical_matches == 0:
-            return 0.0
-
-        # Calculate base score: percentage of keywords matched
-        base_score = matches / len(req_keywords)
-
-        # Boost score if technical terms matched
-        technical_boost = technical_matches * 0.2  # 20% boost per technical match
-
-        return min(1.0, base_score + technical_boost)
-
     @tool("Requirements Matcher")
     def requirements_matcher_tool() -> dict[str, Any]:
         """Match job requirements to evidence snippets from candidate profile.
@@ -141,83 +79,49 @@ def build_requirements_matcher_tool(
         Returns:
             Dictionary with application_id and match_results (list of match results)
         """
-        matches: list[dict[str, Any]] = []
         must_have = job_requirements.get("must_have", [])
         nice_to_have = job_requirements.get("nice_to_have", [])
 
         # Match must-have requirements
-        for req in must_have:
-            matching_snippets = []
-            req_keywords = extract_meaningful_keywords(req)
-
-            if not req_keywords:  # Skip if no meaningful keywords
-                continue
-
-            for snippet in snippets_list:
-                snippet_text = snippet.get("text", "")
-                snippet_keywords = extract_meaningful_keywords(snippet_text)
-
-                # Calculate match score
-                match_score = calculate_match_score(req_keywords, snippet_keywords)
-
-                # Only consider it a match if score is above threshold (at least 2 keywords or 1 technical)
-                if match_score > 0.0:
-                    matching_snippets.append(snippet.get("snippet_id"))
-
-            if matching_snippets:
-                # Confidence based on number of matching snippets and match quality
-                confidence = min(
-                    must_have_max,
-                    must_have_base + len(matching_snippets) * must_have_increment
-                )
-                matches.append({
-                    "requirement": req,
-                    "requirement_type": "must_have",
-                    "snippet_ids": matching_snippets,
-                    "confidence": confidence,
-                })
+        must_have_matches = match_requirements_to_snippets(
+            requirements=must_have,
+            requirement_type="must_have",
+            snippets_list=snippets_list,
+            min_word_length=min_word_length,
+            stop_words=stop_words,
+            technical_terms=technical_terms,
+            confidence_base=must_have_base,
+            confidence_increment=must_have_increment,
+            confidence_max=must_have_max,
+        )
 
         # Match nice-to-have requirements
-        for req in nice_to_have:
-            matching_snippets = []
-            req_keywords = extract_meaningful_keywords(req)
+        nice_to_have_matches = match_requirements_to_snippets(
+            requirements=nice_to_have,
+            requirement_type="nice_to_have",
+            snippets_list=snippets_list,
+            min_word_length=min_word_length,
+            stop_words=stop_words,
+            technical_terms=technical_terms,
+            confidence_base=nice_to_have_base,
+            confidence_increment=nice_to_have_increment,
+            confidence_max=nice_to_have_max,
+        )
 
-            if not req_keywords:  # Skip if no meaningful keywords
-                continue
+        matches = must_have_matches + nice_to_have_matches
 
-            for snippet in snippets_list:
-                snippet_text = snippet.get("text", "")
-                snippet_keywords = extract_meaningful_keywords(snippet_text)
-
-                # Calculate match score
-                match_score = calculate_match_score(req_keywords, snippet_keywords)
-
-                # Only consider it a match if score is above threshold
-                if match_score > 0.0:
-                    matching_snippets.append(snippet.get("snippet_id"))
-
-            if matching_snippets:
-                confidence = min(
-                    nice_to_have_max,
-                    nice_to_have_base + len(matching_snippets) * nice_to_have_increment
-                )
-                matches.append({
-                    "requirement": req,
-                    "requirement_type": "nice_to_have",
-                    "snippet_ids": matching_snippets,
-                    "confidence": confidence,
-                })
-
-        return {
-            "application_id": application_id,
-            "candidate_name": candidate_name,
-            "job_title": job_title,
-            "match_results": matches,
-            "metadata": {
-                "total_must_have_requirements": len(must_have),
-                "total_nice_to_have_requirements": len(nice_to_have),
-            },
-        }
+        return get_model_dump(
+            RequirementsMatchingResult,
+            application_id=application_id,
+            candidate_name=candidate_name,
+            job_title=job_title,
+            match_results=matches,
+            metadata=get_model_dump(
+                RequirementsMatchingMetadata,
+                total_must_have_requirements=len(must_have),
+                total_nice_to_have_requirements=len(nice_to_have),
+            ),
+        )
 
     return requirements_matcher_tool
 
@@ -265,17 +169,6 @@ def build_scoring_tool(
         metadata = match_results_data.get("metadata", {})
         total_must_have_count = metadata.get("total_must_have_requirements", 0)
 
-        # Validate that match_results have requirement_type field
-        missing_requirement_type = [
-            i for i, m in enumerate(match_results)
-            if "requirement_type" not in m
-        ]
-        if missing_requirement_type:
-            raise ValueError(
-                f"match_results missing requirement_type field at indices: {missing_requirement_type}. "
-                f"All match results must include requirement_type ('must_have' or 'nice_to_have')."
-            )
-
         # Filter must-have matches using requirement_type field
         must_have_matches = [
             m for m in match_results
@@ -301,11 +194,12 @@ def build_scoring_tool(
         match_score_rounded = round(min(match_score_bounds["max"], max(match_score_bounds["min"], match_score)), 2)
         must_have_coverage_rounded = round(min(coverage_bounds["max"], max(coverage_bounds["min"], must_have_coverage)), 2)
 
-        return {
-            "match_score": match_score_rounded,
-            "must_have_coverage": must_have_coverage_rounded,
-            "must_have_matches": len(must_have_matches),
-            "total_matches": len(match_results),
-        }
+        return get_model_dump(
+            ScoringResult,
+            match_score=match_score_rounded,
+            must_have_coverage=must_have_coverage_rounded,
+            must_have_matches=len(must_have_matches),
+            total_matches=len(match_results),
+        )
 
     return scoring_tool

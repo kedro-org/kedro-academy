@@ -41,40 +41,31 @@ def format_resume_parsing_prompt(
         raise ValueError("resume_parsing_user_prompt not found in LLMContext")
     
     # Get schema JSON from ResumeParsingOutput model (contains both candidate_profile and evidence_snippets)
-    resume_parsing_output_schema_json = json.dumps(
+    output_schema_json = json.dumps(
         ResumeParsingOutput.model_json_schema(), indent=2
     )
     
     try:
-        # Try formatting with LangChain's format method first
-        formatted_prompt = user_prompt.format(
-            raw_resume_text=raw_resume_text,
-            candidate_id=candidate_id,
-            resume_parsing_output_schema_json=resume_parsing_output_schema_json,
-        )
-        
-        # Extract the string content
-        if isinstance(formatted_prompt, list) and formatted_prompt:
-            prompt_str = str(formatted_prompt[-1].content if hasattr(formatted_prompt[-1], "content") else formatted_prompt[-1])
+        # Extract the string content from prompt
+        if isinstance(user_prompt, list) and user_prompt:
+            prompt_str = str(user_prompt[-1].content if hasattr(user_prompt[-1], "content") else user_prompt[-1])
         else:
-            prompt_str = str(formatted_prompt)
+            prompt_str = str(user_prompt)
         
-        # Handle double braces in YAML templates ({{var}} -> {var} for Python format, then replace)
-        # If formatting didn't work (double braces weren't replaced), manually replace them
+        # Replace double braces from YAML template ({{var}} -> value)
         replacements = {
             "{{raw_resume_text}}": raw_resume_text,
             "{{candidate_id}}": candidate_id,
-            "{{resume_parsing_output_schema_json}}": resume_parsing_output_schema_json,
+            "{{output_schema}}": output_schema_json,
         }
         for placeholder, value in replacements.items():
-            if placeholder in prompt_str:
-                prompt_str = prompt_str.replace(placeholder, value)
+            prompt_str = prompt_str.replace(placeholder, value)
         
         # Also handle single braces in case they weren't formatted
         single_brace_replacements = {
             "{raw_resume_text}": raw_resume_text,
             "{candidate_id}": candidate_id,
-            "{resume_parsing_output_schema_json}": resume_parsing_output_schema_json,
+            "{output_schema}": output_schema_json,
         }
         for placeholder, value in single_brace_replacements.items():
             if placeholder in prompt_str:

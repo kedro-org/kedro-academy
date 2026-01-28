@@ -39,5 +39,6 @@ def create_resume_parser_agent(
     Returns:
         Compiled CrewAI Agent
     """
-    resume_parser_agent = ResumeParserAgent(resume_parser_context).compile()
-    return resume_parser_agent.agent
+    agent_wrapper = ResumeParserAgent(resume_parser_context)
+    agent_wrapper.compile()
+    return agent_wrapper.agent

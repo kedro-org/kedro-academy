@@ -36,7 +36,7 @@ class ResumeEvaluatorAgent(BaseAgent["ResumeEvaluatorAgent"]):
     system_prompt_key = "resume_evaluator_agent_system_prompt"
 
 
-def create_requirements_matcher_agent_with_tools(
+def create_requirements_matcher_agent(
     context: LLMContext,
 ) -> Agent:
     """Create requirements matcher agent with tools from context.
@@ -52,7 +52,7 @@ def create_requirements_matcher_agent_with_tools(
     return agent_wrapper.agent
 
 
-def create_resume_evaluator_agent_with_tools(
+def create_resume_evaluator_agent(
     context: LLMContext,
 ) -> Agent:
     """Create resume evaluator agent with tools from context.
