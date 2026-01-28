@@ -2,7 +2,7 @@
   "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
   "candidate_id": "DS_CANDIDATE_001",
   "candidate_name": "Sarah Chen",
-  "submitted_at": "2026-01-28T15:30:03.363012",
+  "submitted_at": "2026-01-28T16:10:35.798364",
   "status": "pending",
   "artifacts": {
     "job_id": "SE_BACKEND_001",
@@ -186,13 +186,13 @@
     },
     {
       "snippet_id": "edu_1",
-      "text": "Master of Science in Data Science from Stanford University | 2016: Relevant Coursework: Machine Learning, Statistical Methods, Big Data Analytics.",
+      "text": "Master of Science in Data Science from Stanford University | 2016: Machine Learning, Statistical Methods, Big Data Analytics",
       "source": "education",
       "metadata": {}
     },
     {
       "snippet_id": "edu_2",
-      "text": "Bachelor of Science in Mathematics from UC Berkeley | 2014: Minor: Computer Science.",
+      "text": "Bachelor of Science in Mathematics from UC Berkeley | 2014: Minor: Computer Science",
       "source": "education",
       "metadata": {}
     }

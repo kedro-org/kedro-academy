@@ -30,6 +30,9 @@ messages:
         * field: null (if no field/minor mentioned)
         * year: null (if no year mentioned)
       - Extract text EXACTLY as written in the resume - do not paraphrase or summarize
+      - Preserve ALL punctuation, capitalization, sentence structure, and formatting exactly as it appears in the resume
+      - Do NOT add or remove periods, commas, colons, or any other punctuation marks
+      - Do NOT reformat or restructure sentences - copy them exactly as written
       - If you cannot find a piece of information, use the default value - do not make it up
       
       Instructions:
@@ -48,12 +51,24 @@ messages:
          - Year of completion (only if explicitly mentioned, otherwise null)
       6. Create evidence snippets from:
          - Each skill (source: "skills", snippet_id format: "skill_1", "skill_2", etc.)
-         - Each work history entry (source: "work_history", snippet_id format: "work_1", "work_2", etc., include role, company, duration, and description in text)
-         - Each education entry (source: "education", snippet_id format: "edu_1", "edu_2", etc., include degree, institution, year, field in text)
-      7. Ensure all dates, names, and text are extracted EXACTLY as written - do not modify or infer
-      8. Handle variations in section names and formatting, but only extract what is actually present
-      9. Preserve the original raw_resume_text exactly as provided in the candidate_profile
-      10. Validate that all extracted information exists in the resume text before including it
+         - Each work history entry (source: "work_history", snippet_id format: "work_1", "work_2", etc.)
+         - Each education entry (source: "education", snippet_id format: "edu_1", "edu_2", etc.)
+      7. CRITICAL for evidence snippets text field - EXTRACT EXACTLY AS WRITTEN:
+         - For work history snippets: Format as "{Role} at {Company} | {Duration}: {Description}"
+           * Use the EXACT description text from the resume - preserve ALL punctuation, sentence breaks, and formatting
+           * If the resume has periods at the end of sentences, keep them. If it doesn't, don't add them
+           * If sentences are separated by periods in the resume, keep them separated. If they're on separate lines, join them with periods
+           * Copy the description text character-by-character from the resume - do not reformat or restructure
+         - For education snippets: Format as "{Degree} from {Institution} | {Year}: {Field/Coursework}"
+           * If the resume includes labels like "Minor:", "Relevant Coursework:", "Coursework:", etc., preserve them EXACTLY as written
+           * Include the label text exactly as it appears (e.g., "Minor: Computer Science" not just "Computer Science")
+           * Preserve all punctuation and formatting from the original resume text
+         - For skill snippets: Use the exact skill name as written in the resume
+         - GENERAL RULE: Copy text verbatim from the resume - do not add, remove, or modify any characters, punctuation, or formatting
+      8. Ensure all dates, names, and text are extracted EXACTLY as written - do not modify or infer
+      9. Handle variations in section names and formatting, but only extract what is actually present
+      10. Preserve the original raw_resume_text exactly as provided in the candidate_profile
+      11. Validate that all extracted information exists in the resume text before including it
       
       Return ONLY valid JSON with "candidate_profile" and "evidence_snippets" keys. Do not include any explanatory text, only the JSON.
       
