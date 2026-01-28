@@ -1,178 +1,57 @@
 {
   "llm_crew_ai": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#6C5CE7",
-        "stroke": "#4A3FA8",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#8B7FF5",
-        "stroke": "#4A3FA8",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#598395",
+    "color": "#000000",
+    "stroke": "#97BAC9"
   },
   "run_resume_parsing_crew": {
-    "opacity": "0.9",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#FF6B35",
-        "stroke": "#E55A2B",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#FF8C42",
-        "stroke": "#E55A2B",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#00BCFF",
+    "color": "#242424",
+    "stroke": "#ACCCDA"
   },
   "orchestrate_screening_crew": {
-    "opacity": "0.9",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#FF6B35",
-        "stroke": "#E55A2B",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#FF8C42",
-        "stroke": "#E55A2B",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#00BCFF",
+    "color": "#242424",
+    "stroke": "#ACCCDA"
   },
   "create_resume_parser_context": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#4A90E2",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#5BA3F5",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
   },
   "create_requirements_matcher_context": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#4A90E2",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#5BA3F5",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
   },
   "create_resume_evaluator_context": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#4A90E2",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#5BA3F5",
-        "stroke": "#2E5C8A",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
   },
   "job_requirements": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#50C878",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#6EDB8F",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
   },
   "job_metadata": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#50C878",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#6EDB8F",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
   },
-    "application": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#50C878",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#6EDB8F",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      }
-    }
+  "application": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
   },
   "screening_result": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#50C878",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#6EDB8F",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
   },
   "hr_report": {
-    "opacity": "0.85",
-    "strokeWidth": "2px",
-    "themes": {
-      "dark": {
-        "fill": "#50C878",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      },
-      "light": {
-        "fill": "#6EDB8F",
-        "stroke": "#2D8659",
-        "color": "#FFFFFF"
-      }
-    }
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
   }
 }
