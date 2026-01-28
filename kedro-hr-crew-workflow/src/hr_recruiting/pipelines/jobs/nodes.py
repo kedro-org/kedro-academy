@@ -20,6 +20,7 @@ def parse_job_posting(raw_job_doc: Any) -> dict[str, Any]:
     raw_text = extract_text_from_document(raw_job_doc)
     
     # Try to extract job_id from document properties
+    # In production this should be calculated in a robust way
     job_id = None
     if hasattr(raw_job_doc.core_properties, "title") and raw_job_doc.core_properties.title:
         job_id = raw_job_doc.core_properties.title
