@@ -3,11 +3,10 @@
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.llm_context import llm_context_node
 
-from hr_recruiting.pipelines.applications.helper import create_application
 from hr_recruiting.pipelines.applications.nodes import (
+    create_application,
     parse_raw_resume,
     run_resume_parsing_crew,
-    split_resume_parsing_crew_result,
 )
 
 
@@ -40,16 +39,9 @@ def create_pipeline() -> Pipeline:
                     "resume_parser_context",
                     "parsed_raw_resume",
                 ],
-                outputs="resume_parsing_crew_result",
+                outputs=["normalized_candidate_profile", "evidence_snippets"],
                 name="run_resume_parsing_crew",
                 tags=["agentic"],
-            ),
-            # Split result into separate outputs
-            node(
-                func=split_resume_parsing_crew_result,
-                inputs="resume_parsing_crew_result",
-                outputs=["normalized_candidate_profile", "evidence_snippets"],
-                name="split_resume_parsing_crew_result",
             ),
             # Create Application object from candidate profile, job metadata, and evidence snippets
             node(

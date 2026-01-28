@@ -14,6 +14,36 @@ from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
+def get_document_id(doc: Document, id_name: str = "document_id") -> str:
+    """Extract document ID from document properties (title or subject).
+    
+    Tries to extract an identifier from the document's core properties,
+    checking title first, then subject as fallback.
+    
+    Args:
+        doc: python-docx Document object
+        id_name: Name of the ID for error messages (e.g., "candidate_id", "job_id")
+        
+    Returns:
+        Document ID string
+        
+    Raises:
+        ValueError: If ID cannot be extracted from document properties
+    """
+    doc_id = None
+    if hasattr(doc.core_properties, "title") and doc.core_properties.title:
+        doc_id = doc.core_properties.title
+    elif hasattr(doc.core_properties, "subject") and doc.core_properties.subject:
+        doc_id = doc.core_properties.subject
+    
+    if not doc_id:
+        raise ValueError(
+            f"{id_name} not found in document properties (title or subject)"
+        )
+    
+    return doc_id
+
+
 def extract_text_from_document(doc: Document) -> str:
     """Extract all text from a Word document.
 

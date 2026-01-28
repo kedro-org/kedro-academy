@@ -1,7 +1,7 @@
 [
   {
     "event": "before_pipeline_run",
-    "timestamp": "2026-01-28T05:39:38.731884+00:00"
+    "timestamp": "2026-01-28T07:23:42.176521+00:00"
   },
   {
     "event": "after_dataset_loaded",
@@ -22,13 +22,13 @@
     "dataset": "resume_parsing_user_prompt",
     "node_id": "27b70c96",
     "status": "Available",
-    "size": 4414
+    "size": 4343
   },
   {
     "event": "after_node_run",
     "node": "create_resume_parser_context",
     "node_id": "50816308",
-    "duration": 0.001062374998582527,
+    "duration": 0.0009138330060523003,
     "status": "success"
   },
   {
@@ -49,7 +49,7 @@
     "event": "after_node_run",
     "node": "parse_raw_resume",
     "node_id": "49d9b474",
-    "duration": 0.002772416017251089,
+    "duration": 0.002786041994113475,
     "status": "success"
   },
   {
@@ -76,29 +76,8 @@
   {
     "event": "after_node_run",
     "node": "run_resume_parsing_crew",
-    "node_id": "7005f8f1",
-    "duration": 51.66260149999289,
-    "status": "success"
-  },
-  {
-    "event": "after_dataset_saved",
-    "dataset": "resume_parsing_crew_result",
-    "node_id": "c991ad9a",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_dataset_loaded",
-    "dataset": "resume_parsing_crew_result",
-    "node_id": "c991ad9a",
-    "status": "Available",
-    "size": 0
-  },
-  {
-    "event": "after_node_run",
-    "node": "split_resume_parsing_crew_result",
-    "node_id": "1c293a9a",
-    "duration": 0.0005079580005258322,
+    "node_id": "d9c04a77",
+    "duration": 47.102817459002836,
     "status": "success"
   },
   {
@@ -140,7 +119,7 @@
     "event": "after_node_run",
     "node": "create_application",
     "node_id": "f45d55f9",
-    "duration": 0.0007071669970173389,
+    "duration": 0.0005365000106394291,
     "status": "success"
   },
   {
@@ -152,6 +131,6 @@
   },
   {
     "event": "after_pipeline_run",
-    "timestamp": "2026-01-28T05:40:31.161433+00:00"
+    "timestamp": "2026-01-28T07:24:29.574207+00:00"
   }
 ]

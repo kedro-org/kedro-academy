@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from hr_recruiting.base.utils import get_model_dump, extract_text_from_document
+from hr_recruiting.base.utils import extract_text_from_document, get_document_id, get_model_dump
 from hr_recruiting.pipelines.jobs.helper import parse_job_fields
 from hr_recruiting.pipelines.jobs.models import JobMetadata, JobRequirements, ParsedJobPosting
 
@@ -19,16 +19,9 @@ def parse_job_posting(raw_job_doc: Any) -> dict[str, Any]:
     # Extract all text from the document
     raw_text = extract_text_from_document(raw_job_doc)
     
-    # Try to extract job_id from document properties
+    # Extract job_id from document properties
     # In production this should be calculated in a robust way
-    job_id = None
-    if hasattr(raw_job_doc.core_properties, "title") and raw_job_doc.core_properties.title:
-        job_id = raw_job_doc.core_properties.title
-    elif hasattr(raw_job_doc.core_properties, "subject") and raw_job_doc.core_properties.subject:
-        job_id = raw_job_doc.core_properties.subject
-    
-    if not job_id:
-        raise ValueError("job_id not found in job document properties (title or subject)")
+    job_id = get_document_id(raw_job_doc, "job_id")
     
     # Parse all fields from the raw text
     lines = raw_text.split("\n")
