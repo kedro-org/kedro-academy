@@ -1,0 +1,51 @@
+Product,Product_Category,FY_Sales,Region,Launch_Date
+Product_A,Electronics,1250000,North America,2023-01-15
+Product_B,Home & Garden,950000,Europe,2022-08-20
+Product_C,Electronics,1100000,Asia,2023-03-10
+Product_D,Clothing,780000,North America,2022-12-05
+Product_E,Electronics,1400000,Europe,2023-02-28
+Product_F,Home & Garden,620000,Asia,2022-10-12
+Product_G,Clothing,890000,North America,2023-01-20
+Product_H,Electronics,1600000,Europe,2022-11-15
+Product_I,Sports,540000,Asia,2023-04-08
+Product_J,Home & Garden,720000,North America,2022-09-30
+Product_K,Electronics,1320000,Europe,2023-01-05
+Product_L,Clothing,680000,Asia,2022-12-20
+Product_M,Sports,460000,North America,2023-03-15
+Product_N,Electronics,1480000,Europe,2022-10-25
+Product_O,Home & Garden,580000,Asia,2023-02-12
+Product_P,Clothing,750000,North America,2022-11-08
+Product_Q,Electronics,1200000,Europe,2023-04-02
+Product_R,Sports,420000,Asia,2022-12-18
+Product_S,Home & Garden,640000,North America,2023-01-28
+Product_T,Electronics,1350000,Europe,2022-09-14
+Product_U,Clothing,820000,Asia,2023-03-22
+Product_V,Sports,380000,North America,2022-11-30
+Product_W,Home & Garden,700000,Europe,2023-02-08
+Product_X,Electronics,1180000,Asia,2022-12-12
+Product_Y,Clothing,610000,North America,2023-04-18
+Product_Z,Sports,490000,Europe,2022-10-05
+Product_AA,Electronics,1420000,Asia,2023-01-12
+Product_BB,Home & Garden,680000,North America,2022-12-28
+Product_CC,Clothing,760000,Europe,2023-03-05
+Product_DD,Sports,350000,Asia,2022-11-22
+Product_EE,Electronics,1550000,North America,2023-02-14
+Product_FF,Home & Garden,590000,Europe,2022-09-18
+Product_GG,Clothing,710000,Asia,2023-04-10
+Product_HH,Sports,440000,North America,2022-12-08
+Product_II,Electronics,1290000,Europe,2023-01-25
+Product_JJ,Home & Garden,650000,Asia,2022-10-15
+Product_KK,Clothing,780000,North America,2023-03-18
+Product_LL,Sports,520000,Europe,2022-11-12
+Product_MM,Electronics,1380000,Asia,2023-02-22
+Product_NN,Home & Garden,620000,North America,2022-12-30
+Product_OO,Clothing,690000,Europe,2023-04-05
+Product_PP,Sports,480000,Asia,2022-10-28
+Product_QQ,Electronics,1470000,North America,2023-01-08
+Product_RR,Home & Garden,710000,Europe,2022-11-25
+Product_SS,Clothing,740000,Asia,2023-03-12
+Product_TT,Sports,410000,North America,2022-12-15
+Product_UU,Electronics,1510000,Europe,2023-02-18
+Product_VV,Home & Garden,660000,Asia,2022-09-22
+Product_WW,Clothing,820000,North America,2023-04-28
+Product_XX,Sports,390000,Europe,2022-11-18

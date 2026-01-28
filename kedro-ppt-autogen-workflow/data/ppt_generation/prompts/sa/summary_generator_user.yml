@@ -1,0 +1,8 @@
+messages:
+  - role: user
+    content: |
+      For slide '{slide_title}', create a summary.
+
+      Summary Instruction: {summary_instruction}
+
+      Call the generate_summary tool with the instruction above to generate the summary.
