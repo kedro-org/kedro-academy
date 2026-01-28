@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
 from crewai import Agent
 from kedro.pipeline.llm_context import LLMContext
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -161,63 +159,3 @@ class BaseAgent(ABC, Generic[T]):
         """
         self._ensure_compiled()
         return self._agent
-
-    def _try_parse_output(
-        self, output: Any, output_type: type[BaseModel]
-    ) -> BaseModel | None:
-        """Try to parse output into the output type.
-
-        Args:
-            output: Output from agent/task execution
-            output_type: Pydantic model type to parse into
-
-        Returns:
-            Parsed model instance or None if parsing fails
-        """
-        if output is None:
-            return None
-
-        # Handle string output
-        if isinstance(output, str):
-            output = output.strip()
-            if output.startswith("{"):
-                try:
-                    data = json.loads(output)
-                    if isinstance(data, dict):
-                        return output_type(**data)
-                except (json.JSONDecodeError, TypeError, ValueError):
-                    pass
-
-        # Handle dict output
-        if isinstance(output, dict):
-            try:
-                return output_type(**output)
-            except (TypeError, ValueError):
-                pass
-
-        # Handle object with content attribute
-        if hasattr(output, "content"):
-            return self._try_parse_output(output.content, output_type)
-
-        return None
-
-    def invoke(self, task: str) -> Any:
-        """Convenience method for single-agent execution.
-
-        Note: This method is not used in multi-agent CrewAI workflows.
-        In CrewAI, agents are invoked through Tasks within a Crew, not directly.
-        This method is provided for potential single-agent use cases or testing.
-
-        Args:
-            task: Task description or input
-
-        Returns:
-            Agent output (implementation would use CrewAI agent execution)
-
-        Raises:
-            NotImplementedError: Direct agent invocation not implemented for CrewAI workflows
-        """
-        raise NotImplementedError(
-            f"{self.agent_name} agents are used within CrewAI tasks, not invoked directly. "
-            "Use CrewAI Tasks and Crew for agent execution."
-        )

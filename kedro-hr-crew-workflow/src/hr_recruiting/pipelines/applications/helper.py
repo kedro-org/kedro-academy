@@ -87,55 +87,6 @@ def create_application(
     return application.model_dump(mode='json')
 
 
-def format_schema_info(schema_template: dict[str, Any]) -> str:
-    """Format schema information using template with dynamic schema JSON.
-
-    Args:
-        schema_template: Schema template dictionary from YAML dataset
-
-    Returns:
-        Formatted string with schema information
-    """
-    import json
-    
-    try:
-        # Get dynamic schemas from Pydantic models
-        candidate_profile_schema_json = json.dumps(
-            CandidateProfile.model_json_schema(), indent=2
-        )
-        evidence_snippets_schema_json = json.dumps(
-            EvidenceSnippet.model_json_schema(), indent=2
-        )
-
-        # Format candidate profile schema
-        candidate_profile_desc = schema_template["candidate_profile_schema"]["description"].format(
-            candidate_profile_schema_json=candidate_profile_schema_json
-        )
-
-        # Format evidence snippets schema
-        evidence_snippets_desc = schema_template["evidence_snippets_schema"]["description"].format(
-            evidence_snippets_schema_json=evidence_snippets_schema_json
-        )
-
-        # Get output format instructions
-        output_format_desc = schema_template["output_format"]["description"]
-
-        # Combine all schema information with proper spacing
-        schema_sections = [
-            candidate_profile_desc,
-            evidence_snippets_desc,
-            output_format_desc,
-        ]
-        return "\n\n".join(section.strip() for section in schema_sections if section.strip())
-    except KeyError as e:
-        print(f"Error: Missing key in schema template: {e}")  # noqa: T201
-        print(f"Available keys: {list(schema_template.keys())}")  # noqa: T201
-        raise
-    except Exception as e:
-        print(f"Error formatting schema info: {e}")  # noqa: T201
-        raise
-
-
 def format_resume_parsing_prompt(
     context: LLMContext,
     raw_resume_text: str,

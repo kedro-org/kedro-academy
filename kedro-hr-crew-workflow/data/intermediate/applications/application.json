@@ -2,7 +2,7 @@
   "application_id": "DS_CANDIDATE_001_SE_BACKEND_001",
   "candidate_id": "DS_CANDIDATE_001",
   "candidate_name": "Sarah Chen",
-  "submitted_at": "2026-01-27T12:59:44.500024",
+  "submitted_at": "2026-01-27T23:40:31.153772",
   "status": "pending",
   "artifacts": {
     "job_id": "SE_BACKEND_001",
@@ -168,19 +168,19 @@
     },
     {
       "snippet_id": "work_1",
-      "text": "Senior Data Scientist at DataCorp Analytics | Jan 2021 - Present: Developed and deployed ML models that improved customer retention by 25% Built end-to-end ML pipelines using Python, Spark, and Airflow processing 10TB+ daily Led a team of 3 junior data scientists and mentored them on best practices Created recommendation systems using collaborative filtering and deep learning Collaborated with engineering teams to productionize models using Docker and Kubernetes",
+      "text": "Senior Data Scientist at DataCorp Analytics | Jan 2021 - Present: Developed and deployed ML models that improved customer retention by 25%\nBuilt end-to-end ML pipelines using Python, Spark, and Airflow processing 10TB+ daily\nLed a team of 3 junior data scientists and mentored them on best practices\nCreated recommendation systems using collaborative filtering and deep learning\nCollaborated with engineering teams to productionize models using Docker and Kubernetes",
       "source": "work_history",
       "metadata": {}
     },
     {
       "snippet_id": "work_2",
-      "text": "Data Scientist at TechStart Inc. | Jun 2018 - Dec 2020: Built predictive models for fraud detection reducing false positives by 30% Performed statistical analysis and A/B testing to optimize product features Developed NLP models for sentiment analysis and text classification Created automated reporting dashboards using Tableau and Python",
+      "text": "Data Scientist at TechStart Inc. | Jun 2018 - Dec 2020: Built predictive models for fraud detection reducing false positives by 30%\nPerformed statistical analysis and A/B testing to optimize product features\nDeveloped NLP models for sentiment analysis and text classification\nCreated automated reporting dashboards using Tableau and Python",
       "source": "work_history",
       "metadata": {}
     },
     {
       "snippet_id": "work_3",
-      "text": "Junior Data Analyst at Analytics Solutions | Jul 2016 - May 2018: Performed data analysis and created visualizations for business stakeholders Cleaned and preprocessed large datasets using Python and SQL Assisted in building regression models for sales forecasting",
+      "text": "Junior Data Analyst at Analytics Solutions | Jul 2016 - May 2018: Performed data analysis and created visualizations for business stakeholders\nCleaned and preprocessed large datasets using Python and SQL\nAssisted in building regression models for sales forecasting",
       "source": "work_history",
       "metadata": {}
     },

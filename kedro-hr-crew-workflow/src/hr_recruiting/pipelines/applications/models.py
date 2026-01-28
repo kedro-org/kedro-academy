@@ -5,6 +5,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+
+class ParsedResume(BaseModel):
+    """Parsed resume model containing extracted text and candidate ID."""
+
+    candidate_id: str = Field(description="Candidate identifier from document properties")
+    raw_resume_text: str = Field(description="Extracted raw resume text")
+
+
 class EvidenceSnippet(BaseModel):
     """Evidence snippet for matching."""
 

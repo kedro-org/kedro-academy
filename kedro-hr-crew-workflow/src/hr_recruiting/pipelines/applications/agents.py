@@ -28,16 +28,16 @@ class ResumeParserAgent(BaseAgent["ResumeParserAgent"]):
     system_prompt_key = "resume_parser_agent_system_prompt"
 
 
-def create_resume_parser_agent_with_tools(
-    context: LLMContext,
+def create_resume_parser_agent(
+    resume_parser_context: LLMContext,
 ) -> Agent:
-    """Create ResumeParserAgent with tools from context.
+    """Creates ResumeParserAgent from resume_parser_context
 
     Args:
-        context: LLMContext containing LLM, prompts, and tools
+        resume_parser_context: LLMContext containing LLM, prompts, and tools
 
     Returns:
         Compiled CrewAI Agent
     """
-    agent = ResumeParserAgent(context).compile()
-    return agent.agent
+    resume_parser_agent = ResumeParserAgent(resume_parser_context).compile()
+    return resume_parser_agent.agent

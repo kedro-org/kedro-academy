@@ -5,11 +5,14 @@ import json
 import re
 import textwrap
 import time
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 from crewai import Crew
 from docx import Document
 from kedro.pipeline.preview_contract import TextPreview
+from pydantic import BaseModel
+
+T = TypeVar("T", bound=BaseModel)
 
 def extract_text_from_document(doc: Document) -> str:
     """Extract all text from a Word document.
@@ -123,6 +126,35 @@ def extract_task_outputs_from_crew_result(crew_result: Any) -> list[Any]:
         return [crew_result]
     
     return []
+
+
+def get_model_dump(
+    model_class: type[T],
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Create a Pydantic model instance, validate it, and return as dict.
+    
+    This utility function eliminates the need for individual create_* functions
+    for simple model creation cases where we just need to pass kwargs to the
+    model constructor and return the dumped dict.
+    
+    Args:
+        model_class: Pydantic model class to instantiate
+        **kwargs: Keyword arguments to pass to model constructor
+        
+    Returns:
+        Validated model dumped to dict (using mode='json' for datetime serialization)
+        
+    Raises:
+        ValueError: If model validation fails
+    """
+    try:
+        model_instance = model_class(**kwargs)
+        return model_instance.model_dump(mode="json")
+    except Exception as e:
+        raise ValueError(
+            f"Validation failed for {model_class.__name__}: {e}"
+        ) from e
 
 
 def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | None:

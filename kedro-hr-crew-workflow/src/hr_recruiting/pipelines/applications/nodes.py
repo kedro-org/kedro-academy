@@ -5,16 +5,20 @@ from typing import Any
 from crewai import Crew
 from kedro.pipeline.llm_context import LLMContext
 
-from hr_recruiting.base.utils import execute_crew_with_retry, extract_text_from_document
+from hr_recruiting.base.utils import execute_crew_with_retry, extract_text_from_document, get_model_dump
 from hr_recruiting.pipelines.applications.agents import (
-    create_resume_parser_agent_with_tools,
+    create_resume_parser_agent,
 )
 from hr_recruiting.pipelines.applications.helper import extract_resume_parsing_result
+from hr_recruiting.pipelines.applications.models import ParsedResume
 from hr_recruiting.pipelines.applications.tasks import create_resume_parsing_task
 
 
 def parse_raw_resume(raw_resume_doc: Any) -> dict[str, Any]:
     """Extract text and candidate_id from raw resume document.
+    
+    Returns:
+        ParsedResume model dumped to dict for Kedro dataset compatibility
     
     Raises:
         ValueError: If candidate_id cannot be extracted from document properties
@@ -22,6 +26,7 @@ def parse_raw_resume(raw_resume_doc: Any) -> dict[str, Any]:
     raw_text = extract_text_from_document(raw_resume_doc)
     
     # Try to extract candidate_id from document properties
+    # In production, we should use a more robust way to extract the candidate_id
     candidate_id = None
     if hasattr(raw_resume_doc.core_properties, "title") and raw_resume_doc.core_properties.title:
         candidate_id = raw_resume_doc.core_properties.title
@@ -31,10 +36,12 @@ def parse_raw_resume(raw_resume_doc: Any) -> dict[str, Any]:
     if not candidate_id:
         raise ValueError("candidate_id not found in resume document properties (title or subject)")
     
-    return {
-        "candidate_id": candidate_id,
-        "raw_resume_text": raw_text,
-    }
+    # Create and validate ParsedResume model using utility function
+    return get_model_dump(
+        ParsedResume,
+        candidate_id=candidate_id,
+        raw_resume_text=raw_text,
+    )
 
 
 def run_resume_parsing_crew(
@@ -42,29 +49,24 @@ def run_resume_parsing_crew(
     parsed_resume: dict[str, Any],
 ) -> dict[str, Any]:
     """Run CrewAI crew for resume parsing and normalization."""
-    # Create agent
-    agent = create_resume_parser_agent_with_tools(resume_parser_context)
-
-    # Get raw resume text and candidate_id - fail if missing
-    if "raw_resume_text" not in parsed_resume:
-        raise ValueError("raw_resume_text not found in parsed_resume")
+    # Extract fields from already-validated parsed_resume dict
     raw_resume_text = parsed_resume["raw_resume_text"]
-    
-    if "candidate_id" not in parsed_resume:
-        raise ValueError("candidate_id not found in parsed_resume")
     candidate_id = parsed_resume["candidate_id"]
+
+    # Create agent
+    resume_parser_agent = create_resume_parser_agent(resume_parser_context)
 
     # Create task (schema JSON is injected from Pydantic models in format_resume_parsing_prompt)
     task = create_resume_parsing_task(
         resume_parser_context,
-        agent,
+        resume_parser_agent,
         raw_resume_text,
         candidate_id,
     )
 
     # Create crew
     crew = Crew(
-        agents=[agent],
+        agents=[resume_parser_agent],
         tasks=[task],
         verbose=True,
         tracing=False,
