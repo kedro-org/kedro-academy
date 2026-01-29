@@ -28,6 +28,8 @@ Thumbs.db
 
 # Data
 !data/.gitkeep
+data/intermediate/**/*.json
+data/reports/**
 
 # Jupyter
 .ipynb_checkpoints
