@@ -5,22 +5,17 @@
   "match_score": 59.89,
   "must_have_coverage": 0.56,
   "gaps": [
-    "Experience with version control systems (Git) and CI/CD pipelines is only partially met.",
-    "Bachelor's degree in Computer Science, Engineering, or related field is only partially met.",
-    "Knowledge of system design patterns and best practices is a nice-to-have and not a must-have."
+    "Experience with version control systems (Git) and CI/CD pipelines",
+    "Bachelor's degree in Computer Science, Engineering, or related field"
   ],
   "strengths": [
-    "Strong proficiency in Python, Java, or Go.",
-    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis).",
-    "Knowledge of containerization technologies (Docker, Kubernetes)."
+    "Strong proficiency in Python, Java, or Go",
+    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+    "Knowledge of containerization technologies (Docker, Kubernetes)"
   ],
   "risk_flags": [],
-  "recommendation": "review",
-  "qa_suggestions": [
-    "Consider additional technical assessments to evaluate proficiency in CI/CD pipelines.",
-    "Verify educational qualifications to ensure they meet the job requirements.",
-    "Assess experience with system design patterns during the interview process."
-  ],
+  "recommendation": "reject",
+  "qa_suggestions": [],
   "match_results": [
     {
       "requirement": "Strong proficiency in Python, Java, or Go",

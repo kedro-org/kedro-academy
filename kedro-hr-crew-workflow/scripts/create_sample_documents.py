@@ -235,10 +235,11 @@ def create_software_engineer_resume(output_path: Path) -> None:
     # Professional summary
     doc.add_heading("Professional Summary", level=1)
     doc.add_paragraph(
-        "Results-driven Software Engineer with 7+ years of experience designing and developing scalable "
-        "backend systems. Expertise in Python, Java, and Go with a strong focus on microservices, "
-        "API development, and cloud infrastructure. Proven ability to lead technical initiatives and "
-        "deliver high-quality software solutions that serve millions of users."
+        "Senior Software Engineer with 6+ years of professional software development experience specializing "
+        "in backend systems and distributed architectures. Strong proficiency in Python, Java, and Go with "
+        "extensive experience in RESTful API design, microservices, and cloud platforms. Proven track record "
+        "of building scalable systems, optimizing database performance, and implementing robust CI/CD pipelines. "
+        "Passionate about system design patterns, test-driven development, and mentoring junior engineers."
     )
     doc.add_paragraph("")  # Empty line
     
@@ -247,10 +248,12 @@ def create_software_engineer_resume(output_path: Path) -> None:
     doc.add_paragraph("Programming Languages: Python, Java, Go, JavaScript, TypeScript")
     doc.add_paragraph("Backend Frameworks: FastAPI, Django, Flask, Spring Boot, Gin")
     doc.add_paragraph("Databases: PostgreSQL, MySQL, MongoDB, Redis, Cassandra")
-    doc.add_paragraph("Cloud & Infrastructure: AWS (EC2, S3, Lambda, RDS), Docker, Kubernetes, Terraform")
-    doc.add_paragraph("Tools & Technologies: Git, CI/CD (Jenkins, GitHub Actions), REST APIs, GraphQL, gRPC")
+    doc.add_paragraph("Cloud & Infrastructure: AWS (EC2, S3, Lambda, RDS), GCP (Cloud Run, Cloud SQL), Azure, Docker, Kubernetes")
+    doc.add_paragraph("API Design: RESTful APIs, GraphQL, gRPC, API Gateway design patterns")
+    doc.add_paragraph("Version Control & CI/CD: Git, GitHub Actions, Jenkins, GitLab CI, automated testing and deployment pipelines")
     doc.add_paragraph("Message Queues: RabbitMQ, Apache Kafka, AWS SQS")
-    doc.add_paragraph("Monitoring: Prometheus, Grafana, Datadog, ELK Stack")
+    doc.add_paragraph("Monitoring & Observability: Prometheus, Grafana, Datadog, ELK Stack, distributed tracing")
+    doc.add_paragraph("Development Practices: Test-Driven Development (TDD), system design patterns, code reviews, agile methodologies")
     doc.add_paragraph("")  # Empty line
     
     # Work experience
@@ -261,13 +264,17 @@ def create_software_engineer_resume(output_path: Path) -> None:
     doc.add_paragraph("CloudScale Technologies | San Francisco, CA | Mar 2020 - Present")
     doc.add_paragraph("Key Achievements:")
     achievements1 = [
-        "Architected and developed microservices handling 10M+ requests per day using Python and Go",
+        "Architected and developed distributed microservices handling 10M+ requests per day using Python, Java, and Go",
+        "Designed and implemented RESTful APIs and GraphQL endpoints following industry best practices, serving mobile and web clients",
         "Led migration from monolithic application to microservices architecture, improving scalability by 300%",
-        "Designed and implemented RESTful APIs and GraphQL endpoints serving mobile and web clients",
-        "Built real-time data processing pipelines using Kafka and Redis",
-        "Mentored 4 junior engineers and established code review best practices",
-        "Reduced API response times by 40% through database optimization and caching strategies",
-        "Implemented CI/CD pipelines reducing deployment time from 2 hours to 15 minutes"
+        "Optimized PostgreSQL and MySQL database queries, reducing query response times by 50% and implementing Redis caching strategies",
+        "Built and maintained NoSQL databases (MongoDB, Redis) for high-performance data storage and retrieval",
+        "Deployed and managed applications on AWS (EC2, S3, RDS) and GCP, utilizing Docker and Kubernetes for containerization and orchestration",
+        "Implemented comprehensive CI/CD pipelines using Git, Jenkins, and GitHub Actions, reducing deployment time from 2 hours to 15 minutes",
+        "Built real-time data processing pipelines using Apache Kafka, RabbitMQ, and AWS SQS for asynchronous message handling",
+        "Set up monitoring and observability using Prometheus, Grafana, and Datadog for system health and performance tracking",
+        "Practiced Test-Driven Development (TDD) and applied system design patterns to build maintainable and scalable solutions",
+        "Mentored 4 junior engineers, conducted code reviews, and established development best practices"
     ]
     for achievement in achievements1:
         doc.add_paragraph(achievement, style="List Bullet")
@@ -278,11 +285,15 @@ def create_software_engineer_resume(output_path: Path) -> None:
     doc.add_paragraph("StartupHub | Austin, TX | Jun 2017 - Feb 2020")
     doc.add_paragraph("Key Achievements:")
     achievements2 = [
-        "Developed backend services using Python and Django for a SaaS platform",
-        "Built and maintained PostgreSQL databases and optimized query performance",
-        "Implemented authentication and authorization systems using JWT and OAuth2",
-        "Created automated testing suites achieving 85% code coverage",
-        "Collaborated with frontend team to design and implement API contracts"
+        "Developed scalable backend services using Python, Java, and Django for a SaaS platform serving 1M+ users",
+        "Designed and developed RESTful APIs following REST principles, ensuring consistent and intuitive API design",
+        "Built and maintained PostgreSQL and MySQL databases, optimized complex queries, and implemented database indexing strategies",
+        "Worked with MongoDB and Redis for caching and session management, improving application performance",
+        "Deployed applications on AWS cloud platform, utilizing EC2, S3, and RDS services",
+        "Containerized applications using Docker and orchestrated with Kubernetes for scalable deployments",
+        "Implemented CI/CD pipelines using Git version control and Jenkins, automating testing and deployment processes",
+        "Applied Test-Driven Development (TDD) practices, creating comprehensive test suites achieving 85% code coverage",
+        "Collaborated with cross-functional teams to design and implement API contracts and system architecture"
     ]
     for achievement in achievements2:
         doc.add_paragraph(achievement, style="List Bullet")
@@ -293,10 +304,12 @@ def create_software_engineer_resume(output_path: Path) -> None:
     doc.add_paragraph("TechVentures | San Jose, CA | Jul 2016 - May 2017")
     doc.add_paragraph("Key Achievements:")
     achievements3 = [
-        "Developed features for web applications using Java and Spring Framework",
-        "Participated in agile development processes and sprint planning",
-        "Fixed bugs and improved application performance",
-        "Wrote unit and integration tests"
+        "Developed backend features for web applications using Java, Python, and Spring Framework",
+        "Gained experience with PostgreSQL database design and query optimization",
+        "Learned and applied Git version control best practices in collaborative development environment",
+        "Participated in agile development processes, sprint planning, and code review sessions",
+        "Fixed bugs, improved application performance, and wrote comprehensive unit and integration tests",
+        "Assisted in API development and learned RESTful API design principles"
     ]
     for achievement in achievements3:
         doc.add_paragraph(achievement, style="List Bullet")
@@ -313,6 +326,12 @@ def create_software_engineer_resume(output_path: Path) -> None:
     doc.add_heading("Certifications", level=1)
     doc.add_paragraph("AWS Certified Solutions Architect - Associate (2021)")
     doc.add_paragraph("Kubernetes Certified Application Developer (2022)")
+    doc.add_paragraph("")  # Empty line
+    
+    # Open Source Contributions
+    doc.add_heading("Open Source Contributions", level=1)
+    doc.add_paragraph("Contributor to open-source projects on GitHub, including contributions to Python libraries and Go microservices frameworks")
+    doc.add_paragraph("Maintained personal projects demonstrating expertise in RESTful API design, microservices, and system design patterns")
     
     # Save document
     doc.save(output_path)

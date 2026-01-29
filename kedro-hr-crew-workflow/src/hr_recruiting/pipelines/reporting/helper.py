@@ -79,10 +79,11 @@ def setup_document(result: ScreeningResult) -> Document:
 
 def add_header(doc: Document, result: ScreeningResult) -> None:
     """Add document header with title and application ID."""
-    title_text = f"Screening Report for {result.candidate_name}, {result.job_title}"
+    title_text = f"Screening Report for {result.candidate_name}"
     title = doc.add_heading(title_text, 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     doc.add_paragraph(f"Application ID: {result.application_id}")
+    doc.add_paragraph(f"Position applied: {result.job_title}")
     doc.add_paragraph("")
 
 

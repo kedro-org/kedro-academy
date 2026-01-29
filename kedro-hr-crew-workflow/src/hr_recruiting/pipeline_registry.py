@@ -16,16 +16,16 @@ def register_pipelines() -> dict[str, Pipeline]:
     screening_pipeline = create_screening_pipeline()
     reporting_pipeline = create_reporting_pipeline()
 
-    # Combined HR pipeline: jobs + applications + screening + reporting
+    # Combined HR pipeline: applications + screening + reporting
     hr_pipeline = (
-        jobs_pipeline
-        + applications_pipeline
+        applications_pipeline
         + screening_pipeline
         + reporting_pipeline
     )
 
     return {
-        "__default__": hr_pipeline,
+        "__default__": jobs_pipeline + hr_pipeline,
+        "hr": hr_pipeline,
         "jobs": jobs_pipeline,
         "applications": applications_pipeline,
         "screening": screening_pipeline,

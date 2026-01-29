@@ -1,0 +1,159 @@
+{
+  "application_id": "SE_CANDIDATE_001_SE_BACKEND_001",
+  "candidate_name": "Michael Rodriguez",
+  "job_title": "Senior Software Engineer - Backend",
+  "match_score": 84.38,
+  "must_have_coverage": 0.89,
+  "gaps": [
+    "Experience with cloud platforms (AWS, GCP, or Azure) - confidence 0.6",
+    "Bachelor's degree in Computer Science, Engineering, or related field - confidence 0.6"
+  ],
+  "strengths": [
+    "5+ years of professional software development experience - confidence 0.8",
+    "Strong proficiency in Python, Java, or Go - confidence 0.9",
+    "Experience with RESTful API design and development - confidence 0.8",
+    "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis) - confidence 0.9",
+    "Knowledge of containerization technologies (Docker, Kubernetes) - confidence 0.9",
+    "Experience with version control systems (Git) and CI/CD pipelines - confidence 0.7"
+  ],
+  "risk_flags": [],
+  "recommendation": "proceed",
+  "qa_suggestions": [
+    "Consider further assessing the candidate's experience with cloud platforms.",
+    "Verify the candidate's educational background."
+  ],
+  "match_results": [
+    {
+      "requirement": "5+ years of professional software development experience",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "requirement": "Strong proficiency in Python, Java, or Go",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "skill_1",
+        "skill_2",
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "requirement": "Experience with RESTful API design and development",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "requirement": "Solid understanding of relational databases (PostgreSQL, MySQL) and NoSQL databases (MongoDB, Redis)",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "skill_11",
+        "skill_12",
+        "skill_13",
+        "skill_14",
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "requirement": "Experience with cloud platforms (AWS, GCP, or Azure)",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "skill_18"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "requirement": "Knowledge of containerization technologies (Docker, Kubernetes)",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "skill_19",
+        "skill_20",
+        "work_1",
+        "work_2"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "requirement": "Experience with version control systems (Git) and CI/CD pipelines",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "requirement": "Bachelor's degree in Computer Science, Engineering, or related field",
+      "requirement_type": "must_have",
+      "snippet_ids": [
+        "edu_1"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "requirement": "Experience with message queues (RabbitMQ, Kafka, SQS)",
+      "requirement_type": "nice_to_have",
+      "snippet_ids": [
+        "skill_30",
+        "skill_31",
+        "work_1"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "requirement": "Knowledge of GraphQL API design",
+      "requirement_type": "nice_to_have",
+      "snippet_ids": [
+        "skill_22",
+        "work_1"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "requirement": "Experience with distributed systems and microservices architecture",
+      "requirement_type": "nice_to_have",
+      "snippet_ids": [
+        "work_1"
+      ],
+      "confidence": 0.5
+    },
+    {
+      "requirement": "Familiarity with monitoring and observability tools (Prometheus, Grafana, Datadog)",
+      "requirement_type": "nice_to_have",
+      "snippet_ids": [
+        "skill_33",
+        "skill_34",
+        "skill_35",
+        "work_1"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "requirement": "Knowledge of system design patterns and best practices",
+      "requirement_type": "nice_to_have",
+      "snippet_ids": [
+        "skill_24",
+        "skill_39",
+        "work_1",
+        "work_2",
+        "work_3"
+      ],
+      "confidence": 0.8
+    }
+  ]
+}

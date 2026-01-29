@@ -78,7 +78,8 @@ def generate_hr_report(
     add_email_draft_section(doc, email)
 
     # Add QA suggestions
-    add_bullet_list_section(doc, "Next Steps / QA Suggestions", result.qa_suggestions)
+    if len(result.qa_suggestions) > 0:
+        add_bullet_list_section(doc, "Next Steps / QA Suggestions", result.qa_suggestions)
 
     # Add footer
     add_footer(doc)
