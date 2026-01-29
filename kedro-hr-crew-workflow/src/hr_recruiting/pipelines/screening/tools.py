@@ -77,7 +77,12 @@ def build_requirements_matcher_tool(
         - Prioritizes technical terms over common words
 
         Returns:
-            Dictionary with application_id and match_results (list of match results)
+            RequirementsMatchingResult dictionary containing:
+            - application_id: Application identifier
+            - candidate_name: Candidate name
+            - job_title: Job title
+            - match_results: List of match results with requirement, requirement_type, snippet_ids, and confidence
+            - metadata: Dictionary with total_must_have_requirements and total_nice_to_have_requirements
         """
         must_have = job_requirements.get("must_have", [])
         nice_to_have = job_requirements.get("nice_to_have", [])

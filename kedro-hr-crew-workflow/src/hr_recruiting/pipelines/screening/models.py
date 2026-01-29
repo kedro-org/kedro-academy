@@ -39,16 +39,20 @@ class ScoringResult(BaseModel):
 
 
 class ScreeningResult(BaseModel):
-    """Screening result model."""
+    """Screening result model containing complete candidate evaluation.
+    
+    This model represents the final output from the screening pipeline,
+    including match scores, recommendations, and detailed analysis.
+    """
 
     application_id: str = Field(description="Application identifier")
     candidate_name: str = Field(description="Candidate name for communications")
     job_title: str = Field(description="Job title for communications")
     match_score: float = Field(ge=0.0, le=100.0, description="Overall match score (0-100)")
-    must_have_coverage: float = Field(ge=0.0, le=1.0, description="Must-have requirements coverage")
-    gaps: list[str] = Field(default_factory=list, description="Identified gaps")
-    strengths: list[str] = Field(default_factory=list, description="Candidate strengths")
-    risk_flags: list[str] = Field(default_factory=list, description="Risk flags")
-    recommendation: str = Field(description="Recommendation (e.g., 'proceed', 'reject', 'review')")
-    qa_suggestions: list[str] = Field(default_factory=list, description="QA suggestions")
-    match_results: list[MatchResult] = Field(default_factory=list, description="Detailed match results")
+    must_have_coverage: float = Field(ge=0.0, le=1.0, description="Must-have requirements coverage (0.0-1.0)")
+    gaps: list[str] = Field(default_factory=list, description="Identified gaps in candidate qualifications")
+    strengths: list[str] = Field(default_factory=list, description="Candidate strengths and qualifications")
+    risk_flags: list[str] = Field(default_factory=list, description="Risk flags or concerns")
+    recommendation: str = Field(description="Recommendation: 'proceed', 'reject', or 'review'")
+    qa_suggestions: list[str] = Field(default_factory=list, description="QA suggestions for next steps (empty for rejected candidates)")
+    match_results: list[MatchResult] = Field(default_factory=list, description="Detailed match results for each requirement")

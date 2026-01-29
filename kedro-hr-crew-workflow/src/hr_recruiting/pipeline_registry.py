@@ -1,4 +1,9 @@
-"""Pipeline definitions."""
+"""Pipeline registry for HR recruiting workflows.
+
+This module registers all pipelines and combines them into logical groups
+for execution. The default pipeline runs the complete workflow from job
+posting parsing through candidate screening and report generation.
+"""
 
 from kedro.pipeline import Pipeline
 
@@ -9,7 +14,17 @@ from hr_recruiting.pipelines.screening import create_pipeline as create_screenin
 
 
 def register_pipelines() -> dict[str, Pipeline]:
-    """Register the project's pipelines."""
+    """Register all pipelines for the HR recruiting workflow.
+    
+    Returns:
+        Dictionary of pipeline names to Pipeline instances:
+        - "__default__": Complete workflow (jobs + applications + screening + reporting)
+        - "hr": HR workflow (applications + screening + reporting)
+        - "jobs": Jobs pipeline only
+        - "applications": Applications pipeline only
+        - "screening": Screening pipeline only
+        - "reporting": Reporting pipeline only
+    """
     # Individual pipelines
     jobs_pipeline = create_jobs_pipeline()
     applications_pipeline = create_applications_pipeline()

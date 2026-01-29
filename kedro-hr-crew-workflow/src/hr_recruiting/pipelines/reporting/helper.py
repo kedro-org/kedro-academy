@@ -22,10 +22,11 @@ def draft_email(
     """Draft email communication based on screening result and templates.
 
     This is a deterministic function that creates an email draft from templates.
+    The template is selected based on the recommendation (proceed/review/reject).
 
     Args:
-        screening_result: Screening result with candidate_name, job_title, recommendation, qa_suggestions
-        email_templates: Email templates dictionary from config
+        screening_result: Screening result with candidate_name, job_title, and recommendation
+        email_templates: Email templates dictionary from config, keyed by recommendation type
 
     Returns:
         EmailDraft dictionary with subject, body, and placeholders
@@ -69,7 +70,14 @@ def draft_email(
 
 
 def setup_document(result: ScreeningResult) -> Document:
-    """Create and configure the Word document."""
+    """Create and configure the Word document with metadata.
+    
+    Args:
+        result: ScreeningResult to extract application_id for document title
+        
+    Returns:
+        Configured Word document with title, subject, and author metadata
+    """
     doc = Document()
     doc.core_properties.title = f"Screening Report - {result.application_id}"
     doc.core_properties.subject = "HR Candidate Screening Report"
@@ -78,17 +86,26 @@ def setup_document(result: ScreeningResult) -> Document:
 
 
 def add_header(doc: Document, result: ScreeningResult) -> None:
-    """Add document header with title and application ID."""
-    title_text = f"Screening Report for {result.candidate_name}"
+    """Add document header with title, application ID, and job title.
+    
+    Args:
+        doc: Word document to add header to
+        result: ScreeningResult containing candidate_name, application_id, and job_title
+    """
+    title_text = f"Screening Report for {result.candidate_name}, {result.job_title}"
     title = doc.add_heading(title_text, 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     doc.add_paragraph(f"Application ID: {result.application_id}")
-    doc.add_paragraph(f"Position applied: {result.job_title}")
     doc.add_paragraph("")
 
 
 def add_summary_table(doc: Document, result: ScreeningResult) -> None:
-    """Add executive summary table."""
+    """Add executive summary table with match score, recommendation, and coverage.
+    
+    Args:
+        doc: Word document to add table to
+        result: ScreeningResult containing match_score, recommendation, and must_have_coverage
+    """
     doc.add_heading("Executive Summary", level=1)
     summary_table = doc.add_table(rows=4, cols=2)
     summary_table.style = "Light Grid Accent 1"
@@ -122,7 +139,18 @@ def add_bullet_list_section(
     items: list[str],
     prefix: str = "•",
 ) -> None:
-    """Add a section with heading and bullet list."""
+    """Add a section with heading and bullet list.
+    
+    Args:
+        doc: Word document to add section to
+        heading: Section heading text
+        items: List of items to display as bullets
+        prefix: Prefix character for items (default: "•", can be emoji like "⚠️")
+        
+    Note:
+        If items list is empty, the section is not added.
+        Existing bullet characters in items are stripped before adding.
+    """
     if not items:
         return
     
@@ -144,7 +172,15 @@ def add_bullet_list_section(
 
 
 def add_match_results_table(doc: Document, match_results: list[Any]) -> None:
-    """Add detailed match results table."""
+    """Add detailed match results table showing requirement matches.
+    
+    Args:
+        doc: Word document to add table to
+        match_results: List of MatchResult objects with requirement, confidence, and snippet_ids
+        
+    Note:
+        If match_results is empty, the table is not added.
+    """
     if not match_results:
         return
     
@@ -170,7 +206,15 @@ def add_match_results_table(doc: Document, match_results: list[Any]) -> None:
 
 
 def add_email_draft_section(doc: Document, email_draft: Any) -> None:
-    """Add email draft section."""
+    """Add email draft section with subject and body.
+    
+    Args:
+        doc: Word document to add section to
+        email_draft: EmailDraft object with subject and body
+        
+    Note:
+        If email_draft is None or empty, the section is not added.
+    """
     if not email_draft:
         return
     
@@ -183,7 +227,11 @@ def add_email_draft_section(doc: Document, email_draft: Any) -> None:
 
 
 def add_footer(doc: Document) -> None:
-    """Add document footer."""
+    """Add document footer with system information.
+    
+    Args:
+        doc: Word document to add footer to
+    """
     doc.add_paragraph("─" * 50)
     doc.add_paragraph("This report was generated automatically by the HR Recruiting System.")
     doc.add_paragraph("Please review all recommendations before taking action.")

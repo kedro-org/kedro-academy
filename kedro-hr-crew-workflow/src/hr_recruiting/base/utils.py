@@ -221,7 +221,19 @@ def extract_field_from_prompt(prompt_content: str, field_name: str) -> str | Non
     return None
 
 def make_code_preview_fn(*funcs: Callable):
-    """Create a preview function with captured callable context."""
+    """Create a preview function with captured callable context.
+    
+    This function generates a Kedro-Viz TextPreview function that displays
+    the source code of the provided callables. Used for preview functions
+    in llm_context_node to show tool implementations.
+    
+    Args:
+        *funcs: Variable number of callable objects (functions or methods)
+                whose source code should be included in the preview
+                
+    Returns:
+        A callable that returns a TextPreview object containing the source code
+    """
     def preview_fn() -> TextPreview:
         sources: list[str] = []
 

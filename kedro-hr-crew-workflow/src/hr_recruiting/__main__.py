@@ -1,5 +1,7 @@
-"""HR Recruiting CrewAI Workflow file for ensuring the package is 
-executable as `hr-recruiting` and `python -m hr-recruiting`
+"""Entry point for HR Recruiting Kedro project.
+
+This module ensures the package is executable as `hr-recruiting` and
+`python -m hr-recruiting` via Kedro's CLI framework.
 """
 import sys
 from pathlib import Path

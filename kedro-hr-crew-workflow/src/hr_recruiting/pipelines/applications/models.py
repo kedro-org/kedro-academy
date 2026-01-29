@@ -53,12 +53,17 @@ class ResumeParsingOutput(BaseModel):
     evidence_snippets: list[EvidenceSnippet] = Field(description="Evidence snippets for matching")
 
 class Application(BaseModel):
-    """Application model linking candidate to job."""
+    """Application model linking candidate to job.
+    
+    This model represents a candidate's application for a specific job position.
+    It combines candidate information with job metadata and evidence snippets
+    for use in the screening pipeline.
+    """
 
-    application_id: str = Field(description="Unique application identifier")
+    application_id: str = Field(description="Unique application identifier (format: candidate_id_job_id)")
     candidate_id: str = Field(description="Candidate identifier")
     candidate_name: str = Field(description="Candidate name")
     submitted_at: datetime = Field(description="Submission timestamp")
     status: str = Field(default="pending", description="Application status")
-    artifacts: dict[str, Any] = Field(default_factory=dict, description="Job-related artifacts (job_id, job_title, location)")
-    evidence_snippets: list[EvidenceSnippet] = Field(default_factory=list, description="Evidence snippets for matching")
+    artifacts: dict[str, Any] = Field(default_factory=dict, description="Job-related artifacts containing job_id, job_title, and location")
+    evidence_snippets: list[EvidenceSnippet] = Field(default_factory=list, description="Evidence snippets extracted from resume for requirement matching")
