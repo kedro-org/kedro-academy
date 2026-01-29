@@ -134,7 +134,7 @@ Extract and evaluate candidates using a **hybrid deterministic + agentic workflo
 
 ---
 
-## Slide 6: Key Takeaways
+## Key Takeaways
 
 ✅ **Agentic + Structured = Best of Both Worlds**  
 Combine agentic intelligence with Kedro's pipeline robustness
@@ -153,8 +153,8 @@ Use the HR screening workflow as a blueprint for your own Kedro + CrewAI project
 
 ---
 
-## Slide 7: Questions?
+## Questions?
 
-**Thank you for your attention.**
+**Thank you for your time.**
 
 Questions, feedback, and contributions welcome!
