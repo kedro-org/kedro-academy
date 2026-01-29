@@ -470,6 +470,8 @@ kedro-hr-crew-workflow/
 │   └── reports/                 # Final reports
 │       └── *_hr_report.docx
 │
+├── docs/                        # Project related docs
+├── scripts/                     # Project related scripts
 └── src/hr_recruiting/
     ├── base/
     │   ├── agent.py             # Base agent class
