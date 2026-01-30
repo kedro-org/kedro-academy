@@ -9,47 +9,22 @@
 ### The Vision
 
 Building robust, maintainable, production-ready data workflows that combine deterministic and agentic pipelines:
-- **Kedro**: Pipelines, catalogs, configuration, observability
-- **CrewAI**: Agents, tasks, tools, processes, crews
+
+- **Kedro**: Kedro is a toolbox for production-ready data pipelines. Core components of Kedro are DataCatalog, Nodes and Pipelines
+- **CrewAI**: CrewAI is a framework for building agentic workflows. Core components of CrewAI are Agents, Tasks, Tools, Crews and Processes
 
 ![Agentic Development Lifecycle](./assets/agent_dev_lifecycle.png)
 
 ### Key Principles
 
 1. **Agentic ≠ Unstructured** — Agents thrive within a pipeline framework for maintainability and testability
-2. **Configuration as Code** — Prompts & LLM settings live in YAML catalog; version in Git, A/B test freely
+2. **Configuration and code separation** — Prompts & LLM settings live in YAML catalog; version in Git, A/B test freely
 3. **Hybrid by Design** — Deterministic layers (parsing, reporting) + agentic layers (reasoning, evaluation)
-4. **Observable & Traceable** — Kedro-Viz, preview functions, and optional tracing for full visibility
-
-### Framework Landscape
-- **LangGraph**: Graph-based state machines
-- **AutoGen**: Multi-agent conversation patterns
-- **CrewAI**: Role-based agents with defined tasks and crew orchestration
+4. **Observable & Traceable** — Visualization tools like Kedro-Viz or CrewAI's plot and optional tracing for full visibility
 
 ### Agentic Design Patterns
 
 ![Common Patterns](./assets/agentic_workflow_patterns.jpg)
-
----
-
-## Architecture — Component Ownership
-
-### Who Owns What?
-
-| **Component** | **Kedro** | **CrewAI** |
-|---|---|---|
-| **Prompts & Config** | ✓ Catalog via `prompt datasets` | — |
-| **Agent Context** | ✓ Built via `llm_context_node` | ✓ Consumes context |
-| **Agents & Tasks** | — | ✓ Role, goal, tasks, execution |
-| **Tools & Logic** | ✓ Catalog datasets | ✓ logic execution |
-| **Pipeline Orchestration** | ✓ DAG execution and open to use any orchestrator | — |
-
-### Maintainability Stack
-
-- **Testability**: Each node is independent and unit-testable.
-- **Configuration**: No magic paths — all prompts in catalog YAML. On a side note, CrewAI also has good support to handle configuration via YAML.
-- **Type Safety**: Pydantic for structured outputs and CrewAI has great pydantic support.
-- **Observability**: Kedro-Viz for DAG visualisation, `preview_fn` for data inspection, optional Langfuse/Opik integration. You can also make use of CrewAI flows and plot method for this.
 
 ---
 
@@ -89,23 +64,90 @@ Extract and evaluate candidates using a **hybrid deterministic + agentic workflo
                     └──────────────────────────┘
 ```
 
-### Pipeline Stages
-1. **Resume Parser Agent** — Extract experience, skills, education
-2. **Requirements Matcher** — Evaluate fit against job requirements
-3. **Resume Evaluator** — Detailed assessment and recommendation
+### Agents Involved
+1. **Resume Parser Agent** — Used in our application pipeline to extract experience, skills, education
+2. **Requirements Matcher** — Used in our screening pipeline to evaluate fit against job requirements
+3. **Resume Evaluator** — Used in our screening pipeline to perform detailed assessment and provide a recommendation
 4. **Reporting** — Generate audit trail and draft communications
+
+### Architecture — Component Ownership
+
+| **Component** | **Kedro** | **CrewAI** |
+|---|---|---|
+| **Data, Prompts & Config** | ✓ Catalog via `prompt datasets` | — |
+| **Agent Context** | ✓ Built via `llm_context_node` | ✓ Consumes context |
+| **Tools & Logic** | ✓ Catalog datasets | ✓ logic execution |
+| **Agents & Tasks** | — | ✓ Role, goal, tasks, execution |
+| **Pipeline Orchestration** | ✓ DAG execution and open to use any orchestrator | — |
+
+
+### Project Structure
+
+```
+kedro-hr-crew-workflow/
+│
+├── conf/
+│   ├── base/
+│   │   ├── catalog.yml          # Data catalog (all I/O defined here)
+│   │   ├── config_genai.yml     # LLM and prompt configurations
+│   │   └── parameters.yml       # Project parameters
+│   └── local/
+│       └── credentials.yml      # API keys (gitignored)
+│
+├── data/
+│   ├── prompts/                 # Agent prompts
+│   │   ├── applications/        # Applications pipeline prompts
+│   │   │   ├── resume_parser_agent_system_prompt.yml
+│   │   │   └── resume_parsing_user_prompt.yml
+│   │   └── screening/           # Screening pipeline prompts
+│   │       ├── requirements_matcher_agent_system_prompt.yml
+│   │       ├── requirements_matching_user_prompt.yml
+│   │       ├── resume_evaluator_agent_system_prompt.yml
+│   │       └── resume_evaluation_user_prompt.yml
+│   │
+│   ├── config/                  # Business rules & templates
+│   │   ├── screening/           # Screening pipeline configuration
+│   │   │   ├── matching_config.yml
+│   │   │   └── scoring_config.yml
+│   │   └── reporting/           # Reporting pipeline configuration
+│   │       └── email_templates.yml
+│   │
+│   ├── sample/                  # Raw input documents
+│   │   ├── jobs/raw_job_posting.docx
+│   │   └── resumes/*.docx
+│   │
+│   ├── intermediate/            # Processing artifacts
+│   │   ├── jobs/                # Job metadata + requirements
+│   │   ├── applications/        # Evidence snippets + application
+│   │   └── screening/           # Screening results
+│   │
+│   └── reports/                 # Final reports
+│       └── *_hr_report.docx
+│
+├── docs/                        # Project related docs
+├── scripts/                     # Project related scripts
+└── src/hr_recruiting/
+    ├── base/
+    │   ├── agent.py             # Base agent class
+    │   └── utils.py             # Shared utilities
+    │
+    ├── datasets/
+    │   └── crew_model_client.py # CrewAI LLM dataset
+    │
+    └── pipelines/
+        ├── jobs/                # Deterministic job processing
+        ├── applications/        # Agentic application creation (1 agent)
+        ├── screening/           # Agentic candidate screening (2 agents)
+        └── reporting/           # Deterministic report generation
+    └── pipeline_registry.py     # Registry of available pipelines
+```
 
 ---
 
 ## Live Demonstration
 
-### Project Structure Overview
-- `conf/`: Configuration (catalog, parameters, credentials, genai config)
-- `data/`: Prompts, sample documents, outputs
-- `src/`: Pipelines, datasets, and utilities (llm_context_node)
-
 ### What We'll See
-1. **Get to know our sample data**: We will briefly check on the sample files available
+1. **Get to know our data**: We will briefly check on the data and conf files
 2. **Pipeline registry**: We will see how our pipelines are discoverable during kedro run
 3. **Trigger HR pipeline**: Trigger HR pipeline for one of our applicants and analyze the logs
 4. **What is inside screening pipeline**: Check internals of screening pipeline
