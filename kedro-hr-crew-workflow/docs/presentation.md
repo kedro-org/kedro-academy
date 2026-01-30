@@ -40,41 +40,37 @@ Building robust, maintainable, production-ready data workflows that combine dete
 Extract and evaluate candidates using a **hybrid deterministic + agentic workflow**:
 
 ```
-┌─────────────┐         ┌──────────────────────┐         ┌─────────────────┐
-│ Job .docx   │ ────→   │ Parse & Structure    │ ────→   │ Job Metadata    │
-│ Resume .docx│         │ (Deterministic)      │         │ Requirements    │
-└─────────────┘         └──────────────────────┘         └─────────────────┘
-       ↓                          ↓
-       └──────────────────────────┴───────────────────────┐
-                                  ↓
-                    ┌──────────────────────────┐
-                    │ Extract Evidence         │
-                    │ Match & Evaluate         │
-                    │ (Agentic Layer)          │
-                    └──────────────────────────┘
-                                  ↓
-                    ┌──────────────────────────┐
-                    │ Generate Report          │
-                    │ Compose Email Draft      │
-                    │ (Deterministic)          │
-                    └──────────────────────────┘
-                                  ↓
-                    ┌──────────────────────────┐
-                    │ HR Report + Email        │
-                    └──────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ Jobs Pipeline (Deterministic)                                   │
+│   Parse Job Posting → Normalize → Split into Metadata + Reqs    │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Applications Pipeline (Deterministic + Agentic - 1 Agent)       │
+│   Parse Resume → ResumeParserAgent → Create Application         │
+│   Output: Evidence Snippets + Application                       │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Screening Pipeline (Agentic - 2 Agents)                         │
+│   RequirementsMatcherAgent → ResumeEvaluatorAgent               │
+│   Output: Screening Result (with candidate info embedded)       │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Reporting Pipeline (Deterministic)                              │
+│   Draft Email (templates) → Generate HR Report (Word doc)       │
+└─────────────────────────────────────────────────────────────────┘
 ```
-
-### Agents Involved
-1. **Resume Parser Agent** — Used in our application pipeline to extract experience, skills, education
-2. **Requirements Matcher** — Used in our screening pipeline to evaluate fit against job requirements
-3. **Resume Evaluator** — Used in our screening pipeline to perform detailed assessment and provide a recommendation
-4. **Reporting** — Generate audit trail and draft communications
 
 ### Architecture — Component Ownership
 
 | **Component** | **Kedro** | **CrewAI** |
 |---|---|---|
-| **Data, Prompts & Config** | ✓ Catalog via `prompt datasets` | — |
+| **Data, Prompts & Config** | ✓ DataCatalog and `prompt datasets` | — |
 | **Agent Context** | ✓ Built via `llm_context_node` | ✓ Consumes context |
 | **Tools & Logic** | ✓ Catalog datasets | ✓ logic execution |
 | **Agents & Tasks** | — | ✓ Role, goal, tasks, execution |
@@ -144,7 +140,7 @@ kedro-hr-crew-workflow/
 
 ---
 
-## Live Demonstration
+## Demo
 
 ### What We'll See
 1. **Get to know our data**: We will briefly check on the data and conf files
@@ -154,9 +150,12 @@ kedro-hr-crew-workflow/
 5. **Kedro-Viz**: Interactive pipeline visualisation (node coloring, preview_fn)
 6. **Outputs**: Generated documents and structured data
 
+[!NOTE]
+> This project is developed with event-driven architecture in mind and can easily be extended to use batch processing
+
 ---
 
-## Roadmap — Production Readiness
+## Next Steps — Production Readiness
 
 ### Immediate Improvements
 
@@ -165,8 +164,6 @@ kedro-hr-crew-workflow/
 - **Tracing & Monitoring**: Langfuse/Opik integration for observability
 - **Scheduling**: Run via Airflow, Prefect, or event-driven architecture
 - **Security**: Secrets management in `conf/local/`
-
-*This project is developed with event-driven architecture in mind and can easily be extended to use batch processing*
 
 ### Kedro Evolution — What's Coming
 
