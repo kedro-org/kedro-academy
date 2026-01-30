@@ -8,9 +8,11 @@
 
 ### The Vision
 
-Building robust, maintainable agentic workflows by combining:
+Building robust, maintainable, production-ready data workflows that combine deterministic and agentic pipelines:
 - **Kedro**: Pipelines, catalogs, configuration, observability
-- **CrewAI**: Agents, tasks, orchestrated workflows
+- **CrewAI**: Agents, tasks, tools, processes, crews
+
+![Agentic Development Lifecycle](./assets/agent_dev_lifecycle.png)
 
 ### Key Principles
 
@@ -44,10 +46,10 @@ Building robust, maintainable agentic workflows by combining:
 
 ### Maintainability Stack
 
-- **Testability**: Each node is independent and unit-testable
-- **Configuration**: No magic paths — all prompts in catalog YAML
-- **Type Safety**: Pydantic for structured outputs
-- **Observability**: Kedro-Viz for DAG visualization, `preview_fn` for data inspection, optional Langfuse/Opik integration
+- **Testability**: Each node is independent and unit-testable.
+- **Configuration**: No magic paths — all prompts in catalog YAML. On a side note, CrewAI also has good support to handle configuration via YAML.
+- **Type Safety**: Pydantic for structured outputs and CrewAI has great pydantic support.
+- **Observability**: Kedro-Viz for DAG visualisation, `preview_fn` for data inspection, optional Langfuse/Opik integration. You can also make use of CrewAI flows and plot method for this.
 
 ---
 
@@ -103,7 +105,7 @@ Extract and evaluate candidates using a **hybrid deterministic + agentic workflo
 - `src/`: Pipelines, datasets, and utilities (llm_context_node)
 
 ### What We'll See
-1. **Kedro-Viz**: Interactive pipeline visualization (node coloring, preview_fn)
+1. **Kedro-Viz**: Interactive pipeline visualisation (node coloring, preview_fn)
 2. **Individual Pipeline Runs**: Each stage in isolation
 3. **End-to-End Execution**: From raw documents to HR report
 4. **Outputs**: Generated documents and structured data
@@ -158,3 +160,10 @@ Use the HR screening workflow as a blueprint for your own Kedro + CrewAI project
 **Thank you for your time.**
 
 Questions, feedback, and contributions welcome!
+
+---
+
+## References
+
+- [Kedro](https://docs.kedro.org/en/stable/)
+- [CrewAI](https://docs.crewai.com/)

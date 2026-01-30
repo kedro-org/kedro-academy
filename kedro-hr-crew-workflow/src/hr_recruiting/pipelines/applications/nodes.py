@@ -74,6 +74,7 @@ def run_resume_parsing_crew(
         tasks=[task],
         verbose=True,
         tracing=False,
+        output_log_file=True
     )
 
     # Execute crew with retry logic for connection errors
