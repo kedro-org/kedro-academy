@@ -150,7 +150,7 @@ kedro-hr-crew-workflow/
 5. **Kedro-Viz**: Interactive pipeline visualisation (node coloring, preview_fn)
 6. **Outputs**: Generated documents and structured data
 
-[!NOTE]
+> [!NOTE]
 > This project is developed with event-driven architecture in mind and can easily be extended to use batch processing
 
 ---
