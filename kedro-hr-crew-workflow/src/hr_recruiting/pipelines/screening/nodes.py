@@ -53,7 +53,7 @@ def orchestrate_screening_crew(
     )
 
     # Create tasks
-    requirements_task = create_requirements_matching_task(
+    requirements_matching_task = create_requirements_matching_task(
         requirements_matcher_context,
         requirements_matcher_agent,
     )
@@ -65,7 +65,7 @@ def orchestrate_screening_crew(
     # Create crew with telemetry and tracing disabled
     crew = Crew(
         agents=[requirements_matcher_agent, resume_evaluator_agent],
-        tasks=[requirements_task, evaluation_task],
+        tasks=[requirements_matching_task, evaluation_task],
         verbose=True,
         tracing=False,
     )

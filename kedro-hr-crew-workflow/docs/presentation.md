@@ -105,10 +105,12 @@ Extract and evaluate candidates using a **hybrid deterministic + agentic workflo
 - `src/`: Pipelines, datasets, and utilities (llm_context_node)
 
 ### What We'll See
-1. **Kedro-Viz**: Interactive pipeline visualisation (node coloring, preview_fn)
-2. **Individual Pipeline Runs**: Each stage in isolation
-3. **End-to-End Execution**: From raw documents to HR report
-4. **Outputs**: Generated documents and structured data
+1. **Get to know our sample data**: We will briefly check on the sample files available
+2. **Pipeline registry**: We will see how our pipelines are discoverable during kedro run
+3. **Trigger HR pipeline**: Trigger HR pipeline for one of our applicants and analyze the logs
+4. **What is inside screening pipeline**: Check internals of screening pipeline
+5. **Kedro-Viz**: Interactive pipeline visualisation (node coloring, preview_fn)
+6. **Outputs**: Generated documents and structured data
 
 ---
 
