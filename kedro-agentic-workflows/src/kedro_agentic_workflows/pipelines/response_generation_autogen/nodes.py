@@ -1,11 +1,8 @@
 from datetime import datetime
 import logging
-from typing import Any
 
 from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
 from sqlalchemy import text, Engine
 
 from .agent import ResponseGenerationAgentAutogen
@@ -14,40 +11,14 @@ from ...utils import log_message
 logger = logging.getLogger(__name__)
 
 
-def setup_autogen_tracing(span_processor: Any) -> TracerProvider:
-    """Set up OpenTelemetry tracing with Langfuse for AutoGen.
-
-    This function configures OpenTelemetry to send traces to Langfuse.
-    Must be called before running any AutoGen agents.
-
-    Args:
-        span_processor: LangfuseSpanProcessor from the LangfuseTraceDataset.
-
-    Returns:
-        TracerProvider: The configured tracer provider.
-    """
-    provider = TracerProvider()
-    provider.add_span_processor(span_processor)
-    trace.set_tracer_provider(provider)
-
-    logger.info("Langfuse tracing configured for AutoGen agents")
-    return provider
-
-
 def generate_response(
     response_generation_context: LLMContext,
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
-    tracer_provider: TracerProvider,
+    tracer,
 ) -> dict:
-    """
-    Run the ResponseGenerationAgent to produce a final answer.
-    Accepts intent detection result + user context and session config.
-    """
-    # Get a tracer for creating spans
-    tracer = trace.get_tracer(__name__)
-
+    """Run the ResponseGenerationAgent to produce a final answer."""
     if intent_detection_result["intent"] == "clarification_needed":
         message = (
             "Failed to recognize intent. Please try to describe your problem briefly."
