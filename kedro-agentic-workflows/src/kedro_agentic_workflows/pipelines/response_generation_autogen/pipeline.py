@@ -20,8 +20,12 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=generate_response,
-                inputs=["response_generation_context", "intent_detection_result",
-                        "user_context", "session_config", "autogen_tracer_langfuse"],
+                inputs=["response_generation_context",
+                    "intent_detection_result",
+                    "user_context",
+                    "session_config",
+                    "autogen_tracer_langfuse"
+                ],
                 outputs="final_response",
                 name="generate_response_node",
             ),

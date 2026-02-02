@@ -18,7 +18,10 @@ def generate_response(
     session_config: dict,
     tracer,
 ) -> dict:
-    """Run the ResponseGenerationAgent to produce a final answer."""
+    """
+    Run the ResponseGenerationAgent to produce a final answer.
+    Accepts intent detection result + user context and session config.
+    """
     if intent_detection_result["intent"] == "clarification_needed":
         message = (
             "Failed to recognize intent. Please try to describe your problem briefly."
