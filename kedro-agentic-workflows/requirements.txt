@@ -3,7 +3,7 @@ autogen-ext[openai]
 ipython>=8.10
 jupyterlab>=3.0
 notebook
-kedro>=1.0.0
+kedro>=1.2.0
 kedro-datasets[pandas-sqltabledataset,pandas-sqlquerydataset,yaml-yamldataset,opik,langchain-chatopenaidataset, langfuse]~=9.0.0
 kedro-viz>=12.3.0
 langgraph~=1.0.0
