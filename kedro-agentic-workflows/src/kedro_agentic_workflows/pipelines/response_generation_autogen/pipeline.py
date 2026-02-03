@@ -24,7 +24,8 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "intent_detection_result",
                     "user_context",
                     "session_config",
-                    "autogen_tracer_langfuse"
+                    # "autogen_tracer_langfuse"
+                    "autogen_tracer_opik"
                 ],
                 outputs="final_response",
                 name="generate_response_node",
