@@ -24,4 +24,9 @@ class OpenAIChatCompletionClientDataset(AbstractDataset[None, OpenAIChatCompleti
         raise DatasetError(f"{self.__class__.__name__} is read-only and cannot save data")
 
     def load(self) -> OpenAIChatCompletionClient:
-        return OpenAIChatCompletionClient(**self.credentials, **self.kwargs)
+        creds = self.credentials.copy()
+        if "openai_api_key" in creds and "api_key" not in creds:
+            creds["api_key"] = creds.pop("openai_api_key")
+        if "openai_api_base" in creds and "base_url" not in creds:
+            creds["base_url"] = creds.pop("openai_api_base")
+        return OpenAIChatCompletionClient(**creds, **self.kwargs)
