@@ -1,0 +1,60 @@
+# Data Catalog
+# This file defines the datasets used in the project
+
+# Raw input data for jobs
+raw_job_posting:
+  type: openxml.DocxDataset
+  filepath: data/sample/jobs/raw_job_posting.docx
+
+# Jobs pipeline outputs
+job_metadata:
+  type: json.JSONDataset
+  filepath: data/intermediate/jobs/job_metadata.json
+
+job_requirements:
+  type: json.JSONDataset
+  filepath: data/intermediate/jobs/job_requirements.json
+
+# Resume file - uses resume_id for both input filename and output prefixes
+# The upstream system saves resumes as {resume_id}.docx before triggering the pipeline
+# Usage: kedro run --params resume_id=raw_resume_software_engineer
+raw_resume:
+  type: openxml.DocxDataset
+  filepath: "data/sample/resumes/${runtime_params:resume_id}.docx"
+
+# Application containing parsed candidate information
+# and job metadata required for screening
+# Output filename includes resume_id for per-candidate tracking
+application:
+  type: json.JSONDataset
+  filepath: "data/intermediate/applications/${runtime_params:resume_id}_application.json"
+
+# Screening pipeline outputs
+# Output filename includes resume_id for per-candidate tracking
+screening_result:
+  type: json.JSONDataset
+  filepath: "data/intermediate/screening/${runtime_params:resume_id}_screening_result.json"
+
+
+# Reports which are human readable and can be used
+# to communicate the screening result to the candidate
+# Output filename includes resume_id for per-candidate tracking
+hr_report:
+  type: openxml.DocxDataset
+  filepath: "data/reports/${runtime_params:resume_id}_hr_report.docx"
+
+# ---- Configuration files organized by pipeline ----
+
+# Reporting pipeline configuration
+email_templates:
+  type: yaml.YAMLDataset
+  filepath: data/config/reporting/email_templates.yml
+
+# Screening pipeline configuration
+scoring_config:
+  type: yaml.YAMLDataset
+  filepath: data/config/screening/scoring_config.yml
+
+matching_config:
+  type: yaml.YAMLDataset
+  filepath: data/config/screening/matching_config.yml
