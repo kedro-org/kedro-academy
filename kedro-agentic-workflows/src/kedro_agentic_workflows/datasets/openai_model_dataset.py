@@ -30,11 +30,8 @@ class OpenAIModelDataset(AbstractDataset[None, OpenAIModelConfig]):
         if "api_key" not in credentials:
             raise DatasetError("Missing `api_key` in credentials.")
 
-        self.api_key = credentials.get("api_key") or credentials.get("openai_api_key")
-        self.base_url = credentials.get("base_url") or credentials.get("openai_api_base", "https://api.openai.com/v1")
-
-        if not self.api_key:
-            raise DatasetError("Missing `api_key` or `openai_api_key` in credentials.")
+        self.api_key = credentials["api_key"]
+        self.base_url = credentials.get("base_url", "https://api.openai.com/v1")
 
         self.model_name = model_name
         self.model_settings = model_settings or {}
