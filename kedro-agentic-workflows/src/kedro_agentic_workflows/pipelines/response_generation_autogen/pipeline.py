@@ -1,9 +1,6 @@
 from kedro.pipeline import Pipeline, node, pipeline, llm_context_node, tool
 
-from .nodes import (
-    generate_response,
-    log_response_and_end_session,
-)
+from .nodes import generate_response, log_response_and_end_session
 from .tools import build_lookup_docs, build_get_user_claims, build_create_claim
 
 
@@ -23,11 +20,11 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=generate_response,
-                inputs=[
-                    "response_generation_context",
+                inputs=["response_generation_context",
                     "intent_detection_result",
                     "user_context",
                     "session_config",
+                    "autogen_tracer_langfuse"
                 ],
                 outputs="final_response",
                 name="generate_response_node",

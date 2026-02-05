@@ -1,0 +1,54 @@
+# --- LLMs setup ---
+llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+llm_openai:
+  type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
+  model_name: "gpt-4o"
+  model_settings:
+    temperature: 0.0
+  credentials: openai
+
+llm_autogen:
+  type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+# --- Prompts ---
+tool_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/response_generation/prompts/tool.txt
+  template: PromptTemplate
+  dataset:
+    type: text.TextDataset
+
+response_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/response_generation/prompts/response.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+intent_prompt_opik:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/intent_detection/prompts/intent_prompt_opik.json
+  prompt_name: "intent-classifier"
+  prompt_type: "chat"
+  credentials: opik_credentials
+
+# --- Tracing ---
+intent_tracer_opik:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: openai
+
+autogen_tracer_opik:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: autogen
