@@ -44,23 +44,11 @@ intent_prompt_langfuse:
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
 
-# intent_prompt_opik:
-#   type: kedro_datasets_experimental.opik.OpikPromptDataset
-#   filepath: data/intent_detection/prompts/intent_prompt_opik.json
-#   prompt_name: "intent-classifier"
-#   prompt_type: "chat"
-#   credentials: opik_credentials
-
 # --- Tracing ---
 intent_tracer_langfuse:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
   credentials: langfuse_credentials
-  mode: langchain    # langchain | openai | sdk | autogen
-
-# intent_tracer_opik:
-#  type: kedro_datasets_experimental.opik.OpikTraceDataset
-#  credentials: opik_credentials
-#  mode: openai    # langchain | openai | sdk | autogen
+  mode: langchain
 
 autogen_tracer_langfuse:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
