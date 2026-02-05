@@ -48,7 +48,7 @@ intent_prompt_langfuse:
 intent_tracer_langfuse:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
   credentials: langfuse_credentials
-  mode: langchain
+  mode: langchain    # langchain | openai | sdk | autogen
 
 autogen_tracer_langfuse:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
