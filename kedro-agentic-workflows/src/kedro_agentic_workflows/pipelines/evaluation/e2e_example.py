@@ -54,23 +54,31 @@ def main():
         def support_task(*, item, **kwargs):
             question = item.input["question"]
 
-            # Fetch specific prompt version
             prompt = langfuse.get_prompt(
                 "support_answer",
                 version=prompt_version
             )
 
-            compiled_prompt = prompt.compile(
-                question=question
-            )
+            compiled_prompt = prompt.compile(question=question)
 
-            response = lf_openai.chat.completions.create(
+            with langfuse.start_as_current_observation(
+                name="support_answer_generation",
+                as_type="generation",
                 model="gpt-4o-mini",
-                messages=compiled_prompt,
-                temperature=0,
-            )
+                input=compiled_prompt,
+                prompt=prompt,  # <-- attach the ChatPromptClient
+            ) as generation:
+                response = lf_openai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=compiled_prompt,
+                    temperature=0,
+                )
 
-            return response.choices[0].message.content
+                output = response.choices[0].message.content
+
+                generation.update(output=output)
+
+            return output
 
         return support_task
 
@@ -124,7 +132,6 @@ def main():
         evaluators=[llm_judge_evaluator],
         metadata={
             "model": "gpt-4o-mini",
-            "prompt_version": 1
         }
     )
 
@@ -139,7 +146,6 @@ def main():
         evaluators=[llm_judge_evaluator],
         metadata={
             "model": "gpt-4o-mini",
-            "prompt_version": 2
         }
     )
 
