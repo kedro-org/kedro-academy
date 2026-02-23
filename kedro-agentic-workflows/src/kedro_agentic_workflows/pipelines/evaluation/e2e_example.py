@@ -126,6 +126,8 @@ def main():
     # ----------------------------
     # Run Experiment with Prompt Version 1
     # ----------------------------
+    print(type(dataset))
+    print(dataset)
     result_v1 = dataset.run_experiment(
         name="support_eval_prompt_v1",
         task=make_support_task(prompt_version=1),

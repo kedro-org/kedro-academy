@@ -4,3 +4,42 @@ eval_ds:
   local_path: data/evaluation/support_eval_v1.json
   sync_policy: local
   credentials: langfuse_credentials
+
+judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+llm_judge_evaluator_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/evaluation/prompts/judge_llm_prompt.json
+  prompt_name: "judge_llm_prompt"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local      # local|remote|strict
+  mode: sdk               # langchain|sdk
+
+support_answer_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+support_answer_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/evaluation/prompts/support_answer.json
+  prompt_name: "support_answer"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: remote      # local|remote|strict
+  mode: sdk                # langchain|sdk
+  load_args:
+    version: 1  # Specific version for validation
+
+langfuse_client:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: sdk    # langchain | openai | sdk
