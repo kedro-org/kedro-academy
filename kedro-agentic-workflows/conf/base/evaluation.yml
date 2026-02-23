@@ -1,0 +1,6 @@
+eval_ds:
+  type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
+  dataset_name: evaluations/support_eval_v1_test
+  local_path: data/evaluation/support_eval_v1.json
+  sync_policy: local
+  credentials: langfuse_credentials

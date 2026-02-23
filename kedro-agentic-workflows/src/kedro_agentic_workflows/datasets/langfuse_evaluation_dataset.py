@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 from kedro.io import AbstractDataset
-from langfuse import get_client, Langfuse
+from langfuse import Langfuse
 from langfuse._client.datasets import DatasetClient
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
@@ -24,7 +24,11 @@ class LangfuseEvaluationDataset(AbstractDataset):
         self.dataset_name = dataset_name
         self.local_path = Path(local_path) if local_path else None
         self.sync_policy = sync_policy
-        self.client: Langfuse = get_client(**credentials)
+        self._client = Langfuse(
+            public_key=credentials["public_key"],
+            secret_key=credentials["secret_key"],
+            host=credentials.get("host"),
+        )
         self._file_dataset = None
 
     @property
@@ -49,17 +53,17 @@ class LangfuseEvaluationDataset(AbstractDataset):
     def load(self) -> DatasetClient:
         """Return remote Langfuse dataset; optionally sync local items to remote."""
         try:
-            dataset = self.client.get_dataset(name=self.dataset_name)
+            dataset = self._client.get_dataset(name=self.dataset_name)
         except Exception:
             # Create remote dataset if not exist
-            dataset = self.client.create_dataset(name=self.dataset_name)
+            dataset = self._client.create_dataset(name=self.dataset_name)
 
         # Local -> remote sync (only append)
         if self.sync_policy == "local" and self.local_path and self.local_path.exists():
             local_items = self.file_dataset.load()
             for item in local_items:
                 # Use core client to create dataset item in remote
-                self.client.create_dataset_item(
+                self._client.create_dataset_item(
                     dataset_name=self.dataset_name,
                     input=item.get("input"),
                     expected_output=item.get("expected_output"),
@@ -74,7 +78,7 @@ class LangfuseEvaluationDataset(AbstractDataset):
         """Append new items to remote dataset and optionally update local file."""
         _ = self.load()
         for item in data:
-            self.client.create_dataset_item(
+            self._client.create_dataset_item(
                 dataset_name=self.dataset_name,
                 input=item.get("input"),
                 expected_output=item.get("expected_output"),
@@ -87,7 +91,7 @@ class LangfuseEvaluationDataset(AbstractDataset):
 
     def _exists(self) -> bool:
         try:
-            self.client.get_dataset(name=self.dataset_name)
+            self._client.get_dataset(name=self.dataset_name)
             return True
         except Exception:
             return False
