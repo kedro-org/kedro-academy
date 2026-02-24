@@ -23,7 +23,8 @@ def init_llm_judge_evaluator(
     Creates LLM-as-a-Judge evaluator compatible with Langfuse experiments.
     """
 
-    model_name = getattr(judge_llm, "model_name", "unknown-model")
+    model_name = getattr(judge_llm, "model_name", None)
+    metadata = {"judge_model": model_name} if model_name else None
     structured_judge_llm = judge_llm.with_structured_output(JudgeScore)
 
     def llm_judge_evaluator(
@@ -45,16 +46,16 @@ def init_llm_judge_evaluator(
         except Exception as e:
             return Evaluation(
                 name="llm_judge_score",
-                value=0.0,
+                value=0,
                 comment=f"Evaluator failed: {str(e)}",
-                metadata={"judge_model": model_name},
+                metadata=metadata,
             )
 
         return Evaluation(
             name="llm_judge_score",
             value=score,
             comment="LLM-based correctness score",
-            metadata={"judge_model": model_name},
+            metadata=metadata,
         )
 
     return llm_judge_evaluator

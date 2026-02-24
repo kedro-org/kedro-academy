@@ -1,5 +1,8 @@
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
+
+from kedro_datasets._typing import JSONPreview
 from kedro.io import AbstractDataset
 from langfuse import Langfuse
 from langfuse._client.datasets import DatasetClient
@@ -139,3 +142,27 @@ class LangfuseEvaluationDataset(AbstractDataset):
             "local_path": str(self.local_path) if self.local_path else None,
             "sync_policy": self.sync_policy,
         }
+
+    def preview(self) -> JSONPreview:
+        """
+        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
+
+        Automatically wraps string content in a JSON object to ensure compatibility
+        with Kedro-Viz's JSON preview requirements. This prevents "src property must
+        be a valid json object" errors when the local file contains plain text.
+
+        Returns:
+            JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string.
+                String content is wrapped in {"content": <string>} format for proper
+                JSON object structure. Returns error message if local file doesn't exist.
+        """
+        if self.local_path.exists():
+            local_data = self.file_dataset.load()
+
+            # If local_data is just a string, wrap it in a JSON object
+            if isinstance(local_data, str):
+                local_data = {"content": local_data}
+
+            return JSONPreview(json.dumps(local_data))
+
+        return JSONPreview("Local prompt does not exist.")
