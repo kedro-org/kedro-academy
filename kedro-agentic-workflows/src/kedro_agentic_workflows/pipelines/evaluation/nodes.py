@@ -1,12 +1,13 @@
 from typing import Callable, Dict, Any
 
+from langfuse import Evaluation
 from langfuse._client.datasets import DatasetClient
 
 
 def init_llm_judge_evaluator(
     judge_llm,
     llm_judge_evaluator_prompt,
-) -> Callable[[Dict[str, Any], str, str], float]:
+) -> Callable[[dict[str, Any], str, str, Any, dict[str, Any]], Evaluation]:
     """
     Initialize LLM-as-a-Judge evaluator.
 
@@ -24,8 +25,8 @@ def init_llm_judge_evaluator(
         expected_output: str,
         metadata,
         **kwargs
-    ) -> float:
-        compiled_prompt = llm_judge_evaluator_prompt.compile(
+    ):
+        compiled_prompt = llm_judge_evaluator_prompt.format_messages(
             question=input["question"],
             model_output=output,
             expected_output=expected_output,
@@ -40,7 +41,11 @@ def init_llm_judge_evaluator(
             # Fallback in case model misbehaves
             score = 0.0
 
-        return score
+        return Evaluation(
+            name="llm_judge_score",
+            value=score,
+            comment="LLM-based correctness score"
+        )
 
     return llm_judge_evaluator
 
@@ -69,9 +74,6 @@ def make_support_task(support_answer_prompt, support_answer_llm, langfuse_client
 
 
 def run_experiment(eval_ds: DatasetClient, support_task: Callable, llm_judge_evaluator: Callable):
-    print("---")
-    print(type(eval_ds))
-    print("---")
     result_v1 = eval_ds.run_experiment(
         name="support_eval_prompt_v1",
         task=support_task,
