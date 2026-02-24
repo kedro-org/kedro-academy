@@ -32,6 +32,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "eval_ds",
                     "support_task",
                     "llm_judge_evaluator",
+                    "params:support_answer_prompt_version",
                 ],
                 outputs=None,
                 name="run_experiment_node",

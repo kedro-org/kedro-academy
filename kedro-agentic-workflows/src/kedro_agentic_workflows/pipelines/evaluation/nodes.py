@@ -1,70 +1,93 @@
 from typing import Callable, Dict, Any
 
-from langfuse import Evaluation
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import BaseMessage
+from langfuse import Evaluation, Langfuse
 from langfuse._client.datasets import DatasetClient
+from langfuse.model import ChatPromptClient
 
 
 def init_llm_judge_evaluator(
-    judge_llm,
-    llm_judge_evaluator_prompt,
-) -> Callable[[dict[str, Any], str, str, Any, dict[str, Any]], Evaluation]:
+    judge_llm: ChatOpenAI,
+    judge_prompt: ChatPromptTemplate,
+) -> Callable[..., Evaluation]:
     """
-    Initialize LLM-as-a-Judge evaluator.
-
-    Args:
-        judge_llm: Configured LangChain ChatOpenAI model
-        llm_judge_evaluator_prompt: LangChain ChatPromptTemplate
-
-    Returns:
-        Callable evaluator(input, output, expected_output) -> float
+    Creates LLM-as-a-Judge evaluator compatible with Langfuse experiments.
     """
+
+    model_name = getattr(judge_llm, "model_name", "unknown-model")
 
     def llm_judge_evaluator(
         input: Dict[str, Any],
         output: str,
         expected_output: str,
-        metadata,
-        **kwargs
-    ):
-        compiled_prompt = llm_judge_evaluator_prompt.format_messages(
-            question=input["question"],
+        **kwargs,
+    ) -> Evaluation:
+
+        messages: list[BaseMessage] = judge_prompt.format_messages(
+            question=input.get("question", ""),
             model_output=output,
             expected_output=expected_output,
         )
 
-        response = judge_llm.invoke(compiled_prompt)
-        raw_score = response.content.strip()
-
         try:
+            response = judge_llm.invoke(messages)
+            raw_score = response.content.strip()
             score = float(raw_score)
-        except ValueError:
-            # Fallback in case model misbehaves
+        except Exception as e:
             score = 0.0
+            return Evaluation(
+                name="llm_judge_score",
+                value=score,
+                comment=f"Evaluator failed: {str(e)}",
+                metadata={"judge_model": model_name},
+            )
 
         return Evaluation(
             name="llm_judge_score",
             value=score,
-            comment="LLM-based correctness score"
+            comment="LLM-based correctness score",
+            metadata={"judge_model": model_name},
         )
 
     return llm_judge_evaluator
 
 
-def make_support_task(support_answer_prompt, support_answer_llm, langfuse_client, model_name: str = "gpt-4o"):
-    def support_task(*, item, **kwargs):
-        question = item.input["question"]
+def make_support_task(
+    support_prompt: ChatPromptClient,
+    support_llm: ChatOpenAI,
+    langfuse_client: Langfuse,
+) -> Callable[..., str]:
+    """
+    Creates support task callable compatible with Langfuse Dataset experiment.
+    """
 
-        compiled_prompt = support_answer_prompt.compile(question=question)
+    model_name = getattr(support_llm, "model_name", "unknown-model")
+
+    def support_task(*, item, **kwargs) -> str:
+        question = item.input.get("question", "")
+
+        compiled_prompt = support_prompt.compile(question=question)
 
         with langfuse_client.start_as_current_observation(
             name="support_answer_generation",
             as_type="generation",
             model=model_name,
             input=compiled_prompt,
-            prompt=support_answer_prompt,
+            prompt=support_prompt,
         ) as generation:
-            response = support_answer_llm.invoke(compiled_prompt)
-            output = response.content
+
+            try:
+                response = support_llm.invoke(compiled_prompt)
+                output = response.content
+            except Exception as e:
+                output = ""
+                generation.update(
+                    output=output,
+                    metadata={"error": str(e)}
+                )
+                raise
 
             generation.update(output=output)
 
@@ -73,15 +96,22 @@ def make_support_task(support_answer_prompt, support_answer_llm, langfuse_client
     return support_task
 
 
-def run_experiment(eval_ds: DatasetClient, support_task: Callable, llm_judge_evaluator: Callable):
-    result_v1 = eval_ds.run_experiment(
-        name="support_eval_prompt_v1",
+def run_experiment(
+    eval_ds: DatasetClient,
+    support_task: Callable,
+    llm_judge_evaluator: Callable,
+    support_prompt_version: int,
+) -> None:
+
+    experiment_name = f"support_eval_prompt_v{support_prompt_version}"
+
+    result = eval_ds.run_experiment(
+        name=experiment_name,
         task=support_task,
         evaluators=[llm_judge_evaluator],
         metadata={
-            "model": "gpt-4o",
-            "description": "kedro-evaluation"
-        }
+            "prompt_version": support_prompt_version,
+        },
     )
 
-    print(result_v1.format())
+    print(result.format())
