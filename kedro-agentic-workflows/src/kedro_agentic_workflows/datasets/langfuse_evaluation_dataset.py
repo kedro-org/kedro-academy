@@ -53,24 +53,25 @@ class LangfuseEvaluationDataset(AbstractDataset):
     def load(self) -> DatasetClient:
         """Return remote Langfuse dataset; optionally sync local items to remote."""
         try:
-            _ = self._client.get_dataset(name=self.dataset_name)
+            dataset = self._client.get_dataset(name=self.dataset_name)
+            print(f"Dataset '{self.dataset_name}' already exists.")
         except Exception:
             # Create remote dataset if not exist
             _ = self._client.create_dataset(name=self.dataset_name)
 
-        # Local -> remote sync (only append)
-        if self.sync_policy == "local" and self.local_path and self.local_path.exists():
-            local_items = self.file_dataset.load()
-            for item in local_items:
-                # Use core client to create dataset item in remote
-                self._client.create_dataset_item(
-                    dataset_name=self.dataset_name,
-                    input=item.get("input"),
-                    expected_output=item.get("expected_output"),
-                    metadata=item.get("metadata"),
-                )
+            # Local -> remote sync (only append)
+            if self.sync_policy == "local" and self.local_path and self.local_path.exists():
+                local_items = self.file_dataset.load()
+                for item in local_items:
+                    # Use core client to create dataset item in remote
+                    self._client.create_dataset_item(
+                        dataset_name=self.dataset_name,
+                        input=item.get("input"),
+                        expected_output=item.get("expected_output"),
+                        metadata=item.get("metadata"),
+                    )
 
-        dataset = self._client.get_dataset(name=self.dataset_name)
+            dataset = self._client.get_dataset(name=self.dataset_name)
 
         # In remote mode, do *not* read remote items back into local file
 
@@ -78,13 +79,17 @@ class LangfuseEvaluationDataset(AbstractDataset):
 
     def save(self, data: List[dict[str, Any]]) -> None:
         """Append new items to remote dataset and optionally update local file."""
-        _ = self.load()
+        try:
+            dataset = self._client.get_dataset(name=self.dataset_name)
+        except Exception:
+            # Create remote dataset if not exist
+            _ = self._client.create_dataset(name=self.dataset_name)
         for item in data:
             self._client.create_dataset_item(
                 dataset_name=self.dataset_name,
-                input=item.get("input"),
-                expected_output=item.get("expected_output"),
-                metadata=item.get("metadata"),
+                input=item.get("input", ""),
+                expected_output=item.get("expected_output", ""),
+                metadata=item.get("metadata", {}),
             )
 
         if self.sync_policy == "local" and self.local_path:
@@ -93,7 +98,7 @@ class LangfuseEvaluationDataset(AbstractDataset):
 
     def _exists(self) -> bool:
         try:
-            self._client.get_dataset(name=self.dataset_name)
+            _ = self._client.get_dataset(name=self.dataset_name)
             return True
         except Exception:
             return False
