@@ -6,6 +6,13 @@ from langchain_core.messages import BaseMessage
 from langfuse import Evaluation, Langfuse
 from langfuse._client.datasets import DatasetClient
 from langfuse.model import ChatPromptClient
+from pydantic import BaseModel, Field
+
+
+class JudgeScore(BaseModel):
+    score: int = Field(
+        description="Integer score between 1 and 5 inclusive."
+    )
 
 
 def init_llm_judge_evaluator(
@@ -17,6 +24,7 @@ def init_llm_judge_evaluator(
     """
 
     model_name = getattr(judge_llm, "model_name", "unknown-model")
+    structured_judge_llm = judge_llm.with_structured_output(JudgeScore)
 
     def llm_judge_evaluator(
         input: Dict[str, Any],
@@ -32,14 +40,12 @@ def init_llm_judge_evaluator(
         )
 
         try:
-            response = judge_llm.invoke(messages)
-            raw_score = response.content.strip()
-            score = float(raw_score)
+            result: JudgeScore = structured_judge_llm.invoke(messages)
+            score = result.score
         except Exception as e:
-            score = 0.0
             return Evaluation(
                 name="llm_judge_score",
-                value=score,
+                value=0.0,
                 comment=f"Evaluator failed: {str(e)}",
                 metadata={"judge_model": model_name},
             )
