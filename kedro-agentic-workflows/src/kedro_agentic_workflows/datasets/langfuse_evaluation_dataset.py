@@ -53,10 +53,10 @@ class LangfuseEvaluationDataset(AbstractDataset):
     def load(self) -> DatasetClient:
         """Return remote Langfuse dataset; optionally sync local items to remote."""
         try:
-            dataset = self._client.get_dataset(name=self.dataset_name)
+            _ = self._client.get_dataset(name=self.dataset_name)
         except Exception:
             # Create remote dataset if not exist
-            dataset = self._client.create_dataset(name=self.dataset_name)
+            _ = self._client.create_dataset(name=self.dataset_name)
 
         # Local -> remote sync (only append)
         if self.sync_policy == "local" and self.local_path and self.local_path.exists():
@@ -69,6 +69,8 @@ class LangfuseEvaluationDataset(AbstractDataset):
                     expected_output=item.get("expected_output"),
                     metadata=item.get("metadata"),
                 )
+
+        dataset = self._client.get_dataset(name=self.dataset_name)
 
         # In remote mode, do *not* read remote items back into local file
 
