@@ -6,10 +6,9 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage, HumanMessage
 from langfuse import Evaluation, Langfuse
 from langfuse._client.datasets import DatasetClient
-from langfuse.model import ChatPromptClient
 from pydantic import BaseModel, Field
 
-from src.kedro_agentic_workflows.pipelines.intent_detection.agent import IntentDetectionAgent
+from ..intent_detection.agent import IntentDetectionAgent
 
 
 class JudgeScore(BaseModel):
@@ -93,11 +92,12 @@ def make_intent_agent_task(
             as_type="generation",
             model=model_name,
             input={"question": question},
-            prompt=agent.context.prompts["intent_prompt_langfuse"],
+            # TODO: it has to be langfuse prompt object or name (?)
+            # prompt=agent.context.prompts["intent_prompt_langfuse"],
         ) as generation:
 
             try:
-                result = agent.invoke(agent_input)
+                result = agent.invoke(agent_input, {"configurable": {"thread_id": "1"}})
                 intent = result.get("intent", "")
                 reason = result.get("reason", "")
 

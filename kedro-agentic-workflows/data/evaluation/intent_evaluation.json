@@ -1,7 +1,9 @@
 [
   {
     "id": "intent_001",
-    "question": "How do I submit a claim for a car accident?",
+    "input": {
+      "question": "How do I submit a claim for a car accident?"
+    },
     "expected_output": {
       "intent": "general_question",
       "reason": "User is asking about the process for submitting a claim."
@@ -9,7 +11,9 @@
   },
   {
     "id": "intent_002",
-    "question": "My car was hit in the parking lot yesterday and the door is damaged.",
+    "input": {
+      "question": "My car was hit in the parking lot yesterday and the door is damaged."
+    },
     "expected_output": {
       "intent": "claim_new",
       "reason": "User reports a new damage incident that should create a claim."
@@ -17,7 +21,9 @@
   },
   {
     "id": "intent_003",
-    "question": "What's the status of my claim 48392?",
+    "input": {
+      "question": "What's the status of my claim 48392?"
+    },
     "expected_output": {
       "intent": "existing_claim_question",
       "reason": "User is asking about the status of an already filed claim."
@@ -25,7 +31,9 @@
   },
   {
     "id": "intent_004",
-    "question": "I need to upload more documents to my claim.",
+    "input": {
+      "question": "I need to upload more documents to my claim."
+    },
     "expected_output": {
       "intent": "existing_claim_question",
       "reason": "User refers to an existing claim and wants to update it."
@@ -33,7 +41,9 @@
   },
   {
     "id": "intent_005",
-    "question": "I lost my phone during my trip yesterday.",
+    "input": {
+      "question": "I lost my phone during my trip yesterday."
+    },
     "expected_output": {
       "intent": "claim_new",
       "reason": "User reports a new loss that could lead to filing a claim."
@@ -41,7 +51,9 @@
   },
   {
     "id": "intent_006",
-    "question": "I need help.",
+    "input": {
+      "question": "I need help."
+    },
     "expected_output": {
       "intent": "clarification_needed",
       "reason": "User request is vague and requires clarification."
@@ -49,7 +61,9 @@
   },
   {
     "id": "intent_007",
-    "question": "Can I update my contact address in my insurance profile?",
+    "input": {
+      "question": "Can I update my contact address in my insurance profile?"
+    },
     "expected_output": {
       "intent": "general_question",
       "reason": "User asks about account management procedure."
