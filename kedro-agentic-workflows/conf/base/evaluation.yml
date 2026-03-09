@@ -1,0 +1,29 @@
+intent_eval_ds:
+  type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  local_path: data/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: langfuse_credentials
+
+intent_judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+intent_llm_judge_evaluator_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt.json
+  prompt_name: "intent_llm_judge_evaluator_prompt"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: remote      # local|remote|strict
+  mode: langchain          # langchain|sdk
+  load_args:
+    version: 1
+
+langfuse_client:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: sdk    # langchain | openai | sdk
