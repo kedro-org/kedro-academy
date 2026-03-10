@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Dict, Any
 
 from kedro.pipeline import LLMContext
@@ -10,6 +11,8 @@ from pydantic import BaseModel, Field
 
 from ..intent_detection.agent import IntentDetectionAgent
 
+logger = logging.getLogger(__name__)
+
 
 class JudgeScore(BaseModel):
     score: int = Field(
@@ -19,7 +22,7 @@ class JudgeScore(BaseModel):
 
 def init_reason_judge_evaluator(
     intent_judge_llm: ChatOpenAI,
-    intent_llm_judge_evaluator_prompt: ChatPromptTemplate,
+    intent_judge_prompt: ChatPromptTemplate,
 ) -> Callable[..., Evaluation]:
     """
     Creates LLM-as-a-Judge evaluator compatible with Langfuse experiments.
@@ -36,7 +39,7 @@ def init_reason_judge_evaluator(
         **kwargs,
     ) -> Evaluation:
 
-        messages: list[BaseMessage] = intent_llm_judge_evaluator_prompt.format_messages(
+        messages: list[BaseMessage] = intent_judge_prompt.format_messages(
             question=input.get("question", ""),
             predicted_intent=output.get("intent", ""),
             predicted_reason=output.get("reason", ""),
@@ -168,4 +171,4 @@ def run_experiment(
         },
     )
 
-    print(result.format())
+    logger.info(result.format())

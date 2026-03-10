@@ -29,7 +29,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 func=init_reason_judge_evaluator,
                 inputs=[
                     "intent_judge_llm",
-                    "intent_llm_judge_evaluator_prompt"
+                    "intent_judge_prompt"
                 ],
                 outputs="reason_judge_evaluator",
                 name="init_reason_judge_evaluator_node",
@@ -54,7 +54,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "params:model_name"
                 ],
                 outputs=None,
-                name="run_experiment_node",
+                name="run_intent_experiment_node",
             ),
         ]
     )
