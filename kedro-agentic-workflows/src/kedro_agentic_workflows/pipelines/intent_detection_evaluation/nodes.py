@@ -17,7 +17,7 @@ class JudgeScore(BaseModel):
     )
 
 
-def init_llm_judge_evaluator(
+def init_reason_judge_evaluator(
     intent_judge_llm: ChatOpenAI,
     intent_llm_judge_evaluator_prompt: ChatPromptTemplate,
 ) -> Callable[..., Evaluation]:
@@ -64,6 +64,28 @@ def init_llm_judge_evaluator(
         )
 
     return reason_judge_evaluator
+
+
+def init_intent_accuracy_evaluator() -> Callable[..., Evaluation]:
+    def intent_accuracy_evaluator(
+        input: Dict[str, Any],
+        output: Dict[str, Any],
+        expected_output: Dict[str, Any],
+        **kwargs,
+    ) -> Evaluation:
+
+        predicted = output.get("intent", "")
+        expected = expected_output.get("intent", "")
+
+        score = 1 if predicted == expected else 0
+
+        return Evaluation(
+            name="intent_accuracy",
+            value=score,
+            comment=f"predicted={predicted}, expected={expected}",
+        )
+
+    return intent_accuracy_evaluator
 
 
 def make_intent_agent_task(
@@ -129,16 +151,17 @@ def make_intent_agent_task(
 def run_experiment(
     intent_eval_ds: DatasetClient,
     intent_agent_task: Callable,
+    intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
     intent_prompt_version: int,
 ) -> None:
 
-    experiment_name = f"intent_eval_prompt_v{intent_prompt_version}"
+    experiment_name = f"intent_prompt_v{intent_prompt_version}"
 
     result = intent_eval_ds.run_experiment(
         name=experiment_name,
         task=intent_agent_task,
-        evaluators=[reason_judge_evaluator],
+        evaluators=[intent_accuracy_evaluator, reason_judge_evaluator],
         metadata={
             "prompt_version": intent_prompt_version,
         },
