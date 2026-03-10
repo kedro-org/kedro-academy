@@ -154,9 +154,9 @@ def run_experiment(
     intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
     intent_prompt_version: int,
+    model_name: str
 ) -> None:
-
-    experiment_name = f"intent_prompt_v{intent_prompt_version}"
+    experiment_name = f"intent_prompt_v{intent_prompt_version}_model_{model_name}"
 
     result = intent_eval_ds.run_experiment(
         name=experiment_name,
@@ -164,6 +164,7 @@ def run_experiment(
         evaluators=[intent_accuracy_evaluator, reason_judge_evaluator],
         metadata={
             "prompt_version": intent_prompt_version,
+            "model_name": model_name
         },
     )
 
