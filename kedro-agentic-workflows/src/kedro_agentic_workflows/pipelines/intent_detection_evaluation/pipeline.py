@@ -15,7 +15,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs="intent_detection_context",
                 llm="llm",
                 prompts=[
-                    "intent_prompt_langfuse",
+                    "intent_prompt",
                 ],
             ),
             node(

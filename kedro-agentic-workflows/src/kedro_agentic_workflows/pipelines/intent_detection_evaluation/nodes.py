@@ -92,8 +92,7 @@ def make_intent_agent_task(
             as_type="generation",
             model=model_name,
             input={"question": question},
-            # TODO: it has to be langfuse prompt object or name (?)
-            # prompt=agent.context.prompts["intent_prompt_langfuse"],
+            prompt=agent.context.prompts["intent_prompt"],
         ) as generation:
 
             try:

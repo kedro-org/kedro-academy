@@ -111,11 +111,10 @@ We use experimental Kedro datasets for observability and prompt management:
 
 Both datasets wrap the respective observability platform’s API and allow us to manage prompts, track changes, and enable tracing/evaluation.
 
-By default, the project uses `intent_prompt_langfuse`, but `intent_prompt_opik` can be switched in via catalog configuration and 
-updating the pipeline.
+By default, the project uses langfuse `intent_prompt`, but opik `intent_prompt` can be switched in via catalog configuration.
 
 ```yaml
-intent_prompt_langfuse:
+intent_prompt:
   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
   prompt_name: "intent-classifier"
@@ -123,8 +122,10 @@ intent_prompt_langfuse:
   credentials: langfuse_credentials
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
+```
 
-intent_prompt_opik:
+```yaml
+intent_prompt:
   type: kedro_datasets_experimental.opik.OpikPromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_opik.json
   prompt_name: "intent-classifier"

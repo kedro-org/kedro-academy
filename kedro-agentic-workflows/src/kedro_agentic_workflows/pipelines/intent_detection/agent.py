@@ -4,6 +4,8 @@ from typing import Any, TypedDict, Literal
 from kedro.pipeline import LLMContext
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.runnables import Runnable
+from langchain_core.prompts import ChatPromptTemplate
+from langfuse.model import ChatPromptClient
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.state import CompiledStateGraph
@@ -64,12 +66,17 @@ class IntentDetectionAgent(KedroAgent):
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None
 
+        # Preserve Langfuse prompt for tracing
+        # But convert to the Langchain prompt for execution
+        prompt = self.context.prompts["intent_prompt"]
+        if isinstance(prompt, ChatPromptClient):
+            prompt = ChatPromptTemplate.from_messages(
+                prompt.get_langchain_prompt()
+            )
+
         # LLM bound to structured intent output
         structured_llm = self.context.llm.with_structured_output(IntentOutput)
-        self.intent_chain = (
-            self.context.prompts["intent_prompt_langfuse"]
-            | structured_llm
-        )
+        self.intent_chain = prompt | structured_llm
 
     @staticmethod
     def _build_graph(
