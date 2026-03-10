@@ -88,7 +88,7 @@ def init_intent_accuracy_evaluator() -> Callable[..., Evaluation]:
     return intent_accuracy_evaluator
 
 
-def make_intent_agent_task(
+def make_intent_detection_task(
     intent_detection_context: LLMContext,
     langfuse_client: Langfuse,
 ) -> Callable[..., Dict[str, Any]]:
@@ -149,7 +149,7 @@ def make_intent_agent_task(
 
 
 def run_experiment(
-    intent_eval_ds: DatasetClient,
+    intent_evaluation_data: DatasetClient,
     intent_agent_task: Callable,
     intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
@@ -158,7 +158,7 @@ def run_experiment(
 ) -> None:
     experiment_name = f"intent_prompt_v{intent_prompt_version}_model_{model_name}"
 
-    result = intent_eval_ds.run_experiment(
+    result = intent_evaluation_data.run_experiment(
         name=experiment_name,
         task=intent_agent_task,
         evaluators=[intent_accuracy_evaluator, reason_judge_evaluator],

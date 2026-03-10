@@ -3,7 +3,7 @@ from kedro.pipeline import llm_context_node, node, pipeline, Pipeline
 from .nodes import (
     init_intent_accuracy_evaluator,
     init_reason_judge_evaluator,
-    make_intent_agent_task,
+    make_intent_detection_task,
     run_experiment,
 )
 
@@ -32,21 +32,21 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "intent_llm_judge_evaluator_prompt"
                 ],
                 outputs="reason_judge_evaluator",
-                name="init_reason_judge_evaluator",
+                name="init_reason_judge_evaluator_node",
             ),
             node(
-                func=make_intent_agent_task,
+                func=make_intent_detection_task,
                 inputs=[
                     "intent_detection_context",
                     "langfuse_client",
                 ],
                 outputs="intent_agent_task",
-                name="make_intent_evaluation_task_node",
+                name="make_intent_detection_task_node",
             ),
             node(
                 func=run_experiment,
                 inputs=[
-                    "intent_eval_ds",
+                    "intent_evaluation_data",
                     "intent_agent_task",
                     "intent_accuracy_evaluator",
                     "reason_judge_evaluator",
