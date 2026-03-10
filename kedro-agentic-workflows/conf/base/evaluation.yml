@@ -12,7 +12,7 @@ intent_judge_llm:
     temperature: 0.0
   credentials: openai
 
-intent_llm_judge_evaluator_prompt:
+intent_judge_prompt:
   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt.json
   prompt_name: "intent_llm_judge_evaluator_prompt"
