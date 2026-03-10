@@ -2,7 +2,7 @@
 llm:
   type: langchain.ChatOpenAIDataset
   kwargs:
-    model: "gpt-4o"
+    model: ${runtime_params:model_name, gpt-4o}
     temperature: 0.0
   credentials: openai
 

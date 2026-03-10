@@ -51,6 +51,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "intent_accuracy_evaluator",
                     "reason_judge_evaluator",
                     "params:intent_prompt_version",
+                    "params:model_name"
                 ],
                 outputs=None,
                 name="run_experiment_node",
