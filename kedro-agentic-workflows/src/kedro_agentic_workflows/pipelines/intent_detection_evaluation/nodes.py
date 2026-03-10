@@ -171,4 +171,5 @@ def run_experiment(
         },
     )
 
-    logger.info(result.format())
+    print(result.format().replace("\\n", "\n"))
+    logger.info("Experiment '%s' completed.", experiment_name)
