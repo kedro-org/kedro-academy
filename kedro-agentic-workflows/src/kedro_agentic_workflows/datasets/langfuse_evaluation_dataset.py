@@ -155,10 +155,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                 )
         return self._file_dataset
 
-    def _get_or_create_remote_dataset(self) -> None:
-        """Ensure the remote Langfuse dataset exists, creating it if not found."""
+    def _get_or_create_remote_dataset(self) -> DatasetClient:
+        """Ensure the remote Langfuse dataset exists, creating it if not found.
+
+        Returns the latest ``DatasetClient``.
+        """
         try:
-            self._client.get_dataset(name=self.dataset_name)
+            return self._client.get_dataset(name=self.dataset_name)
         except ApiError as exc:
             if exc.status_code != 404:
                 raise DatasetError(
@@ -171,6 +174,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                     "sync_policy": self.sync_policy,
                 }
             )
+            return self._client.get_dataset(name=self.dataset_name)
 
     def _validate_items(self, items: list[dict[str, Any]]) -> None:
         """Validate that all items contain the required 'input' key."""
@@ -291,13 +295,12 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
             ``DatasetClient`` that can be used to iterate items or call
             ``run_experiment()``.
         """
-        self._get_or_create_remote_dataset()
+        dataset = self._get_or_create_remote_dataset()
 
-        get_kwargs: dict[str, Any] = {"name": self.dataset_name}
         if self._version is not None:
-            get_kwargs["version"] = self._version
-
-        dataset = self._client.get_dataset(**get_kwargs)
+            dataset = self._client.get_dataset(
+                name=self.dataset_name, version=self._version
+            )
 
         if self.sync_policy == "local":
             dataset = self._sync_local_to_remote(dataset)
@@ -321,10 +324,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
             )
             return
 
-        self._get_or_create_remote_dataset()
+        dataset = self._get_or_create_remote_dataset()
         self._validate_items(data)
-
-        dataset = self._client.get_dataset(name=self.dataset_name)
         new_items = self._filter_new_items(data, dataset)
         if new_items:
             self._upload_items(new_items)
