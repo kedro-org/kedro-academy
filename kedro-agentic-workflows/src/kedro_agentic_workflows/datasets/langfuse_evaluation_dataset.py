@@ -93,27 +93,68 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
     def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
         """Return JSON/YAML file dataset based on extension."""
         if not self.local_path:
-            raise RuntimeError("local_path must be provided for file dataset operations.")
+            raise DatasetError("local_path must be provided for file dataset operations.")
         if self._file_dataset is None:
-            if self.local_path.suffix.lower() in [".yaml", ".yml"]:
+            if self.local_path.suffix.lower() in (".yaml", ".yml"):
                 from kedro_datasets.yaml import YAMLDataset
                 self._file_dataset = YAMLDataset(filepath=str(self.local_path))
             elif self.local_path.suffix.lower() == ".json":
                 from kedro_datasets.json import JSONDataset
                 self._file_dataset = JSONDataset(filepath=str(self.local_path))
             else:
-                raise NotImplementedError(
+                raise DatasetError(
                     f"Unsupported file extension '{self.local_path.suffix}'. "
                     f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
                 )
         return self._file_dataset
 
+    def _get_or_create_remote_dataset(self) -> None:
+        """Ensure the remote Langfuse dataset exists, creating it if not found."""
+        try:
+            self._client.get_dataset(name=self.dataset_name)
+        except ApiError as exc:
+            if exc.status_code != 404:
+                raise DatasetError(
+                    f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+                ) from exc
+            self._client.create_dataset(
+                name=self.dataset_name,
+                metadata={
+                    "created_by": "kedro",
+                    "sync_policy": self.sync_policy,
+                }
+            )
+
+    def _validate_items(self, items: list[dict[str, Any]]) -> None:
+        """Validate that all items contain the required 'input' key."""
+        for i, item in enumerate(items):
+            if "input" not in item:
+                raise DatasetError(
+                    f"Dataset item at index {i} is missing required 'input' key."
+                )
+
+    def _upload_items(self, items: list[dict[str, Any]]) -> None:
+        """Upload items to the remote Langfuse dataset."""
+        self._validate_items(items)
+        for item in items:
+            self._client.create_dataset_item(
+                dataset_name=self.dataset_name,
+                input=item["input"],
+                expected_output=item.get("expected_output"),
+                metadata=item.get("metadata"),
+            )
+
     def load(self) -> DatasetClient:
         """Return remote Langfuse dataset; optionally sync local items to remote."""
         try:
             dataset = self._client.get_dataset(name=self.dataset_name)
-        except ApiError:
-            _ = self._client.create_dataset(
+        except ApiError as exc:
+            if exc.status_code != 404:
+                raise DatasetError(
+                    f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+                ) from exc
+
+            self._client.create_dataset(
                 name=self.dataset_name,
                 metadata={
                     "created_by": "kedro",
@@ -127,66 +168,36 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                     and self.local_path.exists()
             ):
                 local_items = self.file_dataset.load()
+                self._upload_items(local_items)
 
-                for item in local_items:
-                    if "input" not in item:
-                        raise ValueError("Each dataset item must contain 'input'.")
-
-                    self._client.create_dataset_item(
-                        dataset_name=self.dataset_name,
-                        input=item["input"],
-                        expected_output=item.get("expected_output"),
-                        metadata=item.get("metadata"),
-                    )
-
-            # We need to reload dataset from the remote, so all the items added above are there
             dataset = self._client.get_dataset(name=self.dataset_name)
 
         self._dataset = dataset
-
-        # In remote mode, do *not* read remote items back into local file
-
         return dataset
 
     def save(self, data: list[dict[str, Any]]) -> None:
         if self.sync_policy == "remote":
             return
-        # Create dataset if it does not exist
-        try:
-            _ = self._client.get_dataset(name=self.dataset_name)
-        except ApiError:
-            _ = self._client.create_dataset(
-                name=self.dataset_name,
-                metadata={
-                    "created_by": "kedro",
-                    "sync_policy": self.sync_policy,
-                }
-            )
 
-        for item in data:
-            if "input" not in item:
-                raise ValueError("Each dataset item must contain 'input'.")
+        self._get_or_create_remote_dataset()
+        self._upload_items(data)
 
-            self._client.create_dataset_item(
-                dataset_name=self.dataset_name,
-                input=item["input"],
-                expected_output=item.get("expected_output", ""),
-                metadata=item.get("metadata", {}),
-            )
-
-        if self.sync_policy == "local" and self.local_path:
+        if self.local_path:
             existing = []
             if self.local_path.exists():
                 existing = self.file_dataset.load()
-
             self.file_dataset.save(existing + data)
 
     def _exists(self) -> bool:
         try:
-            _ = self._client.get_dataset(name=self.dataset_name)
+            self._client.get_dataset(name=self.dataset_name)
             return True
-        except ApiError:
-            return False
+        except ApiError as exc:
+            if exc.status_code == 404:
+                return False
+            raise DatasetError(
+                f"Langfuse API error while checking dataset '{self.dataset_name}': {exc}"
+            ) from exc
 
     def _describe(self) -> dict[str, Any]:
         return {
