@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Union
 
@@ -39,7 +40,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
       every load.
     - **remote**: The remote Langfuse dataset is the sole source of truth.
       On ``load()``, the remote dataset is fetched as-is with no local file
-      interaction. ``save()`` is a no-op in this mode.
+      interaction. ``save()`` is a no-op in this mode. An optional ``version``
+      (ISO 8601 timestamp) can pin ``load()`` to a historical snapshot.
     """
 
     def __init__(
@@ -49,14 +51,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         local_path: str | None = None,
         sync_policy: Literal["local", "remote"] = "local",
         metadata: dict[str, Any] | None = None,
+        version: str | None = None,
     ):
-        self._validate_init_params(credentials, local_path, sync_policy)
+        self._validate_init_params(credentials, local_path, sync_policy, version)
 
         self.dataset_name = dataset_name
         self._dataset: DatasetClient | None = None
         self.local_path = Path(local_path) if local_path else None
         self.sync_policy = sync_policy
         self.metadata = metadata
+        self._version = self._parse_version(version)
         self._client = Langfuse(
             public_key=credentials["public_key"],
             secret_key=credentials["secret_key"],
@@ -69,10 +73,17 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         credentials: dict[str, str],
         local_path: str | None,
         sync_policy: str,
+        version: str | None,
     ) -> None:
         self._validate_credentials(credentials)
         self._validate_sync_policy(sync_policy)
         self._validate_local_path(local_path)
+        if version is not None and sync_policy != "remote":
+            raise DatasetError(
+                "The 'version' parameter can only be used with "
+                "sync_policy='remote'. A versioned load returns a historical "
+                "snapshot which is incompatible with local-to-remote sync."
+            )
 
     def _validate_credentials(self, credentials: dict[str, str]) -> None:
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
@@ -108,6 +119,22 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                 f"Unsupported file extension '{suffix}'. "
                 f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}."
             )
+
+    @staticmethod
+    def _parse_version(version: str | None) -> datetime | None:
+        """Parse an ISO 8601 version string into a timezone-aware UTC datetime."""
+        if version is None:
+            return None
+        try:
+            dt = datetime.fromisoformat(version)
+        except (ValueError, TypeError) as exc:
+            raise DatasetError(
+                f"Invalid version '{version}'. "
+                f"Expected ISO 8601 format (e.g. '2026-01-15T00:00:00Z')."
+            ) from exc
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
 
     @property
     def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
@@ -256,14 +283,21 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
 
         Creates the remote dataset if it does not exist. When
         ``sync_policy="local"``, any local items missing from the remote
-        (compared by ``id``) are uploaded before returning.
+        (compared by ``id``) are uploaded before returning. When ``version``
+        is set (remote mode only), returns items as they existed at that
+        point in time.
 
         Returns:
             ``DatasetClient`` that can be used to iterate items or call
             ``run_experiment()``.
         """
         self._get_or_create_remote_dataset()
-        dataset = self._client.get_dataset(name=self.dataset_name)
+
+        get_kwargs: dict[str, Any] = {"name": self.dataset_name}
+        if self._version is not None:
+            get_kwargs["version"] = self._version
+
+        dataset = self._client.get_dataset(**get_kwargs)
 
         if self.sync_policy == "local":
             dataset = self._sync_local_to_remote(dataset)
@@ -318,6 +352,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
             "dataset_name": self.dataset_name,
             "local_path": str(self.local_path) if self.local_path else None,
             "sync_policy": self.sync_policy,
+            "version": self._version.isoformat() if self._version else None,
         }
 
     def preview(self) -> JSONPreview:
