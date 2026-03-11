@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Literal, Union
 
 from kedro_datasets._typing import JSONPreview
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 from langfuse import Langfuse
 from langfuse._client.datasets import DatasetClient
 from langfuse.api.core import ApiError
@@ -12,10 +12,13 @@ if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
 
-SUPPORTED_FILE_EXTENSIONS = [".json", ".yaml", ".yml"]
+SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
+REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
+OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
+VALID_SYNC_POLICIES = {"local", "remote"}
 
 
-class LangfuseEvaluationDataset(AbstractDataset):
+class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetClient]):
     """Kedro dataset for Langfuse evaluations supporting local->remote sync (local mode)
        and remote-only behavior (remote mode)."""
 
@@ -23,19 +26,68 @@ class LangfuseEvaluationDataset(AbstractDataset):
         self,
         dataset_name: str,
         credentials: dict[str, str],
-        local_path: Optional[str] = None,
-        sync_policy: str = "local",  # "local" | "remote"
+        local_path: str | None = None,
+        sync_policy: Literal["local", "remote"] = "local",
+        metadata: dict[str, Any] | None = None,
     ):
+        self._validate_init_params(credentials, local_path, sync_policy)
+
         self.dataset_name = dataset_name
         self._dataset: DatasetClient | None = None
         self.local_path = Path(local_path) if local_path else None
         self.sync_policy = sync_policy
+        self.metadata = metadata
         self._client = Langfuse(
             public_key=credentials["public_key"],
             secret_key=credentials["secret_key"],
             host=credentials.get("host"),
         )
         self._file_dataset = None
+
+    def _validate_init_params(
+        self,
+        credentials: dict[str, str],
+        local_path: str | None,
+        sync_policy: str,
+    ) -> None:
+        self._validate_credentials(credentials)
+        self._validate_sync_policy(sync_policy)
+        self._validate_local_path(local_path)
+
+    def _validate_credentials(self, credentials: dict[str, str]) -> None:
+        for key in REQUIRED_LANGFUSE_CREDENTIALS:
+            if key not in credentials:
+                raise DatasetError(
+                    f"Missing required Langfuse credential: '{key}'."
+                )
+            if not credentials[key] or not str(credentials[key]).strip():
+                raise DatasetError(
+                    f"Langfuse credential '{key}' cannot be empty."
+                )
+        for key in OPTIONAL_LANGFUSE_CREDENTIALS:
+            if key in credentials and (
+                not credentials[key] or not str(credentials[key]).strip()
+            ):
+                raise DatasetError(
+                    f"Langfuse credential '{key}' cannot be empty if provided."
+                )
+
+    def _validate_sync_policy(self, sync_policy: str) -> None:
+        if sync_policy not in VALID_SYNC_POLICIES:
+            raise DatasetError(
+                f"Invalid sync_policy '{sync_policy}'. "
+                f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
+            )
+
+    def _validate_local_path(self, local_path: str | None) -> None:
+        if local_path is None:
+            return
+        suffix = Path(local_path).suffix.lower()
+        if suffix not in SUPPORTED_FILE_EXTENSIONS:
+            raise DatasetError(
+                f"Unsupported file extension '{suffix}'. "
+                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}."
+            )
 
     @property
     def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
@@ -96,7 +148,7 @@ class LangfuseEvaluationDataset(AbstractDataset):
 
         return dataset
 
-    def save(self, data: List[dict[str, Any]]) -> None:
+    def save(self, data: list[dict[str, Any]]) -> None:
         if self.sync_policy == "remote":
             return
         # Create dataset if it does not exist
