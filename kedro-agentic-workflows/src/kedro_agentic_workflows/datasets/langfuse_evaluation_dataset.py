@@ -215,8 +215,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         return merged
 
     def _upload_items(self, items: list[dict[str, Any]]) -> None:
-        """Upload items to the remote Langfuse dataset."""
-        self._validate_items(items)
+        """Upload items to the remote Langfuse dataset.
+
+        Callers are responsible for validating items before calling this method.
+        """
         for item in items:
             self._client.create_dataset_item(
                 dataset_name=self.dataset_name,
