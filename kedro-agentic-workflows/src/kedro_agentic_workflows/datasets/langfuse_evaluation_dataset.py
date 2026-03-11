@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Union
 
@@ -7,6 +8,8 @@ from kedro.io import AbstractDataset, DatasetError
 from langfuse import Langfuse
 from langfuse._client.datasets import DatasetClient
 from langfuse.api.core import ApiError
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
@@ -19,8 +22,25 @@ VALID_SYNC_POLICIES = {"local", "remote"}
 
 
 class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetClient]):
-    """Kedro dataset for Langfuse evaluations supporting local->remote sync (local mode)
-       and remote-only behavior (remote mode)."""
+    """Kedro dataset for Langfuse evaluation datasets.
+
+    Connects to a Langfuse evaluation dataset and returns a ``DatasetClient``
+    on ``load()``, which can be used to run experiments via
+    ``dataset.run_experiment()``. Supports an optional local JSON/YAML file
+    as the authoring surface for evaluation items.
+
+    **Sync policies:**
+
+    - **local** (default): The local file is the source of truth for evaluation
+      items. On ``load()``, the remote dataset is created if it does not exist,
+      and any local items missing from the remote (compared by ``id``) are
+      uploaded. Existing remote items are never modified or deleted. Items
+      without an ``id`` field cannot be deduplicated and will be re-uploaded on
+      every load.
+    - **remote**: The remote Langfuse dataset is the sole source of truth.
+      On ``load()``, the remote dataset is fetched as-is with no local file
+      interaction. ``save()`` is a no-op in this mode.
+    """
 
     def __init__(
         self,
@@ -139,38 +159,65 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         for item in items:
             self._client.create_dataset_item(
                 dataset_name=self.dataset_name,
+                id=item.get("id"),
                 input=item["input"],
                 expected_output=item.get("expected_output"),
                 metadata=item.get("metadata"),
             )
 
-    def load(self) -> DatasetClient:
-        """Return remote Langfuse dataset; optionally sync local items to remote."""
-        try:
-            dataset = self._client.get_dataset(name=self.dataset_name)
-        except ApiError as exc:
-            if exc.status_code != 404:
-                raise DatasetError(
-                    f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
-                ) from exc
+    def _sync_local_to_remote(self, dataset: DatasetClient) -> DatasetClient:
+        """Sync local items to remote, uploading only items missing from remote.
 
-            self._client.create_dataset(
-                name=self.dataset_name,
-                metadata={
-                    "created_by": "kedro",
-                    "sync_policy": self.sync_policy,
-                }
+        Compares local items against remote items by 'id'. Items present in the
+        local file but absent from the remote dataset are uploaded. Existing
+        remote items are never modified or deleted.
+
+        Returns the (possibly refreshed) DatasetClient.
+        """
+        if not self.local_path or not self.local_path.exists():
+            return dataset
+
+        local_items = self.file_dataset.load()
+        self._validate_items(local_items)
+
+        items_with_id = [item for item in local_items if "id" in item]
+        items_without_id = [item for item in local_items if "id" not in item]
+
+        if items_without_id:
+            logger.warning(
+                "Found %d local item(s) without an 'id' field in '%s'. "
+                "Items without 'id' cannot be deduplicated and will be "
+                "uploaded on every load. Consider adding unique 'id' fields.",
+                len(items_without_id),
+                self.local_path,
             )
 
-            if (
-                    self.sync_policy == "local"
-                    and self.local_path
-                    and self.local_path.exists()
-            ):
-                local_items = self.file_dataset.load()
-                self._upload_items(local_items)
+        remote_ids = {item.id for item in dataset.items}
+        missing_items = [
+            item for item in items_with_id
+            if item["id"] not in remote_ids
+        ]
 
-            dataset = self._client.get_dataset(name=self.dataset_name)
+        new_items = missing_items + items_without_id
+        if not new_items:
+            return dataset
+
+        logger.info(
+            "Syncing %d new item(s) from '%s' to remote dataset '%s'.",
+            len(new_items),
+            self.local_path,
+            self.dataset_name,
+        )
+        self._upload_items(new_items)
+        return self._client.get_dataset(name=self.dataset_name)
+
+    def load(self) -> DatasetClient:
+        """Return remote Langfuse dataset; optionally sync local items to remote."""
+        self._get_or_create_remote_dataset()
+        dataset = self._client.get_dataset(name=self.dataset_name)
+
+        if self.sync_policy == "local":
+            dataset = self._sync_local_to_remote(dataset)
 
         self._dataset = dataset
         return dataset
