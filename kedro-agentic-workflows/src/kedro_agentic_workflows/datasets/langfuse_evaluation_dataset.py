@@ -145,14 +145,9 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
             if self.local_path.suffix.lower() in (".yaml", ".yml"):
                 from kedro_datasets.yaml import YAMLDataset
                 self._file_dataset = YAMLDataset(filepath=str(self.local_path))
-            elif self.local_path.suffix.lower() == ".json":
+            else:
                 from kedro_datasets.json import JSONDataset
                 self._file_dataset = JSONDataset(filepath=str(self.local_path))
-            else:
-                raise DatasetError(
-                    f"Unsupported file extension '{self.local_path.suffix}'. "
-                    f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-                )
         return self._file_dataset
 
     def _get_or_create_remote_dataset(self) -> DatasetClient:
@@ -169,10 +164,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                 ) from exc
             self._client.create_dataset(
                 name=self.dataset_name,
-                metadata={
-                    "created_by": "kedro",
-                    "sync_policy": self.sync_policy,
-                }
+                metadata=self.metadata or {},
             )
             return self._client.get_dataset(name=self.dataset_name)
 
@@ -356,6 +348,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
             "local_path": str(self.local_path) if self.local_path else None,
             "sync_policy": self.sync_policy,
             "version": self._version.isoformat() if self._version else None,
+            "metadata": self.metadata,
         }
 
     def preview(self) -> JSONPreview:
