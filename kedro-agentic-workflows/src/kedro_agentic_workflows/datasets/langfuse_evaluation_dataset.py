@@ -31,18 +31,108 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     ``dataset.run_experiment()``. Supports an optional local JSON/YAML file
     as the authoring surface for evaluation items.
 
+    **On load / save behaviour:**
+
+    - **On load:** Creates the remote dataset if it does not exist,
+      synchronises based on ``sync_policy``, and returns a ``DatasetClient``.
+    - **On save:** Uploads new items to the remote dataset (deduplicating
+      by ``id``) and optionally merges them into the local file.
+
+    **Item format:**
+
+    The local file and ``save()`` data must be a list of dicts. Each item
+    accepts the same keys as
+    `Langfuse.create_dataset_item() <https://langfuse.com/docs/evaluation/experiments/datasets#create-items-from-production-data>`_:
+
+    - ``input`` (**required**) — the evaluation input payload.
+    - ``id`` — stable identifier used for deduplication on sync and upload.
+    - ``expected_output`` — ground-truth value for scoring.
+    - ``metadata`` — arbitrary metadata dict attached to the item.
+    - ``source_trace_id`` — Langfuse trace ID to link the item to.
+    - ``source_observation_id`` — observation ID within the source trace.
+    - ``status`` — ``"ACTIVE"`` (default) or ``"ARCHIVED"``.
+
+    ```json
+    [
+      {
+        "id": "q1",
+        "input": {"text": "cancel my order"},
+        "expected_output": "cancel_order",
+        "metadata": {"source": "production"}
+      }
+    ]
+    ```
+
+    Items without an ``id`` cannot be deduplicated and will be re-uploaded
+    on every ``load()`` or ``save()`` call.
+
     **Sync policies:**
 
-    - **local** (default): The local file is the source of truth for evaluation
-      items. On ``load()``, the remote dataset is created if it does not exist,
-      and any local items missing from the remote (compared by ``id``) are
-      uploaded. Existing remote items are never modified or deleted. Items
-      without an ``id`` field cannot be deduplicated and will be re-uploaded on
-      every load.
+    - **local** (default): The local file is the source of truth. On
+      ``load()``, any local items missing from the remote (compared by ``id``)
+      are uploaded. Existing remote items are never modified or deleted.
+      Items without an ``id`` field cannot be deduplicated and will be
+      re-uploaded on every load.
     - **remote**: The remote Langfuse dataset is the sole source of truth.
-      On ``load()``, the remote dataset is fetched as-is with no local file
-      interaction. ``save()`` is a no-op in this mode. An optional ``version``
-      (ISO 8601 timestamp) can pin ``load()`` to a historical snapshot.
+      ``load()`` fetches the remote dataset as-is with no local file
+      interaction. ``save()`` is a no-op in this mode. An optional
+      ``version`` (ISO 8601 timestamp) can pin ``load()`` to a historical
+      snapshot.
+
+    Examples:
+        Using catalog YAML configuration:
+
+        ```yaml
+        # Local sync policy - local file seeds and syncs to remote
+        evaluation_dataset:
+          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          dataset_name: intent-detection-eval
+          local_path: data/evaluation/intent_items.json
+          sync_policy: local
+          credentials: langfuse_credentials
+          metadata:
+            project: intent-detection
+
+        # Remote sync policy - Langfuse is the source of truth
+        production_eval:
+          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          dataset_name: intent-detection-eval
+          sync_policy: remote
+          credentials: langfuse_credentials
+
+        # Pinned to a historical snapshot for reproducibility
+        eval_snapshot:
+          type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
+          dataset_name: intent-detection-eval
+          sync_policy: remote
+          version: "2026-01-15T00:00:00Z"
+          credentials: langfuse_credentials
+        ```
+
+        Using Python API:
+
+        ```python
+        from kedro_agentic_workflows.datasets import LangfuseEvaluationDataset
+
+        dataset = LangfuseEvaluationDataset(
+            dataset_name="intent-detection-eval",
+            credentials={
+                "public_key": "pk_...",
+                "secret_key": "sk_...",
+            },
+            local_path="data/evaluation/intent_items.json",
+        )
+
+        # Load returns a DatasetClient for running experiments
+        eval_dataset = dataset.load()
+        for item in eval_dataset.items:
+            print(item.input, item.expected_output)
+
+        # Save new evaluation items
+        dataset.save([
+            {"id": "q1", "input": {"text": "cancel order"}, "expected_output": "cancel"},
+        ])
+        ```
     """
 
     def __init__(
@@ -54,6 +144,30 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         metadata: dict[str, Any] | None = None,
         version: str | None = None,
     ):
+        """Initialise ``LangfuseEvaluationDataset``.
+
+        Args:
+            dataset_name: Name of the evaluation dataset in Langfuse.
+            credentials: Langfuse authentication credentials.
+                Required: ``public_key``, ``secret_key``.
+                Optional: ``host`` (defaults to Langfuse cloud).
+            local_path: Path to a local JSON/YAML file for authoring evaluation
+                items. Supports ``.json``, ``.yaml``, and ``.yml`` extensions.
+                When ``None``, no local file interaction occurs.
+            sync_policy: Synchronisation strategy between local and remote:
+                ``"local"`` (default) — local file seeds the remote dataset.
+                ``"remote"`` — remote dataset is the sole source of truth.
+            metadata: Optional metadata dict passed to Langfuse when creating
+                the remote dataset for the first time.
+            version: ISO 8601 timestamp to pin ``load()`` to a historical
+                snapshot (e.g. ``"2026-01-15T00:00:00Z"``). Only valid with
+                ``sync_policy="remote"``.
+
+        Raises:
+            DatasetError: If credentials are missing or empty, sync_policy is
+                invalid, local_path has an unsupported extension, or version
+                is used with ``sync_policy="local"``.
+        """
         self._validate_init_params(credentials, local_path, sync_policy, version)
 
         self.dataset_name = dataset_name
@@ -221,6 +335,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     def _upload_items(self, items: list[dict[str, Any]]) -> None:
         """Upload items to the remote Langfuse dataset.
 
+        Passes through all keys accepted by ``Langfuse.create_dataset_item()``.
         Callers are responsible for validating items before calling this method.
         """
         for item in items:
@@ -230,6 +345,9 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 input=item["input"],
                 expected_output=item.get("expected_output"),
                 metadata=item.get("metadata"),
+                source_trace_id=item.get("source_trace_id"),
+                source_observation_id=item.get("source_observation_id"),
+                status=item.get("status"),
             )
 
     def _filter_new_items(
@@ -289,17 +407,20 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         return self._client.get_dataset(name=self.dataset_name)
 
     def load(self) -> "DatasetClient":
-        """Load the Langfuse evaluation dataset.
+        """Load the evaluation dataset from Langfuse.
 
-        Creates the remote dataset if it does not exist. When
-        ``sync_policy="local"``, any local items missing from the remote
-        (compared by ``id``) are uploaded before returning. When ``version``
-        is set (remote mode only), returns items as they existed at that
-        point in time.
+        Creates the remote dataset if it does not exist. In ``local`` mode,
+        items from the local file that are missing on remote (compared by
+        ``id``) are uploaded first. In ``remote`` mode with ``version`` set,
+        returns items as they existed at that point in time.
 
         Returns:
-            ``DatasetClient`` that can be used to iterate items or call
-            ``run_experiment()``.
+            DatasetClient: Langfuse dataset client that can be used to
+                iterate items or call ``run_experiment()``.
+
+        Raises:
+            DatasetError: If the Langfuse API is unreachable or returns
+                an unexpected error.
         """
         dataset = self._get_or_create_remote_dataset()
 
@@ -326,12 +447,21 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         return dataset
 
     def save(self, data: list[dict[str, Any]]) -> None:
-        """Save evaluation items to remote and optionally to local file.
+        """Save evaluation items to the remote dataset and local file.
 
-        Items already present on remote (matched by ``id``) are skipped.
-        When ``local_path`` is set, items are also merged into the local
-        file with the same id-based deduplication. No-op when
-        ``sync_policy="remote"``.
+        Uploads items to Langfuse, skipping any that already exist on
+        remote (matched by ``id``). When ``local_path`` is configured,
+        items are also merged into the local file with the same id-based
+        deduplication. No-op when ``sync_policy="remote"``.
+
+        Args:
+            data: List of evaluation item dicts. Each item must contain
+                an ``input`` key. See class docstring for the full list of
+                accepted keys (mirrors ``Langfuse.create_dataset_item()``).
+
+        Raises:
+            DatasetError: If any item is missing the required ``input`` key
+                or the Langfuse API returns an error.
         """
         if self.sync_policy == "remote":
             logger.warning(
@@ -385,7 +515,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         }
 
     def preview(self) -> JSONPreview:
-        """Generate a JSON-compatible preview of the local evaluation data for Kedro-Viz."""
+        """Generate a JSON-compatible preview of the local evaluation data.
+
+        Returns:
+            JSONPreview: Serialised JSON string for Kedro-Viz. Returns a
+                descriptive message if ``local_path`` is not configured or
+                the file does not exist.
+        """
         if not self.local_path:
             return JSONPreview("No local_path configured.")
 
