@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Union
+from typing import TYPE_CHECKING, Any, Literal
 
 from kedro_datasets._typing import JSONPreview
 from kedro.io import AbstractDataset, DatasetError
@@ -137,7 +137,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         return dt
 
     @property
-    def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
+    def file_dataset(self) -> "JSONDataset | YAMLDataset":
         """Return JSON/YAML file dataset based on extension."""
         if not self.local_path:
             raise DatasetError("local_path must be provided for file dataset operations.")
