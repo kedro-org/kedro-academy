@@ -7,14 +7,15 @@ from typing import TYPE_CHECKING, Any, Literal
 from kedro_datasets._typing import JSONPreview
 from kedro.io import AbstractDataset, DatasetError
 from langfuse import Langfuse
-from langfuse._client.datasets import DatasetClient
-from langfuse.api.core import ApiError
+from langfuse.api import Error as LangfuseApiError
+from langfuse.api import NotFoundError as LangfuseNotFoundError
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
+    from langfuse._client.datasets import DatasetClient
 
 SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
 REQUIRED_LANGFUSE_CREDENTIALS = {"public_key", "secret_key"}
@@ -22,7 +23,7 @@ OPTIONAL_LANGFUSE_CREDENTIALS = {"host"}
 VALID_SYNC_POLICIES = {"local", "remote"}
 
 
-class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetClient]):
+class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetClient"]):
     """Kedro dataset for Langfuse evaluation datasets.
 
     Connects to a Langfuse evaluation dataset and returns a ``DatasetClient``
@@ -150,23 +151,23 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
                 self._file_dataset = JSONDataset(filepath=str(self.local_path))
         return self._file_dataset
 
-    def _get_or_create_remote_dataset(self) -> DatasetClient:
+    def _get_or_create_remote_dataset(self) -> "DatasetClient":
         """Ensure the remote Langfuse dataset exists, creating it if not found.
 
         Returns the latest ``DatasetClient``.
         """
         try:
             return self._client.get_dataset(name=self.dataset_name)
-        except ApiError as exc:
-            if exc.status_code != 404:
-                raise DatasetError(
-                    f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
-                ) from exc
+        except LangfuseNotFoundError:
             self._client.create_dataset(
                 name=self.dataset_name,
                 metadata=self.metadata or {},
             )
             return self._client.get_dataset(name=self.dataset_name)
+        except LangfuseApiError as exc:
+            raise DatasetError(
+                f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+            ) from exc
 
     def _validate_items(self, items: list[dict[str, Any]]) -> None:
         """Validate that all items contain the required 'input' key."""
@@ -223,7 +224,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
     def _filter_new_items(
         self,
         items: list[dict[str, Any]],
-        dataset: DatasetClient,
+        dataset: "DatasetClient",
     ) -> list[dict[str, Any]]:
         """Return items not already present on remote, compared by 'id'.
 
@@ -248,7 +249,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
 
         return missing_items + items_without_id
 
-    def _sync_local_to_remote(self, dataset: DatasetClient) -> DatasetClient:
+    def _sync_local_to_remote(self, dataset: "DatasetClient") -> "DatasetClient":
         """Sync local items to remote, uploading only items missing from remote.
 
         Compares local items against remote items by 'id'. Items present in the
@@ -276,7 +277,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         self._upload_items(new_items)
         return self._client.get_dataset(name=self.dataset_name)
 
-    def load(self) -> DatasetClient:
+    def load(self) -> "DatasetClient":
         """Load the Langfuse evaluation dataset.
 
         Creates the remote dataset if it does not exist. When
@@ -335,9 +336,9 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], DatasetCli
         try:
             self._client.get_dataset(name=self.dataset_name)
             return True
-        except ApiError as exc:
-            if exc.status_code == 404:
-                return False
+        except LangfuseNotFoundError:
+            return False
+        except LangfuseApiError as exc:
             raise DatasetError(
                 f"Langfuse API error while checking dataset '{self.dataset_name}': {exc}"
             ) from exc
