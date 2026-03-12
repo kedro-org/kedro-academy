@@ -1,7 +1,7 @@
 intent_evaluation_data:
   type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
   dataset_name: evaluations/intent_agent_evaluation
-  filepath: data/evaluation/intent_evaluation.json
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
   credentials: langfuse_credentials
   metadata:
