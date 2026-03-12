@@ -4,6 +4,9 @@ intent_evaluation_data:
   local_path: data/evaluation/intent_evaluation.json
   sync_policy: local
   credentials: langfuse_credentials
+  metadata:
+    created_by: kedro
+    sync_policy: local
 
 intent_judge_llm:
   type: langchain.ChatOpenAIDataset
