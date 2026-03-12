@@ -159,6 +159,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         try:
             return self._client.get_dataset(name=self.dataset_name)
         except LangfuseNotFoundError:
+            pass
+        except LangfuseApiError as exc:
+            raise DatasetError(
+                f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+            ) from exc
+
+        try:
             logger.info(
                 "Dataset '%s' not found on Langfuse, creating it.",
                 self.dataset_name,
@@ -170,7 +177,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             return self._client.get_dataset(name=self.dataset_name)
         except LangfuseApiError as exc:
             raise DatasetError(
-                f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+                f"Langfuse API error while creating dataset '{self.dataset_name}': {exc}"
             ) from exc
 
     def _validate_items(self, items: list[dict[str, Any]]) -> None:
