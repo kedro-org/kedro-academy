@@ -183,16 +183,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         )
         self._file_dataset = None
 
+    @staticmethod
     def _validate_init_params(
-        self,
         credentials: dict[str, str],
         filepath: str | None,
         sync_policy: str,
         version: str | None,
     ) -> None:
-        self._validate_credentials(credentials)
-        self._validate_sync_policy(sync_policy)
-        self._validate_filepath(filepath)
+        LangfuseEvaluationDataset._validate_credentials(credentials)
+        LangfuseEvaluationDataset._validate_sync_policy(sync_policy)
+        LangfuseEvaluationDataset._validate_filepath(filepath)
         if version is not None and sync_policy != "remote":
             raise DatasetError(
                 "The 'version' parameter can only be used with "
@@ -200,7 +200,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 "snapshot which is incompatible with local-to-remote sync."
             )
 
-    def _validate_credentials(self, credentials: dict[str, str]) -> None:
+    @staticmethod
+    def _validate_credentials(credentials: dict[str, str]) -> None:
         for key in REQUIRED_LANGFUSE_CREDENTIALS:
             if key not in credentials:
                 raise DatasetError(
@@ -218,14 +219,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                     f"Langfuse credential '{key}' cannot be empty if provided."
                 )
 
-    def _validate_sync_policy(self, sync_policy: str) -> None:
+    @staticmethod
+    def _validate_sync_policy(sync_policy: str) -> None:
         if sync_policy not in VALID_SYNC_POLICIES:
             raise DatasetError(
                 f"Invalid sync_policy '{sync_policy}'. "
                 f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
             )
 
-    def _validate_filepath(self, filepath: str | None) -> None:
+    @staticmethod
+    def _validate_filepath(filepath: str | None) -> None:
         if filepath is None:
             return
         suffix = Path(filepath).suffix.lower()
@@ -294,7 +297,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 f"Langfuse API error while creating dataset '{self._dataset_name}': {exc}"
             ) from exc
 
-    def _validate_items(self, items: list[dict[str, Any]]) -> None:
+    @staticmethod
+    def _validate_items(items: list[dict[str, Any]]) -> None:
         """Validate that all items contain the required 'input' key."""
         for i, item in enumerate(items):
             if "input" not in item:
