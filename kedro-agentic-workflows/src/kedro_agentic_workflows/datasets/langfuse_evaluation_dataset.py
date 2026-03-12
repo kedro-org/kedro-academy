@@ -87,7 +87,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         evaluation_dataset:
           type: kedro_agentic_workflows.datasets.LangfuseEvaluationDataset
           dataset_name: intent-detection-eval
-          local_path: data/evaluation/intent_items.json
+          filepath: data/evaluation/intent_items.json
           sync_policy: local
           credentials: langfuse_credentials
           metadata:
@@ -120,7 +120,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 "public_key": "pk_...",
                 "secret_key": "sk_...",
             },
-            local_path="data/evaluation/intent_items.json",
+            filepath="data/evaluation/intent_items.json",
         )
 
         # Load returns a DatasetClient for running experiments
@@ -139,7 +139,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         self,
         dataset_name: str,
         credentials: dict[str, str],
-        local_path: str | None = None,
+        filepath: str | None = None,
         sync_policy: Literal["local", "remote"] = "local",
         metadata: dict[str, Any] | None = None,
         version: str | None = None,
@@ -151,7 +151,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             credentials: Langfuse authentication credentials.
                 Required: ``public_key``, ``secret_key``.
                 Optional: ``host`` (defaults to Langfuse cloud).
-            local_path: Path to a local JSON/YAML file for authoring evaluation
+            filepath: Path to a local JSON/YAML file for authoring evaluation
                 items. Supports ``.json``, ``.yaml``, and ``.yml`` extensions.
                 When ``None``, no local file interaction occurs.
             sync_policy: Synchronisation strategy between local and remote:
@@ -165,16 +165,16 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
         Raises:
             DatasetError: If credentials are missing or empty, sync_policy is
-                invalid, local_path has an unsupported extension, or version
+                invalid, filepath has an unsupported extension, or version
                 is used with ``sync_policy="local"``.
         """
-        self._validate_init_params(credentials, local_path, sync_policy, version)
+        self._validate_init_params(credentials, filepath, sync_policy, version)
 
-        self.dataset_name = dataset_name
+        self._dataset_name = dataset_name
         self._dataset: DatasetClient | None = None
-        self.local_path = Path(local_path) if local_path else None
-        self.sync_policy = sync_policy
-        self.metadata = metadata
+        self._filepath = Path(filepath) if filepath else None
+        self._sync_policy = sync_policy
+        self._metadata = metadata
         self._version = self._parse_version(version)
         self._client = Langfuse(
             public_key=credentials["public_key"],
@@ -186,13 +186,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     def _validate_init_params(
         self,
         credentials: dict[str, str],
-        local_path: str | None,
+        filepath: str | None,
         sync_policy: str,
         version: str | None,
     ) -> None:
         self._validate_credentials(credentials)
         self._validate_sync_policy(sync_policy)
-        self._validate_local_path(local_path)
+        self._validate_filepath(filepath)
         if version is not None and sync_policy != "remote":
             raise DatasetError(
                 "The 'version' parameter can only be used with "
@@ -225,10 +225,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
             )
 
-    def _validate_local_path(self, local_path: str | None) -> None:
-        if local_path is None:
+    def _validate_filepath(self, filepath: str | None) -> None:
+        if filepath is None:
             return
-        suffix = Path(local_path).suffix.lower()
+        suffix = Path(filepath).suffix.lower()
         if suffix not in SUPPORTED_FILE_EXTENSIONS:
             raise DatasetError(
                 f"Unsupported file extension '{suffix}'. "
@@ -254,15 +254,15 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
     @property
     def file_dataset(self) -> "JSONDataset | YAMLDataset":
         """Return JSON/YAML file dataset based on extension."""
-        if not self.local_path:
-            raise DatasetError("local_path must be provided for file dataset operations.")
+        if not self._filepath:
+            raise DatasetError("filepath must be provided for file dataset operations.")
         if self._file_dataset is None:
-            if self.local_path.suffix.lower() in (".yaml", ".yml"):
+            if self._filepath.suffix.lower() in (".yaml", ".yml"):
                 from kedro_datasets.yaml import YAMLDataset
-                self._file_dataset = YAMLDataset(filepath=str(self.local_path))
+                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
             else:
                 from kedro_datasets.json import JSONDataset
-                self._file_dataset = JSONDataset(filepath=str(self.local_path))
+                self._file_dataset = JSONDataset(filepath=str(self._filepath))
         return self._file_dataset
 
     def _get_or_create_remote_dataset(self) -> "DatasetClient":
@@ -271,27 +271,27 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         Returns the latest ``DatasetClient``.
         """
         try:
-            return self._client.get_dataset(name=self.dataset_name)
+            return self._client.get_dataset(name=self._dataset_name)
         except LangfuseNotFoundError:
             pass
         except LangfuseApiError as exc:
             raise DatasetError(
-                f"Langfuse API error while fetching dataset '{self.dataset_name}': {exc}"
+                f"Langfuse API error while fetching dataset '{self._dataset_name}': {exc}"
             ) from exc
 
         try:
             logger.info(
                 "Dataset '%s' not found on Langfuse, creating it.",
-                self.dataset_name,
+                self._dataset_name,
             )
             self._client.create_dataset(
-                name=self.dataset_name,
-                metadata=self.metadata or {},
+                name=self._dataset_name,
+                metadata=self._metadata or {},
             )
-            return self._client.get_dataset(name=self.dataset_name)
+            return self._client.get_dataset(name=self._dataset_name)
         except LangfuseApiError as exc:
             raise DatasetError(
-                f"Langfuse API error while creating dataset '{self.dataset_name}': {exc}"
+                f"Langfuse API error while creating dataset '{self._dataset_name}': {exc}"
             ) from exc
 
     def _validate_items(self, items: list[dict[str, Any]]) -> None:
@@ -340,7 +340,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         """
         for item in items:
             self._client.create_dataset_item(
-                dataset_name=self.dataset_name,
+                dataset_name=self._dataset_name,
                 id=item.get("id"),
                 input=item["input"],
                 expected_output=item.get("expected_output"),
@@ -387,7 +387,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
         Returns the (possibly refreshed) DatasetClient.
         """
-        if not self.local_path or not self.local_path.exists():
+        if not self._filepath or not self._filepath.exists():
             return dataset
 
         local_items = self.file_dataset.load()
@@ -400,11 +400,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         logger.info(
             "Syncing %d new item(s) from '%s' to remote dataset '%s'.",
             len(new_items),
-            self.local_path,
-            self.dataset_name,
+            self._filepath,
+            self._dataset_name,
         )
         self._upload_items(new_items)
-        return self._client.get_dataset(name=self.dataset_name)
+        return self._client.get_dataset(name=self._dataset_name)
 
     def load(self) -> "DatasetClient":
         """Load the evaluation dataset from Langfuse.
@@ -427,21 +427,21 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         if self._version is not None:
             logger.info(
                 "Loading versioned snapshot of '%s' at %s.",
-                self.dataset_name,
+                self._dataset_name,
                 self._version.isoformat(),
             )
             dataset = self._client.get_dataset(
-                name=self.dataset_name, version=self._version
+                name=self._dataset_name, version=self._version
             )
 
-        if self.sync_policy == "local":
+        if self._sync_policy == "local":
             dataset = self._sync_local_to_remote(dataset)
 
         logger.info(
             "Loaded dataset '%s' with %d item(s) (sync_policy='%s').",
-            self.dataset_name,
+            self._dataset_name,
             len(dataset.items),
-            self.sync_policy,
+            self._sync_policy,
         )
         self._dataset = dataset
         return dataset
@@ -450,7 +450,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         """Save evaluation items to the remote dataset and local file.
 
         Uploads items to Langfuse, skipping any that already exist on
-        remote (matched by ``id``). When ``local_path`` is configured,
+        remote (matched by ``id``). When ``filepath`` is configured,
         items are also merged into the local file with the same id-based
         deduplication. No-op when ``sync_policy="remote"``.
 
@@ -463,11 +463,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             DatasetError: If any item is missing the required ``input`` key
                 or the Langfuse API returns an error.
         """
-        if self.sync_policy == "remote":
+        if self._sync_policy == "remote":
             logger.warning(
                 "save() is a no-op when sync_policy='remote' for dataset '%s'. "
                 "Remote datasets are managed externally.",
-                self.dataset_name,
+                self._dataset_name,
             )
             return
 
@@ -478,40 +478,40 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             logger.info(
                 "Uploading %d new item(s) to remote dataset '%s'.",
                 len(new_items),
-                self.dataset_name,
+                self._dataset_name,
             )
             self._upload_items(new_items)
         else:
             logger.info(
                 "No new items to upload to remote dataset '%s'.",
-                self.dataset_name,
+                self._dataset_name,
             )
 
-        if self.local_path:
+        if self._filepath:
             existing = []
-            if self.local_path.exists():
+            if self._filepath.exists():
                 existing = self.file_dataset.load()
             merged = self._merge_items(existing, data)
             self.file_dataset.save(merged)
 
     def _exists(self) -> bool:
         try:
-            self._client.get_dataset(name=self.dataset_name)
+            self._client.get_dataset(name=self._dataset_name)
             return True
         except LangfuseNotFoundError:
             return False
         except LangfuseApiError as exc:
             raise DatasetError(
-                f"Langfuse API error while checking dataset '{self.dataset_name}': {exc}"
+                f"Langfuse API error while checking dataset '{self._dataset_name}': {exc}"
             ) from exc
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset_name": self.dataset_name,
-            "local_path": str(self.local_path) if self.local_path else None,
-            "sync_policy": self.sync_policy,
+            "dataset_name": self._dataset_name,
+            "filepath": str(self._filepath) if self._filepath else None,
+            "sync_policy": self._sync_policy,
             "version": self._version.isoformat() if self._version else None,
-            "metadata": self.metadata,
+            "metadata": self._metadata,
         }
 
     def preview(self) -> JSONPreview:
@@ -519,13 +519,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
         Returns:
             JSONPreview: Serialised JSON string for Kedro-Viz. Returns a
-                descriptive message if ``local_path`` is not configured or
+                descriptive message if ``filepath`` is not configured or
                 the file does not exist.
         """
-        if not self.local_path:
-            return JSONPreview("No local_path configured.")
+        if not self._filepath:
+            return JSONPreview("No filepath configured.")
 
-        if not self.local_path.exists():
+        if not self._filepath.exists():
             return JSONPreview("Local file does not exist.")
 
         local_data = self.file_dataset.load()
