@@ -159,6 +159,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         try:
             return self._client.get_dataset(name=self.dataset_name)
         except LangfuseNotFoundError:
+            logger.info(
+                "Dataset '%s' not found on Langfuse, creating it.",
+                self.dataset_name,
+            )
             self._client.create_dataset(
                 name=self.dataset_name,
                 metadata=self.metadata or {},
@@ -293,6 +297,11 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         dataset = self._get_or_create_remote_dataset()
 
         if self._version is not None:
+            logger.info(
+                "Loading versioned snapshot of '%s' at %s.",
+                self.dataset_name,
+                self._version.isoformat(),
+            )
             dataset = self._client.get_dataset(
                 name=self.dataset_name, version=self._version
             )
@@ -300,6 +309,12 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         if self.sync_policy == "local":
             dataset = self._sync_local_to_remote(dataset)
 
+        logger.info(
+            "Loaded dataset '%s' with %d item(s) (sync_policy='%s').",
+            self.dataset_name,
+            len(dataset.items),
+            self.sync_policy,
+        )
         self._dataset = dataset
         return dataset
 
@@ -323,7 +338,17 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         self._validate_items(data)
         new_items = self._filter_new_items(data, dataset)
         if new_items:
+            logger.info(
+                "Uploading %d new item(s) to remote dataset '%s'.",
+                len(new_items),
+                self.dataset_name,
+            )
             self._upload_items(new_items)
+        else:
+            logger.info(
+                "No new items to upload to remote dataset '%s'.",
+                self.dataset_name,
+            )
 
         if self.local_path:
             existing = []
