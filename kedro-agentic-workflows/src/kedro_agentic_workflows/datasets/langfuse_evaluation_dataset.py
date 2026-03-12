@@ -77,7 +77,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
       ``load()`` fetches the remote dataset as-is with no local file
       interaction. ``save()`` is a no-op in this mode. An optional
       ``version`` (ISO 8601 timestamp) can pin ``load()`` to a historical
-      snapshot.
+                snapshot (requires ``langfuse>=3.14.0``).
 
     Examples:
         Using catalog YAML configuration:
@@ -161,7 +161,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 the remote dataset for the first time.
             version: ISO 8601 timestamp to pin ``load()`` to a historical
                 snapshot (e.g. ``"2026-01-15T00:00:00Z"``). Only valid with
-                ``sync_policy="remote"``.
+                ``sync_policy="remote"``. When omitted, the latest dataset
+                state is returned. Requires ``langfuse>=3.14.0`` (dataset
+                versioning was introduced in the
+                `Feb 2026 release <https://langfuse.com/changelog/2026-02-11-versioned-dataset-experiments>`_).
 
         Raises:
             DatasetError: If credentials are missing or empty, sync_policy is
