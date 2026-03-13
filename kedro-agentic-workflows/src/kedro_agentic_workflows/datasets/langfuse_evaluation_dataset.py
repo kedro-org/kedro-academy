@@ -35,8 +35,9 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
 
     - **On load:** Creates the remote dataset if it does not exist,
       synchronises based on ``sync_policy``, and returns a ``DatasetClient``.
-    - **On save:** Uploads new items to the remote dataset (deduplicating
-      by ``id``) and optionally merges them into the local file.
+    - **On save:** Always uploads new items to the remote dataset
+      (deduplicating by ``id``). In ``local`` mode, also merges them into
+      the local file. In ``remote`` mode, only the remote upload occurs.
 
     **Item format:**
 
@@ -75,9 +76,10 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
       re-uploaded on every load.
     - **remote**: The remote Langfuse dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
-      interaction. ``save()`` is a no-op in this mode. An optional
+      interaction. ``save()`` uploads new items to remote (deduplicating
+      by ``id``) but does not write to any local file. An optional
       ``version`` (ISO 8601 timestamp) can pin ``load()`` to a historical
-                snapshot (requires ``langfuse>=3.14.0``).
+      snapshot (requires ``langfuse>=3.14.0``).
 
     Examples:
         Using catalog YAML configuration:
@@ -154,9 +156,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             filepath: Path to a local JSON/YAML file for authoring evaluation
                 items. Supports ``.json``, ``.yaml``, and ``.yml`` extensions.
                 When ``None``, no local file interaction occurs.
-            sync_policy: Synchronisation strategy between local and remote:
-                ``"local"`` (default) — local file seeds the remote dataset.
-                ``"remote"`` — remote dataset is the sole source of truth.
+            sync_policy: Controls the source of truth for reads and whether
+                a local file is involved:
+                ``"local"`` (default) — local file seeds the remote dataset
+                on ``load()``; ``save()`` uploads to remote and merges into
+                the local file.
+                ``"remote"`` — ``load()`` fetches remote as-is; ``save()``
+                uploads to remote without local file interaction.
             metadata: Optional metadata dict passed to Langfuse when creating
                 the remote dataset for the first time.
             version: ISO 8601 timestamp to pin ``load()`` to a historical
@@ -454,12 +460,13 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         return dataset
 
     def save(self, data: list[dict[str, Any]]) -> None:
-        """Save evaluation items to the remote dataset and local file.
+        """Save evaluation items to the remote dataset.
 
         Uploads items to Langfuse, skipping any that already exist on
-        remote (matched by ``id``). When ``filepath`` is configured,
-        items are also merged into the local file with the same id-based
-        deduplication. No-op when ``sync_policy="remote"``.
+        remote (matched by ``id``). In ``local`` mode, items are also
+        merged into the local file with the same id-based deduplication.
+        In ``remote`` mode, only the remote upload occurs — no local
+        file is written.
 
         Args:
             data: List of evaluation item dicts. Each item must contain
@@ -470,14 +477,6 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             DatasetError: If any item is missing the required ``input`` key
                 or the Langfuse API returns an error.
         """
-        if self._sync_policy == "remote":
-            logger.warning(
-                "save() is a no-op when sync_policy='remote' for dataset '%s'. "
-                "Remote datasets are managed externally.",
-                self._dataset_name,
-            )
-            return
-
         dataset = self._get_or_create_remote_dataset()
         self._validate_items(data)
         new_items = self._filter_new_items(data, dataset)
@@ -494,7 +493,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 self._dataset_name,
             )
 
-        if self._filepath:
+        if self._sync_policy == "local" and self._filepath:
             existing = []
             if self._filepath.exists():
                 existing = self.file_dataset.load()
