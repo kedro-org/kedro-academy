@@ -121,7 +121,7 @@ def make_intent_detection_task(
         ) as generation:
 
             try:
-                result = agent.invoke(agent_input, {"configurable": {"thread_id": "1"}})
+                result = agent.invoke(agent_input, {"configurable": {"thread_id": item.id}})
                 intent = result.get("intent", "")
                 reason = result.get("reason", "")
 
