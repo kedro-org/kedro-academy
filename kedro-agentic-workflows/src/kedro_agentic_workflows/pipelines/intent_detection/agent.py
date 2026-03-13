@@ -189,7 +189,7 @@ class IntentDetectionAgent(KedroAgent):
 def detect_intent(state: AgentState, llm: Runnable) -> dict:
     """Classify the latest user message into an intent."""
     query = state["messages"][-1].content
-    result: IntentOutput = llm.invoke(query)
+    result: IntentOutput = llm.invoke({"input": query})
 
     return {
         "intent": result.intent,
