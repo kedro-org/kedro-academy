@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Dict, Any
+from typing import Any, Callable
 
 from kedro.pipeline import LLMContext
 from langchain_core.prompts import ChatPromptTemplate
@@ -33,9 +33,9 @@ def init_reason_judge_evaluator(
     structured_judge_llm = intent_judge_llm.with_structured_output(JudgeScore)
 
     def reason_judge_evaluator(
-        input: Dict[str, Any],
-        output: Dict[str, Any],
-        expected_output: Dict[str, Any],
+        input: dict[str, Any],
+        output: dict[str, Any],
+        expected_output: dict[str, Any],
         **kwargs,
     ) -> Evaluation:
 
@@ -71,9 +71,9 @@ def init_reason_judge_evaluator(
 
 def init_intent_accuracy_evaluator() -> Callable[..., Evaluation]:
     def intent_accuracy_evaluator(
-        input: Dict[str, Any],
-        output: Dict[str, Any],
-        expected_output: Dict[str, Any],
+        input: dict[str, Any],
+        output: dict[str, Any],
+        expected_output: dict[str, Any],
         **kwargs,
     ) -> Evaluation:
 
@@ -94,7 +94,7 @@ def init_intent_accuracy_evaluator() -> Callable[..., Evaluation]:
 def make_intent_detection_task(
     intent_detection_context: LLMContext,
     langfuse_client: Langfuse,
-) -> Callable[..., Dict[str, Any]]:
+) -> Callable[..., dict[str, Any]]:
     """
     Creates support task callable compatible with Langfuse Dataset experiment.
     """
@@ -102,7 +102,7 @@ def make_intent_detection_task(
     agent.compile()
     model_name = getattr(agent.context.llm, "model_name", "unknown-model")
 
-    def intent_agent_task(*, item, **kwargs) -> Dict[str, Any]:
+    def intent_agent_task(*, item, **kwargs) -> dict[str, Any]:
         question = item.input.get("question", "")
 
         agent_input = {
