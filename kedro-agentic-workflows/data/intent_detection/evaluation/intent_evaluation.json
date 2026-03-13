@@ -68,5 +68,45 @@
       "intent": "general_question",
       "reason": "User asks about account management procedure."
     }
+  },
+  {
+    "id": "intent_008",
+    "input": {
+      "question": "I had a water leak in my house last night, what should I do?"
+    },
+    "expected_output": {
+      "intent": "general_question",
+      "reason": "User describes a recent incident but is asking for procedural guidance, not filing a claim."
+    }
+  },
+  {
+    "id": "intent_009",
+    "input": {
+      "question": "I reported a theft last week but I just realized my laptop was also stolen."
+    },
+    "expected_output": {
+      "intent": "existing_claim_question",
+      "reason": "User references a previously reported incident and wants to add information to it."
+    }
+  },
+  {
+    "id": "intent_010",
+    "input": {
+      "question": "Something happened to my car."
+    },
+    "expected_output": {
+      "intent": "clarification_needed",
+      "reason": "User implies an incident but provides no details about what happened or what they need."
+    }
+  },
+  {
+    "id": "intent_011",
+    "input": {
+      "question": "How long does it usually take to get a claim approved? I've been waiting for weeks."
+    },
+    "expected_output": {
+      "intent": "existing_claim_question",
+      "reason": "While the first part is a general question, the second part reveals the user has a pending claim they are asking about."
+    }
   }
 ]
