@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, TypedDict, Literal
+from typing import TypedDict, Literal
 
 from kedro.pipeline import LLMContext
 from langchain_core.messages import AnyMessage, AIMessage
@@ -165,7 +165,7 @@ class IntentDetectionAgent(KedroAgent):
             else "update_context"
         )
 
-    def invoke(self, context: dict, config: dict | None = None) -> Any:
+    def invoke(self, context: dict, config: dict | None = None) -> AgentState:
         """
         Run the compiled intent detection graph.
 
