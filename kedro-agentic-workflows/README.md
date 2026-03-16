@@ -190,6 +190,68 @@ For more details see `conf/base/catalog_genai_config.yml` and [docs for `Langfus
 
 `Note:` Only one tracing backend (`Langfuse` or `Opik`) should be active at a time. See `src/kedro_agentic_workflows/pipelines/intent_detection/nodes.py`.
 
+## 🧪 Evaluation
+
+The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse Experiments](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
+
+### How it works
+
+The pipeline:
+1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to Langfuse.
+2. Runs the **Intent Detection Agent** on each item, recording traces as Langfuse observations linked to the prompt and model.
+3. Scores each result with two evaluators:
+   - **Intent accuracy** — binary match between predicted and expected intent.
+   - **Reason quality** — LLM-as-a-judge score (1–5) evaluating the reasoning behind the prediction.
+4. Publishes the experiment to Langfuse with all scores, traces, and metadata.
+
+### `LangfuseEvaluationDataset`
+
+The evaluation dataset is managed by `LangfuseEvaluationDataset`, a custom Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
+
+- **`local`** — the local file is the source of truth; `load()` syncs new items to the remote dataset. `save()` uploads to remote and merges back into the local file.
+- **`remote`** — the remote Langfuse dataset is the source of truth; no local file interaction. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
+
+Lifecycle operations (update, archive, delete) are delegated to the native Langfuse API — the dataset handles load/save only.
+
+> **Note:** `LangfuseEvaluationDataset` currently lives in this project at
+> `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py`.
+> It will be moved to the `kedro-datasets` experimental package in a future release.
+
+Catalog entry (`conf/base/catalog_evaluation.yml`):
+
+```yaml
+intent_evaluation_data:
+  type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    created_by: kedro
+```
+
+### Running the evaluation pipeline
+
+```bash
+kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+```
+
+The `intent_prompt_version` and `model_name` parameters are used to name the experiment in Langfuse (e.g., `intent_prompt_v1_model_gpt-4o`), making it easy to compare runs across prompt iterations and models.
+
+### Evaluation data
+
+Stored at `data/intent_detection/evaluation/intent_evaluation.json` — a JSON array of labeled items:
+
+```json
+{
+  "id": "intent_001",
+  "input": { "question": "How do I submit a claim for a car accident?" },
+  "expected_output": { "intent": "general_question", "reason": "User is asking about the process." }
+}
+```
+
+Each item requires `input` (with a `question` field) and `expected_output` (with `intent` and `reason` fields). Items with an `id` are deduplicated on sync; items without `id` are uploaded every time.
+
 ## ⚙️ Project Setup
 
 ### 1. Clone the Repository
