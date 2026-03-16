@@ -106,8 +106,8 @@ Purpose: Classify user queries into categories (general_question, claim_new, exi
 
 We use experimental Kedro datasets for observability and prompt management:
 
-- `intent_prompt_langfuse.json` stored using [LangfusePromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfusePromptDataset/) that integrates with [Langfuse](https://langfuse.com/).
-- `intent_prompt_opik.json` stored using [OpikPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikPromptDataset/) that integrates with [Opik](https://www.comet.com/opik).
+- `intent_prompt_langfuse.json` stored using [LangfusePromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.LangfusePromptDataset/) that integrates with [Langfuse](https://langfuse.com/).
+- `intent_prompt_opik.json` stored using [OpikPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.OpikPromptDataset/) that integrates with [Opik](https://www.comet.com/opik).
 
 Both datasets wrap the respective observability platform’s API and allow us to manage prompts, track changes, and enable tracing/evaluation.
 
@@ -120,10 +120,8 @@ intent_prompt:
   prompt_name: "intent-classifier"
   prompt_type: "chat"
   credentials: langfuse_credentials
-  sync_policy: remote      # local|remote|strict
-  mode: sdk                # langchain|sdk
-  load_args:
-    version: ${runtime_params:intent_prompt_version, 1}
+  sync_policy: local      # local|remote|strict
+  mode: langchain         # langchain|sdk
 ```
 
 ```yaml
@@ -143,7 +141,7 @@ Stored under: `data/response_generation/prompts`
 
 Purpose: Generate personalized responses that combine user context, user claims data and knowledge base content and decide which tools to call to retrieve this content.
 
-Unlike intent detection, these are static templates managed via Kedro’s experimental [LangChainPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langchain.LangChainPromptDataset/):
+Unlike intent detection, these are static templates managed via Kedro’s experimental [LangChainPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langchain.LangChainPromptDataset/):
 
 - `tool.txt` – instruction for tool usage (defines how the LLM should decide when and how to call tools).
 - `response.yml` – instruction for response style, tone, and overall reasoning with user-level template, receiving context (intent, claim data, docs) and instructing the model on what to answer.
@@ -188,7 +186,7 @@ intent_tracer_opik:
   mode: openai    # langchain | openai | sdk
 ```
 
-For more details see `conf/base/catalog_genai_config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
+For more details see `conf/base/catalog_genai_config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
 
 `Note:` Only one tracing backend (`Langfuse` or `Opik`) should be active at a time. See `src/kedro_agentic_workflows/pipelines/intent_detection/nodes.py`.
 
