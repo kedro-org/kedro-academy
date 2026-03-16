@@ -64,14 +64,14 @@ kedro_agentic_workflows/
   ├── conf
   │   ├── base
   │   │   ├── catalog.yml                      # Kedro datasets catalog
-  │   │   ├── genai-config.yml                 # Configuration for LMMs, prompts and tracing 
+  │   │   ├── catalog_genai_config.yml           # Configuration for LLMs, prompts and tracing 
   │   │   └── parameters.yml                   # Kedro pipeline parameters (user_id, etc.)
   │   └── local
   │       └── credentials.yml                  # API keys, DB credentials
   ├── data
   │   ├── intent_detection
   │   │   └── prompts                          # Stores intent detection prompts
-  │   └── response_generartion
+  │   └── response_generation
   │       └── prompts                          # Stores response generation prompts
   └── src
       └── kedro_agentic_workflows
@@ -120,8 +120,10 @@ intent_prompt:
   prompt_name: "intent-classifier"
   prompt_type: "chat"
   credentials: langfuse_credentials
-  sync_policy: local      # local|remote|strict
-  mode: langchain         # langchain|sdk
+  sync_policy: remote      # local|remote|strict
+  mode: sdk                # langchain|sdk
+  load_args:
+    version: ${runtime_params:intent_prompt_version, 1}
 ```
 
 ```yaml
@@ -186,7 +188,7 @@ intent_tracer_opik:
   mode: openai    # langchain | openai | sdk
 ```
 
-For more details see `conf/base/genai-config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
+For more details see `conf/base/catalog_genai_config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
 
 `Note:` Only one tracing backend (`Langfuse` or `Opik`) should be active at a time. See `src/kedro_agentic_workflows/pipelines/intent_detection/nodes.py`.
 
