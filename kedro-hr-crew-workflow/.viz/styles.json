@@ -1,0 +1,57 @@
+{
+  "llm_crew_ai": {
+    "fill": "#598395",
+    "color": "#000000",
+    "stroke": "#97BAC9"
+  },
+  "run_resume_parsing_crew": {
+    "fill": "#00BCFF",
+    "color": "#242424",
+    "stroke": "#ACCCDA"
+  },
+  "orchestrate_screening_crew": {
+    "fill": "#00BCFF",
+    "color": "#242424",
+    "stroke": "#ACCCDA"
+  },
+  "create_resume_parser_context": {
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
+  },
+  "create_requirements_matcher_context": {
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
+  },
+  "create_resume_evaluator_context": {
+    "fill": "#CFDFE7",
+    "color": "#242424",
+    "stroke": "#FFFFFF"
+  },
+  "job_requirements": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
+  },
+  "job_metadata": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
+  },
+  "application": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
+  },
+  "screening_result": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
+  },
+  "hr_report": {
+    "fill": "#97BAC9",
+    "color": "#000000",
+    "stroke": "#CFDFE7"
+  }
+}
