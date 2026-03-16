@@ -33,8 +33,9 @@ This project demonstrates how to build robust agentic workflows using `LangGraph
 * **Structured and reproducible outputs** – Agent responses include message content plus metadata, all logged for auditing and reproducibility.
 * **Session logging** – Conversations, messages, and tool interactions are persisted to a database for auditing and analysis.
 * **Observability and prompt tracking** – Integrates with external tools like `Langfuse` and `Opik` to track prompts, tool usage, and workflow execution.
+* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` for comparison across prompt versions and models.
 
-Together, these elements show how to **combine pipeline orchestration, agentic reasoning, and observability** in a modular, maintainable, and reproducible workflow.
+Together, these elements show how to **combine pipeline orchestration, agentic reasoning, evaluation, and observability** in a modular, maintainable, and reproducible workflow.
 
 ## 🤖 Agentic Workflow Design
 
@@ -64,30 +65,36 @@ kedro_agentic_workflows/
   ├── conf
   │   ├── base
   │   │   ├── catalog.yml                      # Kedro datasets catalog
-  │   │   ├── catalog_genai_config.yml           # Configuration for LLMs, prompts and tracing 
-  │   │   └── parameters.yml                   # Kedro pipeline parameters (user_id, etc.)
+  │   │   ├── catalog_genai_config.yml         # Configuration for LLMs, prompts and tracing
+  │   │   ├── catalog_evaluation.yml           # Catalog for the evaluation pipeline
+  │   │   └── parameters.yml                   # Kedro pipeline parameters
   │   └── local
   │       └── credentials.yml                  # API keys, DB credentials
   ├── data
   │   ├── intent_detection
-  │   │   └── prompts                          # Stores intent detection prompts
+  │   │   ├── prompts                          # Intent detection prompts
+  │   │   └── evaluation                       # Evaluation dataset and judge prompt
   │   └── response_generation
-  │       └── prompts                          # Stores response generation prompts
+  │       └── prompts                          # Response generation prompts
   └── src
       └── kedro_agentic_workflows
           ├── datasets
-          │   └── sqlalchemy_dataset.py        # Custom Kedro dataset to create SQLAlchemy engines
+          │   ├── sqlalchemy_dataset.py        # Custom Kedro dataset for SQLAlchemy engines
+          │   └── langfuse_evaluation_dataset.py  # Kedro dataset bridging local files ↔ Langfuse datasets
           ├── pipelines
           │   ├── intent_detection
           │   │   ├── agent.py                 # IntentDetectionAgent (LangGraph workflow)
           │   │   ├── nodes.py                 # Kedro nodes for intent detection
           │   │   └── pipeline.py              # Kedro pipeline
+          │   ├── intent_detection_evaluation
+          │   │   ├── nodes.py                 # Evaluators and experiment runner
+          │   │   └── pipeline.py              # Evaluation pipeline
           │   └── response_generation
           │       ├── agent.py                 # ResponseGenerationAgent (LangGraph workflow)
           │       ├── tools.py                 # Tool builders
           │       ├── nodes.py                 # Kedro nodes for response generation
           │       └── pipeline.py              # Kedro pipeline
-          ├── utils.py                         # Shared utilities: AgentContext, KedroAgent, agent message logging
+          ├── utils.py                         # Shared utilities: KedroAgent, message logging
           └── settings.py                      # Global project settings
 ```
 
@@ -192,7 +199,7 @@ For more details see `conf/base/catalog_genai_config.yml` and [docs for `Langfus
 
 ## 🧪 Evaluation
 
-The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse Experiments](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
+The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
 
 ### How it works
 
@@ -324,8 +331,17 @@ kedro run --params user_id=3
 
 Pipeline execution flow:
 
-* Intent Detection Pipeline – classify query.
-* Response Generation Pipeline – decide tool usage and generate response.
+* Intent Detection Pipeline — classify query.
+* Response Generation Pipeline — decide tool usage and generate response.
+
+### 3. Run Evaluation Pipeline
+
+Run the intent detection agent against a labeled evaluation dataset:
+```bash
+kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+```
+
+Results are published as a Langfuse experiment. See the [Evaluation](#-evaluation) section for details.
 
 ## 💬 Conversation Example
 
