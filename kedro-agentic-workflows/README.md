@@ -33,8 +33,9 @@ This project demonstrates how to build robust agentic workflows using `LangGraph
 * **Structured and reproducible outputs** – Agent responses include message content plus metadata, all logged for auditing and reproducibility.
 * **Session logging** – Conversations, messages, and tool interactions are persisted to a database for auditing and analysis.
 * **Observability and prompt tracking** – Integrates with external tools like `Langfuse` and `Opik` to track prompts, tool usage, and workflow execution.
+* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` for comparison across prompt versions and models.
 
-Together, these elements show how to **combine pipeline orchestration, agentic reasoning, and observability** in a modular, maintainable, and reproducible workflow.
+Together, these elements show how to **combine pipeline orchestration, agentic reasoning, evaluation, and observability** in a modular, maintainable, and reproducible workflow.
 
 ## 🤖 Agentic Workflow Design
 
@@ -64,30 +65,36 @@ kedro_agentic_workflows/
   ├── conf
   │   ├── base
   │   │   ├── catalog.yml                      # Kedro datasets catalog
-  │   │   ├── genai-config.yml                 # Configuration for LMMs, prompts and tracing 
-  │   │   └── parameters.yml                   # Kedro pipeline parameters (user_id, etc.)
+  │   │   ├── catalog_genai_config.yml         # Configuration for LLMs, prompts and tracing
+  │   │   ├── catalog_evaluation.yml           # Catalog for the evaluation pipeline
+  │   │   └── parameters.yml                   # Kedro pipeline parameters
   │   └── local
   │       └── credentials.yml                  # API keys, DB credentials
   ├── data
   │   ├── intent_detection
-  │   │   └── prompts                          # Stores intent detection prompts
-  │   └── response_generartion
-  │       └── prompts                          # Stores response generation prompts
+  │   │   ├── prompts                          # Intent detection prompts
+  │   │   └── evaluation                       # Evaluation dataset and judge prompt
+  │   └── response_generation
+  │       └── prompts                          # Response generation prompts
   └── src
       └── kedro_agentic_workflows
           ├── datasets
-          │   └── sqlalchemy_dataset.py        # Custom Kedro dataset to create SQLAlchemy engines
+          │   ├── sqlalchemy_dataset.py        # Custom Kedro dataset for SQLAlchemy engines
+          │   └── langfuse_evaluation_dataset.py  # Kedro dataset bridging local files ↔ Langfuse datasets
           ├── pipelines
           │   ├── intent_detection
           │   │   ├── agent.py                 # IntentDetectionAgent (LangGraph workflow)
           │   │   ├── nodes.py                 # Kedro nodes for intent detection
           │   │   └── pipeline.py              # Kedro pipeline
+          │   ├── intent_detection_evaluation
+          │   │   ├── nodes.py                 # Evaluators and experiment runner
+          │   │   └── pipeline.py              # Evaluation pipeline
           │   └── response_generation
           │       ├── agent.py                 # ResponseGenerationAgent (LangGraph workflow)
           │       ├── tools.py                 # Tool builders
           │       ├── nodes.py                 # Kedro nodes for response generation
           │       └── pipeline.py              # Kedro pipeline
-          ├── utils.py                         # Shared utilities: AgentContext, KedroAgent, agent message logging
+          ├── utils.py                         # Shared utilities: KedroAgent, message logging
           └── settings.py                      # Global project settings
 ```
 
@@ -106,16 +113,15 @@ Purpose: Classify user queries into categories (general_question, claim_new, exi
 
 We use experimental Kedro datasets for observability and prompt management:
 
-- `intent_prompt_langfuse.json` stored using [LangfusePromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfusePromptDataset/) that integrates with [Langfuse](https://langfuse.com/).
-- `intent_prompt_opik.json` stored using [OpikPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikPromptDataset/) that integrates with [Opik](https://www.comet.com/opik).
+- `intent_prompt_langfuse.json` stored using [LangfusePromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.LangfusePromptDataset/) that integrates with [Langfuse](https://langfuse.com/).
+- `intent_prompt_opik.json` stored using [OpikPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.OpikPromptDataset/) that integrates with [Opik](https://www.comet.com/opik).
 
 Both datasets wrap the respective observability platform’s API and allow us to manage prompts, track changes, and enable tracing/evaluation.
 
-By default, the project uses `intent_prompt_langfuse`, but `intent_prompt_opik` can be switched in via catalog configuration and 
-updating the pipeline.
+By default, the project uses langfuse `intent_prompt`, but opik `intent_prompt` can be switched in via catalog configuration.
 
 ```yaml
-intent_prompt_langfuse:
+intent_prompt:
   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
   prompt_name: "intent-classifier"
@@ -123,8 +129,10 @@ intent_prompt_langfuse:
   credentials: langfuse_credentials
   sync_policy: local      # local|remote|strict
   mode: langchain         # langchain|sdk
+```
 
-intent_prompt_opik:
+```yaml
+intent_prompt:
   type: kedro_datasets_experimental.opik.OpikPromptDataset
   filepath: data/intent_detection/prompts/intent_prompt_opik.json
   prompt_name: "intent-classifier"
@@ -140,7 +148,7 @@ Stored under: `data/response_generation/prompts`
 
 Purpose: Generate personalized responses that combine user context, user claims data and knowledge base content and decide which tools to call to retrieve this content.
 
-Unlike intent detection, these are static templates managed via Kedro’s experimental [LangChainPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langchain.LangChainPromptDataset/):
+Unlike intent detection, these are static templates managed via Kedro’s experimental [LangChainPromptDataset](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langchain.LangChainPromptDataset/):
 
 - `tool.txt` – instruction for tool usage (defines how the LLM should decide when and how to call tools).
 - `response.yml` – instruction for response style, tone, and overall reasoning with user-level template, receiving context (intent, claim data, docs) and instructing the model on what to answer.
@@ -185,9 +193,71 @@ intent_tracer_opik:
   mode: openai    # langchain | openai | sdk
 ```
 
-For more details see `conf/base/genai-config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.0.0/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
+For more details see `conf/base/catalog_genai_config.yml` and [docs for `LangfuseTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.LangfuseTraceDataset/) and [docs for `OpikTraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.OpikTraceDataset/).
 
 `Note:` Only one tracing backend (`Langfuse` or `Opik`) should be active at a time. See `src/kedro_agentic_workflows/pipelines/intent_detection/nodes.py`.
+
+## 🧪 Evaluation
+
+The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
+
+### How it works
+
+The pipeline:
+1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to Langfuse.
+2. Runs the **Intent Detection Agent** on each item, recording traces as Langfuse observations linked to the prompt and model.
+3. Scores each result with two evaluators:
+   - **Intent accuracy** — binary match between predicted and expected intent.
+   - **Reason quality** — LLM-as-a-judge score (1–5) evaluating the reasoning behind the prediction.
+4. Publishes the experiment to Langfuse with all scores, traces, and metadata.
+
+### `LangfuseEvaluationDataset`
+
+The evaluation dataset is managed by `LangfuseEvaluationDataset`, a custom Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
+
+- **`local`** — the local file is the source of truth; `load()` upserts all local items to remote (creating new items or updating existing ones matched by `id`). `save()` upserts to remote and merges back into the local file (new data takes precedence).
+- **`remote`** — the remote Langfuse dataset is the source of truth. `load()` fetches remote as-is; `save()` upserts items to remote without writing to any local file. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
+
+Lifecycle operations (update, archive, delete) are delegated to the native Langfuse API — the dataset handles load/save only.
+
+> **Note:** `LangfuseEvaluationDataset` currently lives in this project at
+> `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py`.
+> It will be moved to the `kedro-datasets` experimental package in a future release.
+
+Catalog entry (`conf/base/catalog_evaluation.yml`):
+
+```yaml
+intent_evaluation_data:
+  type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    created_by: kedro
+```
+
+### Running the evaluation pipeline
+
+```bash
+kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+```
+
+The `intent_prompt_version` and `model_name` parameters are used to name the experiment in Langfuse (e.g., `intent_prompt_v1_model_gpt-4o`), making it easy to compare runs across prompt iterations and models.
+
+### Evaluation data
+
+Stored at `data/intent_detection/evaluation/intent_evaluation.json` — a JSON array of labeled items:
+
+```json
+{
+  "id": "intent_001",
+  "input": { "question": "How do I submit a claim for a car accident?" },
+  "expected_output": { "intent": "general_question", "reason": "User is asking about the process." }
+}
+```
+
+Each item requires `input` (with a `question` field) and `expected_output` (with `intent` and `reason` fields). Items with an `id` are upserted on sync (created or updated); items without `id` create new entries every time.
 
 ## ⚙️ Project Setup
 
@@ -261,8 +331,17 @@ kedro run --params user_id=3
 
 Pipeline execution flow:
 
-* Intent Detection Pipeline – classify query.
-* Response Generation Pipeline – decide tool usage and generate response.
+* Intent Detection Pipeline — classify query.
+* Response Generation Pipeline — decide tool usage and generate response.
+
+### 3. Run Evaluation Pipeline
+
+Run the intent detection agent against a labeled evaluation dataset:
+```bash
+kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+```
+
+Results are published as a Langfuse experiment. See the [Evaluation](#-evaluation) section for details.
 
 ## 💬 Conversation Example
 
