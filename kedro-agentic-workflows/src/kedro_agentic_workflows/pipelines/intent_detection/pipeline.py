@@ -31,7 +31,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "params:user_id",
                     "user_data",
                     "session_id",
-                    "intent_tracer_langfuse",
+                    "intent_tracer_opik",
                 ],
                 outputs=["user_context", "session_config"],
                 name="load_context_node",

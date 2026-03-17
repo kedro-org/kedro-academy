@@ -52,12 +52,22 @@ intent_prompt_langfuse:
 #   credentials: opik_credentials
 
 # --- Tracing ---
-intent_tracer_langfuse:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
-  credentials: langfuse_credentials
-  mode: langchain    # langchain | openai | sdk
+# intent_tracer_langfuse:
+#  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+#  credentials: langfuse_credentials
+#  mode: langchain    # langchain | openai | sdk | autogen
 
-# intent_tracer_opik:
-#  type: kedro_datasets_experimental.opik.OpikTraceDataset
-#  credentials: opik_credentials
-#  mode: openai    # langchain | openai | sdk
+intent_tracer_opik:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: langchain    # langchain | openai | sdk | autogen
+
+# autogen_tracer_langfuse:
+#  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+#  credentials: langfuse_credentials
+#  mode: autogen
+
+autogen_tracer_opik:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: autogen
