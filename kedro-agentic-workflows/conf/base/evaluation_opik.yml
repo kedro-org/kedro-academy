@@ -1,0 +1,43 @@
+opik_eval_ds:
+  type: kedro_agentic_workflows.datasets.opik_evaluation_dataset.OpikEvaluationDataset
+  dataset_name: evaluations/support_eval_test
+  local_path: data/evaluation/support_eval_test.json
+  sync_policy: local
+  credentials: opik_credentials
+
+opik_judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+opik_llm_judge_evaluator_prompt:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/evaluation/prompts/opik_judge_llm_prompt.json
+  prompt_name: "opik_judge_llm_prompt"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: langchain
+
+opik_support_answer_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+opik_support_answer_prompt:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/evaluation/prompts/opik_support_answer.json
+  prompt_name: "opik_support_answer"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: langchain
+
+opik_client:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: langchain

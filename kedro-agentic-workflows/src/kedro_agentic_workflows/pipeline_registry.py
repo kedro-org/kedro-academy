@@ -17,4 +17,6 @@ def register_pipelines() -> dict[str, Pipeline]:
     pipelines["__default__"] = pipelines["intent_detection"] + pipelines["response_generation"]
     pipelines["openai"] = pipelines["intent_detection"] + pipelines["response_generation_openai"]
     pipelines["autogen"] = pipelines["intent_detection"] + pipelines["response_generation_autogen"]
+    pipelines["evaluation"] = pipelines["evaluation"]
+    pipelines["evaluation_opik"] = pipelines["evaluation_opik"]
     return pipelines
