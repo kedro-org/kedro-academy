@@ -16,6 +16,7 @@ def generate_response(
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
+    tracer,
 ) -> dict:
     """
     Run the ResponseGenerationAgent to produce a final answer.
@@ -30,17 +31,37 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgentAutogen(context=response_generation_context)
-        agent.compile()
+        # Wrap agent execution in a span for tracing
+        with tracer.start_as_current_span("response_generation") as span:
+            # Log input context to the span
+            span.set_attribute("intent", intent_detection_result["intent"])
+            span.set_attribute(
+                "intent_reason", intent_detection_result.get("reason", "")
+            )
+            span.set_attribute(
+                "user_id",
+                user_context.get("profile", {}).get("user_id", "unknown"),
+            )
 
-        context = {
-            "messages": [],
-            "intent": intent_detection_result["intent"],
-            "intent_generator_summary": intent_detection_result["reason"],
-            "user_context": user_context,
-        }
+            agent = ResponseGenerationAgentAutogen(context=response_generation_context)
+            agent.compile()
 
-        result = agent.invoke(context, session_config)
+            context = {
+                "messages": [],
+                "intent": intent_detection_result["intent"],
+                "intent_generator_summary": intent_detection_result["reason"],
+                "user_context": user_context,
+            }
+
+            result = agent.invoke(context, session_config)
+
+            # Log output to the span
+            if result.get("messages"):
+                span.set_attribute(
+                    "response", result["messages"][-1].content[:500]
+                )  # Truncate for safety
+            span.set_attribute("claim_created", result.get("claim_created", False))
+            span.set_attribute("escalated", result.get("escalated", False))
 
     for m in result["messages"]:
         try:
