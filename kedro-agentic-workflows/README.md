@@ -215,8 +215,8 @@ The pipeline:
 
 The evaluation dataset is managed by `LangfuseEvaluationDataset`, a custom Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
 
-- **`local`** — the local file is the source of truth; `load()` syncs new items to the remote dataset. `save()` uploads to remote and merges back into the local file.
-- **`remote`** — the remote Langfuse dataset is the source of truth; no local file interaction. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
+- **`local`** — the local file is the source of truth; `load()` upserts all local items to remote (creating new items or updating existing ones matched by `id`). `save()` upserts to remote and merges back into the local file (new data takes precedence).
+- **`remote`** — the remote Langfuse dataset is the source of truth. `load()` fetches remote as-is; `save()` upserts items to remote without writing to any local file. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
 
 Lifecycle operations (update, archive, delete) are delegated to the native Langfuse API — the dataset handles load/save only.
 
@@ -257,7 +257,7 @@ Stored at `data/intent_detection/evaluation/intent_evaluation.json` — a JSON a
 }
 ```
 
-Each item requires `input` (with a `question` field) and `expected_output` (with `intent` and `reason` fields). Items with an `id` are deduplicated on sync; items without `id` are uploaded every time.
+Each item requires `input` (with a `question` field) and `expected_output` (with `intent` and `reason` fields). Items with an `id` are upserted on sync (created or updated); items without `id` create new entries every time.
 
 ## ⚙️ Project Setup
 
