@@ -120,7 +120,7 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
             dataset_name="intent-detection-eval",
             credentials={
                 "public_key": "pk_...",
-                "secret_key": "sk_...",
+                "secret_key": "sk_...",  # pragma: allowlist secret
             },
             filepath="data/evaluation/intent_items.json",
         )
@@ -363,8 +363,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
                 status=item.get("status"),
             )
 
+    @staticmethod
     def _filter_new_items(
-        self,
         items: list[dict[str, Any]],
         dataset: "DatasetClient",
     ) -> list[dict[str, Any]]:
