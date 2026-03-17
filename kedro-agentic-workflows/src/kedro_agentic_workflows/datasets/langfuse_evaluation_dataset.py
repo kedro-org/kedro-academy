@@ -253,7 +253,8 @@ class LangfuseEvaluationDataset(AbstractDataset[list[dict[str, Any]], "DatasetCl
         if version is None:
             return None
         try:
-            dt = datetime.fromisoformat(version)
+            normalized = version[:-1] + "+00:00" if version.endswith("Z") else version
+            dt = datetime.fromisoformat(normalized)
         except (ValueError, TypeError) as exc:
             raise DatasetError(
                 f"Invalid version '{version}'. "
