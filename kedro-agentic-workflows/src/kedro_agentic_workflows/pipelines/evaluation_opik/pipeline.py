@@ -33,6 +33,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "opik_support_task",
                     "opik_llm_judge_evaluator",
                     "params:support_answer_prompt_version",
+                    "params:model_name",
                 ],
                 outputs=None,
                 name="opik_run_experiment_node",

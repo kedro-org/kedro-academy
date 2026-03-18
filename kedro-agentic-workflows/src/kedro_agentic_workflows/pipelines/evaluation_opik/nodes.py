@@ -97,6 +97,7 @@ def run_experiment(
     support_task: Callable,
     llm_judge_evaluator: Callable,
     support_prompt_version: int,
+    model_name: str,
 ) -> None:
     """Run an Opik evaluation experiment over the dataset.
     """
@@ -107,6 +108,6 @@ def run_experiment(
         task=support_task,
         scoring_functions=[llm_judge_evaluator],  # Langfuse calls this parameter "evaluators"
         experiment_name=experiment_name,
-        experiment_config={"prompt_version": support_prompt_version},
+        experiment_config={"model_name": model_name},
     )
 
