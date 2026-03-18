@@ -18,14 +18,6 @@ SUPPORTED_FILE_EXTENSIONS = [".json", ".yaml", ".yml"]
 class OpikEvaluationDataset(AbstractDataset):
     """Kedro dataset for Opik evaluation datasets supporting local->remote sync (local mode)
     and remote-only behavior (remote mode).
-
-    On load: returns an ``opik.Dataset`` object, creating it in Opik if it does not
-    exist. When ``sync_policy="local"`` and the dataset is being created for the first
-    time, items from the local file are inserted automatically.
-
-    On save: inserts items into the Opik dataset. When ``sync_policy="local"``, the
-    local file is also updated to keep it in sync. When ``sync_policy="remote"``,
-    save is a no-op.
     """
 
     def __init__(
@@ -157,9 +149,24 @@ class OpikEvaluationDataset(AbstractDataset):
         }
 
     def preview(self) -> JSONPreview:
+        """
+        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
+
+        Automatically wraps string content in a JSON object to ensure compatibility
+        with Kedro-Viz's JSON preview requirements. This prevents "src property must
+        be a valid json object" errors when the local file contains plain text.
+
+        Returns:
+            JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string.
+                String content is wrapped in {"content": <string>} format for proper
+                JSON object structure. Returns error message if local file doesn't exist.
+        """
         if self.local_path and self.local_path.exists():
             local_data = self.file_dataset.load()
+
             if isinstance(local_data, str):
                 local_data = {"content": local_data}
+
             return JSONPreview(json.dumps(local_data))
+        
         return JSONPreview("Local evaluation dataset does not exist.")
