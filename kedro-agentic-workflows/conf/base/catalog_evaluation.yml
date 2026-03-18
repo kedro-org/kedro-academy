@@ -20,10 +20,8 @@ intent_judge_prompt:
   prompt_name: "intent_llm_judge_evaluator_prompt"
   prompt_type: "chat"
   credentials: langfuse_credentials
-  sync_policy: remote      # local|remote|strict
+  sync_policy: local       # local|remote|strict
   mode: langchain          # langchain|sdk
-  load_args:
-    version: 1
 
 langfuse_client:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
