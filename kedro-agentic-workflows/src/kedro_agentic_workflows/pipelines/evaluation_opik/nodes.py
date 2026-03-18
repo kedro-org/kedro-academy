@@ -55,6 +55,8 @@ def init_llm_judge_evaluator(
             score = 0
             reason = f"Evaluator failed: {str(e)}"
 
+        # There is a metadata parameter for ScoreResult actually, 
+        # but I don't know where it shows up in the UI 
         return ScoreResult(
             name="llm_judge_score",
             value=float(score),
