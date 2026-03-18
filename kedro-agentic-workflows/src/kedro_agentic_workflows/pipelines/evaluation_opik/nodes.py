@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 from opik.api_objects.dataset.dataset import Dataset
 from opik.evaluation import evaluate
 from opik.evaluation.metrics.score_result import ScoreResult
+from opik.evaluation.test_result import TestResult
 from pydantic import BaseModel, Field
 
 
@@ -26,6 +27,8 @@ def init_llm_judge_evaluator(
 ) -> Callable:
     """Creates LLM-as-a-Judge scorer function compatible with opik.evaluation.evaluate().
     """
+    model_name = getattr(judge_llm, "model_name", None)
+    metadata = {"judge_model": model_name} if model_name else None
     structured_judge_llm = judge_llm.with_structured_output(JudgeScore)
 
     def llm_judge_scorer(
@@ -52,11 +55,11 @@ def init_llm_judge_evaluator(
             score = 0
             reason = f"Evaluator failed: {str(e)}"
 
-        # Opik returns ScoreResult(name, value, reason) which has no metadata field.
         return ScoreResult(
             name="llm_judge_score",
             value=float(score),
             reason=reason,
+            metadata=metadata,
         )
 
     return llm_judge_scorer
@@ -92,6 +95,18 @@ def make_support_task(
     return support_task
 
 
+def _pass_rate(test_results: List[TestResult]) -> ScoreResult:
+    """Compute the fraction of items that scored 4 or above."""
+    scores = [
+        sr.value
+        for tr in test_results
+        for sr in tr.score_results
+        if not sr.scoring_failed
+    ]
+    rate = sum(1 for s in scores if s >= 4) / len(scores) if scores else 0.0
+    return ScoreResult(name="pass_rate", value=rate)
+
+
 def run_experiment(
     eval_ds: Dataset,
     support_task: Callable,
@@ -108,6 +123,10 @@ def run_experiment(
         task=support_task,
         scoring_functions=[llm_judge_evaluator],  # Langfuse calls this parameter "evaluators"
         experiment_name=experiment_name,
-        experiment_config={"model_name": model_name},
+        experiment_config={
+            "prompt_version": support_prompt_version,
+            "model_name": model_name,
+        },
+        experiment_scoring_functions=[_pass_rate],
     )
 
