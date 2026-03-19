@@ -100,6 +100,51 @@ def make_judge_scorer(llm: ChatOpenAI):
     return llm_judge_scorer
 
 
+def demonstrate_update(dataset):
+    """Update an existing item — requires the full item dict including id."""
+    items = dataset.get_items()
+    if not items:
+        print("(no items to update)")
+        return
+
+    # update() requires the full item object, not just the changed fields
+    updated = {**items[0], "expected_output": "Updated: go to Settings > Account > Reset Password."}
+    dataset.update([updated])
+    print(f"Updated item {items[0]['id']} with new expected_output.")
+
+    refreshed = dataset.get_items()
+    updated_item = next((i for i in refreshed if i["id"] == items[0]["id"]), None)
+    print(f"Confirmed new expected_output: {updated_item['expected_output'] if updated_item else 'not found'}")
+
+
+def demonstrate_delete(dataset):
+    """Delete a specific item by ID — creates a new dataset version."""
+    items = dataset.get_items()
+    if len(items) < 2:
+        print("(need at least 2 items to demo delete safely)")
+        return
+
+    target_id = items[-1]["id"]
+    dataset.delete([target_id])
+    print(f"Deleted item {target_id}.")
+    print(f"Items remaining: {len(dataset.get_items())}")
+
+
+def demonstrate_insert_from_json(dataset):
+    """Insert a new item using a raw JSON string instead of a list of dicts."""
+    import json
+
+    new_items = [
+        {
+            "input": {"question": "How do I update my billing information?"},
+            "expected_output": "Go to Settings > Billing and update your payment method.",
+            "metadata": {"difficulty": "easy"},
+        }
+    ]
+    dataset.insert_from_json(json.dumps(new_items))
+    print(f"Inserted via insert_from_json. Items now: {len(dataset.get_items())}")
+
+
 def main():
     load_dotenv()
 
@@ -108,6 +153,15 @@ def main():
 
     dataset = get_or_create_dataset(client)
     show_dataset_info(dataset)
+
+    print("\n--- Update ---")
+    demonstrate_update(dataset)
+
+    print("\n--- Delete ---")
+    demonstrate_delete(dataset)
+
+    print("\n--- Insert from JSON ---")
+    demonstrate_insert_from_json(dataset)
 
     print("\n--- Running experiment ---")
     result = evaluate(
@@ -127,6 +181,11 @@ def main():
     avg = sum(scores) / len(scores) if scores else None
     print(f"\nAverage score: {avg:.2f}" if avg is not None else "\nNo scores recorded.")
     print(f"Results: {result.experiment_url}")
+
+    # clear() deletes all items and creates a new dataset version — run last
+    print("\n--- Clear (destructive) ---")
+    dataset.clear()
+    print(f"Dataset cleared. Items remaining: {len(dataset.get_items())}")
 
 
 if __name__ == "__main__":
