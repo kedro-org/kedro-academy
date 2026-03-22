@@ -14,12 +14,12 @@ opik_judge_llm:
 
 opik_llm_judge_evaluator_prompt:
   type: kedro_datasets_experimental.opik.OpikPromptDataset
-  filepath: data/evaluation/prompts/opik_judge_llm_prompt.json
+  filepath: data/evaluation/prompts/opik/judge_llm_prompt_v2.json  # swap to v2/v3 to test different judge wordings
   prompt_name: "opik_judge_llm_prompt"
   prompt_type: "chat"
   credentials: opik_credentials
   sync_policy: local
-  mode: langchain
+  mode: sdk
 
 opik_support_answer_llm:
   type: langchain.ChatOpenAIDataset
@@ -30,12 +30,12 @@ opik_support_answer_llm:
 
 opik_support_answer_prompt:
   type: kedro_datasets_experimental.opik.OpikPromptDataset
-  filepath: data/evaluation/prompts/opik_support_answer.json
+  filepath: data/evaluation/prompts/opik/support_answer_v2.json  # swap to v2/v3 to test different prompt versions
   prompt_name: "opik_support_answer"
   prompt_type: "chat"
   credentials: opik_credentials
   sync_policy: local
-  mode: langchain
+  mode: sdk
 
 opik_client:
   type: kedro_datasets_experimental.opik.OpikTraceDataset

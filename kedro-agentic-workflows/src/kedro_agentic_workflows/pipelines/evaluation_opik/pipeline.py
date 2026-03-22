@@ -7,6 +7,7 @@ from .nodes import (
 )
 
 
+
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
@@ -32,7 +33,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "opik_eval_ds",
                     "opik_support_task",
                     "opik_llm_judge_evaluator",
-                    "params:support_answer_prompt_version",
+                    "opik_support_answer_prompt",
                     "params:model_name",
                 ],
                 outputs=None,
