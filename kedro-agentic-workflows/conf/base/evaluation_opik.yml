@@ -1,7 +1,7 @@
 opik_eval_ds:
   type: kedro_agentic_workflows.datasets.opik_evaluation_dataset.OpikEvaluationDataset
   dataset_name: evaluations/support_eval_test
-  local_path: data/evaluation/support_eval_test.json
+  filepath: data/evaluation/support_eval_test.json
   sync_policy: local
   credentials: opik_credentials
 

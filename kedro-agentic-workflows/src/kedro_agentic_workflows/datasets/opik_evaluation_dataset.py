@@ -1,6 +1,7 @@
 import json
+import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Literal
 
 from kedro.io import AbstractDataset, DatasetError
 from kedro_datasets._typing import JSONPreview
@@ -12,7 +13,12 @@ if TYPE_CHECKING:
     from kedro_datasets.json import JSONDataset
     from kedro_datasets.yaml import YAMLDataset
 
-SUPPORTED_FILE_EXTENSIONS = [".json", ".yaml", ".yml"]
+logger = logging.getLogger(__name__)
+
+SUPPORTED_FILE_EXTENSIONS = {".json", ".yaml", ".yml"}
+REQUIRED_OPIK_CREDENTIALS = {"api_key"}
+OPTIONAL_OPIK_CREDENTIALS = {"workspace", "host", "project_name"}
+VALID_SYNC_POLICIES = {"local", "remote"}
 
 
 class OpikEvaluationDataset(AbstractDataset):
@@ -24,37 +30,84 @@ class OpikEvaluationDataset(AbstractDataset):
         self,
         dataset_name: str,
         credentials: dict[str, str],
-        local_path: Optional[str] = None,
-        sync_policy: str = "local",
+        filepath: str | None = None,
+        sync_policy: Literal["local", "remote"] = "local",
+        metadata: dict[str, Any] | None = None,
     ):
-        self.dataset_name = dataset_name
-        self.local_path = Path(local_path) if local_path else None
-        self.sync_policy = sync_policy
+        self._validate_init_params(credentials, filepath, sync_policy)
+
+        self._dataset_name = dataset_name
+        self._filepath = Path(filepath) if filepath else None
+        self._sync_policy = sync_policy
+        self._metadata = metadata
         self._file_dataset = None
 
         try:
             self._client = Opik(**credentials)
         except Exception as e:
-            raise DatasetError(f"Failed to initialise Opik client: {e}")
+            raise DatasetError(f"Failed to initialise Opik client: {e}") from e
+
+    @staticmethod
+    def _validate_init_params(
+        credentials: dict[str, str],
+        filepath: str | None,
+        sync_policy: str,
+    ) -> None:
+        OpikEvaluationDataset._validate_credentials(credentials)
+        OpikEvaluationDataset._validate_sync_policy(sync_policy)
+        OpikEvaluationDataset._validate_filepath(filepath)
+
+    @staticmethod
+    def _validate_credentials(credentials: dict[str, str]) -> None:
+        for key in REQUIRED_OPIK_CREDENTIALS:
+            if key not in credentials:
+                raise DatasetError(
+                    f"Missing required Opik credential: '{key}'."
+                )
+            if not credentials[key] or not str(credentials[key]).strip():
+                raise DatasetError(
+                    f"Opik credential '{key}' cannot be empty."
+                )
+        for key in OPTIONAL_OPIK_CREDENTIALS:
+            if key in credentials and (
+                not credentials[key] or not str(credentials[key]).strip()
+            ):
+                raise DatasetError(
+                    f"Opik credential '{key}' cannot be empty if provided."
+                )
+
+    @staticmethod
+    def _validate_sync_policy(sync_policy: str) -> None:
+        if sync_policy not in VALID_SYNC_POLICIES:
+            raise DatasetError(
+                f"Invalid sync_policy '{sync_policy}'. "
+                f"Must be one of: {', '.join(sorted(VALID_SYNC_POLICIES))}."
+            )
+
+    @staticmethod
+    def _validate_filepath(filepath: str | None) -> None:
+        if filepath is None:
+            return
+        suffix = Path(filepath).suffix.lower()
+        if suffix not in SUPPORTED_FILE_EXTENSIONS:
+            raise DatasetError(
+                f"Unsupported file extension '{suffix}'. "
+                f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}."
+            )
 
     @property
-    def file_dataset(self) -> Union["JSONDataset", "YAMLDataset"]:
-        """Return a JSON or YAML file dataset based on the local_path extension."""
-        if not self.local_path:
-            raise RuntimeError("local_path must be provided for file dataset operations.")
+    def file_dataset(self) -> "JSONDataset | YAMLDataset":
+        """Return a JSON or YAML file dataset based on the filepath extension."""
+        if not self._filepath:
+            raise DatasetError("filepath must be provided for file dataset operations.")
         if self._file_dataset is None:
-            suffix = self.local_path.suffix.lower()
-            if suffix in [".yaml", ".yml"]:
+            suffix = self._filepath.suffix.lower()
+            if suffix in (".yaml", ".yml"):
                 from kedro_datasets.yaml import YAMLDataset  # noqa: PLC0415
-                self._file_dataset = YAMLDataset(filepath=str(self.local_path))
-            elif suffix == ".json":
-                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
-                self._file_dataset = JSONDataset(filepath=str(self.local_path))
+                self._file_dataset = YAMLDataset(filepath=str(self._filepath))
             else:
-                raise NotImplementedError(
-                    f"Unsupported file extension '{self.local_path.suffix}'. "
-                    f"Supported formats: {', '.join(sorted(SUPPORTED_FILE_EXTENSIONS))}"
-                )
+                from kedro_datasets.json import JSONDataset  # noqa: PLC0415
+                self._file_dataset = JSONDataset(filepath=str(self._filepath))
         return self._file_dataset
 
     def load(self) -> Dataset:
@@ -70,28 +123,30 @@ class OpikEvaluationDataset(AbstractDataset):
             DatasetError: If the Opik API returns an unexpected error.
         """
         try:
-            dataset = self._client.get_dataset(name=self.dataset_name)
+            dataset = self._client.get_dataset(name=self._dataset_name)
         except ApiError as e:
             if e.status_code != 404:
                 raise DatasetError(
-                    f"Failed to fetch Opik dataset '{self.dataset_name}': {e}"
-                )
+                    f"Failed to fetch Opik dataset '{self._dataset_name}': {e}"
+                ) from e
 
             dataset = self._client.create_dataset(
-                name=self.dataset_name,
-                description=f"Created by Kedro (sync_policy={self.sync_policy})",
+                name=self._dataset_name,
+                description=f"Created by Kedro (sync_policy={self._sync_policy})",
             )
 
             if (
-                self.sync_policy == "local"
-                and self.local_path
-                and self.local_path.exists()
+                self._sync_policy == "local"
+                and self._filepath
+                and self._filepath.exists()
             ):
                 local_items = self.file_dataset.load()
 
                 for item in local_items:
                     if "input" not in item:
-                        raise ValueError("Each dataset item must contain 'input'.")
+                        raise DatasetError(
+                            "Each dataset item must contain 'input'."
+                        )
 
                 # Opik requires item IDs to be valid UUIDs; strip non-UUID IDs
                 # so the SDK generates them automatically. Deduplication is
@@ -103,11 +158,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 dataset.insert(items_to_insert)
 
             # Reload so the dataset's internal hash state reflects inserted items
-            dataset = self._client.get_dataset(name=self.dataset_name)
+            dataset = self._client.get_dataset(name=self._dataset_name)
 
         return dataset
 
-    def save(self, data: List[dict[str, Any]]) -> None:
+    def save(self, data: list[dict[str, Any]]) -> None:
         """Insert items into the Opik dataset and optionally update the local file.
 
         In remote sync policy, this is a no-op.
@@ -116,32 +171,31 @@ class OpikEvaluationDataset(AbstractDataset):
             data: List of dicts, each containing at least an ``input`` key.
 
         Raises:
-            DatasetError: If the Opik API call fails.
-            ValueError: If any item is missing the required ``input`` key.
+            DatasetError: If the Opik API call fails or any item is missing ``input``.
         """
-        if self.sync_policy == "remote":
+        if self._sync_policy == "remote":
             return
 
         for item in data:
             if "input" not in item:
-                raise ValueError("Each dataset item must contain 'input'.")
+                raise DatasetError("Each dataset item must contain 'input'.")
 
         try:
-            opik_dataset = self._client.get_or_create_dataset(name=self.dataset_name)
+            opik_dataset = self._client.get_or_create_dataset(name=self._dataset_name)
         except Exception as e:
-            raise DatasetError(f"Failed to get or create Opik dataset: {e}")
+            raise DatasetError(f"Failed to get or create Opik dataset: {e}") from e
 
         opik_dataset.insert(data)
 
-        if self.sync_policy == "local" and self.local_path:
-            existing: List[dict] = []
-            if self.local_path.exists():
+        if self._sync_policy == "local" and self._filepath:
+            existing: list[dict] = []
+            if self._filepath.exists():
                 existing = self.file_dataset.load()
             self.file_dataset.save(existing + data)
 
     def _exists(self) -> bool:
         try:
-            self._client.get_dataset(name=self.dataset_name)
+            self._client.get_dataset(name=self._dataset_name)
             return True
         except ApiError as e:
             if e.status_code == 404:
@@ -150,30 +204,28 @@ class OpikEvaluationDataset(AbstractDataset):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset_name": self.dataset_name,
-            "local_path": str(self.local_path) if self.local_path else None,
-            "sync_policy": self.sync_policy,
+            "dataset_name": self._dataset_name,
+            "filepath": str(self._filepath) if self._filepath else None,
+            "sync_policy": self._sync_policy,
+            "metadata": self._metadata,
         }
 
     def preview(self) -> JSONPreview:
-        """
-        Generate a JSON-compatible preview of the underlying prompt data for Kedro-Viz.
-
-        Automatically wraps string content in a JSON object to ensure compatibility
-        with Kedro-Viz's JSON preview requirements. This prevents "src property must
-        be a valid json object" errors when the local file contains plain text.
+        """Generate a JSON-compatible preview of the local evaluation data for Kedro-Viz.
 
         Returns:
             JSONPreview: A Kedro-Viz-compatible object containing a serialized JSON string.
-                String content is wrapped in {"content": <string>} format for proper
-                JSON object structure. Returns error message if local file doesn't exist.
+                Returns a descriptive message if filepath is not configured or does not exist.
         """
-        if self.local_path and self.local_path.exists():
-            local_data = self.file_dataset.load()
+        if not self._filepath:
+            return JSONPreview("No filepath configured.")
 
-            if isinstance(local_data, str):
-                local_data = {"content": local_data}
+        if not self._filepath.exists():
+            return JSONPreview("Local evaluation dataset does not exist.")
 
-            return JSONPreview(json.dumps(local_data))
-        
-        return JSONPreview("Local evaluation dataset does not exist.")
+        local_data = self.file_dataset.load()
+
+        if isinstance(local_data, str):
+            local_data = {"content": local_data}
+
+        return JSONPreview(json.dumps(local_data))

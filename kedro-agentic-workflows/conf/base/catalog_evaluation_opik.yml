@@ -1,7 +1,7 @@
 opik_intent_evaluation_data:
   type: kedro_agentic_workflows.datasets.opik_evaluation_dataset.OpikEvaluationDataset
   dataset_name: evaluations/intent_agent_evaluation
-  local_path: data/intent_detection/evaluation/intent_evaluation.json
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
   credentials: opik_credentials
 
