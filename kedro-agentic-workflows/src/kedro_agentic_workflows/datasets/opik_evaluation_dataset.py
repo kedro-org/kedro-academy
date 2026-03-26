@@ -93,7 +93,14 @@ class OpikEvaluationDataset(AbstractDataset):
                     if "input" not in item:
                         raise ValueError("Each dataset item must contain 'input'.")
 
-                dataset.insert(local_items)
+                # Opik requires item IDs to be valid UUIDs; strip non-UUID IDs
+                # so the SDK generates them automatically. Deduplication is
+                # content-hash-based and unaffected by the ID field.
+                items_to_insert = [
+                    {k: v for k, v in item.items() if k != "id"}
+                    for item in local_items
+                ]
+                dataset.insert(items_to_insert)
 
             # Reload so the dataset's internal hash state reflects inserted items
             dataset = self._client.get_dataset(name=self.dataset_name)
