@@ -110,62 +110,129 @@ class OpikEvaluationDataset(AbstractDataset):
                 self._file_dataset = JSONDataset(filepath=str(self._filepath))
         return self._file_dataset
 
-    def load(self) -> Dataset:
-        """Return the Opik Dataset object, creating and seeding it if it does not exist.
+    def _get_or_create_remote_dataset(self) -> Dataset:
+        """Ensure the remote Opik dataset exists, creating it if not found.
 
-        When sync_policy="local" and the dataset is created for the first time,
-        items from the local file are inserted automatically.
-
-        Returns:
-            opik.Dataset: The Opik dataset ready for use in experiments.
+        Returns the latest ``Dataset`` object.
 
         Raises:
             DatasetError: If the Opik API returns an unexpected error.
         """
         try:
-            dataset = self._client.get_dataset(name=self._dataset_name)
+            return self._client.get_dataset(name=self._dataset_name)
         except ApiError as e:
             if e.status_code != 404:
                 raise DatasetError(
-                    f"Failed to fetch Opik dataset '{self._dataset_name}': {e}"
+                    f"Opik API error while fetching dataset '{self._dataset_name}': {e}"
                 ) from e
 
-            dataset = self._client.create_dataset(
+        try:
+            logger.info(
+                "Dataset '%s' not found on Opik, creating it.",
+                self._dataset_name,
+            )
+            return self._client.create_dataset(
                 name=self._dataset_name,
                 description=f"Created by Kedro (sync_policy={self._sync_policy})",
             )
+        except ApiError as e:
+            raise DatasetError(
+                f"Opik API error while creating dataset '{self._dataset_name}': {e}"
+            ) from e
 
-            if (
-                self._sync_policy == "local"
-                and self._filepath
-                and self._filepath.exists()
-            ):
-                local_items = self.file_dataset.load()
+    @staticmethod
+    def _validate_items(items: list[dict[str, Any]]) -> None:
+        """Validate that all items contain the required ``input`` key.
 
-                for item in local_items:
-                    if "input" not in item:
-                        raise DatasetError(
-                            "Each dataset item must contain 'input'."
-                        )
+        Raises:
+            DatasetError: If any item is missing the ``input`` key.
+        """
+        for i, item in enumerate(items):
+            if "input" not in item:
+                raise DatasetError(
+                    f"Dataset item at index {i} is missing required 'input' key."
+                )
 
-                # Opik requires item IDs to be valid UUIDs; strip non-UUID IDs
-                # so the SDK generates them automatically. Deduplication is
-                # content-hash-based and unaffected by the ID field.
-                items_to_insert = [
-                    {k: v for k, v in item.items() if k != "id"}
-                    for item in local_items
-                ]
-                dataset.insert(items_to_insert)
+    def _upload_items(self, dataset: Dataset, items: list[dict[str, Any]]) -> None:
+        """Insert items into the remote Opik dataset.
 
-            # Reload so the dataset's internal hash state reflects inserted items
-            dataset = self._client.get_dataset(name=self._dataset_name)
+        Opik requires item IDs to be valid UUIDs. Human-readable IDs from local
+        files (e.g. ``"intent_001"``) are stripped so the SDK auto-generates UUIDs.
+        Deduplication is content-hash-based and is unaffected by the ID field.
 
+        Callers are responsible for validating items before calling this method.
+        """
+        items_to_insert = [
+            {k: v for k, v in item.items() if k != "id"}
+            for item in items
+        ]
+        dataset.insert(items_to_insert)
+
+    def _sync_local_to_remote(self, dataset: Dataset) -> Dataset:
+        """Upsert all local items to the remote dataset.
+
+        Reads the local file and inserts all items into the remote dataset.
+        The Opik SDK deduplicates by content hash, so re-inserting unchanged
+        items is a no-op. Returns a refreshed ``Dataset`` object.
+        """
+        if not self._filepath or not self._filepath.exists():
+            return dataset
+
+        local_items = self.file_dataset.load()
+        self._validate_items(local_items)
+
+        if not local_items:
+            return dataset
+
+        items_without_id = [item for item in local_items if "id" not in item]
+        if items_without_id:
+            logger.warning(
+                "Found %d item(s) without an 'id' field in '%s'. "
+                "These cannot be tracked across syncs.",
+                len(items_without_id),
+                self._filepath,
+            )
+
+        logger.info(
+            "Upserting %d item(s) from '%s' to remote dataset '%s'.",
+            len(local_items),
+            self._filepath,
+            self._dataset_name,
+        )
+        self._upload_items(dataset, local_items)
+
+        return self._client.get_dataset(name=self._dataset_name)
+
+    def load(self) -> Dataset:
+        """Load the Opik dataset, syncing local items to remote if sync_policy is ``local``.
+
+        Creates the remote dataset if it does not exist. In ``local`` mode, all
+        local items are upserted to remote on every load — content-identical items
+        are deduplicated by the Opik SDK and will not create duplicates.
+
+        Returns:
+            Dataset: The Opik dataset ready for use in experiments.
+
+        Raises:
+            DatasetError: If the Opik API returns an unexpected error.
+        """
+        dataset = self._get_or_create_remote_dataset()
+
+        if self._sync_policy == "local":
+            dataset = self._sync_local_to_remote(dataset)
+
+        logger.info(
+            "Loaded dataset '%s' (sync_policy='%s').",
+            self._dataset_name,
+            self._sync_policy,
+        )
         return dataset
 
     def save(self, data: list[dict[str, Any]]) -> None:
         """Insert items into the Opik dataset and optionally update the local file.
 
-        In remote sync policy, this is a no-op.
+        In ``remote`` mode, only the remote upload occurs. In ``local`` mode,
+        items are also merged into the local file.
 
         Args:
             data: List of dicts, each containing at least an ``input`` key.
@@ -174,18 +241,16 @@ class OpikEvaluationDataset(AbstractDataset):
             DatasetError: If the Opik API call fails or any item is missing ``input``.
         """
         if self._sync_policy == "remote":
-            return
+            logger.warning(
+                "sync_policy='remote': save() uploads to remote only, "
+                "local file '%s' will not be updated.",
+                self._filepath,
+            )
 
-        for item in data:
-            if "input" not in item:
-                raise DatasetError("Each dataset item must contain 'input'.")
+        self._validate_items(data)
 
-        try:
-            opik_dataset = self._client.get_or_create_dataset(name=self._dataset_name)
-        except Exception as e:
-            raise DatasetError(f"Failed to get or create Opik dataset: {e}") from e
-
-        opik_dataset.insert(data)
+        dataset = self._get_or_create_remote_dataset()
+        self._upload_items(dataset, data)
 
         if self._sync_policy == "local" and self._filepath:
             existing: list[dict] = []
