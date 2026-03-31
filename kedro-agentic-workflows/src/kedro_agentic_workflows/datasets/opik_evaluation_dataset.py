@@ -203,6 +203,44 @@ class OpikEvaluationDataset(AbstractDataset):
 
         return self._client.get_dataset(name=self._dataset_name)
 
+    @staticmethod
+    def _merge_items(
+        existing: list[dict[str, Any]],
+        new: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Merge new items into an existing list, deduplicating by ``id``.
+
+        Items without an ``id`` key are always appended. For items with an
+        ``id``, new items take precedence — existing entries with the same
+        ``id`` are replaced in place.
+        """
+        new_by_id: dict[str, dict[str, Any]] = {
+            item["id"]: item for item in new if "id" in item
+        }
+
+        seen_ids: set[str] = set()
+        merged: list[dict[str, Any]] = []
+
+        for item in existing:
+            item_id = item.get("id")
+            if item_id is not None and item_id in new_by_id:
+                merged.append(new_by_id[item_id])
+                seen_ids.add(item_id)
+            else:
+                merged.append(item)
+                if item_id is not None:
+                    seen_ids.add(item_id)
+
+        for item in new:
+            item_id = item.get("id")
+            if item_id is not None and item_id in seen_ids:
+                continue
+            if item_id is not None:
+                seen_ids.add(item_id)
+            merged.append(item)
+
+        return merged
+
     def load(self) -> Dataset:
         """Load the Opik dataset, syncing local items to remote if sync_policy is ``local``.
 
@@ -256,7 +294,7 @@ class OpikEvaluationDataset(AbstractDataset):
             existing: list[dict] = []
             if self._filepath.exists():
                 existing = self.file_dataset.load()
-            self.file_dataset.save(existing + data)
+            self.file_dataset.save(self._merge_items(existing, data))
 
     def _exists(self) -> bool:
         try:
@@ -265,7 +303,9 @@ class OpikEvaluationDataset(AbstractDataset):
         except ApiError as e:
             if e.status_code == 404:
                 return False
-            raise
+            raise DatasetError(
+                f"Opik API error while checking dataset '{self._dataset_name}': {e}"
+            ) from e
 
     def _describe(self) -> dict[str, Any]:
         return {
