@@ -12,6 +12,9 @@ from pydantic import BaseModel, Field
 from ..intent_detection.agent import IntentDetectionAgent
 
 
+logger = logging.getLogger(__name__)
+
+
 class JudgeScore(BaseModel):
     score: int = Field(
         description="Integer score between 1 and 5 inclusive."
