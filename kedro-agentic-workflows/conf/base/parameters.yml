@@ -2,4 +2,3 @@ user_id: 1
 docs_matches: 3
 intent_prompt_version: 1
 model_name: "gpt-4o"
-support_answer_prompt_version: 1

@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 
 from ..intent_detection.agent import IntentDetectionAgent
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -118,12 +117,11 @@ def make_intent_detection_task(
             as_type="generation",
             model=model_name,
             input={"question": question},
-            # TODO: it has to be langfuse prompt object or name (?)
-            # prompt=agent.context.prompts["intent_prompt_langfuse"],
+            prompt=agent.context.prompts["intent_prompt"],
         ) as generation:
 
             try:
-                result = agent.invoke(agent_input, {"configurable": {"thread_id": "1"}})
+                result = agent.invoke(agent_input, {"configurable": {"thread_id": item.id}})
                 intent = result.get("intent", "")
                 reason = result.get("reason", "")
 
