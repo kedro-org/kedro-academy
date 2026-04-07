@@ -1,5 +1,5 @@
 intent_evaluation_data:
-  type: kedro_agentic_workflows.datasets.langfuse_evaluation_dataset.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
   dataset_name: evaluations/intent_agent_evaluation
   filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
@@ -20,10 +20,8 @@ intent_judge_prompt:
   prompt_name: "intent_llm_judge_evaluator_prompt"
   prompt_type: "chat"
   credentials: langfuse_credentials
-  sync_policy: remote      # local|remote|strict
+  sync_policy: local       # local|remote|strict
   mode: langchain          # langchain|sdk
-  load_args:
-    version: 1
 
 langfuse_client:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
