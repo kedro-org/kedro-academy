@@ -32,7 +32,7 @@ CONFIG_LOADER_ARGS = {
     "base_env": "base",
     "default_run_env": "local",
     "config_patterns": {
-        "catalog": ["catalog*", "catalog*/**", "**/catalog*", "genai-config.yml", "evaluation.yml"],
+        "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
     },
 }
 
@@ -50,3 +50,4 @@ from kedro.utils import KedroExperimentalWarning
 
 # Suppresses all subsequent KedroExperimentalWarning warnings
 warnings.filterwarnings("ignore", category=KedroExperimentalWarning)
+warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
