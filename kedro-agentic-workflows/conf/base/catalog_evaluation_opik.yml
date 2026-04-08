@@ -1,0 +1,24 @@
+opik_intent_evaluation_data:
+  type: kedro_agentic_workflows.datasets.opik_evaluation_dataset.OpikEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: opik_credentials
+
+opik_intent_judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+opik_intent_judge_prompt:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt_opik.json
+  prompt_name: "opik_intent_judge_evaluator_prompt"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: sdk
+
+# opik_client is defined in evaluation_opik.yml and shared across Opik pipelines
