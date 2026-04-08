@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -35,9 +36,11 @@ class OpikEvaluationDataset(AbstractDataset):
 
     - **On load:** Creates the remote dataset if it does not exist,
       synchronises based on ``sync_policy``, and returns an ``opik.Dataset``.
-    - **On save:** Upserts all items to the remote dataset. In ``local`` mode,
-      items are also merged into the local file (new items take precedence).
-      In ``remote`` mode, only the remote upsert occurs.
+    - **On save:** Inserts all items to the remote dataset. Unchanged items
+      are deduplicated by the Opik SDK (content hash); changed items create
+      new remote rows. In ``local`` mode, items are also merged into the
+      local file (new items take precedence). In ``remote`` mode, only the
+      remote insert occurs.
 
     **Item format:**
 
@@ -45,11 +48,12 @@ class OpikEvaluationDataset(AbstractDataset):
     accepts the following keys:
 
     - ``input`` (**required**) — the evaluation input payload.
-    - ``id`` — stable identifier used for local deduplication. Note: Opik
-      requires item IDs to be valid UUIDs. Human-readable IDs (e.g.
-      ``"intent_001"``) are stripped before upload — Opik auto-generates
-      UUIDs. Items without an ``id`` cannot be deduplicated across syncs and
-      will create new remote entries on every load.
+    - ``id`` — stable identifier used for local deduplication. If ``id`` is
+      a valid UUID it is forwarded to Opik, giving the remote row a stable
+      identity. Human-readable IDs (e.g. ``"intent_001"``) are stripped
+      before upload so the API is not fed invalid values — Opik
+      auto-generates a UUID in those cases. Items without an ``id`` are
+      uploaded without one and Opik assigns a UUID automatically.
     - ``expected_output`` — ground-truth value for scoring.
     - ``metadata`` — arbitrary metadata dict attached to the item.
 
@@ -67,12 +71,15 @@ class OpikEvaluationDataset(AbstractDataset):
     **Sync policies:**
 
     - **local** (default): The local file is the source of truth. On
-      ``load()``, all local items are upserted to remote (creating new items
-      or updating existing ones by content hash). ``save()`` upserts to
+      ``load()``, all local items are re-inserted to remote on every sync.
+      The Opik SDK deduplicates by content hash — items whose content has
+      not changed since the last sync are ignored. If a local item's content
+      changes (even when its ``id`` is kept the same), a new remote row is
+      added; the previous version is **not** replaced. ``save()`` inserts to
       remote and merges into the local file (new data takes precedence).
     - **remote**: The remote Opik dataset is the sole source of truth.
       ``load()`` fetches the remote dataset as-is with no local file
-      interaction. ``save()`` upserts all items to remote without writing
+      interaction. ``save()`` inserts all items to remote without writing
       to any local file. If the remote dataset does not exist yet, it is
       created empty — **no items are pushed from the local file**. To seed
       a new remote dataset, run with ``sync_policy="local"`` at least once,
@@ -151,11 +158,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 When ``None``, no local file interaction occurs.
             sync_policy: Controls the source of truth for reads and whether
                 a local file is involved:
-                ``"local"`` (default) — all local items are upserted to
-                remote on ``load()``; ``save()`` upserts to remote and
+                ``"local"`` (default) — all local items are re-inserted to
+                remote on ``load()``; ``save()`` inserts to remote and
                 merges into the local file (new data takes precedence).
                 ``"remote"`` — ``load()`` fetches remote as-is; ``save()``
-                upserts to remote without local file interaction.
+                inserts to remote without local file interaction.
             metadata: Optional metadata dict stored locally and returned by
                 ``_describe()``. Note: Opik's ``create_dataset()`` does not
                 accept a metadata argument, so this value is not propagated
@@ -294,20 +301,47 @@ class OpikEvaluationDataset(AbstractDataset):
     def _upload_items(self, dataset: Dataset, items: list[dict[str, Any]]) -> None:
         """Insert items into the remote Opik dataset.
 
-        Opik requires item IDs to be valid UUIDs. Human-readable IDs from local
-        files (e.g. ``"intent_001"``) are stripped so the SDK auto-generates UUIDs.
-        Deduplication is content-hash-based and is unaffected by the ID field.
+        If an item's ``id`` is a valid UUID it is forwarded as-is, giving the
+        remote row a stable identity. Human-readable IDs (e.g. ``"intent_001"``)
+        are stripped before upload so the API is not fed invalid values — Opik
+        auto-generates a UUID in those cases. Items with no ``id`` are uploaded
+        without one and Opik assigns a UUID automatically.
+
+        Deduplication is content-hash-based. Unchanged items are no-ops
+        regardless of whether an ``id`` is present.
 
         Callers are responsible for validating items before calling this method.
+
+        Raises:
+            DatasetError: If the Opik API returns an error or the server is
+                unreachable during insert.
         """
-        items_to_insert = [
-            {k: v for k, v in item.items() if k != "id"}
-            for item in items
-        ]
-        dataset.insert(items_to_insert)
+        items_to_insert = []
+        for item in items:
+            if "id" not in item:
+                items_to_insert.append(item)
+            elif not item["id"]:
+                items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+            else:
+                try:
+                    uuid.UUID(str(item["id"]))
+                    items_to_insert.append(item)
+                except ValueError:
+                    items_to_insert.append({k: v for k, v in item.items() if k != "id"})
+        try:
+            dataset.insert(items_to_insert)
+        except ApiError as e:
+            raise DatasetError(
+                f"Opik API error while inserting items into dataset "
+                f"'{self._dataset_name}': {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to insert items into Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
     def _sync_local_to_remote(self, dataset: Dataset) -> Dataset:
-        """Upsert all local items to the remote dataset.
+        """Insert all local items into the remote dataset.
 
         Reads the local file and inserts all items into the remote dataset.
         The Opik SDK deduplicates by content hash, so re-inserting unchanged
@@ -322,25 +356,61 @@ class OpikEvaluationDataset(AbstractDataset):
         if not local_items:
             return dataset
 
-        items_without_id = [item for item in local_items if "id" not in item]
-        if items_without_id:
+        items_without_stable_id = [
+            item for item in local_items
+            if "id" not in item or not item.get("id")
+        ]
+        if items_without_stable_id:
             logger.warning(
-                "Found %d item(s) without an 'id' field in '%s'. "
-                "These cannot be tracked across syncs.",
-                len(items_without_id),
+                "Found %d item(s) with a missing, None, or empty 'id' field in '%s'. "
+                "These cannot be tracked across syncs and will create new remote "
+                "rows on every load.",
+                len(items_without_stable_id),
                 self._filepath,
             )
 
+        items_with_non_uuid_id = []
+        for item in local_items:
+            if item.get("id"):  # present and non-empty/non-None
+                try:
+                    uuid.UUID(str(item["id"]))
+                except ValueError:
+                    items_with_non_uuid_id.append(item)
+        if items_with_non_uuid_id:
+            logger.warning(
+                "Found %d item(s) with non-UUID 'id' values in '%s' "
+                "(e.g. '%s'). These IDs will be stripped before upload — "
+                "Opik will auto-generate UUIDs and remote rows will not "
+                "have stable identities.",
+                len(items_with_non_uuid_id),
+                self._filepath,
+                items_with_non_uuid_id[0]["id"],
+            )
+
         logger.info(
-            "Upserting %d item(s) from '%s' to remote dataset '%s'.",
+            "Syncing %d item(s) from '%s' to remote dataset '%s'.",
             len(local_items),
             self._filepath,
             self._dataset_name,
         )
         self._upload_items(dataset, local_items)
-        self._client.flush()
+        try:
+            self._client.flush()
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to flush items to Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
-        return self._client.get_dataset(name=self._dataset_name)
+        try:
+            return self._client.get_dataset(name=self._dataset_name)
+        except ApiError as e:
+            raise DatasetError(
+                f"Opik API error while refreshing dataset '{self._dataset_name}' after sync: {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to refresh dataset '{self._dataset_name}' after sync: {e}"
+            ) from e
 
     @staticmethod
     def _merge_items(
@@ -384,8 +454,9 @@ class OpikEvaluationDataset(AbstractDataset):
         """Load the Opik dataset, syncing local items to remote if sync_policy is ``local``.
 
         Creates the remote dataset if it does not exist. In ``local`` mode, all
-        local items are upserted to remote on every load — content-identical items
-        are deduplicated by the Opik SDK and will not create duplicates.
+        local items are re-inserted to remote on every load. The Opik SDK
+        deduplicates by content hash — unchanged items are no-ops; changed items
+        (even with the same local ``id``) create new remote rows.
 
         Returns:
             Dataset: The Opik dataset ready for use in experiments.
@@ -429,7 +500,12 @@ class OpikEvaluationDataset(AbstractDataset):
 
         dataset = self._get_or_create_remote_dataset()
         self._upload_items(dataset, data)
-        self._client.flush()
+        try:
+            self._client.flush()
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to flush items to Opik dataset '{self._dataset_name}': {e}"
+            ) from e
 
         if self._sync_policy == "local" and self._filepath:
             existing: list[dict] = []
@@ -446,6 +522,11 @@ class OpikEvaluationDataset(AbstractDataset):
                 return False
             raise DatasetError(
                 f"Opik API error while checking dataset '{self._dataset_name}': {e}"
+            ) from e
+        except Exception as e:
+            raise DatasetError(
+                f"Failed to connect to Opik while checking dataset "
+                f"'{self._dataset_name}': {e}"
             ) from e
 
     def _describe(self) -> dict[str, Any]:
@@ -474,4 +555,7 @@ class OpikEvaluationDataset(AbstractDataset):
         if isinstance(local_data, str):
             local_data = {"content": local_data}
 
-        return JSONPreview(json.dumps(local_data))
+        try:
+            return JSONPreview(json.dumps(local_data))
+        except (TypeError, ValueError) as e:
+            return JSONPreview(f"Could not serialise local data to JSON: {e}")
