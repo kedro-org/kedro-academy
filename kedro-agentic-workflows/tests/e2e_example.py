@@ -41,7 +41,7 @@ from kedro.io import DatasetError
 from opik.evaluation import evaluate
 from opik.evaluation.metrics.score_result import ScoreResult
 
-from kedro_agentic_workflows.datasets.opik_evaluation_dataset import OpikEvaluationDataset
+from kedro_datasets_experimental.opik import OpikEvaluationDataset
 
 
 def _uuid7() -> str:
