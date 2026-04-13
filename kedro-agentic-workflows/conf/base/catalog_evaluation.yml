@@ -26,4 +26,4 @@ intent_judge_prompt:
 langfuse_client:
   type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
   credentials: langfuse_credentials
-  mode: sdk    # langchain | openai | sdk
+  mode: sdk    # langchain|openai| sdk
