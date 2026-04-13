@@ -21,4 +21,7 @@ opik_intent_judge_prompt:
   sync_policy: local
   mode: sdk
 
-# opik_client is defined in evaluation_opik.yml and shared across Opik pipelines
+opik_client:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: langchain
