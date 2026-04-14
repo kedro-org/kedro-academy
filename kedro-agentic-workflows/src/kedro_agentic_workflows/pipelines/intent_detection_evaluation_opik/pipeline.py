@@ -27,7 +27,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 func=init_reason_judge_evaluator,
                 inputs=[
                     "opik_intent_judge_llm",
-                    "opik_intent_judge_prompt",
+                    "opik_judge_llm_prompt",
                 ],
                 outputs="opik_reason_judge_evaluator",
                 name="opik_init_reason_judge_evaluator_node",
@@ -48,7 +48,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "opik_intent_agent_task",
                     "opik_intent_accuracy_evaluator",
                     "opik_reason_judge_evaluator",
-                    "opik_intent_judge_prompt",
+                    "opik_judge_llm_prompt",
                     "params:model_name",
                 ],
                 outputs=None,

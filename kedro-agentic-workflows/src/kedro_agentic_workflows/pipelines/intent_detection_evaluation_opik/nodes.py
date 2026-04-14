@@ -35,13 +35,13 @@ def _prompt_to_template(prompt: Prompt) -> ChatPromptTemplate:
 
 def init_reason_judge_evaluator(
     intent_judge_llm: ChatOpenAI,
-    intent_judge_prompt: Prompt,
+    judge_llm_prompt: Prompt,
 ) -> Callable:
     """Creates LLM-as-a-Judge scorer compatible with opik.evaluation.evaluate()."""
     model_name = getattr(intent_judge_llm, "model_name", None)
     metadata = {"judge_model": model_name} if model_name else None
     structured_judge_llm = intent_judge_llm.with_structured_output(JudgeScore)
-    judge_template = _prompt_to_template(intent_judge_prompt)
+    judge_template = _prompt_to_template(judge_llm_prompt)
 
     def reason_judge_evaluator(
         dataset_item: dict[str, Any],
@@ -140,11 +140,11 @@ def run_experiment(
     intent_agent_task: Callable,
     intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
-    intent_judge_prompt: Prompt,
+    judge_llm_prompt: Prompt,
     model_name: str,
 ) -> None:
     """Run an Opik evaluation experiment over the intent detection dataset."""
-    prompt_commit = intent_judge_prompt.commit
+    prompt_commit = judge_llm_prompt.commit
     experiment_name = f"intent_eval_prompt_{prompt_commit[:8]}_model_{model_name}"
 
     evaluate(
