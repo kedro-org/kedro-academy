@@ -45,5 +45,6 @@ CONFIG_LOADER_ARGS = {
 # DATA_CATALOG_CLASS = DataCatalog
 
 import warnings
+from kedro.utils import KedroExperimentalWarning
 
 warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
