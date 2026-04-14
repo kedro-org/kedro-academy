@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, Callable
 
@@ -6,6 +7,7 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from opik.api_objects.dataset.dataset import Dataset
+from opik.api_objects.prompt.text.prompt import Prompt
 from opik.evaluation import evaluate
 from opik.evaluation.metrics.score_result import ScoreResult
 from pydantic import BaseModel, Field
@@ -19,14 +21,27 @@ class JudgeScore(BaseModel):
     score: int = Field(description="Integer score between 1 and 5 inclusive.")
 
 
+def _prompt_to_template(prompt: Prompt) -> ChatPromptTemplate:
+    """Convert an Opik SDK Prompt object to a LangChain ChatPromptTemplate."""
+    data = prompt.prompt
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError:
+            return ChatPromptTemplate.from_template(data)
+    messages = [(m["role"], m["content"]) for m in data]
+    return ChatPromptTemplate.from_messages(messages)
+
+
 def init_reason_judge_evaluator(
     intent_judge_llm: ChatOpenAI,
-    intent_judge_prompt: ChatPromptTemplate,
+    intent_judge_prompt: Prompt,
 ) -> Callable:
     """Creates LLM-as-a-Judge scorer compatible with opik.evaluation.evaluate()."""
     model_name = getattr(intent_judge_llm, "model_name", None)
     metadata = {"judge_model": model_name} if model_name else None
     structured_judge_llm = intent_judge_llm.with_structured_output(JudgeScore)
+    judge_template = _prompt_to_template(intent_judge_prompt)
 
     def reason_judge_evaluator(
         dataset_item: dict[str, Any],
@@ -36,7 +51,7 @@ def init_reason_judge_evaluator(
         input_ = dataset_item.get("input", {})
         expected_output = dataset_item.get("expected_output", {})
 
-        messages: list[BaseMessage] = intent_judge_prompt.format_messages(
+        messages: list[BaseMessage] = judge_template.format_messages(
             question=input_.get("question", ""),
             predicted_intent=task_outputs.get("intent", ""),
             predicted_reason=task_outputs.get("reason", ""),
@@ -125,10 +140,12 @@ def run_experiment(
     intent_agent_task: Callable,
     intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
+    intent_judge_prompt: Prompt,
     model_name: str,
 ) -> None:
     """Run an Opik evaluation experiment over the intent detection dataset."""
-    experiment_name = f"intent_eval_model_{model_name}"
+    prompt_commit = intent_judge_prompt.commit
+    experiment_name = f"intent_eval_prompt_{prompt_commit[:8]}_model_{model_name}"
 
     evaluate(
         dataset=intent_evaluation_data,
@@ -136,6 +153,7 @@ def run_experiment(
         scoring_functions=[intent_accuracy_evaluator, reason_judge_evaluator],
         experiment_name=experiment_name,
         experiment_config={
+            "prompt_commit": prompt_commit,
             "model_name": model_name,
         },
     )

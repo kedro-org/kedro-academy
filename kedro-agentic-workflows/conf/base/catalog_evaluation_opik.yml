@@ -19,7 +19,7 @@ opik_intent_judge_prompt:
   prompt_type: "chat"
   credentials: opik_credentials
   sync_policy: local
-  mode: langchain
+  mode: sdk
 
 opik_client:
   type: kedro_datasets_experimental.opik.OpikTraceDataset

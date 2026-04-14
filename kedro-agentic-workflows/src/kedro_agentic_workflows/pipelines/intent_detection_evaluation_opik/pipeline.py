@@ -48,6 +48,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "opik_intent_agent_task",
                     "opik_intent_accuracy_evaluator",
                     "opik_reason_judge_evaluator",
+                    "opik_intent_judge_prompt",
                     "params:model_name",
                 ],
                 outputs=None,

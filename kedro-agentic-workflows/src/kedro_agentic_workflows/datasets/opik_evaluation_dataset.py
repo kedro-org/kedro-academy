@@ -346,6 +346,10 @@ class OpikEvaluationDataset(AbstractDataset):
           content is deduplicated by content hash (no-op), but changed
           content creates a **new remote row** while the previous one
           remains.
+          versions, ``None``, empty string, or no ``id`` key): stripped
+          before upload. Opik auto-generates a new UUID v7, so a **new
+          remote row is created on every call**. Whenever content changes,
+          a new remote row will be created while the previous one remains.
 
         Callers are responsible for validating items before calling this method.
 
@@ -505,6 +509,8 @@ class OpikEvaluationDataset(AbstractDataset):
         the ``id`` is stripped before upload and Opik auto-generates a new UUID v7.
         Unchanged content is deduplicated (no-op), but changed content creates a
         new remote row while the previous one remains.
+        the ``id`` is stripped before upload and Opik auto-generates a new UUID v7,
+        so a new remote row is created on every load.
 
         Returns:
             Dataset: The Opik dataset ready for use in experiments.
