@@ -314,10 +314,9 @@ Steps:
 
 Expected (remote):
   - 2 new rows for UUID_5 and UUID_6.
-  - UUID_1 with new expected_output creates a new remote row
-    (content-hash differs from old content → Opik adds a row).
-  - Remote total: 4 existing + 3 saved = up to 7 rows
-    (exact count depends on Opik content-hash dedup for UUID_1).
+  - UUID_1 is a valid UUID v7 — Opik upserts by ID, so the existing row
+    is updated in-place (no new row created).
+  - Remote total: 6 items (4 existing + UUID_5 + UUID_6; UUID_1 updated in place).
 
 Expected (local file):
   - UUID_5 and UUID_6 appended.
@@ -325,7 +324,9 @@ Expected (local file):
   - Local total: 6 items (4 existing + 2 new; UUID_1 replaced in place).
 
 Verify in Opik UI:
-  - Local file on disk has 6 items with UUID_1's expected_output updated.
+  - Dataset has 6 items.
+  - UUID_1's expected_output is 'general_question_updated'.
+  - UUID_5 and UUID_6 are present.
 """)
 
 ds4 = make_dataset()
@@ -344,8 +345,26 @@ assert item_uuid1_local["expected_output"]["intent"] == "general_question_update
     f"UUID_1 expected_output not updated locally: {item_uuid1_local['expected_output']}"
 )
 
+# Verify remote state: UUID_1 updated in-place, UUID_5/UUID_6 added, total = 6
+ds4_remote = make_dataset(sync_policy="remote")
+result4_remote = ds4_remote.load()
+summary4 = summarise_remote(result4_remote)
+items4_remote = result4_remote.get_items()
+
+assert summary4["count"] == 6, (
+    f"Expected 6 remote items after save(), got {summary4['count']}"
+)
+assert _UUID_5 in summary4["ids"], f"UUID_5 not found on remote after save(): {summary4['ids']}"
+assert _UUID_6 in summary4["ids"], f"UUID_6 not found on remote after save(): {summary4['ids']}"
+
+item_uuid1_remote = next((i for i in items4_remote if i["id"] == _UUID_1), None)
+assert item_uuid1_remote is not None, "UUID_1 not found on remote after save()"
+assert item_uuid1_remote["expected_output"]["intent"] == "general_question_updated", (
+    f"UUID_1 expected_output not updated on remote: {item_uuid1_remote['expected_output']}"
+)
+
 print(f"\n✓ PASSED — Local file has {len(local_items4)} item(s); UUID_1 updated in place")
-print("  (Check Opik UI for remote item count — UUID_1 new content creates an additional row)")
+print(f"  Remote has {summary4['count']} item(s); UUID_1 updated in-place, UUID_5/UUID_6 added")
 
 # ---------------------------------------------------------------------------
 # Section 2: Remote mode (Scenarios 5–6)
@@ -510,13 +529,8 @@ Steps:
 
 Expected:
   - The UUID is still forwarded in the insert call (not stripped).
-  - Opik receives the item with the same UUID id.
-  - Remote may contain both the old and the new row (content-hash differs).
-
-Note:
-  Whether Opik replaces or appends the row depends on its server-side
-  behaviour for duplicate UUIDs. The dataset guarantees the UUID is
-  forwarded; it does not guarantee server-side upsert semantics.
+  - Opik's REST endpoint upserts by item ID. The existing remote row is
+    updated in-place with the new content. No additional row is created.
 """)
 
 updated_uuid_item = {
@@ -561,15 +575,11 @@ Steps:
 
 Expected:
   - Warning is logged on each load about missing/empty 'id' fields.
-  - Each load() re-inserts the items with new auto-generated UUIDs.
-  - Remote row count grows by 2 on the second load (no dedup possible
-    without content-hash match — same content IS deduped; different
-    content would grow).
-
-Note:
-  Because content is unchanged, Opik content-hash dedup DOES prevent
-  duplicates here. Remote count should stay at 2 after the second load.
-  Items without id that change content will grow unbounded.
+  - Each load() strips the missing id and Opik auto-generates a new UUID v7.
+  - Because content is unchanged between the two loads, Opik's content-hash
+    dedup prevents duplicates — remote count stays at 2 after the second load.
+  - Items without an id whose content changes between loads will accumulate
+    new remote rows on every sync.
 """)
 
 no_id_items = [
