@@ -35,23 +35,25 @@ response_prompt:
   dataset:
     type: yaml.YAMLDataset
 
-intent_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
-  filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
-  prompt_name: "intent-classifier"
-  prompt_type: "chat"
-  credentials: langfuse_credentials
-  sync_policy: local       # local|remote|strict
-  mode: sdk         # langchain|sdk
-  load_args:
-    version: ${runtime_params:intent_prompt_version, 1}
-
 # intent_prompt:
-#   type: kedro_datasets_experimental.opik.OpikPromptDataset
-#   filepath: data/intent_detection/prompts/intent_prompt_opik.json
+#   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+#   filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
 #   prompt_name: "intent-classifier"
 #   prompt_type: "chat"
-#   credentials: opik_credentials
+#   credentials: langfuse_credentials
+#   sync_policy: local       # local|remote|strict
+#   mode: sdk         # langchain|sdk
+#   load_args:
+#     version: ${runtime_params:intent_prompt_version, 1}
+
+intent_prompt:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/intent_detection/prompts/intent_prompt_opik.json
+  prompt_name: "intent-classifier"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: sdk
 
 # --- Tracing ---
 intent_tracer_langfuse:

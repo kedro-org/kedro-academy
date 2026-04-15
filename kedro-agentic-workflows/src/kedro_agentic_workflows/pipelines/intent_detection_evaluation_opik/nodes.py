@@ -140,12 +140,12 @@ def run_experiment(
     intent_agent_task: Callable,
     intent_accuracy_evaluator: Callable,
     reason_judge_evaluator: Callable,
-    judge_llm_prompt: Prompt,
+    intent_prompt: Prompt,
     model_name: str,
 ) -> None:
     """Run an Opik evaluation experiment over the intent detection dataset."""
-    prompt_commit = judge_llm_prompt.commit
-    experiment_name = f"intent_eval_prompt_{prompt_commit[:8]}_model_{model_name}"
+    intent_prompt_commit = intent_prompt.commit
+    experiment_name = f"intent_eval_prompt_{intent_prompt_commit[:8]}_model_{model_name}"
 
     evaluate(
         dataset=intent_evaluation_data,
@@ -153,7 +153,7 @@ def run_experiment(
         scoring_functions=[intent_accuracy_evaluator, reason_judge_evaluator],
         experiment_name=experiment_name,
         experiment_config={
-            "prompt_commit": prompt_commit,
+            "intent_prompt_commit": intent_prompt_commit,
             "model_name": model_name,
         },
     )

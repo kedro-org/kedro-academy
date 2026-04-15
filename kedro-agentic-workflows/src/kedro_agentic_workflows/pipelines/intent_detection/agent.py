@@ -1,11 +1,14 @@
 from functools import partial
 from typing import TypedDict, Literal
 
+import json
+
 from kedro.pipeline import LLMContext
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.runnables import Runnable
 from langchain_core.prompts import ChatPromptTemplate
 from langfuse.model import ChatPromptClient
+from opik.api_objects.prompt.text.prompt import Prompt as OpikPrompt
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.state import CompiledStateGraph
@@ -66,13 +69,24 @@ class IntentDetectionAgent(KedroAgent):
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None
 
-        # Preserve Langfuse prompt for tracing
-        # But convert to the Langchain prompt for execution
+        # Convert prompt objects to ChatPromptTemplate for execution
         prompt = self.context.prompts["intent_prompt"]
         if isinstance(prompt, ChatPromptClient):
             prompt = ChatPromptTemplate.from_messages(
                 prompt.get_langchain_prompt()
             )
+        elif isinstance(prompt, OpikPrompt):
+            data = prompt.prompt
+            if isinstance(data, str):
+                try:
+                    data = json.loads(data)
+                except json.JSONDecodeError:
+                    prompt = ChatPromptTemplate.from_template(data)
+                    data = None
+            if data is not None:
+                prompt = ChatPromptTemplate.from_messages(
+                    [(m["role"], m["content"]) for m in data]
+                )
 
         # LLM bound to structured intent output
         structured_llm = self.context.llm.with_structured_output(IntentOutput)
