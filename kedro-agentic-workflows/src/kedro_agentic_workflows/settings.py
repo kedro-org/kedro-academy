@@ -36,7 +36,7 @@ CONFIG_LOADER_ARGS = {
     },
 }
 
-# Class that manages Kedro's library components.
+# Class that manages Kedro's library components.Yeah
 # from kedro.framework.context import KedroContext
 # CONTEXT_CLASS = KedroContext
 
@@ -47,4 +47,6 @@ CONFIG_LOADER_ARGS = {
 import warnings
 from kedro.utils import KedroExperimentalWarning
 
+# Suppresses all subsequent KedroExperimentalWarning warnings
+warnings.filterwarnings("ignore", category=KedroExperimentalWarning)
 warnings.filterwarnings("ignore", message="Pydantic serializer warnings")
