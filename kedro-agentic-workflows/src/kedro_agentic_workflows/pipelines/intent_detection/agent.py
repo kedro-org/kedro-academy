@@ -74,7 +74,11 @@ class IntentDetectionAgent(KedroAgent):
         # same template content but expose different APIs. We normalize to
         # ChatPromptTemplate here so the rest of the agent can use a single
         # interface regardless of which provider is active. Langfuse prompt is also
-        # preserved for tracing purposes.
+        # The catalog can deliver intent_prompt as a Langfuse
+        # (mode: langchain/sdk) or an Opik Prompt SDK object (mode: langchain/sdk). 
+        # Both carry the same template content but expose different APIs.
+        # We normalize to ChatPromptTemplate here, so the rest of the agent can use a single
+        # interface regardless of which provider is active.
         prompt = self.context.prompts["intent_prompt"]
         if isinstance(prompt, ChatPromptClient):
             prompt = ChatPromptTemplate.from_messages(
