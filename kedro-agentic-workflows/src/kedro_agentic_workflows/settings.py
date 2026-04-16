@@ -36,7 +36,7 @@ CONFIG_LOADER_ARGS = {
     },
 }
 
-# Class that manages Kedro's library components.Yeah
+# Class that manages Kedro's library components.
 # from kedro.framework.context import KedroContext
 # CONTEXT_CLASS = KedroContext
 
