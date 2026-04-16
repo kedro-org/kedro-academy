@@ -69,7 +69,12 @@ class IntentDetectionAgent(KedroAgent):
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None
 
-        # Convert prompt objects to ChatPromptTemplate for execution
+        # The catalog can deliver intent_prompt as either a Langfuse ChatPromptClient
+        # (mode: langchain) or an Opik Prompt SDK object (mode: sdk). Both carry the
+        # same template content but expose different APIs. We normalize to
+        # ChatPromptTemplate here so the rest of the agent can use a single
+        # interface regardless of which provider is active. Langfuse prompt is also
+        # preserved for tracing purposes.
         prompt = self.context.prompts["intent_prompt"]
         if isinstance(prompt, ChatPromptClient):
             prompt = ChatPromptTemplate.from_messages(
