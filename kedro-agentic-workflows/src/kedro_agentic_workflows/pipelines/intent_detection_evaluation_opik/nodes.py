@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any, Callable
 
@@ -21,27 +20,14 @@ class JudgeScore(BaseModel):
     score: int = Field(description="Integer score between 1 and 5 inclusive.")
 
 
-def _prompt_to_template(prompt: Prompt) -> ChatPromptTemplate:
-    """Convert an Opik SDK Prompt object to a LangChain ChatPromptTemplate."""
-    data = prompt.prompt
-    if isinstance(data, str):
-        try:
-            data = json.loads(data)
-        except json.JSONDecodeError:
-            return ChatPromptTemplate.from_template(data)
-    messages = [(m["role"], m["content"]) for m in data]
-    return ChatPromptTemplate.from_messages(messages)
-
-
 def init_reason_judge_evaluator(
     intent_judge_llm: ChatOpenAI,
-    judge_llm_prompt: Prompt,
+    judge_llm_prompt: ChatPromptTemplate,
 ) -> Callable:
     """Creates LLM-as-a-Judge scorer compatible with opik.evaluation.evaluate()."""
     model_name = getattr(intent_judge_llm, "model_name", None)
     metadata = {"judge_model": model_name} if model_name else None
     structured_judge_llm = intent_judge_llm.with_structured_output(JudgeScore)
-    judge_template = _prompt_to_template(judge_llm_prompt)
 
     def reason_judge_evaluator(
         dataset_item: dict[str, Any],
@@ -51,7 +37,7 @@ def init_reason_judge_evaluator(
         input_ = dataset_item.get("input", {})
         expected_output = dataset_item.get("expected_output", {})
 
-        messages: list[BaseMessage] = judge_template.format_messages(
+        messages: list[BaseMessage] = judge_llm_prompt.format_messages(
             question=input_.get("question", ""),
             predicted_intent=task_outputs.get("intent", ""),
             predicted_reason=task_outputs.get("reason", ""),
@@ -145,7 +131,8 @@ def run_experiment(
 ) -> None:
     """Run an Opik evaluation experiment over the intent detection dataset."""
     intent_prompt_commit = intent_prompt.commit
-    experiment_name = f"intent_eval_prompt_{intent_prompt_commit[:8]}_model_{model_name}"
+    prompt_name = intent_prompt.name
+    experiment_name = f"intent_eval_prompt_{prompt_name}_{intent_prompt_commit[:8]}_model_{model_name}"
 
     evaluate(
         dataset=intent_evaluation_data,
@@ -154,6 +141,7 @@ def run_experiment(
         experiment_name=experiment_name,
         experiment_config={
             "intent_prompt_commit": intent_prompt_commit,
+            "prompt_name": prompt_name,
             "model_name": model_name,
         },
     )
