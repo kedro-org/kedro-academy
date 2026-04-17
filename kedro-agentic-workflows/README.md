@@ -199,17 +199,17 @@ For more details see `conf/base/catalog_genai_config.yml` and [docs for `Langfus
 
 ## 🧪 Evaluation
 
-The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
+The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It supports two observability backends — [Langfuse](https://langfuse.com/) and [Opik](https://www.comet.com/opik) — so results, traces, and scores are visible in either platform's UI.
 
 ### How it works
 
 The pipeline:
-1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to Langfuse.
-2. Runs the **Intent Detection Agent** on each item, recording traces as Langfuse observations linked to the prompt and model.
+1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to the remote platform.
+2. Runs the **Intent Detection Agent** on each item, recording traces linked to the prompt version and model.
 3. Scores each result with two evaluators:
    - **Intent accuracy** — binary match between predicted and expected intent.
    - **Reason quality** — LLM-as-a-judge score (1–5) evaluating the reasoning behind the prediction.
-4. Publishes the experiment to Langfuse with all scores, traces, and metadata.
+4. Publishes the experiment with all scores, traces, and metadata.
 
 ### `LangfuseEvaluationDataset`
 
@@ -237,13 +237,39 @@ intent_evaluation_data:
     created_by: kedro
 ```
 
+### `OpikEvaluationDataset`
+
+Alternatively, the evaluation dataset can be managed by `OpikEvaluationDataset` from `kedro-datasets-experimental`, which bridges a local JSON/YAML file with a remote Opik dataset. It supports the same two sync policies as the Langfuse variant:
+
+- **`local`** — the local file is the source of truth; `load()` re-inserts all local items to remote on every sync via Opik's upsert-by-ID API. Items with a UUID v7 `id` update the existing remote row in-place; items without a UUID v7 `id` create a new remote row on every sync.
+- **`remote`** — the remote Opik dataset is the source of truth. `load()` fetches remote as-is with no local file interaction; `save()` inserts items to remote only.
+
+Catalog entry (`conf/base/catalog_evaluation_opik.yml`):
+
+```yaml
+opik_intent_evaluation_data:
+  type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: opik_credentials
+```
+
 ### Running the evaluation pipeline
 
+**With Langfuse:**
 ```bash
 kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
 ```
 
 The `intent_prompt_version` and `model_name` parameters are used to name the experiment in Langfuse (e.g., `intent_prompt_v1_model_gpt-4o`), making it easy to compare runs across prompt iterations and models.
+
+**With Opik:**
+```bash
+kedro run -p intent_detection_evaluation_opik --params model_name=gpt-4o
+```
+
+The experiment name is derived automatically from the active prompt name, its commit hash, and the model (e.g., `intent_eval_prompt_intent-classifier_abc12345_model_gpt-4o`), making it easy to compare runs across prompt versions and models in the Opik UI.
 
 ### Evaluation data
 

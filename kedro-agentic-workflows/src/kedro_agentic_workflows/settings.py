@@ -47,7 +47,6 @@ CONFIG_LOADER_ARGS = {
 import warnings
 from kedro.utils import KedroExperimentalWarning
 
-
 # Suppresses all subsequent KedroExperimentalWarning warnings
 warnings.filterwarnings("ignore", category=KedroExperimentalWarning)
 warnings.filterwarnings("ignore", message="Pydantic serializer warnings")

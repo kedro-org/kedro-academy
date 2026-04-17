@@ -1,0 +1,27 @@
+opik_intent_evaluation_data:
+  type: kedro_datasets_experimental.opik.OpikEvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: opik_credentials
+
+opik_intent_judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+opik_judge_llm_prompt:
+  type: kedro_datasets_experimental.opik.OpikPromptDataset
+  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt_opik.json
+  prompt_name: "opik_judge_llm_prompt"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: langchain
+
+opik_client:
+  type: kedro_datasets_experimental.opik.OpikTraceDataset
+  credentials: opik_credentials
+  mode: langchain
