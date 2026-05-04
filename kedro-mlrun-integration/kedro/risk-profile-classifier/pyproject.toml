@@ -1,0 +1,44 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.9"
+name = "risk_profile_classifier"
+readme = "README.md"
+dynamic = [ "version",]
+dependencies = [ "ipython>=8.10", "jupyterlab>=3.0", "notebook", "kedro[jupyter]~=1.0.0", "kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset, plotly-plotlydataset, plotly-jsondataset, matplotlib-matplotlibwriter]>=3.0", "kedro-viz>=6.7.0", "scikit-learn~=1.5.1", "seaborn~=0.12.1",]
+
+[project.scripts]
+risk-profile-classifier = "risk_profile_classifier.__main__:main"
+
+[project.optional-dependencies]
+dev = [ "pytest-cov~=3.0", "pytest-mock>=1.7.1, <2.0", "pytest~=7.2", "ruff~=0.12.0",]
+
+[tool.kedro]
+package_name = "risk_profile_classifier"
+project_name = "risk-profile-classifier"
+kedro_init_version = "1.0.0"
+tools = "['Linting', 'Custom Logging']"
+example_pipeline = "True"
+source_dir = "src"
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+
+[project.entry-points."kedro.hooks"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [ "F", "W", "E", "I", "UP", "PL", "T201",]
+ignore = [ "E501",]
+
+[tool.setuptools.dynamic.version]
+attr = "risk_profile_classifier.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false

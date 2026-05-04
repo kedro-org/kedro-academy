@@ -1,0 +1,45 @@
+# Data Catalog for Risk Profile Classifier
+# Documentation: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+# ===========================
+# Training Pipeline Datasets
+# ===========================
+
+# Raw user data (loaded from CSV)
+raw_user_data:
+  type: kedro_datasets_experimental.mlrun.MLRunDataframeDataset
+  key: generate-data-main_user_data.csv
+
+# Feature scaler (saved during training, used in serving)
+feature_scaler:
+  type: kedro_datasets_experimental.mlrun.MLRunModel
+  key: risk-profile-classifier-feature-scaler
+  framework: sklearn
+
+# Trained risk profile classifier model
+risk_classifier:
+  type: kedro_datasets_experimental.mlrun.MLRunModel
+  key: risk-profile-classifier-model
+  framework: sklearn
+
+# Model evaluation metrics
+model_metrics:
+  type: kedro_datasets_experimental.mlrun.MLRunResult
+  key: risk-profile-classifier-metrics
+  flatten: true
+
+# ===========================
+# Serving Pipeline Datasets
+# ===========================
+
+# Input user data for prediction (from HTTP request or parameters)
+user_input:
+  type: MemoryDataset
+  metadata:
+    nuclio_event: true  # Populate from event.body
+
+# Predictions output (in-memory for HTTP response)
+predictions:
+  type: MemoryDataset
+  metadata:
+    nuclio_response: true  # Return this in HTTP response
