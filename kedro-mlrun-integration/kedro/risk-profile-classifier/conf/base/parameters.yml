@@ -1,28 +1,35 @@
 # Parameters for Risk Profile Classifier
 
 # ===========================
+# Shared feature configuration
+# ===========================
+# Single source of truth for feature columns used by both training and serving.
+# Both pipelines consume this list; changing it here propagates to both.
+features:
+  - age
+  - income
+  - investment_experience_years
+  - savings_ratio
+  - debt_ratio
+  - risk_tolerance_score
+  - portfolio_volatility
+
+# ===========================
 # Training Parameters
 # ===========================
 training:
   # Random state for reproducibility
   random_state: 42
-  
-  # Features to use for modeling
-  features:
-    - age
-    - income
-    - investment_experience_years
-    - savings_ratio
-    - debt_ratio
-    - risk_tolerance_score
-    - portfolio_volatility
-  
+
+  # Features to use for modeling (reference the shared list above)
+  features: ${features}
+
   # Target variable
   target: risk_profile
-  
+
   # Train/test split
   test_size: 0.2
-  
+
   # Model hyperparameters
   model_params:
     n_estimators: 100
@@ -34,16 +41,9 @@ training:
 # Serving Parameters
 # ===========================
 serving:
-  # Features to use (must match training)
-  features:
-    - age
-    - income
-    - investment_experience_years
-    - savings_ratio
-    - debt_ratio
-    - risk_tolerance_score
-    - portfolio_volatility
-  
+  # Features to use (must match training; reference the shared list above)
+  features: ${features}
+
   # Sample users for prediction (in production, this would come from API/DB)
   sample_users:
     - age: 28

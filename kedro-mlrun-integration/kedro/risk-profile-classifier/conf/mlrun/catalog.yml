@@ -1,4 +1,8 @@
-# Data Catalog for Risk Profile Classifier
+# MLRun Environment Catalog for Risk Profile Classifier
+# Use with: kedro run --env mlrun
+# This catalog overrides conf/base/catalog.yml when running inside an MLRun project.
+# It replaces file-based datasets with MLRun-native dataset types that read/write
+# from the MLRun feature store and model registry.
 # Documentation: https://docs.kedro.org/en/stable/data/data_catalog.html
 
 # ===========================
@@ -38,8 +42,12 @@ user_input:
   metadata:
     nuclio_event: true  # Populate from event.body
 
-# Predictions output (in-memory for HTTP response)
+# Predictions output: user features joined with predicted risk profiles.
 predictions:
   type: MemoryDataset
   metadata:
     nuclio_response: true  # Return this in HTTP response
+
+# Summary statistics over the current prediction batch.
+prediction_summary:
+  type: MemoryDataset

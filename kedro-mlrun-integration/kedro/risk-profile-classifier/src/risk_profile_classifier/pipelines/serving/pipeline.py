@@ -12,15 +12,17 @@ from .nodes import (
 
 def create_pipeline(**kwargs) -> Pipeline:
     """Create the serving/inference pipeline.
-    
+
     Returns:
-        A Pipeline object for serving predictions.
+        A Pipeline object for serving predictions. The final output is
+        ``predictions`` — a DataFrame of user features combined with
+        predicted risk profiles and confidence scores.
     """
     return Pipeline(
         [
             node(
                 func=load_user_data_for_prediction,
-                inputs="user_input",
+                inputs=["user_input", "params:serving"],
                 outputs="user_data_raw",
                 name="load_user_data_node",
             ),
@@ -33,8 +35,20 @@ def create_pipeline(**kwargs) -> Pipeline:
             node(
                 func=predict_risk_profiles,
                 inputs=["risk_classifier", "user_data_scaled"],
-                outputs="predictions",
+                outputs="raw_predictions",
                 name="predict_risk_profiles_node",
+            ),
+            node(
+                func=format_predictions_output,
+                inputs=["raw_predictions", "user_data_raw"],
+                outputs="predictions",
+                name="format_predictions_node",
+            ),
+            node(
+                func=generate_prediction_summary,
+                inputs="predictions",
+                outputs="prediction_summary",
+                name="generate_summary_node",
             ),
         ]
     )

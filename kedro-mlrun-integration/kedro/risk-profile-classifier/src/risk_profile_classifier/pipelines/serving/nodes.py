@@ -1,6 +1,6 @@
 """Serving pipeline nodes for risk profile prediction."""
 import logging
-from typing import Dict, List
+from typing import Dict
 
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -9,42 +9,26 @@ from sklearn.preprocessing import StandardScaler
 logger = logging.getLogger(__name__)
 
 
-def load_user_data_for_prediction(user_input: Dict) -> pd.DataFrame:
+def load_user_data_for_prediction(user_input: Dict, parameters: Dict) -> pd.DataFrame:
     """Load user data for prediction from input dictionary.
-    
-    This function accepts data from HTTP requests (via Nuclio) or from parameters.
-    
+
+    This function accepts data from HTTP requests (via Nuclio) or falls back
+    to sample users defined in ``parameters.yml`` under ``serving.sample_users``.
+
     Args:
         user_input: Dictionary or list of dictionaries with user features.
                    Can be a single user dict or a list of user dicts.
-        
+                   When empty or None the sample_users from parameters are used.
+        parameters: Serving parameters; must contain a ``sample_users`` key with
+                    a list of user feature dicts used as fallback input.
+
     Returns:
         DataFrame with user features to predict.
     """
-    # If user_input is None or empty, use sample data
     if not user_input or user_input == {}:
-        sample_users = [
-            {
-                "age": 28,
-                "income": 65000,
-                "investment_experience_years": 3,
-                "savings_ratio": 0.25,
-                "debt_ratio": 0.15,
-                "risk_tolerance_score": 8,
-                "portfolio_volatility": 0.30,
-            },
-            {
-                "age": 55,
-                "income": 120000,
-                "investment_experience_years": 20,
-                "savings_ratio": 0.35,
-                "debt_ratio": 0.10,
-                "risk_tolerance_score": 3,
-                "portfolio_volatility": 0.10,
-            },
-        ]
+        sample_users = parameters["sample_users"]
         df = pd.DataFrame(sample_users)
-        logger.info(f"Using sample data: {len(df)} users")
+        logger.info(f"Using sample data from parameters: {len(df)} users")
     else:
         # Convert single dict to list for uniform processing
         if isinstance(user_input, dict) and "age" in user_input:
@@ -56,10 +40,10 @@ def load_user_data_for_prediction(user_input: Dict) -> pd.DataFrame:
             user_data = user_input.get("data", user_input)
             if isinstance(user_data, dict) and "age" in user_data:
                 user_data = [user_data]
-        
+
         df = pd.DataFrame(user_data)
         logger.info(f"Loaded {len(df)} users for prediction from input")
-    
+
     return df
 
 

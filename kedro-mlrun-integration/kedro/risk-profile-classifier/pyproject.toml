@@ -42,3 +42,6 @@ attr = "risk_profile_classifier.__version__"
 [tool.setuptools.packages.find]
 where = [ "src",]
 namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "5f2825e388b34bb7a4f6aee36117a030"

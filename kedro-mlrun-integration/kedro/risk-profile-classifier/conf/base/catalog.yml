@@ -8,35 +8,46 @@
 # Raw user data (loaded from CSV)
 raw_user_data:
   type: pandas.CSVDataset
-  filepath: data/raw/user_data.csv
+  filepath: data/01_raw/user_data.csv
 
 # Feature scaler (saved during training, used in serving)
 feature_scaler:
   type: pickle.PickleDataset
-  filepath: data/models/feature_scaler.pkl
+  filepath: data/06_models/feature_scaler.pkl
+  versioned: true
 
 # Trained risk profile classifier model
 risk_classifier:
   type: pickle.PickleDataset
-  filepath: data/models/risk_classifier.pkl
+  filepath: data/06_models/risk_classifier.pkl
+  versioned: true
 
 # Model evaluation metrics
 model_metrics:
   type: json.JSONDataset
-  filepath: data/reporting/model_metrics.json
+  filepath: data/08_reporting/model_metrics.json
 
 # ===========================
 # Serving Pipeline Datasets
 # ===========================
 
-# Input user data for prediction (from HTTP request or parameters)
+# Input user data for prediction.
+# Defaults to an empty dict so the node falls back to params:serving.sample_users.
+# In the Nuclio serving environment this value is overwritten with the HTTP request body.
 user_input:
   type: MemoryDataset
+  data: {}
+  copy_mode: assign
   metadata:
-    nuclio_event: true  # Populate from event.body
+    nuclio_event: true  # Overwritten from event.body at runtime
 
-# Predictions output (in-memory for HTTP response)
+# Predictions output: user features joined with predicted risk profiles.
+# In the Nuclio serving environment this DataFrame is returned in the HTTP response.
 predictions:
   type: MemoryDataset
   metadata:
     nuclio_response: true  # Return this in HTTP response
+
+# Summary statistics over the current prediction batch.
+prediction_summary:
+  type: MemoryDataset

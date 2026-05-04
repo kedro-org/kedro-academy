@@ -17,10 +17,8 @@ data/**
 # also keep all .gitkeep files
 !.gitkeep
 
-# also keep the example dataset
-!data/01_raw/companies.csv
-!data/01_raw/reviews.csv
-!data/01_raw/shuttles.xlsx
+# also keep the raw input dataset
+!data/01_raw/user_data.csv
 
 # ignore kedro-viz metadata
 .viz
