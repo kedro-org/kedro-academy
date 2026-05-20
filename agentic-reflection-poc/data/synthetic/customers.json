@@ -1,0 +1,241 @@
+[
+  {
+    "customer_id": "cust_001",
+    "company_name": "Northstar Logistics",
+    "industry": "Logistics",
+    "size": "Mid-market",
+    "employee_count": 850,
+    "locations": 18,
+    "region": "UK & Ireland",
+    "current_products": [
+      "MPLS",
+      "Business Broadband"
+    ],
+    "account_tenure_years": 4,
+    "known_pain_points": [
+      "rising network costs",
+      "warehouse connectivity gaps"
+    ],
+    "strategic_initiatives": [
+      "fleet digitisation",
+      "IoT tracking"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_002",
+    "company_name": "Harborview Health",
+    "industry": "Healthcare",
+    "size": "Mid-market",
+    "employee_count": 1200,
+    "locations": 9,
+    "region": "US East",
+    "current_products": [
+      "MPLS",
+      "DIA"
+    ],
+    "account_tenure_years": 5,
+    "known_pain_points": [
+      "clinical app latency",
+      "remote clinic connectivity"
+    ],
+    "strategic_initiatives": [
+      "telehealth expansion",
+      "EHR cloud migration"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_003",
+    "company_name": "ForgeWorks Manufacturing",
+    "industry": "Manufacturing",
+    "size": "Mid-market",
+    "employee_count": 2200,
+    "locations": 6,
+    "region": "DACH",
+    "current_products": [
+      "SD-WAN pilot",
+      "4G backup"
+    ],
+    "account_tenure_years": 6,
+    "known_pain_points": [
+      "OT/IT convergence",
+      "predictive maintenance"
+    ],
+    "strategic_initiatives": [
+      "factory automation",
+      "private 5G trials"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_004",
+    "company_name": "BrightCart Retail",
+    "industry": "Retail",
+    "size": "Enterprise",
+    "employee_count": 5000,
+    "locations": 120,
+    "region": "UK",
+    "current_products": [
+      "Business Broadband"
+    ],
+    "account_tenure_years": 7,
+    "known_pain_points": [
+      "POS downtime",
+      "in-store Wi-Fi gaps"
+    ],
+    "strategic_initiatives": [
+      "unified commerce",
+      "edge analytics"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_005",
+    "company_name": "Summit Financial Group",
+    "industry": "Financial services",
+    "size": "Mid-market",
+    "employee_count": 900,
+    "locations": 4,
+    "region": "US",
+    "current_products": [
+      "MPLS",
+      "DDoS scrubbing"
+    ],
+    "account_tenure_years": 8,
+    "known_pain_points": [
+      "latency-sensitive trading links",
+      "regulatory audit trails"
+    ],
+    "strategic_initiatives": [
+      "cloud core banking",
+      "zero-trust access"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_006",
+    "company_name": "Greenfield Academy Trust",
+    "industry": "Education",
+    "size": "Mid-market",
+    "employee_count": 300,
+    "locations": 22,
+    "region": "UK",
+    "current_products": [
+      "Fibre",
+      "Wi-Fi managed"
+    ],
+    "account_tenure_years": 9,
+    "known_pain_points": [
+      "campus coverage holes",
+      "safeguarding for online learning"
+    ],
+    "strategic_initiatives": [
+      "hybrid learning",
+      "student device programs"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_007",
+    "company_name": "CityWorks Council",
+    "industry": "Public sector",
+    "size": "Enterprise",
+    "employee_count": 8000,
+    "locations": 35,
+    "region": "UK",
+    "current_products": [
+      "MPLS",
+      "Internet"
+    ],
+    "account_tenure_years": 10,
+    "known_pain_points": [
+      "legacy WAN costs",
+      "citizen digital services"
+    ],
+    "strategic_initiatives": [
+      "smart city pilots",
+      "secure remote staff"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_008",
+    "company_name": "Helios Energy Services",
+    "industry": "Energy",
+    "size": "Mid-market",
+    "employee_count": 1500,
+    "locations": 14,
+    "region": "Nordics",
+    "current_products": [
+      "MPLS",
+      "IoT SIMs"
+    ],
+    "account_tenure_years": 3,
+    "known_pain_points": [
+      "field site connectivity",
+      "SCADA reliability"
+    ],
+    "strategic_initiatives": [
+      "renewable site monitoring",
+      "grid modernization"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_009",
+    "company_name": "Clarity Legal Partners",
+    "industry": "Professional services",
+    "size": "Mid-market",
+    "employee_count": 400,
+    "locations": 3,
+    "region": "UK",
+    "current_products": [
+      "Business Broadband",
+      "SIP"
+    ],
+    "account_tenure_years": 4,
+    "known_pain_points": [
+      "client confidentiality",
+      "hybrid meeting quality"
+    ],
+    "strategic_initiatives": [
+      "secure collaboration",
+      "document automation"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  },
+  {
+    "customer_id": "cust_010",
+    "company_name": "Stonebridge Construction",
+    "industry": "Construction",
+    "size": "Mid-market",
+    "employee_count": 1100,
+    "locations": 25,
+    "region": "UK & Ireland",
+    "current_products": [
+      "4G routers",
+      "Business Broadband"
+    ],
+    "account_tenure_years": 5,
+    "known_pain_points": [
+      "site office churn",
+      "temporary site connectivity"
+    ],
+    "strategic_initiatives": [
+      "BIM collaboration",
+      "site safety IoT"
+    ],
+    "tone_preference": "practical and ROI-oriented",
+    "relationship_context": "long-standing account with annual renewal in Q3"
+  }
+]

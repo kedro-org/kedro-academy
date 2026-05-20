@@ -1,0 +1,5 @@
+reflection:
+  temperature: 0.2
+  worst_case_count: 5
+  best_case_count: 3
+  regression_case_count: 4

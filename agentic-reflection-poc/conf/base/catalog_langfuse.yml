@@ -1,0 +1,27 @@
+# Prompt — local YAML is source of truth; synced to Langfuse on save
+campaign_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/prompts/langfuse/campaign_agent_system_prompt.yaml
+  prompt_name: ${globals:langfuse_prompt_name}
+  prompt_type: text
+  credentials: langfuse_credentials
+  sync_policy: local
+  mode: sdk
+  save_args:
+    labels: ["production"]
+
+# Trace client — read-only; load() returns Langfuse SDK client
+langfuse_tracer:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: sdk
+
+# Evaluation dataset — local JSON source of truth; synced to Langfuse on save
+eval_dataset:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: ${globals:langfuse_dataset_name}
+  filepath: data/synthetic/eval_cases.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    project: agentic-reflection-poc

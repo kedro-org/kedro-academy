@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-reflection-poc"
+version = "0.1.0"
+description = "B2B Campaign Agent — agentic reflection / continuous learning POC"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "kedro>=0.19.14",
+  "kedro-viz>=10.0.0",
+  "kedro-datasets[json,langchain,langfuse]>=4.0.0",
+  "langchain-openai>=0.2.0",
+  "langchain-core>=0.3.0",
+  "streamlit>=1.32.0",
+  "langfuse>=2.0.0",
+  "openai>=1.30.0",
+  "pandas>=2.0.0",
+  "pydantic>=2.0.0",
+  "python-dotenv>=1.0.0",
+  "plotly>=5.18.0",
+  "pyyaml>=6.0.0",
+  "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "ruff>=0.4.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.kedro]
+package_name = "agentic_reflection_poc"
+project_name = "agentic-reflection-poc"
+kedro_init_version = "1.0.0"
+source_dir = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.kedro_telemetry]
+project_id = "a2680a4037eb4134967b4124bf1a14ee"

@@ -1,0 +1,49 @@
+# LangChain LLM datasets (used by Kedro llm_context_node)
+agent_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_model}
+    temperature: 0.7
+
+judge_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_judge_model}
+    temperature: 0.0
+
+reflection_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_reflection_model}
+    temperature: 0.2
+
+# Prompt datasets for LLM context nodes
+campaign_system_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/prompts/agent_run/campaign_agent_system_prompt.yaml
+
+campaign_system_prompt_history:
+  type: yaml.YAMLDataset
+  filepath: data/prompts/history/campaign_agent_system_prompt.yaml
+  versioned: true
+
+
+judge_system_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/prompts/evaluation/judge_system_prompt.yaml
+
+# LLMContext outputs (assign avoids deepcopy of LangChain clients)
+agent_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign
+
+judge_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign
+
+reflection_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign

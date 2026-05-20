@@ -1,0 +1,70 @@
+# layer: synthetic
+customers:
+  type: json.JSONDataset
+  filepath: data/synthetic/customers.json
+  metadata:
+    kedro-viz:
+      layer: synthetic
+
+products:
+  type: json.JSONDataset
+  filepath: data/synthetic/products.json
+
+skill_file:
+  type: text.TextDataset
+  filepath: skills/b2b-email-style.md
+
+# Langfuse-shaped eval items (local JSON; synced via eval_dataset on apply)
+eval_cases_file:
+  type: json.JSONDataset
+  filepath: data/synthetic/eval_cases.json
+
+# Parameterised run outputs (resolved via ${runtime_params:...} at kedro run)
+run_emails:
+  type: json.JSONDataset
+  filepath: data/outputs/${runtime_params:run_id, 'run_1'}/emails.json
+
+run_case_scores:
+  type: json.JSONDataset
+  filepath: data/outputs/${runtime_params:run_id, 'run_1'}/case_scores.json
+
+run_trace_metadata:
+  type: json.JSONDataset
+  filepath: data/outputs/${runtime_params:run_id, 'run_1'}/trace_metadata.json
+
+run_aggregate_scores:
+  type: json.JSONDataset
+  filepath: data/reporting/${runtime_params:run_id, 'run_1'}/aggregate_scores.json
+
+# Proposal artifacts
+proposal_bundle:
+  type: json.JSONDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/proposal.json
+
+proposal_summary_md:
+  type: text.TextDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/reflection_summary.md
+
+proposal_new_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/new_system_prompt.yaml
+
+proposal_new_skill:
+  type: text.TextDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/new_b2b_email_style.md
+
+proposal_new_eval_cases:
+  type: json.JSONDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/new_eval_cases.json
+
+proposal_prompt_diff:
+  type: text.TextDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/prompt_diff.html
+
+proposal_skill_diff:
+  type: text.TextDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/skill_diff.html
+
+applied_marker:
+  type: json.JSONDataset
+  filepath: data/reporting/${runtime_params:proposal_id, 'proposal_1'}/applied.json
