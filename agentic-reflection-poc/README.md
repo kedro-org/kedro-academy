@@ -33,21 +33,9 @@ LLM setup uses Kedro [LLM context nodes](https://docs.kedro.org/en/stable/build/
 
 ## Quick start
 
-Requires **Python 3.10–3.12** (Kedro is not compatible with 3.14 yet).
-
-```bash
-cd agentic-reflection-poc
-make setup          # creates .venv, install + seed synthetic data
-make app            # launch Streamlit (Kedro-Viz starts automatically in the background)
-```
-
-Walk through the UI: **Run Agent → Run Reflection → Approve & Apply → Re-run Agent**.
+Requires **Python 3.10+**
 
 ### Credentials
-
-Copy real API keys into `conf/local/credentials.yml` (replace `REPLACE_ME` placeholders). **Pipelines fail without a valid OpenAI key** unless you enable **Mock LLM mode** in the Streamlit sidebar.
-
-For an **AI gateway** (e.g. McKinsey QuantumBlack), set both `api_key` and `base_url` under `openai_credentials`. The gateway JWT must not be sent to `api.openai.com` — `ChatOpenAIDataset` reads `base_url` from credentials automatically.
 
 ```yaml
 openai_credentials:
@@ -65,7 +53,16 @@ Langfuse integration uses `kedro_datasets_experimental.langfuse.*` datasets (`ca
 
 Run outputs use Kedro catalog paths: `data/outputs/{run_id}/` and `data/reporting/{proposal_id}/` (set via `kedro run --params run_id=run_1`).
 
-See `.env.example` for variable names. **Without keys**, enable **Mock LLM** in the sidebar or pass `--params demo_mock_llm=true`.
+See `.env.example` for variable names.
+
+```bash
+cd agentic-reflection-poc
+make setup          # creates .venv, install + seed synthetic data
+make app            # launch Streamlit (Kedro-Viz starts automatically in the background)
+```
+
+Walk through the UI: **Run Agent → Run Reflection → Approve & Apply → Re-run Agent**.
+
 
 ### Seed synthetic data
 
@@ -74,7 +71,7 @@ make seed
 # or: python scripts/seed_synthetic_data.py
 ```
 
-By default **5 eval cases** are seeded (`synthetic_eval_case_count` in `conf/base/parameters.yml`). Set to `20` and re-run `make seed` when you want the full demo set.
+By default **1 eval case** is seeded (`synthetic_eval_case_count` in `conf/base/parameters.yml`). Set to `20` and re-run `make seed` when you want the full demo set.
 
 ### CLI pipelines
 
@@ -85,55 +82,4 @@ kedro run --pipeline reflection --params run_id=run_1,proposal_id=proposal_1
 kedro run --pipeline apply --params proposal_id=proposal_1
 kedro run --pipeline agent_run --params run_id=run_2
 kedro run --pipeline evaluation --params run_id=run_2
-```
-
-Or partial cycle: `make run-cycle`
-
-### Kedro-Viz
-
-```bash
-make viz
-```
-
-## Presenter script
-
-1. "This is a campaign agent that writes telco B2B outreach emails. Right now it has a weak prompt and a vague skill file — intentionally."
-2. Click **Run Agent**.
-3. "Five emails generated (configurable to 20), every one traced, every one scored. Score: around 5 out of 10. Let's look at why." Open one weak email. Point to failure tags.
-4. Open the Langfuse tab. "Every run is fully observable — traces, scores, prompt version, all here."
-5. Click **Run Reflection**.
-6. "A reflection agent just read every trace, every score, and the current prompt. It identified three failure patterns." Point to the three-column summary.
-7. "Here is exactly what it proposes to change." Show prompt diff. Show skill diff.
-8. "Notice: nothing has changed yet. A human reviews and approves."
-9. Click **Approve & Apply Changes**.
-10. "Prompt v2 is now active. Regression cases added to the eval set."
-11. Click **Re-run Agent**.
-12. "Same cases. Same evaluation. Score improves by ~3 points." Show side-by-side emails.
-13. Scroll to the closing card: "Different agent. Same reflection loop. Same Kedro backbone."
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| `kedro: command not found` | Run `pip install -e .` and use `python -m kedro` |
-| `401 invalid_issuer` on LLM calls | Add `base_url` to `openai_credentials` for your AI gateway; do not point gateway tokens at OpenAI's default API |
-| Pipeline fails on OpenAI | Enable mock mode, or add valid `api_key` + `base_url` |
-| Langfuse tab shows local mode | Add keys to `conf/local/credentials.yml` |
-| Stale demo state | Sidebar **Reset Demo** or `make reset` |
-| Low Run 2 improvement | Ensure apply ran; check `prompts/current_system_prompt.yaml` |
-
-## Project layout
-
-- `app.py` — Streamlit dashboard
-- `src/agentic_reflection_poc/pipelines/` — Kedro pipelines (`agent_run`, `evaluation`, `reflection`, `apply`)
-- `scripts/seed_synthetic_data.py` — seed customers, products, eval cases
-- `conf/base/catalog_llm.yml` — LLM + prompt datasets for `llm_context_node`
-- `data/synthetic/` — customers, products, eval cases
-- `prompts/` — system prompt versions
-- `skills/b2b-email-style.md` — style guide
-
-## Tests
-
-```bash
-make test
 ```
