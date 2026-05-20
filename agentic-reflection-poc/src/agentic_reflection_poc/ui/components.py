@@ -64,20 +64,27 @@ GLOBAL_CSS = f"""
   }}
 
   /* ── Primary buttons — QB blue ── */
-  [data-testid="baseButton-primary"] {{
+  [data-testid="baseButton-primary"],
+  button[kind="primary"] {{
     background-color: {_BLUE} !important;
     border-color: {_BLUE} !important;
     color: #FFFFFF !important;
     font-weight: 500 !important;
-    border-radius: 6px !important;
+    border-radius: 2px !important;
     padding: 0.45rem 1.25rem !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
   }}
-  [data-testid="baseButton-primary"]:hover {{
+  [data-testid="baseButton-primary"]:hover,
+  button[kind="primary"]:hover {{
     background-color: #013E88 !important;
     border-color: #013E88 !important;
   }}
   [data-testid="baseButton-primary"]:disabled,
-  [data-testid="baseButton-primary"][disabled] {{
+  [data-testid="baseButton-primary"][disabled],
+  button[kind="primary"]:disabled,
+  button[kind="primary"][disabled] {{
     background-color: #94A3B8 !important;
     border-color: #94A3B8 !important;
     color: #FFFFFF !important;
@@ -88,7 +95,10 @@ GLOBAL_CSS = f"""
   [data-testid="baseButton-secondary"] {{
     border-color: {_BORDER} !important;
     color: {_TEXT} !important;
-    border-radius: 6px !important;
+    border-radius: 2px !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
   }}
 
   /* ── Tabs ── */
@@ -108,6 +118,10 @@ GLOBAL_CSS = f"""
   [data-testid="stTabs"] [aria-selected="true"] {{
     color: {_BLUE} !important;
     border-bottom: 2px solid {_BLUE} !important;
+  }}
+  /* Override Streamlit's moving tab-highlight bar (default red → McKinsey blue) */
+  [data-baseweb="tab-highlight"] {{
+    background-color: {_BLUE} !important;
   }}
 
   /* ── Metrics ── */
@@ -528,6 +542,47 @@ def _word_diff_html(before: str, after: str) -> tuple[str, str]:
             )
 
     return " ".join(a_parts), " ".join(b_parts)
+
+
+def text_diff_card(
+    before_label: str,
+    after_label: str,
+    before_text: str,
+    after_text: str,
+) -> None:
+    """Side-by-side word-level diff for prompt or skill text, matching the step-3 email diff style."""
+    before_html, after_html = _word_diff_html(before_text, after_text)
+
+    legend = (
+        f'<span style="background:#FFE4E4;color:#9B1C1C;border-radius:2px;padding:1px 6px;font-size:11px;">removed</span>'
+        f"&nbsp;&nbsp;"
+        f'<span style="background:#D1FAE5;color:#065F46;border-radius:2px;padding:1px 6px;font-size:11px;">added</span>'
+    )
+    st.markdown(
+        f'<div style="font-size:11px;color:{_MUTED};margin-bottom:8px;">Word-level changes:&nbsp;{legend}</div>',
+        unsafe_allow_html=True,
+    )
+
+    col1, col2 = st.columns(2)
+
+    def _side(label: str, content: str, border: str) -> None:
+        st.markdown(
+            f"""
+            <div style="background:{_CARD_BG};border:1px solid {border};border-radius:8px;
+                        padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div style="font-size:11px;font-weight:700;color:{_MUTED};
+                          text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">{html.escape(label)}</div>
+              <div style="font-size:13px;line-height:1.65;color:{_TEXT};
+                          white-space:pre-wrap;font-family:monospace;">{content}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col1:
+        _side(before_label, before_html, "#FECACA")
+    with col2:
+        _side(after_label, after_html, "#6EE7B7")
 
 
 def email_diff_cards(

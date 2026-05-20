@@ -11,7 +11,7 @@ import streamlit as st
 
 from agentic_reflection_poc.pipelines.reflection.models import ReflectionProposal
 from agentic_reflection_poc.ui.state import DemoState
-from agentic_reflection_poc.utils.prompt_utils import is_weak_prompt, prompt_text
+from agentic_reflection_poc.utils.prompt_utils import SEED_PROMPT, SEED_SKILL, is_weak_prompt, prompt_text
 from agentic_reflection_poc.ui import charts, components, embeds
 
 NEUTRAL_BORDER = "#E2E2E2"
@@ -72,7 +72,7 @@ def render_step1(
         if not is_weak_prompt(prompt_text(raw_prompt)):
             st.warning(
                 "The active prompt is already **v2 (improved)**. Scores will not improve across runs "
-                "until you click the **↺ reset icon** (top right) to restore the weak v1 prompt."
+                "until you click the **Reset Demo** (top right) to restore the weak v1 prompt."
             )
 
     with components.story_section("Pipeline"):
@@ -95,7 +95,7 @@ def render_step1(
         c1, c2, c3, c4 = st.columns([1.2, 0.1, 1, 1])
         with c1:
             run_clicked = st.button(
-                "Run pipeline",
+                "Run Generate & Evaluate",
                 disabled=not demo.can_run_agent_step1(),
                 type="primary",
                 key="step1_run",
@@ -108,7 +108,7 @@ def render_step1(
         log_target = components.pipeline_log_slot()
         if run_clicked:
             st.session_state["step1_logs"] = []
-            with st.spinner("Running Kedro…"):
+            with st.spinner("Running Generate & Evaluate…"):
                 ok = run_with_logs(
                     "agent_run",
                     pipeline_params({"run_id": "run_1"}),
@@ -225,7 +225,7 @@ def render_step2(
         r1, _gap, r2 = st.columns([1, 0.1, 1])
         with r1:
             reflect_clicked = st.button(
-                "Run reflection",
+                "Run Reflection",
                 disabled=not demo.can_run_reflection(),
                 type="primary",
                 key="step2_reflect",
@@ -239,7 +239,7 @@ def render_step2(
         log_target = components.pipeline_log_slot()
         if reflect_clicked:
             st.session_state["step2_logs"] = []
-            with st.spinner("Reflecting…"):
+            with st.spinner("Running Reflecting…"):
                 ok = run_with_logs(
                     "reflection",
                     pipeline_params({"run_id": "run_1", "proposal_id": proposal_id}),
@@ -299,15 +299,21 @@ def render_step2(
                 NEUTRAL_BORDER,
             )
 
-        diff_path = proposal_path / "prompt_diff.html"
-        if diff_path.exists():
-            st.markdown("**Prompt diff (v1 → proposed v2)**")
-            st.markdown(diff_path.read_text(encoding="utf-8"), unsafe_allow_html=True)
+        st.markdown("**Prompt diff (v1 → proposed v2)**")
+        components.text_diff_card(
+            "Seed prompt (v1)",
+            "Proposed prompt (v2)",
+            prompt_text(SEED_PROMPT),
+            proposal.new_system_prompt,
+        )
 
-        skill_diff = proposal_path / "skill_diff.html"
-        if skill_diff.exists():
-            with st.expander("Skill diff"):
-                st.markdown(skill_diff.read_text(encoding="utf-8"), unsafe_allow_html=True)
+        with st.expander("Skill diff"):
+            components.text_diff_card(
+                "Seed skill (v1)",
+                "Proposed skill (v2)",
+                SEED_SKILL,
+                proposal.new_skill_file,
+            )
 
         with st.expander("New regression eval cases"):
             new_cases = _load_json(proposal_path / "new_eval_cases.json") or []
@@ -373,7 +379,7 @@ def render_step3(
             language="bash",
         )
         run_clicked = st.button(
-            "Run pipeline (Run 2)",
+            "Re-run Generate & Evaluate",
             disabled=not demo.can_run_agent_step3(),
             type="primary",
             key="step3_run",
@@ -381,7 +387,7 @@ def render_step3(
         log_target = components.pipeline_log_slot()
         if run_clicked:
             st.session_state["step3_logs"] = []
-            with st.spinner("Running Run 2…"):
+            with st.spinner("Running Generate & Evaluate…"):
                 ok = run_with_logs(
                     "agent_run",
                     pipeline_params({"run_id": "run_2"}),
