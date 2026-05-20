@@ -1,0 +1,10 @@
+# Catalog entries used by the `evaluation` pipeline.
+#
+# Inputs:
+#   - judge prompt:     data/evaluation/prompts/judge_prompt.json  (Langfuse-backed)
+#   - traces:           fetched from Langfuse for a given run_id
+#   - eval cases:       reused from agent_run (rubric per case)
+#
+# Outputs (per run_id):
+#   - per-case scores:  data/outputs/runs/{run_id}/per_case_scores.json
+#   - aggregate scores: data/outputs/runs/{run_id}/aggregate_scores.json

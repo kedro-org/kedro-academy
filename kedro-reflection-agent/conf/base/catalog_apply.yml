@@ -1,0 +1,10 @@
+# Catalog entries used by the `apply` pipeline.
+#
+# Inputs:
+#   - approved reflection: data/outputs/reflections/{reflection_id}/...
+#
+# Outputs:
+#   - new prompt:        pushed to Langfuse (new version of the agent_run prompt)
+#   - new skill:         written to data/agent_run/skills/b2b_email_style.md
+#   - new eval cases:    pushed to Langfuse evaluation dataset
+#   - audit:             data/outputs/apply_history.json (append-only)

@@ -1,0 +1,13 @@
+# Catalog entries used by the `reflection` pipeline.
+#
+# Inputs:
+#   - meta-agent prompt:  data/reflection/prompts/meta_agent_prompt.json  (Langfuse-backed)
+#   - current prompt:     reuses agent_run input
+#   - current skill:      reuses agent_run input
+#   - traces + scores:    fetched from Langfuse / read from data/outputs/runs/{run_id}/
+#
+# Outputs (per reflection_id):
+#   - summary:            data/outputs/reflections/{reflection_id}/summary.md
+#   - proposed prompt:    data/outputs/reflections/{reflection_id}/proposed_prompt.json
+#   - proposed skill:     data/outputs/reflections/{reflection_id}/proposed_skill.md
+#   - proposed eval cases:data/outputs/reflections/{reflection_id}/proposed_eval_cases.json
