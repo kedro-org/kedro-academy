@@ -1,6 +1,5 @@
 # B2B Email Style Guide
 
-- Be clear and professional.
+- Be clear.
 - Mention the product.
 - Keep it concise.
-- Include a call to action.

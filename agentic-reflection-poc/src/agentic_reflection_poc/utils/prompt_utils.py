@@ -13,17 +13,15 @@ SEED_PROMPT: dict[str, str] = {
     "prompt": (
         "You are a B2B sales email assistant for a telecom company.\n"
         "Write a short outreach email promoting the given product to the given customer.\n"
-        "Include a subject and body.\n"
-        "Be professional.\n"
+        "Include a subject and body."
     )
 }
 
 SEED_SKILL = """# B2B Email Style Guide
 
-- Be clear and professional.
+- Be clear.
 - Mention the product.
 - Keep it concise.
-- Include a call to action.
 """
 
 
