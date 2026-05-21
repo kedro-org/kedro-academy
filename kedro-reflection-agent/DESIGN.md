@@ -1,7 +1,20 @@
 # kedro-reflection-agent — design
 
-Working document. Captures the agreed shape of the demo before implementation.
-Updated slice by slice.
+Working document. Captures the agreed shape of the demo and tracks what has
+been implemented so far. Updated slice by slice.
+
+## Implementation status
+
+| Pipeline     | Status            | Notes                                                   |
+| ------------ | ----------------- | ------------------------------------------------------- |
+| `campaign`   | implemented       | 3 nodes; produces emails + run metadata, traces Langfuse |
+| `evaluation` | implemented       | 5 nodes; drives Langfuse `run_experiment(...)`           |
+| `reflection` | skeleton (catalog stub + empty `pipeline.py`) | next slice                                 |
+| `apply`      | skeleton (catalog stub + empty `pipeline.py`) | follows `reflection`                       |
+| Streamlit UI | scaffold (`app/main.py`, `app/components/`)   | wires up after `apply`                     |
+
+Seed and evaluation data (10 customers, 5 products, 20 campaign targets,
+20 eval cases) are committed under `data/`. See README for the layout.
 
 ---
 
@@ -69,25 +82,49 @@ evaluation can join emails to rubrics.
 
 ### 2. `evaluation`
 
-For a given `run_id`, fetch traces back, run heuristic + LLM-judge scorers
-against each email using the rubric attached to its eval case, then aggregate.
+Drives a Langfuse `DatasetClient.run_experiment(...)` over the evaluation
+dataset. For a given `run_id`, the experiment task is a disk lookup of the
+campaign-generated email for each case_id (no LLM call inside the task);
+evaluators score those outputs.
+
+Why a Langfuse experiment rather than a hand-rolled scoring loop:
+
+- Successive experiments (before reflection, after reflection) are tracked as
+  named dataset runs in Langfuse and trivially comparable in the UI.
+- Each evaluator emits a typed Langfuse `Evaluation` (name + value + comment)
+  that is stored against the experiment item and visible in the dashboard.
+- The pattern mirrors `kedro-agentic-workflows` (the source-of-truth project),
+  keeping the two demos architecturally aligned.
+
+The task **looks up the cached campaign email** rather than re-invoking the
+agent. This gives the demo a single source of truth — the email shown in the
+UI is byte-identical to the one being scored — and saves 20 LLM calls per
+evaluation run. The price is that the experiment doesn't capture per-item
+generation traces; those already exist in Langfuse from running `campaign`.
 
 | Inputs                                          | Source                                                                  |
 | ----------------------------------------------- | ----------------------------------------------------------------------- |
-| Run's traces (or emails on disk as fallback)    | Langfuse / `data/outputs/runs/{run_id}/emails/`                         |
 | Eval cases (owns the dataset; provides rubrics) | `data/evaluation/eval_cases.json` ↔ Langfuse                            |
+| Customers, products (seed)                      | `data/seed/` (re-used catalog entries)                                  |
+| Campaign emails (looked up by `case_id`)        | `data/outputs/runs/{run_id}/emails/`                                    |
 | Judge prompt                                    | `data/evaluation/prompts/judge_prompt.json` ↔ Langfuse                  |
-| `run_id` (runtime param)                        | CLI / Streamlit                                                         |
-
-Joins emails (by `case_id`) against eval-case rubrics to score.
+| Judge LLM                                       | `gpt-4o` @ temperature 0 (bigger than the campaign LLM for steadiness)  |
+| `run_id`, `model_name`, `system_prompt_version`, `judge_model_name`, `judge_prompt_version`, `passing_threshold`, `body_length_min`, `body_length_max` (runtime params) | CLI / Streamlit |
 
 | Outputs                                                          | Destination                                                |
 | ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| Per-case scores                                                  | `data/outputs/runs/{run_id}/per_case_scores.json`          |
-| Aggregate scores (mean per scorer, mean total, n_passing)        | `data/outputs/runs/{run_id}/aggregate_scores.json`         |
-| Scores attached back to traces (optional)                        | Langfuse                                                   |
+| Dataset run + per-item evaluations + per-item traces             | Langfuse (named `campaign_{run_id}_prompt_v{N}`)           |
+| Per-case scores (Langfuse → disk mirror, for reflection)         | `data/outputs/runs/{run_id}/per_case_scores.json`          |
+| Aggregate scores (mean per scorer, mean total, n_passing, urls)  | `data/outputs/runs/{run_id}/aggregate_scores.json`         |
 
-**Scorers (7 total):**
+**Scorers (7 total).** Five evaluator callables produce all seven `Evaluation`s:
+four heuristic evaluators (one each) and one combined LLM-judge evaluator that
+does a single structured LLM call per email and returns a `list[Evaluation]` of
+three dimensions (writing_quality, personalization, groundedness). 20 judge
+LLM calls per evaluation run, not 60. The per-case mean is the equal-weighted
+mean across all seven; cases with mean ≥ `passing_threshold` (default 0.92,
+tuned so the v0 baseline pass rate leaves room for reflection to improve it)
+count as passing.
 
 | Scorer              | Type        | What it checks                                                     |
 | ------------------- | ----------- | ------------------------------------------------------------------ |

@@ -15,14 +15,14 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+import time
 from typing import Any
 
 from kedro.pipeline import LLMContext
-from langchain_core.prompts import ChatPromptTemplate
 from langfuse.langchain import CallbackHandler
 
 from ...data_models import Customer, Email, EmailOutput, Product, RunMetadata
+from .._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -88,17 +88,33 @@ def generate_emails(
       - emails: dict[case_id, Email dict] for the PartitionedDataset
       - run_metadata: dict for the JSON run-summary dataset
     """
-    chain = _build_chain(agent_context)
+    chain = build_structured_chain(agent_context, "system_prompt", EmailOutput)
     skill_version = _hash_skill(skill_text)
-    started_at = _utc_now_iso()
+    started_at = utc_now_iso()
+    run_started = time.perf_counter()
 
     emails: dict[str, dict] = {}
     n_errors = 0
+    total = len(agent_inputs)
 
-    for agent_input in agent_inputs:
+    logger.info(
+        "campaign %s: starting %d generations | model=%s prompt_v=%s skill_v=%s",
+        run_id,
+        total,
+        model_name,
+        system_prompt_version,
+        skill_version,
+    )
+
+    for idx, agent_input in enumerate(agent_inputs, start=1):
         case_id: str = agent_input["case_id"]
         customer: Customer = agent_input["customer"]
         product: Product = agent_input["product"]
+
+        logger.info(
+            "[%d/%d] %s: %s × %s",
+            idx, total, case_id, customer.customer_id, product.product_id,
+        )
 
         invoke_payload = {
             "skill": skill_text,
@@ -121,14 +137,15 @@ def generate_emails(
             "run_name": f"campaign:{case_id}",
         }
 
+        case_started = time.perf_counter()
         try:
             result: EmailOutput = chain.invoke(invoke_payload, config=invoke_config)
-        except Exception as exc:
+        except Exception:
             n_errors += 1
-            logger.exception("Failed to generate email for case %s: %s", case_id, exc)
+            logger.exception("[%d/%d] %s: FAILED", idx, total, case_id)
             continue
 
-        email = Email(
+        emails[case_id] = Email(
             case_id=case_id,
             customer_id=customer.customer_id,
             product_id=product.product_id,
@@ -139,11 +156,16 @@ def generate_emails(
             skill_version=skill_version,
             model_name=model_name,
             run_id=run_id,
-            generated_at=_utc_now_iso(),
-        )
-        emails[case_id] = email.model_dump()
+            generated_at=utc_now_iso(),
+        ).model_dump()
 
-    finished_at = _utc_now_iso()
+        logger.info(
+            "[%d/%d] %s: done in %.1fs",
+            idx, total, case_id, time.perf_counter() - case_started,
+        )
+
+    finished_at = utc_now_iso()
+    total_elapsed = time.perf_counter() - run_started
     run_metadata = RunMetadata(
         run_id=run_id,
         n_cases=len(agent_inputs),
@@ -156,12 +178,16 @@ def generate_emails(
         finished_at=finished_at,
     ).model_dump()
 
+    avg = total_elapsed / total if total else 0.0
     logger.info(
-        "campaign %s: generated %d/%d emails (%d errors) with model=%s prompt_v=%s skill_v=%s",
+        "campaign %s: generated %d/%d emails (%d errors) in %.1fs (avg %.1fs/case) "
+        "| model=%s prompt_v=%s skill_v=%s",
         run_id,
         run_metadata["n_emails"],
         run_metadata["n_cases"],
         run_metadata["n_errors"],
+        total_elapsed,
+        avg,
         model_name,
         system_prompt_version,
         skill_version,
@@ -173,27 +199,5 @@ def generate_emails(
 # --- helpers -----------------------------------------------------------------
 
 
-def _build_chain(agent_context: LLMContext):
-    """Compose ``prompt | structured_llm`` from the LLM context."""
-    raw_prompt = agent_context.prompts["system_prompt"]
-
-    # mode: langchain on LangfusePromptDataset should give us a ChatPromptTemplate
-    # directly. We defensively handle ChatPromptClient as in the source-of-truth
-    # project in case the conversion isn't already applied.
-    if isinstance(raw_prompt, ChatPromptTemplate):
-        chat_prompt = raw_prompt
-    elif hasattr(raw_prompt, "get_langchain_prompt"):
-        chat_prompt = ChatPromptTemplate.from_messages(raw_prompt.get_langchain_prompt())
-    else:
-        chat_prompt = ChatPromptTemplate.from_messages(raw_prompt)
-
-    structured_llm = agent_context.llm.with_structured_output(EmailOutput)
-    return chat_prompt | structured_llm
-
-
 def _hash_skill(skill_text: str) -> str:
     return hashlib.sha256(skill_text.encode("utf-8")).hexdigest()[:12]
-
-
-def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()

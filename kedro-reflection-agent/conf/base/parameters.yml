@@ -11,3 +11,25 @@ model_name: gpt-4o-mini
 
 # Version of the Langfuse-stored system prompt to load.
 system_prompt_version: 1
+
+
+# --- evaluation -------------------------------------------------------------
+
+# OpenAI model used by the LLM judge. Deliberately bigger than the campaign
+# model so scores are steadier.
+judge_model_name: gpt-4o
+
+# Version of the Langfuse-stored judge prompt to load.
+judge_prompt_version: 1
+
+# Per-case mean score threshold; cases at or above this count toward n_passing.
+# Tuned for the v0 baseline: the 4 deterministic heuristics always score 1.0
+# (subject/length/no-fake-skus/cta), so the meaningful signal lives in the 3
+# LLM-judged dimensions. With the v0 emails, per-case mean ranges 0.83-0.96
+# (median 0.93). A 0.92 threshold puts the bar where personalization weakness
+# actually moves the needle, giving reflection a visible pass-rate target.
+passing_threshold: 0.92
+
+# Heuristic body-length bounds, in characters.
+body_length_min: 300
+body_length_max: 2000

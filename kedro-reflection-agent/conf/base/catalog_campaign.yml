@@ -4,11 +4,9 @@
 #   - run_id      : runtime param, defaults to `default` (see parameters.yml)
 #   - LLM, prompt and tracer follow the kedro-agentic-workflows patterns
 #     (langchain.ChatOpenAIDataset, kedro_datasets_experimental.langfuse.*)
-
-# --- Default dataset ----------------------------------------------------------
-"{default_dataset}":
-  type: MemoryDataset
-  copy_mode: "assign"
+#   - The `{default_dataset}` pattern that backs in-memory node outputs
+#     (agent_context, agent_inputs, etc.) lives in conf/base/catalog.yml
+#     because it is pipeline-agnostic.
 
 # --- LLM ----------------------------------------------------------------------
 

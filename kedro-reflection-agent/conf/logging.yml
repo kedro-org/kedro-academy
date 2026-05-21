@@ -39,5 +39,25 @@ loggers:
   kedro_reflection_agent:
     level: INFO
 
+  # Silence two Kedro internal WARNINGs that fire on every run and are noise
+  # for our project. Both are informational, not actionable:
+  #
+  #   * `pipeline_name` is deprecated... use `pipeline_names` instead.
+  #     Emitted by `kedro run -p <name>` (the CLI still uses the singular arg
+  #     internally). We can't change this from project code.
+  #   * Config from the dataset pattern '{default_dataset}' will be used to
+  #     override default dataset creation for '<name>'.
+  #     Fired whenever Kedro auto-creates a MemoryDataset for an in-memory
+  #     node output (judge_context, campaign_task, heuristic_evaluators, etc).
+  #     Expected and harmless for our pipeline shape.
+  #
+  # If Kedro adds new WARNINGs in either module we'd genuinely want to see,
+  # revisit these.
+  kedro.framework.session.session:
+    level: ERROR
+
+  kedro.io.catalog_config_resolver:
+    level: ERROR
+
 root:
   handlers: [rich, info_file_handler]

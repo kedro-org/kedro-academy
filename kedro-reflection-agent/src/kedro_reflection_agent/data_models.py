@@ -96,3 +96,68 @@ class RunMetadata(BaseModel):
     skill_version: Optional[str] = None
     started_at: str
     finished_at: str
+
+
+# --- evaluation outputs ------------------------------------------------------
+
+
+class JudgeScore(BaseModel):
+    """Structured LLM-judge output for one email.
+
+    All three dimensions are scored in a single LLM call so the judge reasons
+    about them holistically and we keep cost/latency to one call per email.
+    The combined judge evaluator returns this as three Langfuse ``Evaluation``s.
+    """
+
+    writing_quality: float = Field(..., ge=0.0, le=1.0)
+    writing_quality_reason: str
+    personalization: float = Field(..., ge=0.0, le=1.0)
+    personalization_reason: str
+    groundedness: float = Field(..., ge=0.0, le=1.0)
+    groundedness_reason: str
+
+
+class EvaluationRecord(BaseModel):
+    """Disk-friendly serialisation of a single Langfuse ``Evaluation``."""
+
+    name: str
+    value: float
+    comment: Optional[str] = None
+    metadata: Optional[dict] = None
+
+
+class CaseScore(BaseModel):
+    """One row of ``per_case_scores.json``.
+
+    Mirrors a single ``ExperimentItemResult`` from the Langfuse experiment
+    plus our derived per-case mean and pass/fail.
+    """
+
+    case_id: str
+    trace_id: Optional[str] = None
+    dataset_run_id: Optional[str] = None
+    output: dict  # the task's task output: {case_id, subject, body, [error]}
+    evaluations: list[EvaluationRecord]
+    mean_score: float = Field(..., ge=0.0, le=1.0)
+    passing: bool
+
+
+class AggregateScore(BaseModel):
+    """Contents of ``aggregate_scores.json`` — run-level summary."""
+
+    run_id: str
+    experiment_name: str
+    dataset_run_url: Optional[str] = None
+    dataset_run_id: Optional[str] = None
+    n_cases: int
+    n_passing: int
+    pass_rate: float = Field(..., ge=0.0, le=1.0)
+    mean_total: float = Field(..., ge=0.0, le=1.0)
+    mean_per_scorer: dict[str, float]
+    passing_threshold: float
+    model_name: str
+    system_prompt_version: Optional[int] = None
+    judge_model_name: str
+    judge_prompt_version: Optional[int] = None
+    started_at: str
+    finished_at: str
