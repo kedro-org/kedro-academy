@@ -4,7 +4,7 @@ A Kedro + Streamlit demo of an **agentic reflection / continuous learning** loop
 
 A B2B campaign agent generates personalised outreach emails for telco sales. After running on an eval set, a meta-agent reflects on the failures and proposes updates to the system prompt, the skill file, and the eval set itself. Re-running the agent against the new artifacts produces visibly better emails.
 
-> Status: **scaffold only**. No node implementations yet. Pipelines and UI components are filled in slice by slice.
+> Status: **scaffold only**. No node implementations yet. Pipelines and UI components are filled in slice by slice. See [`DESIGN.md`](DESIGN.md) for the agreed pipeline shapes and data flows.
 
 ## Project shape
 
