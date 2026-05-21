@@ -33,3 +33,16 @@ passing_threshold: 0.92
 # Heuristic body-length bounds, in characters.
 body_length_min: 300
 body_length_max: 2000
+
+
+# --- reflection -------------------------------------------------------------
+
+# Pinned reflection identifier; controls where artifacts are written under
+# data/outputs/reflections/<reflection_id>/.
+reflection_id: refl_1
+
+# OpenAI model used by the reflection meta-agent.
+meta_agent_model_name: gpt-4o
+
+# Version of the Langfuse-stored meta-agent prompt to load.
+meta_agent_prompt_version: 1
