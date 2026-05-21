@@ -1,0 +1,102 @@
+[
+  {
+    "product_id": "prod_001",
+    "name": "Managed SD-WAN",
+    "category": "Connectivity",
+    "ideal_for": [
+      "multi-site businesses",
+      "cost optimization",
+      "cloud migration"
+    ],
+    "value_props": [
+      "improves application performance across sites",
+      "reduces dependency on legacy MPLS",
+      "centralized policy and traffic management"
+    ],
+    "avoid_claims": [
+      "guaranteed 50% cost reduction",
+      "instant deployment"
+    ],
+    "cta": "book a 30-minute network optimisation review"
+  },
+  {
+    "product_id": "prod_002",
+    "name": "Private 5G",
+    "category": "Connectivity",
+    "ideal_for": [
+      "manufacturing campuses",
+      "warehouse automation",
+      "low-latency OT"
+    ],
+    "value_props": [
+      "dedicated spectrum for critical workloads",
+      "supports mobile robotics and AGVs",
+      "integrates with existing LAN/WAN"
+    ],
+    "avoid_claims": [
+      "guaranteed 50% cost reduction",
+      "instant deployment"
+    ],
+    "cta": "schedule a private 5G feasibility workshop"
+  },
+  {
+    "product_id": "prod_003",
+    "name": "IoT Connectivity Management",
+    "category": "IoT",
+    "ideal_for": [
+      "fleet tracking",
+      "smart metering",
+      "field asset monitoring"
+    ],
+    "value_props": [
+      "single pane for SIM lifecycle",
+      "usage alerts and cost controls",
+      "global coverage with local breakout"
+    ],
+    "avoid_claims": [
+      "unlimited data at zero cost",
+      "instant deployment"
+    ],
+    "cta": "book an IoT connectivity assessment"
+  },
+  {
+    "product_id": "prod_004",
+    "name": "Cloud Contact Centre",
+    "category": "Collaboration",
+    "ideal_for": [
+      "retail support",
+      "public sector hotlines",
+      "hybrid agents"
+    ],
+    "value_props": [
+      "omnichannel routing with CRM hooks",
+      "elastic agent scaling",
+      "quality analytics and coaching"
+    ],
+    "avoid_claims": [
+      "100% CSAT guarantee",
+      "instant deployment"
+    ],
+    "cta": "schedule a contact centre modernisation call"
+  },
+  {
+    "product_id": "prod_005",
+    "name": "Cyber Threat Monitoring",
+    "category": "Security",
+    "ideal_for": [
+      "regulated industries",
+      "multi-site SOC coverage",
+      "MPLS estates"
+    ],
+    "value_props": [
+      "24x7 correlated threat detection",
+      "playbooks aligned to NIST",
+      "integration with existing SIEM"
+    ],
+    "avoid_claims": [
+      "zero breaches guaranteed",
+      "instant deployment"
+    ],
+    "cta": "book a security posture review"
+  }
+]

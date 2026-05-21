@@ -1,0 +1,38 @@
+# Catalog entries used by the `apply` pipeline.
+#
+# Inputs:
+#   - approved reflection: data/outputs/reflections/{proposal_id}/...
+#
+# Outputs:
+#   - new prompt:        written to data/agent_run/prompts/campaign_agent_system_prompt.yaml
+#   - new skill:         written to data/agent_run/skills/b2b-email-style.md
+#   - new eval cases:    merged into data/seed/eval_cases.json (via Langfuse dataset)
+#   - audit:             data/outputs/reflections/{proposal_id}/applied.json
+
+# ── Langfuse sync ─────────────────────────────────────────────────────────────
+
+campaign_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/agent_run/prompts/campaign_agent_system_prompt.yaml
+  prompt_name: ${globals:langfuse_prompt_name}
+  prompt_type: text
+  credentials: langfuse_credentials
+  sync_policy: local
+  mode: sdk
+  save_args:
+    labels: ["production"]
+
+eval_dataset:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: ${globals:langfuse_dataset_name}
+  filepath: data/seed/eval_cases.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    project: kedro-reflection-agent
+
+# ── Apply output ──────────────────────────────────────────────────────────────
+
+applied_marker:
+  type: json.JSONDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/applied.json

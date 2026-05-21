@@ -1,0 +1,37 @@
+# Catalog entries used by the `evaluation` pipeline.
+#
+# Inputs:
+#   - judge prompt:     data/evaluation/prompts/judge_system_prompt.yaml
+#   - run emails:       reused from agent_run (data/outputs/runs/{run_id}/emails.json)
+#   - eval cases:       reused from agent_run (data/seed/eval_cases.json)
+#
+# Outputs (per run_id):
+#   - per-case scores:  data/outputs/runs/{run_id}/case_scores.json
+#   - aggregate scores: data/outputs/runs/{run_id}/aggregate_scores.json
+
+# ── LLM context ──────────────────────────────────────────────────────────────
+
+judge_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_judge_model}
+    temperature: 0.0
+
+judge_system_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/evaluation/prompts/judge_system_prompt.yaml
+
+judge_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign
+
+# ── Evaluation outputs ────────────────────────────────────────────────────────
+
+run_case_scores:
+  type: json.JSONDataset
+  filepath: data/outputs/runs/${runtime_params:run_id, 'run_1'}/case_scores.json
+
+run_aggregate_scores:
+  type: json.JSONDataset
+  filepath: data/outputs/runs/${runtime_params:run_id, 'run_1'}/aggregate_scores.json

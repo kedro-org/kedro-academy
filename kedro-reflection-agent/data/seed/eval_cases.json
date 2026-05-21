@@ -1,0 +1,43 @@
+[
+  {
+    "id": "case_001",
+    "input": {
+      "case_id": "case_001",
+      "customer_id": "cust_001",
+      "product_id": "prod_001",
+      "ground_truth": {
+        "must_mention": [
+          "multi-site",
+          "network costs",
+          "fleet digitisation"
+        ],
+        "must_not_mention": [
+          "guaranteed 50% cost reduction",
+          "instant deployment"
+        ],
+        "desired_cta_type": "network optimisation review",
+        "personalization_angle": "connect SD-WAN to warehouse and fleet connectivity needs",
+        "target_persona": "IT Director"
+      }
+    },
+    "expected_output": {
+      "must_mention": [
+        "multi-site",
+        "network costs",
+        "fleet digitisation"
+      ],
+      "must_not_mention": [
+        "guaranteed 50% cost reduction",
+        "instant deployment"
+      ],
+      "desired_cta_type": "network optimisation review",
+      "personalization_angle": "connect SD-WAN to warehouse and fleet connectivity needs",
+      "target_persona": "IT Director"
+    },
+    "metadata": {
+      "is_regression": false,
+      "source_failure_case_id": null,
+      "reason_added": null
+    }
+  }
+]

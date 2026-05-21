@@ -1,0 +1,61 @@
+# Catalog entries used by the `reflection` pipeline.
+#
+# Inputs:
+#   - current prompt:     reuses agent_run catalog (campaign_system_prompt)
+#   - current skill:      reuses agent_run catalog (skill_file)
+#   - run emails/scores:  reuses evaluation catalog outputs
+#
+# Outputs (per reflection_id / proposal_id):
+#   - summary:            data/outputs/reflections/{proposal_id}/reflection_summary.md
+#   - proposed prompt:    data/outputs/reflections/{proposal_id}/new_system_prompt.yaml
+#   - proposed skill:     data/outputs/reflections/{proposal_id}/new_b2b_email_style.md
+#   - proposed eval cases:data/outputs/reflections/{proposal_id}/new_eval_cases.json
+#   - diffs:              data/outputs/reflections/{proposal_id}/prompt_diff.html
+
+# ── LLM context ──────────────────────────────────────────────────────────────
+
+reflection_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_reflection_model}
+    temperature: 0.2
+
+reflection_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign
+
+# ── Reflection outputs ────────────────────────────────────────────────────────
+
+proposal_bundle:
+  type: json.JSONDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/proposal.json
+
+proposal_summary_md:
+  type: text.TextDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/reflection_summary.md
+
+proposal_new_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/new_system_prompt.yaml
+
+proposal_new_skill:
+  type: text.TextDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/new_b2b_email_style.md
+
+proposal_new_eval_cases:
+  type: json.JSONDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/new_eval_cases.json
+
+proposal_prompt_diff:
+  type: text.TextDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/prompt_diff.html
+
+proposal_skill_diff:
+  type: text.TextDataset
+  filepath: data/outputs/reflections/${runtime_params:proposal_id, 'proposal_1'}/skill_diff.html
+
+# ── Intermediate ──────────────────────────────────────────────────────────────
+
+proposal_outputs:
+  type: kedro.io.memory_dataset.MemoryDataset

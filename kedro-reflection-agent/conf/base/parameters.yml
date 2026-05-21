@@ -1,0 +1,38 @@
+# LLM model selection
+openai_model: "gpt-5-nano-2025-08-07"
+openai_judge_model: "gpt-5-nano-2025-08-07"
+openai_reflection_model: "gpt-5-nano-2025-08-07"
+
+# Langfuse resource names
+langfuse_prompt_name: "b2b-campaign-agent-system-prompt"
+langfuse_dataset_name: "b2b-campaign-agent-eval"
+langfuse_host: "https://us.cloud.langfuse.com"
+langfuse_project_id: ""
+
+# Synthetic data (seed script uses this count)
+synthetic_eval_case_count: 1
+
+# Demo controls
+demo_force_improvement: true
+demo_use_langfuse: true
+demo_use_kedro_viz: false
+
+# Default run identifiers (overridden via CLI --params)
+run_id: "run_1"
+proposal_id: "proposal_1"
+
+# Per-pipeline tuning
+agent_run:
+  temperature: 0.7
+
+evaluation:
+  judge_temperature: 0.0
+
+reflection:
+  temperature: 0.2
+  worst_case_count: 5
+  best_case_count: 3
+  regression_case_count: 4
+
+apply:
+  backup_suffix: ".bak"

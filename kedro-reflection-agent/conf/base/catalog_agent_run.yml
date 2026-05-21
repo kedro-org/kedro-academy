@@ -1,0 +1,81 @@
+# Catalog entries used by the `agent_run` pipeline.
+#
+# Inputs:
+#   - seed data:        data/seed/customers.json, data/seed/products.json
+#   - system prompt:    data/agent_run/prompts/campaign_agent_system_prompt.yaml
+#   - skill file:       data/agent_run/skills/b2b-email-style.md
+#   - eval cases:       data/seed/eval_cases.json
+#
+# Outputs (per run_id):
+#   - emails:           data/outputs/runs/{run_id}/emails.json
+#   - run metadata:     data/outputs/runs/{run_id}/trace_metadata.json
+#   - traces:           emitted to Langfuse (not stored locally)
+
+# ── Seed data ────────────────────────────────────────────────────────────────
+
+customers:
+  type: json.JSONDataset
+  filepath: data/seed/customers.json
+  metadata:
+    kedro-viz:
+      layer: raw
+
+products:
+  type: json.JSONDataset
+  filepath: data/seed/products.json
+  metadata:
+    kedro-viz:
+      layer: raw
+
+eval_cases_file:
+  type: json.JSONDataset
+  filepath: data/seed/eval_cases.json
+  metadata:
+    kedro-viz:
+      layer: raw
+
+skill_file:
+  type: text.TextDataset
+  filepath: data/agent_run/skills/b2b-email-style.md
+  metadata:
+    kedro-viz:
+      layer: raw
+
+# ── LLM context ──────────────────────────────────────────────────────────────
+
+agent_llm:
+  type: kedro_datasets.langchain.ChatOpenAIDataset
+  credentials: openai_credentials
+  kwargs:
+    model: ${globals:openai_model}
+    temperature: 0.7
+
+campaign_system_prompt:
+  type: yaml.YAMLDataset
+  filepath: data/agent_run/prompts/campaign_agent_system_prompt.yaml
+
+campaign_system_prompt_history:
+  type: yaml.YAMLDataset
+  filepath: data/agent_run/prompts/history/campaign_agent_system_prompt.yaml
+  versioned: true
+
+agent_llm_context:
+  type: kedro.io.memory_dataset.MemoryDataset
+  copy_mode: assign
+
+# ── Langfuse tracer ───────────────────────────────────────────────────────────
+
+langfuse_tracer:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: sdk
+
+# ── Run outputs ───────────────────────────────────────────────────────────────
+
+run_emails:
+  type: json.JSONDataset
+  filepath: data/outputs/runs/${runtime_params:run_id, 'run_1'}/emails.json
+
+run_trace_metadata:
+  type: json.JSONDataset
+  filepath: data/outputs/runs/${runtime_params:run_id, 'run_1'}/trace_metadata.json
