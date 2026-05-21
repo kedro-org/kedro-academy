@@ -12,5 +12,11 @@ def register_pipelines() -> dict[str, Pipeline]:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
     pipelines = find_pipelines(raise_errors=True)
-    pipelines["__default__"] = sum(pipelines.values())
+    # `apply` writes back to live catalog entries (system_prompt, skill_text,
+    # eval_cases) that are inputs to other pipelines, creating a cycle when
+    # composed into __default__. It is a terminal, human-triggered step and
+    # must always be run explicitly via `kedro run -p apply`.
+    pipelines["__default__"] = sum(
+        v for k, v in pipelines.items() if k != "apply"
+    )
     return pipelines
