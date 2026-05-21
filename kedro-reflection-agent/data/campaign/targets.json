@@ -1,0 +1,22 @@
+[
+  {"case_id": "case_001", "customer_id": "cust_002", "product_id": "prod_001"},
+  {"case_id": "case_002", "customer_id": "cust_001", "product_id": "prod_005"},
+  {"case_id": "case_003", "customer_id": "cust_005", "product_id": "prod_002"},
+  {"case_id": "case_004", "customer_id": "cust_009", "product_id": "prod_002"},
+  {"case_id": "case_005", "customer_id": "cust_002", "product_id": "prod_003"},
+  {"case_id": "case_006", "customer_id": "cust_004", "product_id": "prod_001"},
+  {"case_id": "case_007", "customer_id": "cust_006", "product_id": "prod_001"},
+  {"case_id": "case_008", "customer_id": "cust_007", "product_id": "prod_003"},
+  {"case_id": "case_009", "customer_id": "cust_003", "product_id": "prod_002"},
+  {"case_id": "case_010", "customer_id": "cust_003", "product_id": "prod_004"},
+  {"case_id": "case_011", "customer_id": "cust_006", "product_id": "prod_004"},
+  {"case_id": "case_012", "customer_id": "cust_010", "product_id": "prod_003"},
+  {"case_id": "case_013", "customer_id": "cust_001", "product_id": "prod_001"},
+  {"case_id": "case_014", "customer_id": "cust_008", "product_id": "prod_002"},
+  {"case_id": "case_015", "customer_id": "cust_010", "product_id": "prod_001"},
+  {"case_id": "case_016", "customer_id": "cust_008", "product_id": "prod_001"},
+  {"case_id": "case_017", "customer_id": "cust_005", "product_id": "prod_003"},
+  {"case_id": "case_018", "customer_id": "cust_004", "product_id": "prod_004"},
+  {"case_id": "case_019", "customer_id": "cust_007", "product_id": "prod_001"},
+  {"case_id": "case_020", "customer_id": "cust_009", "product_id": "prod_005"}
+]

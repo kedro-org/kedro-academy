@@ -1,0 +1,122 @@
+[
+  {
+    "customer_id": "cust_001",
+    "company_name": "SmallTech Solutions",
+    "industry": "retail",
+    "company_size": "small",
+    "employee_count": 45,
+    "current_products": ["UC Suite Basic"],
+    "account_tenure_years": 2.0,
+    "primary_contact_name": "Maya Holm",
+    "primary_contact_role": "IT Manager",
+    "region": "Nordics"
+  },
+  {
+    "customer_id": "cust_002",
+    "company_name": "NordicLogistics AB",
+    "industry": "logistics",
+    "company_size": "mid",
+    "employee_count": 380,
+    "current_products": ["SD-WAN Basic", "IoT Fleet Connectivity"],
+    "account_tenure_years": 5.0,
+    "primary_contact_name": "Lars Bergman",
+    "primary_contact_role": "Head of Network Operations",
+    "region": "Nordics"
+  },
+  {
+    "customer_id": "cust_003",
+    "company_name": "MetroBank Group",
+    "industry": "banking",
+    "company_size": "enterprise",
+    "employee_count": 12000,
+    "current_products": ["Managed Cloud Connect", "SD-WAN Pro"],
+    "account_tenure_years": 8.0,
+    "primary_contact_name": "Priya Anand",
+    "primary_contact_role": "VP Infrastructure",
+    "region": "EMEA"
+  },
+  {
+    "customer_id": "cust_004",
+    "company_name": "GreenLeaf Retail",
+    "industry": "retail",
+    "company_size": "mid",
+    "employee_count": 520,
+    "current_products": ["UC Suite Pro"],
+    "account_tenure_years": 1.0,
+    "primary_contact_name": "Daniel O'Connor",
+    "primary_contact_role": "CTO",
+    "region": "UK & Ireland"
+  },
+  {
+    "customer_id": "cust_005",
+    "company_name": "Apex Manufacturing",
+    "industry": "manufacturing",
+    "company_size": "enterprise",
+    "employee_count": 4500,
+    "current_products": ["IoT Fleet Connectivity", "SD-WAN Pro"],
+    "account_tenure_years": 11.0,
+    "primary_contact_name": "Klara Novak",
+    "primary_contact_role": "Director of Industrial IT",
+    "region": "Central Europe"
+  },
+  {
+    "customer_id": "cust_006",
+    "company_name": "Riverside Health Network",
+    "industry": "healthcare",
+    "company_size": "mid",
+    "employee_count": 840,
+    "current_products": ["Managed Cloud Connect", "UC Suite Pro"],
+    "account_tenure_years": 4.0,
+    "primary_contact_name": "Dr. Helena Bauer",
+    "primary_contact_role": "CIO",
+    "region": "DACH"
+  },
+  {
+    "customer_id": "cust_007",
+    "company_name": "Bayview Media Group",
+    "industry": "media",
+    "company_size": "mid",
+    "employee_count": 260,
+    "current_products": ["UC Suite Pro"],
+    "account_tenure_years": 3.0,
+    "primary_contact_name": "Marcus Chen",
+    "primary_contact_role": "Head of IT",
+    "region": "North America"
+  },
+  {
+    "customer_id": "cust_008",
+    "company_name": "PortHarbor Shipping",
+    "industry": "logistics",
+    "company_size": "small",
+    "employee_count": 90,
+    "current_products": [],
+    "account_tenure_years": 0.5,
+    "primary_contact_name": "Aoife Murphy",
+    "primary_contact_role": "Operations Manager",
+    "region": "UK & Ireland"
+  },
+  {
+    "customer_id": "cust_009",
+    "company_name": "CityGrid Energy",
+    "industry": "utilities",
+    "company_size": "enterprise",
+    "employee_count": 3200,
+    "current_products": ["IoT Fleet Connectivity"],
+    "account_tenure_years": 9.0,
+    "primary_contact_name": "Rafael Costa",
+    "primary_contact_role": "Head of OT/IT Integration",
+    "region": "Iberia"
+  },
+  {
+    "customer_id": "cust_010",
+    "company_name": "ZenithFinTech",
+    "industry": "banking",
+    "company_size": "small",
+    "employee_count": 75,
+    "current_products": [],
+    "account_tenure_years": 1.0,
+    "primary_contact_name": "Tomoko Sato",
+    "primary_contact_role": "VP Engineering",
+    "region": "APAC"
+  }
+]

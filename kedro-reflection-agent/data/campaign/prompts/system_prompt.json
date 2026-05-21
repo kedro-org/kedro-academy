@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": "You are a B2B outreach email writer. Apply this style guide:\n\n{skill}"
+  },
+  {
+    "role": "human",
+    "content": "Write an outreach email to this customer about this product.\n\nCustomer:\n{customer}\n\nProduct:\n{product}"
+  }
+]

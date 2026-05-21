@@ -9,15 +9,20 @@ conf/local/**
 # ignore potentially sensitive credentials files
 conf/**/*credentials*
 # but keep the template so new contributors know what shape to fill in
-!conf/local/credentials.template.yml
+# (the .yml.example extension makes Kedro's config loader skip this file)
+!conf/local/credentials.yml.example
 
-# ignore everything in the following folders
-data/**
+# Data layout:
+#   - data/seed/, data/campaign/, data/evaluation/, data/reflection/
+#     are input-side: hand-crafted artifacts that are part of the project
+#     and need to be committed.
+#   - data/outputs/  is the only place pipelines write to. Ignore everything
+#     under it except the .gitkeep files that preserve the folder shape.
+data/outputs/**
+!data/outputs/**/.gitkeep
+!data/outputs/.gitkeep
 
-# except their sub-folders
-!data/**/
-
-# also keep all .gitkeep files
+# also keep all .gitkeep files everywhere
 !.gitkeep
 
 # ignore kedro-viz metadata

@@ -1,0 +1,13 @@
+# Defaults for all pipelines. Override via `--params key=value` on the CLI.
+
+# --- campaign ---------------------------------------------------------------
+
+# Pinned run identifier; controls where outputs are written under
+# data/outputs/runs/<run_id>/. The Streamlit demo pins this to run_1 / run_2.
+run_id: default
+
+# OpenAI model used by the agent.
+model_name: gpt-4o-mini
+
+# Version of the Langfuse-stored system prompt to load.
+system_prompt_version: 1

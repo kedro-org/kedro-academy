@@ -2,8 +2,8 @@
 #
 # Inputs:
 #   - meta-agent prompt:  data/reflection/prompts/meta_agent_prompt.json  (Langfuse-backed)
-#   - current prompt:     reuses agent_run input
-#   - current skill:      reuses agent_run input
+#   - current prompt:     reuses campaign input
+#   - current skill:      reuses campaign input
 #   - traces + scores:    fetched from Langfuse / read from data/outputs/runs/{run_id}/
 #
 # Outputs (per reflection_id):

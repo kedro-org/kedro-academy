@@ -16,7 +16,7 @@ cross-sell, pricing, or any other agent — different agent, same pipelines.
 
 ```
                         ┌──────────────┐
-   seed + prompt +  ──▶ │  agent_run   │ ──▶ emails (disk) + traces (Langfuse)
+   seed + prompt +  ──▶ │  campaign    │ ──▶ emails (disk) + traces (Langfuse)
    skill + eval cases   └──────────────┘
                                 │
                                 ▼
@@ -38,24 +38,27 @@ cross-sell, pricing, or any other agent — different agent, same pipelines.
 ```
 
 Two runs of the first two pipelines bracket one reflection cycle:
-`agent_run (run_1) → evaluation (run_1) → reflection → apply → agent_run (run_2) → evaluation (run_2)`.
+`campaign (run_1) → evaluation (run_1) → reflection → apply → campaign (run_2) → evaluation (run_2)`.
 
 ---
 
 ## Pipelines
 
-### 1. `agent_run`
+### 1. `campaign`
 
-For each eval case (customer × product), generate one outreach email and emit
-one trace to Langfuse so downstream scoring can find it.
+Given a list of campaign targets (customer × product pairs), generate one
+outreach email per target and emit one Langfuse trace per generation. Owns no
+evaluation concerns — it reads its own `targets` list and does not see the
+evaluation dataset. The two share a `case_id` namespace by convention so
+evaluation can join emails to rubrics.
 
 | Inputs                                                    | Source                                           |
 | --------------------------------------------------------- | ------------------------------------------------ |
 | 10 customers                                              | `data/seed/customers.json`                       |
 | 5 products                                                | `data/seed/products.json`                        |
-| 20 eval cases (each = customer_id + product_id + rubric)  | `data/agent_run/eval_cases.json` ↔ Langfuse      |
-| System prompt (current version)                           | `data/agent_run/prompts/system_prompt.json` ↔ Langfuse |
-| Skill file (current version)                              | `data/agent_run/skills/b2b_email_style.md` (disk) |
+| 20 campaign targets (case_id + customer_id + product_id)  | `data/campaign/targets.json`                     |
+| System prompt (current version)                           | `data/campaign/prompts/system_prompt.json` ↔ Langfuse |
+| Skill file (current version)                              | `data/campaign/skills/b2b_email_style.md` (disk) |
 | `run_id` (runtime param)                                  | CLI / Streamlit                                  |
 
 | Outputs                                                                   | Destination                                                     |
@@ -72,9 +75,11 @@ against each email using the rubric attached to its eval case, then aggregate.
 | Inputs                                          | Source                                                                  |
 | ----------------------------------------------- | ----------------------------------------------------------------------- |
 | Run's traces (or emails on disk as fallback)    | Langfuse / `data/outputs/runs/{run_id}/emails/`                         |
-| Eval cases (for the rubrics)                    | reuse from `agent_run`                                                  |
+| Eval cases (owns the dataset; provides rubrics) | `data/evaluation/eval_cases.json` ↔ Langfuse                            |
 | Judge prompt                                    | `data/evaluation/prompts/judge_prompt.json` ↔ Langfuse                  |
 | `run_id` (runtime param)                        | CLI / Streamlit                                                         |
+
+Joins emails (by `case_id`) against eval-case rubrics to score.
 
 | Outputs                                                          | Destination                                                |
 | ---------------------------------------------------------------- | ---------------------------------------------------------- |
@@ -102,8 +107,8 @@ derived from the failures (so weaknesses become permanent regression cases).
 
 | Inputs                                       | Source                                                          |
 | -------------------------------------------- | --------------------------------------------------------------- |
-| Current system prompt + skill file           | reuse from `agent_run`                                          |
-| Current eval cases                           | reuse from `agent_run`                                          |
+| Current system prompt + skill file           | reuse from `campaign`                                           |
+| Current eval cases                           | reuse from `evaluation`                                         |
 | Traces + scores from latest run              | Langfuse + `data/outputs/runs/{run_id}/`                        |
 | Meta-agent prompt                            | `data/reflection/prompts/meta_agent_prompt.json` ↔ Langfuse     |
 | `run_id`, `reflection_id` (runtime params)   | CLI / Streamlit                                                 |
@@ -131,17 +136,17 @@ locations, then append an audit row.
 | Outputs                                                              | Destination                                                  |
 | -------------------------------------------------------------------- | ------------------------------------------------------------ |
 | New system prompt → Langfuse (new version)                           | Langfuse                                                     |
-| New skill → disk                                                     | `data/agent_run/skills/b2b_email_style.md` (overwritten)     |
+| New skill → disk                                                     | `data/campaign/skills/b2b_email_style.md` (overwritten)      |
 | New eval cases → Langfuse evaluation dataset                         | Langfuse                                                     |
 | Audit row (`reflection_id`, timestamp, applied artifacts, prev versions) | `data/outputs/apply_history.json` (append)               |
 
-After `apply`, re-running `agent_run` reads the new live state and produces `run_2`.
+After `apply`, re-running `campaign` reads the new live state and produces `run_2`.
 
 ---
 
 ## Conventions
 
-- **`run_id`** identifies one execution of `agent_run` + `evaluation`. Demo uses
+- **`run_id`** identifies one execution of `campaign` + `evaluation`. Demo uses
   `run_1` (before reflection) and `run_2` (after).
 - **`reflection_id`** identifies one execution of `reflection`. Demo uses
   `refl_1`.

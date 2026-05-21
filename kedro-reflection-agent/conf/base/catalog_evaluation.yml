@@ -1,10 +1,27 @@
 # Catalog entries used by the `evaluation` pipeline.
 #
 # Inputs:
+#   - eval_cases:       data/evaluation/eval_cases.json  (Langfuse-backed)
 #   - judge prompt:     data/evaluation/prompts/judge_prompt.json  (Langfuse-backed)
+#   - emails:           data/outputs/runs/{run_id}/emails/  (from campaign pipeline)
 #   - traces:           fetched from Langfuse for a given run_id
-#   - eval cases:       reused from agent_run (rubric per case)
 #
 # Outputs (per run_id):
 #   - per-case scores:  data/outputs/runs/{run_id}/per_case_scores.json
 #   - aggregate scores: data/outputs/runs/{run_id}/aggregate_scores.json
+
+
+# --- Eval cases (Langfuse-backed, cached locally) ---------------------------
+# Owned by `evaluation`. Each item carries an `expected_output.rubric` used
+# for scoring. The `campaign` pipeline maintains its own targets list separately
+# (see catalog_campaign.yml); the two share a `case_id` namespace so this
+# pipeline can join emails to rubrics.
+
+eval_cases:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: "b2b-campaign-agent-eval"
+  filepath: data/evaluation/eval_cases.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    created_by: kedro

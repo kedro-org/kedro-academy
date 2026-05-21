@@ -1,0 +1,62 @@
+[
+  {
+    "product_id": "prod_001",
+    "name": "SD-WAN Pro",
+    "short_description": "Managed multi-site SD-WAN with policy-based routing and centralized control.",
+    "target_segment": "enterprise",
+    "key_benefits": [
+      "20-40% latency reduction compared to legacy MPLS",
+      "Single policy plane across 100+ sites",
+      "Built-in failover and application-aware traffic shaping"
+    ],
+    "pricing_tier": "premium"
+  },
+  {
+    "product_id": "prod_002",
+    "name": "5G Private Network",
+    "short_description": "Dedicated 5G coverage for industrial and high-density sites.",
+    "target_segment": "enterprise",
+    "key_benefits": [
+      "Deterministic low-latency wireless for OT and AGVs",
+      "Edge compute co-located with the radio core",
+      "Spectrum and SIM lifecycle fully managed"
+    ],
+    "pricing_tier": "premium"
+  },
+  {
+    "product_id": "prod_003",
+    "name": "Managed Cloud Connect",
+    "short_description": "Direct private link to major public clouds with managed routing and egress.",
+    "target_segment": "mid",
+    "key_benefits": [
+      "Private connectivity to AWS, Azure and GCP",
+      "Reduced cloud egress costs vs public internet transit",
+      "End-to-end SLA across the link and the underlay"
+    ],
+    "pricing_tier": "standard"
+  },
+  {
+    "product_id": "prod_004",
+    "name": "IoT Fleet Connectivity",
+    "short_description": "Multi-region SIM management and connectivity for IoT and vehicle fleets.",
+    "target_segment": "mid",
+    "key_benefits": [
+      "Single pane for SIM provisioning, billing and policy",
+      "Global roaming with deterministic per-region rates",
+      "Firmware-over-the-air (FOTA) and remote diagnostics"
+    ],
+    "pricing_tier": "standard"
+  },
+  {
+    "product_id": "prod_005",
+    "name": "UC Suite Pro",
+    "short_description": "Cloud telephony, video and contact-centre features in one subscription.",
+    "target_segment": "any",
+    "key_benefits": [
+      "BYOD-friendly softphone and HD video conferencing",
+      "Contact-centre queues, IVR and analytics",
+      "Native integrations with major CRMs and helpdesks"
+    ],
+    "pricing_tier": "standard"
+  }
+]

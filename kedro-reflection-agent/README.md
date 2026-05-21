@@ -13,12 +13,12 @@ kedro-reflection-agent/
 ├── conf/                          # Kedro configs (one catalog_*.yml per pipeline)
 ├── data/
 │   ├── seed/                      # synthetic customers + products
-│   ├── agent_run/, evaluation/, reflection/   # pipeline inputs (prompts, skills)
+│   ├── campaign/, evaluation/, reflection/   # pipeline inputs (prompts, skills)
 │   └── outputs/                   # runs/{run_id}/ and reflections/{reflection_id}/
 ├── src/kedro_reflection_agent/
 │   ├── data_models.py             # shared Pydantic models
 │   ├── datasets/                  # project-specific datasets (if needed)
-│   └── pipelines/{agent_run,evaluation,reflection,apply}/
+│   └── pipelines/{campaign,evaluation,reflection,apply}/
 ├── app/                           # Streamlit dashboard
 │   ├── main.py, runner.py, state.py
 │   └── components/                # one file per demo step
@@ -34,7 +34,7 @@ conda activate kedro-agentic-reflection-env   # or any Python >=3.10 venv
 pip install -r requirements.txt
 
 # Fill in credentials (the file is gitignored)
-cp conf/local/credentials.template.yml conf/local/credentials.yml
+cp conf/local/credentials.yml.example conf/local/credentials.yml
 # edit conf/local/credentials.yml — openai + langfuse_credentials
 ```
 
@@ -42,7 +42,7 @@ cp conf/local/credentials.template.yml conf/local/credentials.yml
 
 ```bash
 # Kedro pipelines (each individually, once nodes are added):
-kedro run -p agent_run --params run_id=run_1
+kedro run -p campaign --params run_id=run_1
 kedro run -p evaluation --params run_id=run_1
 kedro run -p reflection --params reflection_id=refl_1,run_id=run_1
 kedro run -p apply --params reflection_id=refl_1
