@@ -7,55 +7,106 @@ the dashboard reads them back from disk.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
+import sys
 from pathlib import Path
+from typing import Callable
+
+LogCallback = Callable[[str], None] | None
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
 
-def _run_pipeline(pipeline: str, params: dict[str, str]) -> tuple[bool, str]:
-    """Run a single Kedro pipeline and return (success, combined log)."""
-    cmd = ["kedro", "run", "--pipelines", pipeline]
+def _kedro_cmd() -> list[str]:
+    kedro = shutil.which("kedro")
+    if kedro:
+        return [kedro]
+    return [sys.executable, "-m", "kedro"]
+
+
+def _run_pipeline(
+    pipeline: str,
+    params: dict[str, str],
+    on_log: LogCallback = None,
+) -> subprocess.CompletedProcess[str]:
+    cmd = _kedro_cmd() + ["run", "--pipelines", pipeline]
     if params:
         params_str = ",".join(f"{k}={v}" for k, v in params.items())
         cmd += ["--params", params_str]
 
-    result = subprocess.run(
+    process = subprocess.Popen(
         cmd,
-        cwd=PROJECT_ROOT,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
+        cwd=PROJECT_ROOT,
     )
-    log = result.stdout + result.stderr
-    return result.returncode == 0, log
+    lines: list[str] = []
+    assert process.stdout is not None
+    for line in process.stdout:
+        lines.append(line)
+        if on_log:
+            on_log(line)
+    process.wait()
+    return subprocess.CompletedProcess(
+        args=cmd,
+        returncode=process.returncode,
+        stdout="".join(lines),
+        stderr="",
+    )
 
 
-def run_campaign(run_id: str) -> tuple[bool, str]:
-    """Run campaign + evaluation for *run_id*.
-
-    Runs campaign first; evaluation is run separately so each has its own log.
-    Returns (success, combined_log).
-    """
+def run_campaign(
+    run_id: str,
+    on_log: LogCallback = None,
+) -> tuple[bool, str]:
+    """Run campaign then evaluation for *run_id*, streaming lines via on_log."""
     logs: list[str] = []
 
-    ok, log = _run_pipeline("campaign", {"run_id": run_id})
-    logs.append(log)
-    if not ok:
+    def _log(line: str) -> None:
+        logs.append(line)
+        if on_log:
+            on_log(line)
+
+    r = _run_pipeline("campaign", {"run_id": run_id}, on_log=_log)
+    if r.returncode != 0:
         return False, "".join(logs)
 
-    ok, log = _run_pipeline("evaluation", {"run_id": run_id})
-    logs.append(log)
-    return ok, "".join(logs)
+    r = _run_pipeline("evaluation", {"run_id": run_id}, on_log=_log)
+    return r.returncode == 0, "".join(logs)
 
 
-def run_reflection(run_id: str, reflection_id: str) -> tuple[bool, str]:
-    """Run the reflection pipeline."""
-    return _run_pipeline(
+def run_reflection(
+    run_id: str,
+    reflection_id: str,
+    on_log: LogCallback = None,
+) -> tuple[bool, str]:
+    logs: list[str] = []
+
+    def _log(line: str) -> None:
+        logs.append(line)
+        if on_log:
+            on_log(line)
+
+    r = _run_pipeline(
         "reflection",
         {"run_id": run_id, "reflection_id": reflection_id},
+        on_log=_log,
     )
+    return r.returncode == 0, "".join(logs)
 
 
-def run_apply(reflection_id: str) -> tuple[bool, str]:
-    """Run the apply pipeline to commit the approved reflection."""
-    return _run_pipeline("apply", {"reflection_id": reflection_id})
+def run_apply(
+    reflection_id: str,
+    on_log: LogCallback = None,
+) -> tuple[bool, str]:
+    logs: list[str] = []
+
+    def _log(line: str) -> None:
+        logs.append(line)
+        if on_log:
+            on_log(line)
+
+    r = _run_pipeline("apply", {"reflection_id": reflection_id}, on_log=_log)
+    return r.returncode == 0, "".join(logs)
