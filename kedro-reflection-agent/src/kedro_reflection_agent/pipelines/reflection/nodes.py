@@ -40,6 +40,10 @@ _N_WORST_CASES = 5
 # Human-message template preserved verbatim from the current system_prompt.json.
 # Only the system message changes across reflection cycles; the data-provision
 # template (customer / product / skill injection) stays constant.
+#
+# Source of truth: data/campaign/prompts/system_prompt.json (human message),
+# also embedded in scripts/seed_demo.py (SEED_SYSTEM_PROMPT).
+# Keep all three in sync if the human message ever changes.
 _HUMAN_TEMPLATE = (
     "Write an outreach email to this customer about this product.\n\n"
     "Customer:\n{customer}\n\nProduct:\n{product}"

@@ -9,8 +9,8 @@ Restores:
 Clears:
   - data/outputs/runs/
   - data/outputs/reflections/
-  - data/outputs/apply_history.json (if present)
   - data/demo_state.json
+  (apply_history.json is preserved across resets)
 
 Run from the project root:
     python scripts/seed_demo.py
@@ -28,6 +28,9 @@ ROOT = Path(__file__).parent.parent
 # Seed content — edit these if you want to change the "v1" baseline
 # ---------------------------------------------------------------------------
 
+# The human message here must stay in sync with:
+#   - data/campaign/prompts/system_prompt.json  (live runtime source of truth)
+#   - _HUMAN_TEMPLATE in pipelines/reflection/nodes.py  (re-attached after each reflect)
 SEED_SYSTEM_PROMPT: list[dict] = [
     {
         "role": "system",

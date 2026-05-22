@@ -20,6 +20,15 @@ logger = logging.getLogger(__name__)
 
 _HISTORY_PATH = Path("data/outputs/apply_history.json")
 
+# Local file that backs the LangfusePromptDataset for system_prompt.
+# LangfusePromptDataset.save() only calls create_prompt() on the remote side;
+# it never updates the local file.  With sync_policy: local the next campaign
+# load treats the local file as the source of truth, detects a hash-mismatch
+# against the new Langfuse version, and pushes the old content back — making
+# the reflection a no-op.  We therefore mirror every successful apply back to
+# disk so the two sides stay in sync.
+_SYSTEM_PROMPT_PATH = Path("data/campaign/prompts/system_prompt.json")
+
 
 def commit_reflection(
     proposed_prompt: Any,
@@ -36,6 +45,17 @@ def commit_reflection(
         apply_history           – full updated audit log          → apply_history
     """
     messages = _extract_messages(proposed_prompt)
+
+    # Keep the local prompt file in sync with what LangfusePromptDataset will
+    # push to Langfuse (it only writes remotely).  Without this the next
+    # campaign run's sync_policy: local would overwrite Langfuse back to v1.
+    _SYSTEM_PROMPT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _SYSTEM_PROMPT_PATH.write_text(json.dumps(messages, indent=2), encoding="utf-8")
+    logger.info(
+        "apply %s: wrote updated system prompt to %s",
+        reflection_id,
+        _SYSTEM_PROMPT_PATH,
+    )
 
     new_eval_cases = [
         {
@@ -77,7 +97,10 @@ def commit_reflection(
 def _extract_messages(prompt: Any) -> list[dict]:
     """Convert proposed_prompt to a list of {role, content} dicts.
 
-    Accepts a plain list of dicts (json.JSONDataset) or a ChatPromptTemplate.
+    The current catalog wiring (proposed_prompt: json.JSONDataset) always
+    produces a plain list, so the isinstance branch is the only path reached
+    today.  The ChatPromptTemplate fallback is defensive for a future catalog
+    change (e.g. switching proposed_prompt to LangfusePromptDataset).
     """
     if isinstance(prompt, list):
         return [{"role": m["role"], "content": m["content"]} for m in prompt]

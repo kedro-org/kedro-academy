@@ -41,6 +41,8 @@ meta_agent_prompt:
 
 # --- Outputs (per reflection_id) ----------------------------------------------
 
+# The ,refl_1 fallback in each filepath mirrors parameters.yml → reflection_id.
+# If you change the default there, update the four fallbacks below to match.
 reflection_summary:
   type: text.TextDataset
   filepath: data/outputs/reflections/${runtime_params:reflection_id,refl_1}/summary.md
