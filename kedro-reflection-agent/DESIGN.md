@@ -1,20 +1,16 @@
 # kedro-reflection-agent — design
 
-Working document. Captures the agreed shape of the demo and tracks what has
-been implemented so far. Updated slice by slice.
+Working document. Captures the agreed shape of the demo and tracks what has been implemented. Updated slice by slice.
 
 ## Implementation status
 
-| Pipeline     | Status            | Notes                                                   |
-| ------------ | ----------------- | ------------------------------------------------------- |
-| `campaign`   | implemented       | 3 nodes; produces emails + run metadata, traces Langfuse |
-| `evaluation` | implemented       | 5 nodes; drives Langfuse `run_experiment(...)`           |
-| `reflection` | skeleton (catalog stub + empty `pipeline.py`) | next slice                                 |
-| `apply`      | skeleton (catalog stub + empty `pipeline.py`) | follows `reflection`                       |
-| Streamlit UI | scaffold (`app/main.py`, `app/components/`)   | wires up after `apply`                     |
-
-Seed and evaluation data (10 customers, 5 products, 20 campaign targets,
-20 eval cases) are committed under `data/`. See README for the layout.
+| Pipeline     | Status       | Notes                                                              |
+| ------------ | ------------ | ------------------------------------------------------------------ |
+| `campaign`   | ✅ complete  | 3 nodes; produces emails + run metadata; traces every generation   |
+| `evaluation` | ✅ complete  | 5 nodes; drives Langfuse `run_experiment(...)`; 7 scorers          |
+| `reflection` | ✅ complete  | 3 nodes; meta-agent proposes prompt + skill + eval cases           |
+| `apply`      | ✅ complete  | 1 node; commits proposal; appends audit row                        |
+| Streamlit UI | ✅ complete  | 3-step interactive demo with Kedro-Viz + Langfuse observability    |
 
 ---
 
@@ -30,18 +26,18 @@ cross-sell, pricing, or any other agent — different agent, same pipelines.
 ```
                         ┌──────────────┐
    seed + prompt +  ──▶ │  campaign    │ ──▶ emails (disk) + traces (Langfuse)
-   skill + eval cases   └──────────────┘
+   skill + targets      └──────────────┘
                                 │
                                 ▼
                         ┌──────────────┐
-   traces + scores  ──▶ │ evaluation   │ ──▶ per-case scores + aggregate (disk)
-   + judge prompt       └──────────────┘
+   emails + rubrics ──▶ │ evaluation   │ ──▶ per-case scores + aggregate (disk)
+   + judge prompt       └──────────────┘     + named dataset run (Langfuse)
                                 │
                                 ▼
                         ┌──────────────┐
    current prompt + ──▶ │ reflection   │ ──▶ proposal: summary + new prompt
-   skill + eval cases   └──────────────┘     + new skill + new eval cases (disk)
-   + traces + scores            │
+   skill + failing      └──────────────┘     + new skill + new eval cases (disk)
+   cases + scores               │
                                 ▼
                         ┌──────────────┐
    approved proposal ─▶ │   apply      │ ──▶ new prompt → Langfuse,
@@ -60,124 +56,187 @@ Two runs of the first two pipelines bracket one reflection cycle:
 ### 1. `campaign`
 
 Given a list of campaign targets (customer × product pairs), generate one
-outreach email per target and emit one Langfuse trace per generation. Owns no
-evaluation concerns — it reads its own `targets` list and does not see the
-evaluation dataset. The two share a `case_id` namespace by convention so
-evaluation can join emails to rubrics.
+outreach email per target and emit one Langfuse trace per generation.
 
-| Inputs                                                    | Source                                           |
-| --------------------------------------------------------- | ------------------------------------------------ |
-| 10 customers                                              | `data/seed/customers.json`                       |
-| 5 products                                                | `data/seed/products.json`                        |
-| 20 campaign targets (case_id + customer_id + product_id)  | `data/campaign/targets.json`                     |
-| System prompt (current version)                           | `data/campaign/prompts/system_prompt.json` ↔ Langfuse |
-| Skill file (current version)                              | `data/campaign/skills/b2b_email_style.md` (disk) |
-| `run_id` (runtime param)                                  | CLI / Streamlit                                  |
+| Inputs                                                   | Source                                                |
+| -------------------------------------------------------- | ----------------------------------------------------- |
+| 10 customers                                             | `data/seed/customers.json`                            |
+| 5 products                                               | `data/seed/products.json`                             |
+| Campaign targets (case_id + customer_id + product_id)    | `data/campaign/targets.json`                          |
+| System prompt (current version)                          | `data/campaign/prompts/system_prompt.json` ↔ Langfuse |
+| Skill file (current version)                             | `data/campaign/skills/b2b_email_style.md`             |
+| `run_id`, `model_name`, `system_prompt_version`          | CLI / Streamlit                                       |
 
-| Outputs                                                                   | Destination                                                     |
-| ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| 20 emails (subject, body, metadata)                                       | `data/outputs/runs/{run_id}/emails/{case_id}.json`              |
-| Run metadata (prompt version, skill version, model, timestamp, count)     | `data/outputs/runs/{run_id}/run_metadata.json`                  |
-| One trace per case                                                        | Langfuse                                                        |
+| Outputs                                               | Destination                                              |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| Emails (subject, body, metadata)                      | `data/outputs/runs/{run_id}/emails/{case_id}.json`       |
+| Run metadata (model, versions, counts, timestamps)    | `data/outputs/runs/{run_id}/run_metadata.json`           |
+| One trace per case                                    | Langfuse (trace name `campaign:{case_id}`)               |
+
+**Node topology:**
+
+```
+llm_context_node            ->  agent_context (LLMContext)
+prepare_agent_inputs_node   ->  agent_inputs  (list[{case_id, customer, product}])
+generate_emails_node        ->  emails, run_metadata
+```
+
+The chain is `ChatPromptTemplate | LLM.with_structured_output(EmailOutput)`.
+The skill markdown is injected via `{skill}` in the system prompt template.
+Each invocation passes `run_name=f"campaign:{case_id}"` so Langfuse traces are
+named per-case and can be located by name in the API.
+
+---
 
 ### 2. `evaluation`
 
-Drives a Langfuse `DatasetClient.run_experiment(...)` over the evaluation
-dataset. For a given `run_id`, the experiment task is a disk lookup of the
-campaign-generated email for each case_id (no LLM call inside the task);
-evaluators score those outputs.
+Drives a Langfuse `DatasetClient.run_experiment(...)` over the evaluation dataset.
+The experiment task is a **disk lookup** of the campaign email by `case_id` (no
+LLM call inside the task), so what is scored is byte-identical to what the UI shows.
 
-Why a Langfuse experiment rather than a hand-rolled scoring loop:
+| Inputs                                                  | Source                                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Eval cases (owns the dataset; provides rubrics)         | `data/evaluation/eval_cases.json` ↔ Langfuse                              |
+| Customers, products                                     | `data/seed/` (shared catalog entries)                                     |
+| Campaign emails (looked up by `case_id`)                | `data/outputs/runs/{run_id}/emails/`                                      |
+| Judge prompt                                            | `data/evaluation/prompts/judge_prompt.json` ↔ Langfuse                    |
+| `run_id`, `judge_model_name`, `judge_prompt_version`, `passing_threshold`, `body_length_min/max` | CLI / Streamlit |
 
-- Successive experiments (before reflection, after reflection) are tracked as
-  named dataset runs in Langfuse and trivially comparable in the UI.
-- Each evaluator emits a typed Langfuse `Evaluation` (name + value + comment)
-  that is stored against the experiment item and visible in the dashboard.
-- The pattern mirrors `kedro-agentic-workflows` (the source-of-truth project),
-  keeping the two demos architecturally aligned.
+| Outputs                                                         | Destination                                                |
+| --------------------------------------------------------------- | ---------------------------------------------------------- |
+| Dataset run + per-item evaluations + per-item traces            | Langfuse (run name `campaign_{run_id}_prompt_v{N}`)        |
+| Per-case scores (case_id, evaluations, mean_score, passing)     | `data/outputs/runs/{run_id}/per_case_scores.json`          |
+| Aggregate scores (mean per scorer, pass_rate, n_passing, urls)  | `data/outputs/runs/{run_id}/aggregate_scores.json`         |
 
-The task **looks up the cached campaign email** rather than re-invoking the
-agent. This gives the demo a single source of truth — the email shown in the
-UI is byte-identical to the one being scored — and saves 20 LLM calls per
-evaluation run. The price is that the experiment doesn't capture per-item
-generation traces; those already exist in Langfuse from running `campaign`.
+**Node topology:**
 
-| Inputs                                          | Source                                                                  |
-| ----------------------------------------------- | ----------------------------------------------------------------------- |
-| Eval cases (owns the dataset; provides rubrics) | `data/evaluation/eval_cases.json` ↔ Langfuse                            |
-| Customers, products (seed)                      | `data/seed/` (re-used catalog entries)                                  |
-| Campaign emails (looked up by `case_id`)        | `data/outputs/runs/{run_id}/emails/`                                    |
-| Judge prompt                                    | `data/evaluation/prompts/judge_prompt.json` ↔ Langfuse                  |
-| Judge LLM                                       | `gpt-4o` @ temperature 0 (bigger than the campaign LLM for steadiness)  |
-| `run_id`, `model_name`, `system_prompt_version`, `judge_model_name`, `judge_prompt_version`, `passing_threshold`, `body_length_min`, `body_length_max` (runtime params) | CLI / Streamlit |
+```
+judge_context_node              ->  judge_context
+init_heuristic_evaluators_node  ->  heuristic_evaluators (4 callables)
+init_judge_evaluator_node       ->  judge_evaluator (1 callable → 3 Evaluations)
+make_campaign_task_node         ->  campaign_task (closure over emails dict)
+run_experiment_node             ->  per_case_scores, aggregate_scores
+```
 
-| Outputs                                                          | Destination                                                |
-| ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| Dataset run + per-item evaluations + per-item traces             | Langfuse (named `campaign_{run_id}_prompt_v{N}`)           |
-| Per-case scores (Langfuse → disk mirror, for reflection)         | `data/outputs/runs/{run_id}/per_case_scores.json`          |
-| Aggregate scores (mean per scorer, mean total, n_passing, urls)  | `data/outputs/runs/{run_id}/aggregate_scores.json`         |
+**Scorers (7 total):**
 
-**Scorers (7 total).** Five evaluator callables produce all seven `Evaluation`s:
-four heuristic evaluators (one each) and one combined LLM-judge evaluator that
-does a single structured LLM call per email and returns a `list[Evaluation]` of
-three dimensions (writing_quality, personalization, groundedness). 20 judge
-LLM calls per evaluation run, not 60. The per-case mean is the equal-weighted
-mean across all seven; cases with mean ≥ `passing_threshold` (default 0.92,
-tuned so the v0 baseline pass rate leaves room for reflection to improve it)
-count as passing.
+| Scorer            | Type      | What it checks                                               |
+| ----------------- | --------- | ------------------------------------------------------------ |
+| `subject_present` | heuristic | non-empty subject line present                               |
+| `length_in_range` | heuristic | body length within `[min, max]` chars                        |
+| `no_fake_skus`    | heuristic | no `\b[A-Z]{2,}[-]?\d+` outside known product names         |
+| `cta_present`     | heuristic | matches CTA patterns (meeting / demo / call / reply)         |
+| `writing_quality` | LLM-judge | clarity, grammar, tone                                       |
+| `personalization` | LLM-judge | uses customer industry / size / tenure / current products    |
+| `groundedness`    | LLM-judge | claims only what the product card supports                   |
 
-| Scorer              | Type        | What it checks                                                     |
-| ------------------- | ----------- | ------------------------------------------------------------------ |
-| `subject_present`   | heuristic   | non-empty subject line parsed out                                  |
-| `length_in_range`   | heuristic   | body length within `[min, max]` chars                              |
-| `no_fake_skus`      | heuristic   | nothing matches `\b[A-Z]{2,}[-]?\d+` outside known product names   |
-| `cta_present`       | heuristic   | matches CTA patterns (meeting / demo / call / reply)               |
-| `writing_quality`   | LLM-judge   | clarity, grammar, tone match                                       |
-| `personalization`   | LLM-judge   | uses customer industry / size / tenure / current products          |
-| `groundedness`      | LLM-judge   | claims only what the product card supports                         |
+One judge LLM call per email returns all three judge dimensions. Per-case mean is
+equal-weighted across all 7; cases with mean ≥ `passing_threshold` count as passing.
+
+---
 
 ### 3. `reflection`
 
-Meta-agent reads the current artifacts + the failures, and proposes a new set:
-narrative summary, better system prompt, updated skill file, and new eval cases
-derived from the failures (so weaknesses become permanent regression cases).
+Meta-agent reads the current artifacts + failing cases and proposes a replacement
+set. Reflection is **open-loop** — it never writes to the live prompt, skill, or
+dataset. Only `apply` does that.
 
-| Inputs                                       | Source                                                          |
-| -------------------------------------------- | --------------------------------------------------------------- |
-| Current system prompt + skill file           | reuse from `campaign`                                           |
-| Current eval cases                           | reuse from `evaluation`                                         |
-| Traces + scores from latest run              | Langfuse + `data/outputs/runs/{run_id}/`                        |
-| Meta-agent prompt                            | `data/reflection/prompts/meta_agent_prompt.json` ↔ Langfuse     |
-| `run_id`, `reflection_id` (runtime params)   | CLI / Streamlit                                                 |
+| Inputs                                           | Source                                                      |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| Current system prompt                            | reuse from `campaign` catalog                               |
+| Current skill file                               | reuse from `campaign` catalog                               |
+| Current eval cases                               | reuse from `evaluation` catalog                             |
+| Per-case scores + aggregate                      | `data/outputs/runs/{run_id}/per_case_scores.json`           |
+| Meta-agent prompt                                | `data/reflection/prompts/meta_agent_prompt.json` ↔ Langfuse |
+| `run_id`, `reflection_id`, `passing_threshold`   | CLI / Streamlit                                             |
 
-| Outputs                                                          | Destination                                                            |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Narrative summary (`identified` / `fixed` / `reasons`)           | `data/outputs/reflections/{reflection_id}/summary.md`                  |
-| Proposed system prompt (new version, not yet applied)            | `data/outputs/reflections/{reflection_id}/proposed_prompt.json`        |
-| Proposed skill file (new content, not yet applied)               | `data/outputs/reflections/{reflection_id}/proposed_skill.md`           |
-| Proposed new eval cases                                          | `data/outputs/reflections/{reflection_id}/proposed_eval_cases.json`    |
+| Outputs                                                        | Destination                                                         |
+| -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Narrative summary (`identified` / `fixed` / `reasons`)         | `data/outputs/reflections/{reflection_id}/summary.md`               |
+| Proposed system prompt (new messages, not yet applied)         | `data/outputs/reflections/{reflection_id}/proposed_prompt.json`     |
+| Proposed skill file (new content, not yet applied)             | `data/outputs/reflections/{reflection_id}/proposed_skill.md`        |
+| Proposed new eval cases (from failure modes)                   | `data/outputs/reflections/{reflection_id}/proposed_eval_cases.json` |
 
-Reflection is open-loop: it never writes to the live prompt / skill / dataset.
-Only `apply` does that.
+**Node topology:**
+
+```
+meta_agent_context_node         ->  meta_agent_context
+prepare_reflection_context_node ->  reflection_context (template vars)
+reflect_node                    ->  reflection_summary, proposed_prompt,
+                                    proposed_skill, proposed_eval_cases
+```
+
+**Key implementation details:**
+
+- `prepare_reflection_context` filters out cases that errored in the Langfuse
+  experiment (no local email generated — detected by empty `output.body`).
+- If no cases fail the threshold, the N lowest-scoring cases are used instead
+  so the meta-agent always has something to work with.
+- Only the system message is extracted from the current prompt template and
+  passed to the meta-agent (not the human message), to avoid duplicate content
+  in the proposal.
+- `proposed_prompt` is saved as a plain `json.JSONDataset` (list of
+  `{role, content}` dicts) rather than a `LangfusePromptDataset` so `apply`
+  can read it without an active Langfuse connection.
+
+---
 
 ### 4. `apply`
 
-Take an approved `reflection_id` and commit its three artifacts to the live
-locations, then append an audit row.
+Takes an approved `reflection_id` and commits all three artifacts to their live
+locations, then appends an audit row.
 
-| Inputs                                          | Source                                                |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| Proposed prompt / skill / eval cases            | `data/outputs/reflections/{reflection_id}/`           |
-| `reflection_id` (runtime param)                 | CLI / Streamlit                                       |
+| Inputs                                     | Source                                            |
+| ------------------------------------------ | ------------------------------------------------- |
+| Proposed prompt / skill / eval cases       | `data/outputs/reflections/{reflection_id}/`       |
+| `reflection_id`                            | CLI / Streamlit                                   |
 
-| Outputs                                                              | Destination                                                  |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ |
-| New system prompt → Langfuse (new version)                           | Langfuse                                                     |
-| New skill → disk                                                     | `data/campaign/skills/b2b_email_style.md` (overwritten)      |
-| New eval cases → Langfuse evaluation dataset                         | Langfuse                                                     |
-| Audit row (`reflection_id`, timestamp, applied artifacts, prev versions) | `data/outputs/apply_history.json` (append)               |
+| Outputs                                                             | Destination                                             |
+| ------------------------------------------------------------------- | ------------------------------------------------------- |
+| New system prompt (new Langfuse version)                            | Langfuse (`b2b-email-system-prompt`)                    |
+| New skill file                                                      | `data/campaign/skills/b2b_email_style.md` (overwritten) |
+| New eval cases                                                      | Langfuse dataset `b2b-campaign-agent-eval`              |
+| Audit row (reflection_id, timestamp, messages, skill, case ids)     | `data/outputs/apply_history.json` (append)              |
 
-After `apply`, re-running `campaign` reads the new live state and produces `run_2`.
+**Node topology:**
+
+```
+commit_reflection_node  ->  system_prompt, skill_text, eval_cases, apply_history
+```
+
+After `apply`, re-running `campaign` (with `run_id=run_2`) reads the new live
+prompt and skill and produces `run_2` emails scored against the augmented eval set.
+
+---
+
+## Streamlit dashboard
+
+Three-step interactive UI at `app/main.py`. Each step maps to one component file.
+
+| Step  | File                          | Pipelines triggered           | Key panels                                    |
+| ----- | ----------------------------- | ----------------------------- | --------------------------------------------- |
+| 1     | `app/components/step_1_run.py`   | `campaign` + `evaluation`     | Run logs · Scoreboard · Langfuse              |
+| 2     | `app/components/step_2_reflect.py` | `reflection` + `apply`      | Run logs · Proposal · Langfuse                |
+| 3     | `app/components/step_3_rerun.py`  | `campaign` + `evaluation`    | Run logs · Compare (before/after) · Langfuse  |
+
+**State machine** (`app/state.py`):
+
+```
+idle → run_1_done → reflected → applied → run_2_done
+```
+
+State is persisted to `data/demo_state.json`. The seed script writes a fresh
+`seed_at` timestamp on reset; `main.py` detects this and calls
+`st.cache_data.clear()` so stale cached data from the previous run is discarded.
+
+**Langfuse observability panel** (`app/embeds.py` + `app/langfuse_analytics.py`):
+
+Each step has a Langfuse tab that shows — when credentials are configured:
+- Metrics row: total traces, LLM cost today, observations today
+- Score averages bar chart (all 7 dimensions) from `/api/public/scores`
+- Token usage by model from `/api/public/metrics`
+- Daily traces + daily cost from `/api/public/metrics/daily`
+- Recent traces expander with deep-links (requires `project_id` in credentials)
 
 ---
 
@@ -185,22 +244,23 @@ After `apply`, re-running `campaign` reads the new live state and produces `run_
 
 - **`run_id`** identifies one execution of `campaign` + `evaluation`. Demo uses
   `run_1` (before reflection) and `run_2` (after).
-- **`reflection_id`** identifies one execution of `reflection`. Demo uses
-  `refl_1`.
-- **Langfuse-backed datasets** (prompt, eval dataset, traces) use the
-  experimental `LangfusePromptDataset` / `LangfuseEvaluationDataset` /
-  `LangfuseTraceDataset` with `sync_policy: local` so they cache to disk and
-  work offline. Push happens via `apply`.
-- **Data models** (`Customer`, `Product`, `EvalCase`, `Rubric`, `Email`, `Score`,
-  `ReflectionProposal`, …) live in `src/kedro_reflection_agent/data_models.py`.
-  They are added incrementally — each iteration introduces only the models it
-  needs, refining earlier ones as required.
+- **`reflection_id`** identifies one execution of `reflection`. Demo uses `refl_1`.
+- **Catalog split by pipeline.** Each pipeline has its own
+  `conf/base/catalog_{pipeline}.yml`. Shared/in-memory datasets use the
+  `{default_dataset}` pattern in `conf/base/catalog.yml`.
+- **Langfuse-backed datasets** use `sync_policy: local` so they cache to disk
+  and work offline. Push to Langfuse happens through `apply`.
+- **Scores computed locally.** The UI always filters `per_case_scores.json` to
+  locally generated email IDs (not the full Langfuse experiment dataset) to
+  avoid inflated metrics from experiment scaffolding items.
+- **Data models** live in `src/kedro_reflection_agent/data_models.py` and are
+  added incrementally as each pipeline slice is built.
 
 ---
 
 ## Out of scope
 
 - Real telco data (use synthetic)
-- Closed-loop auto-apply (we stay open-loop with one-keystroke approval)
-- Ontology / graph updates (next iteration)
+- Closed-loop auto-apply (open-loop with one-keystroke approval)
+- Multi-turn conversation agent (single-shot generation per case)
 - Production-grade error handling, multi-tenancy, deployment
