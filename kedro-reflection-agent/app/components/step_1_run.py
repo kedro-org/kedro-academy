@@ -218,17 +218,7 @@ def render(demo: DemoState) -> None:
                 )
 
     def tab_langfuse() -> None:
-        trace_metadata = None
-        trace_path = _OUTPUTS / _RUN_ID / "trace_metadata.json"
-        if trace_path.exists():
-            try:
-                trace_metadata = json.loads(trace_path.read_text(encoding="utf-8"))
-            except Exception:
-                pass
-        embeds.render_langfuse_panel(
-            trace_metadata if isinstance(trace_metadata, list) else None,
-            title="Langfuse — Run 1",
-        )
+        embeds.render_langfuse_panel(title="Langfuse — Run 1", key_prefix="step1_lf")
 
     with ui.story_section("Observe & results"):
         embeds.render_horizontal_tabs(

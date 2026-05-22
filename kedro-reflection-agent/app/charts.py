@@ -94,6 +94,54 @@ def langfuse_daily_cost_chart(daily_rows: list[dict[str, Any]]) -> go.Figure | N
     return fig
 
 
+def langfuse_token_usage_chart(rows: list[dict[str, Any]]) -> go.Figure | None:
+    if not rows:
+        return None
+    models = [r.get("model") or r.get("providedModelName") or "unknown" for r in rows]
+    input_tok = [r.get("sum_inputTokens") or 0 for r in rows]
+    output_tok = [r.get("sum_outputTokens") or 0 for r in rows]
+    costs = [r.get("sum_totalCost") or 0.0 for r in rows]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(name="Input tokens", x=models, y=input_tok, marker_color="#CCCCCC"))
+    fig.add_trace(go.Bar(name="Output tokens", x=models, y=output_tok, marker_color="#1A1A1A"))
+    total_cost = sum(costs)
+    fig.update_layout(
+        title=f"Token usage by model  (total cost ${total_cost:.4f})",
+        barmode="stack",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=300,
+        margin=dict(l=20, r=20, t=40, b=20),
+        yaxis_title="Tokens",
+        legend=dict(orientation="h"),
+    )
+    return fig
+
+
+def langfuse_score_averages_chart(avgs: dict[str, float]) -> go.Figure | None:
+    if not avgs:
+        return None
+    sorted_items = sorted(avgs.items(), key=lambda x: x[1], reverse=True)
+    names = [k for k, _ in sorted_items]
+    values = [round(v, 3) for _, v in sorted_items]
+    fig = go.Figure(go.Bar(
+        x=names,
+        y=values,
+        marker_color="#1A1A1A",
+        text=[f"{v:.2f}" for v in values],
+        textposition="outside",
+    ))
+    fig.update_layout(
+        title="Average scores (all runs)",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=300,
+        margin=dict(l=20, r=20, t=40, b=20),
+        yaxis=dict(range=[0, 1.15], title="Avg score"),
+    )
+    return fig
+
+
 def langfuse_score_timeseries_chart(rows: list[dict[str, Any]]) -> go.Figure | None:
     if not rows:
         return None

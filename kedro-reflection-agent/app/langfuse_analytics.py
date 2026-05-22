@@ -118,3 +118,74 @@ def fetch_case_score_timeseries(
         return payload.get("data", [])
     except Exception:  # noqa: BLE001
         return []
+
+
+def fetch_token_usage_by_model(
+    credentials: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Token usage and cost grouped by model via /api/public/metrics."""
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=30)
+    query = {
+        "view": "observations",
+        "metrics": [
+            {"measure": "inputTokens", "aggregation": "sum"},
+            {"measure": "outputTokens", "aggregation": "sum"},
+            {"measure": "totalCost", "aggregation": "sum"},
+        ],
+        "dimensions": [{"alias": "model", "field": "providedModelName"}],
+        "filters": [],
+        "fromTimestamp": start.strftime("%Y-%m-%dT00:00:00Z"),
+        "toTimestamp": end.strftime("%Y-%m-%dT23:59:59Z"),
+    }
+    try:
+        payload = _api_get(credentials, "/api/public/metrics", {"query": json.dumps(query)})
+        return [r for r in payload.get("data", []) if r.get("model") or r.get("providedModelName")]
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def fetch_score_averages(
+    credentials: dict[str, Any],
+    *,
+    limit: int = 100,
+) -> dict[str, float]:
+    """Return {score_name: average_value} aggregated from the most recent scores."""
+    try:
+        payload = _api_get(credentials, "/api/public/scores", {"limit": str(limit)})
+        totals: dict[str, list[float]] = {}
+        for s in payload.get("data", []):
+            name = s.get("name")
+            value = s.get("value")
+            if name and value is not None:
+                totals.setdefault(name, []).append(float(value))
+        return {name: sum(vals) / len(vals) for name, vals in totals.items()}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def fetch_traces(
+    credentials: dict[str, Any],
+    *,
+    trace_name: str | None = None,
+    limit: int = 50,
+) -> tuple[list[dict[str, Any]], int]:
+    """Fetch recent traces; returns (traces, total_count)."""
+    params: dict[str, str] = {"limit": str(limit), "orderBy": "timestamp.desc"}
+    if trace_name:
+        params["name"] = trace_name
+    try:
+        payload = _api_get(credentials, "/api/public/traces", params)
+        total = payload.get("meta", {}).get("totalItems", len(payload.get("data", [])))
+        return payload.get("data", []), total
+    except Exception:  # noqa: BLE001
+        return [], 0
+
+
+def trace_url(credentials: dict[str, Any], trace_id: str) -> str:
+    """Build a deep-link URL for a single trace."""
+    host = (credentials.get("host") or "https://cloud.langfuse.com").rstrip("/")
+    project_id = credentials.get("project_id", "").strip()
+    if project_id:
+        return f"{host}/project/{project_id}/traces/{trace_id}"
+    return f"{host}/traces/{trace_id}"

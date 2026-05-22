@@ -49,14 +49,6 @@ def _load_products() -> dict[str, dict]:
     return {prod["product_id"]: prod for prod in json.loads(p.read_text(encoding="utf-8"))} if p.exists() else {}
 
 
-def _load_trace_metadata(run_id: str) -> list[dict]:
-    p = _OUTPUTS / run_id / "trace_metadata.json"
-    if not p.exists():
-        return []
-    try:
-        return json.loads(p.read_text(encoding="utf-8"))
-    except Exception:
-        return []
 
 
 def _local_stats(scores_list: list[dict]) -> dict:
@@ -165,8 +157,6 @@ def render(demo: DemoState) -> None:
 
     customers = _load_customers()
     products = _load_products()
-    traces1 = _load_trace_metadata(_RUN_ID_1)
-    traces2 = _load_trace_metadata(_RUN_ID_2)
 
     def tab_logs() -> None:
         lines = st.session_state.get("step3_logs") or []
@@ -254,10 +244,7 @@ def render(demo: DemoState) -> None:
                 st.divider()
 
     def tab_langfuse() -> None:
-        embeds.render_langfuse_panel(title="Langfuse")
-        if traces1 or traces2:
-            st.divider()
-            embeds.render_trace_comparison(traces1, traces2)
+        embeds.render_langfuse_panel(title="Langfuse", key_prefix="step3_lf")
 
     with ui.story_section("Observe & results"):
         embeds.render_horizontal_tabs(

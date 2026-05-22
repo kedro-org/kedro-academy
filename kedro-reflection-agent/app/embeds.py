@@ -6,12 +6,7 @@ from collections.abc import Callable
 
 import streamlit as st
 
-from app.langfuse_analytics import (
-    fetch_case_score_timeseries,
-    fetch_daily_metrics,
-    fetch_trace_count_timeseries,
-)
-from app import charts
+from app import charts, langfuse_analytics
 from app.kedro_viz_server import VizStatus, ensure_kedro_viz_running, kedro_viz_url
 
 DEFAULT_LANGFUSE_HOST = "https://cloud.langfuse.com"
@@ -122,22 +117,43 @@ def langfuse_traces_url() -> str | None:
     return langfuse_project_url()
 
 
+@st.cache_data(ttl=60, show_spinner=False)
+def _fetch_langfuse_analytics() -> dict:
+    creds = langfuse_credentials()
+    traces, total = langfuse_analytics.fetch_traces(creds)
+    daily = langfuse_analytics.fetch_daily_metrics(creds)
+    score_avgs = langfuse_analytics.fetch_score_averages(creds)
+    token_usage = langfuse_analytics.fetch_token_usage_by_model(creds)
+    return {"traces": traces, "total": total, "daily": daily, "score_avgs": score_avgs, "token_usage": token_usage}
+
+
 def render_langfuse_panel(
-    trace_metadata: list[dict] | None = None,
     *,
     title: str = "Langfuse",
     show_all_traces_link: bool = True,
+    key_prefix: str = "lf",
 ) -> None:
-    """Langfuse observability via API charts + trace deep-links."""
+    """Langfuse observability — metrics charts + recent trace links."""
     st.markdown(f"**{title}**")
+
     if not langfuse_configured():
-        st.warning(
-            "Add `langfuse_credentials` (public_key, secret_key, host, project_id) "
-            "to `conf/local/credentials.yml`, then re-run the agent."
+        st.caption(
+            "Configure `langfuse_credentials` in `conf/local/credentials.yml` "
+            "to enable Langfuse UI links and charts."
         )
+        with st.expander("Self-hosting Langfuse locally", expanded=False):
+            st.markdown(
+                "Run a local Langfuse instance with Docker:\n"
+                "```bash\n"
+                "git clone https://github.com/langfuse/langfuse.git\n"
+                "cd langfuse\n"
+                "docker compose up -d\n"
+                "```\n"
+                "Then set `host: http://localhost:3000` in `conf/local/credentials.yml`. "
+                "No API rate limits apply to a self-hosted instance."
+            )
         return
 
-    creds = langfuse_credentials()
     project_url = langfuse_project_url()
     traces_url = langfuse_traces_url()
     c1, c2 = st.columns(2)
@@ -148,109 +164,60 @@ def render_langfuse_panel(
         if show_all_traces_link and traces_url:
             st.link_button("View all traces ↗", traces_url, width="stretch")
 
-    st.caption(
-        "Charts load from the Langfuse metrics APIs (daily metrics + time-series). "
-        "Full UI opens in a new tab."
-    )
+    st.divider()
+    data = _fetch_langfuse_analytics()
+    total = data["total"]
+    api_traces = data["traces"]
+    daily = data["daily"]
+    score_avgs = data["score_avgs"]
+    token_usage = data["token_usage"]
 
-    with st.spinner("Loading Langfuse metrics…"):
-        daily = fetch_daily_metrics(creds, days=14)
-        score_ts = fetch_case_score_timeseries(creds, days=14)
-        if not daily:
-            trace_ts = fetch_trace_count_timeseries(creds, days=14)
-        else:
-            trace_ts = []
+    if total == 0:
+        st.caption("No traces found in Langfuse yet — run the campaign pipeline first.")
+        return
 
+    # Top metrics row
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total traces", total)
+    if daily:
+        day = daily[0]
+        c2.metric("LLM cost (today)", f"${day.get('totalCost', 0):.4f}")
+        c3.metric("Observations (today)", day.get("countObservations", 0))
+
+    # Score averages bar chart
+    fig_scores = charts.langfuse_score_averages_chart(score_avgs)
+    if fig_scores:
+        st.plotly_chart(fig_scores, width="stretch", key=f"{key_prefix}_score_avgs")
+
+    # Token usage by model (from /api/public/metrics)
+    fig_tokens = charts.langfuse_token_usage_chart(token_usage)
+    if fig_tokens:
+        st.plotly_chart(fig_tokens, width="stretch", key=f"{key_prefix}_token_usage")
+
+    # Daily activity charts
+    fig_traces_chart = charts.langfuse_daily_traces_chart(daily)
+    fig_cost = charts.langfuse_daily_cost_chart(daily)
     col_a, col_b = st.columns(2)
     with col_a:
-        fig = charts.langfuse_daily_traces_chart(daily) or (
-            charts.langfuse_score_timeseries_chart(trace_ts) if trace_ts else None
-        )
-        if fig:
-            st.plotly_chart(fig, width="stretch", key=f"lf_traces_{title}")
-        else:
-            st.caption("No daily trace data yet — run the agent after configuring Langfuse.")
+        if fig_traces_chart:
+            st.plotly_chart(fig_traces_chart, width="stretch", key=f"{key_prefix}_daily_traces")
     with col_b:
-        cost_fig = charts.langfuse_daily_cost_chart(daily)
-        score_fig = charts.langfuse_score_timeseries_chart(score_ts)
-        if cost_fig:
-            st.plotly_chart(cost_fig, width="stretch", key=f"lf_cost_{title}")
-        elif score_fig:
-            st.plotly_chart(score_fig, width="stretch", key=f"lf_score_{title}")
-        else:
-            st.caption("No cost or score time-series yet.")
+        if fig_cost:
+            st.plotly_chart(fig_cost, width="stretch", key=f"{key_prefix}_daily_cost")
 
-    if trace_metadata:
-        st.divider()
-        render_trace_links(trace_metadata, title="Traces from this run")
-    else:
-        st.info("Run the agent pipeline to populate per-case trace links below.")
-
-
-def render_trace_links(trace_metadata: list[dict], *, title: str = "Run traces") -> None:
-    if not trace_metadata:
-        st.caption("No traces recorded yet.")
-        return
-    st.markdown(f"**{title}**")
-    linked = [t for t in trace_metadata if t.get("trace_url") or t.get("trace_id")]
-    if not linked:
-        st.caption("Traces were attempted but no URLs were returned (check pipeline logs).")
-        return
-    for item in linked:
-        cols = st.columns([3, 1])
-        cols[0].write(f"**{item.get('company_name', item.get('customer_id', ''))}**")
-        cols[0].caption(item.get("case_id", ""))
-        url = item.get("trace_url")
-        if url:
-            cols[1].link_button("Open trace ↗", url, width="stretch")
-        elif item.get("trace_id"):
-            cols[1].code(item["trace_id"], language=None)
-
-
-def render_trace_comparison(traces_run1: list[dict], traces_run2: list[dict]) -> None:
-    """Side-by-side trace links for Run 1 vs Run 2."""
-    st.markdown("**Trace comparison — Run 1 vs Run 2**")
-    if not traces_run1 and not traces_run2:
-        st.caption("No trace metadata yet. Complete Step 3 after Langfuse is configured.")
-        return
-
-    by_case_1 = {t.get("case_id"): t for t in traces_run1 if t.get("case_id")}
-    by_case_2 = {t.get("case_id"): t for t in traces_run2 if t.get("case_id")}
-    case_ids = sorted(set(by_case_1) | set(by_case_2))
-
-    if not case_ids:
-        col_a, col_b = st.columns(2)
-        with col_a:
-            render_trace_links(traces_run1, title="Run 1")
-        with col_b:
-            render_trace_links(traces_run2, title="Run 2")
-        return
-
-    for case_id in case_ids:
-        t1 = by_case_1.get(case_id, {})
-        t2 = by_case_2.get(case_id, {})
-        label = t1.get("company_name") or t2.get("company_name") or case_id
-        st.markdown(f"**{label}** · `{case_id}`")
-        left, right = st.columns(2)
-        with left:
-            st.caption("Run 1 (before)")
-            _trace_link_cell(t1)
-        with right:
-            st.caption("Run 2 (after)")
-            _trace_link_cell(t2)
-
-
-def _trace_link_cell(item: dict) -> None:
-    if not item:
-        st.caption("No trace")
-        return
-    url = item.get("trace_url")
-    if url:
-        st.link_button("Open trace ↗", url, width="stretch")
-    elif item.get("trace_id"):
-        st.code(item["trace_id"], language=None)
-    else:
-        st.caption("No trace URL")
+    # Recent trace links
+    creds = langfuse_credentials()
+    if api_traces:
+        with st.expander(f"Recent traces ({min(len(api_traces), 20)} shown)", expanded=False):
+            for t in api_traces[:20]:
+                tid = t.get("id", "")
+                name = t.get("name") or tid
+                ts = (t.get("timestamp") or "")[:19].replace("T", " ")
+                url = langfuse_analytics.trace_url(creds, tid)
+                cols = st.columns([3, 1])
+                cols[0].write(f"**{name}**")
+                cols[0].caption(ts)
+                cols[1].link_button("Open ↗", url, width="stretch")
 
 
 def render_horizontal_tabs(

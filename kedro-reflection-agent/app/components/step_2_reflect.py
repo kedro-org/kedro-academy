@@ -279,7 +279,7 @@ def render(demo: DemoState) -> None:
             st.caption("Changes applied locally. Run Step 3 to measure improvement.")
 
     def tab_langfuse() -> None:
-        embeds.render_langfuse_panel(title="Langfuse — project overview")
+        embeds.render_langfuse_panel(title="Langfuse — project overview", key_prefix="step2_lf")
 
     with ui.story_section("Observe & results"):
         embeds.render_horizontal_tabs(
