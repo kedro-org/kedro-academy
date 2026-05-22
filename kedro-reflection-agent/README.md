@@ -119,13 +119,15 @@ Drives a Langfuse `DatasetClient.run_experiment(...)`. The experiment task is an
 
 Seven scorers in total: four deterministic heuristics (`subject_present`, `length_in_range`, `no_fake_skus`, `cta_present`) and three LLM-judge dimensions returned by one combined call (`writing_quality`, `personalization`, `groundedness`).
 
-## Setup
+## Quick start
 
 ```bash
-conda activate kedro-agentic-reflection-env   # or any Python >=3.10 venv
-pip install -r requirements.txt
+make setup          # create .venv, install deps, restore seed data
+```
 
-# Fill in credentials. The real credentials.yml is gitignored.
+Then fill in credentials (the real file is gitignored):
+
+```bash
 cp conf/local/credentials.yml.example conf/local/credentials.yml
 # Edit conf/local/credentials.yml — openai.api_key + langfuse_credentials
 ```
@@ -141,26 +143,40 @@ With `sync_policy: local` (the default in this project), the experimental
 Langfuse datasets read from local disk and push to Langfuse on save, so a
 first-time setup can be done by running each pipeline once.
 
+## Makefile shortcuts
+
+| Command | What it does |
+|---|---|
+| `make install` | Create `.venv` and install all dependencies |
+| `make setup` | `install` + `seed` — full first-time setup |
+| `make seed` | Restore v1 prompt, skill file & eval cases; wipe run outputs |
+| `make reset` | Alias for `seed` — use after a demo to start clean |
+| `make app` | Launch the Streamlit dashboard (`streamlit run app/main.py`) |
+| `make viz` | Start Kedro-Viz standalone |
+| `make test` | Run the test suite |
+| `make run-cycle` | Full three-step pipeline cycle without the UI |
+
+> **Reset vs seed:** both do the same thing — restore the weak v1 baseline and
+> clear `data/outputs/runs/` and `data/outputs/reflections/`. The
+> `data/outputs/apply_history.json` log is intentionally preserved so you can
+> track how many times the loop has been applied across sessions.
+
 ## Run
 
 ```bash
-# Generate emails and emit traces for run_1.
-kedro run -p campaign --params run_id=run_1
+# Launch the interactive demo UI:
+make app
 
-# Score the emails written by campaign for run_1.
-kedro run -p evaluation --params run_id=run_1
+# Or run each pipeline step manually:
+kedro run --pipelines campaign    --params "run_id=run_1"
+kedro run --pipelines evaluation  --params "run_id=run_1"
+kedro run --pipelines reflection  --params "run_id=run_1,reflection_id=refl_1"
+kedro run --pipelines apply       --params "reflection_id=refl_1"
+kedro run --pipelines campaign    --params "run_id=run_2"
+kedro run --pipelines evaluation  --params "run_id=run_2"
 
-# Same again for run_2 once reflection + apply land:
-kedro run -p reflection --params reflection_id=refl_1,run_id=run_1   # TODO
-kedro run -p apply --params reflection_id=refl_1                     # TODO
-kedro run -p campaign --params run_id=run_2
-kedro run -p evaluation --params run_id=run_2
-
-# Visualise the topology:
-kedro viz
-
-# Streamlit dashboard (currently a scaffold):
-streamlit run app/main.py
+# Visualise the pipeline topology:
+make viz
 ```
 
 ## Configuration

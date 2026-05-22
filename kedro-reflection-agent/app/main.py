@@ -5,7 +5,6 @@ Run with:  streamlit run app/main.py
 
 from __future__ import annotations
 
-import shutil
 import sys
 from pathlib import Path
 
@@ -40,14 +39,12 @@ STATE_PATH = _PROJECT_ROOT / "data" / "demo_state.json"
 
 
 def _do_reset() -> None:
-    for folder in ["outputs", "reporting", "intermediate"]:
-        p = _PROJECT_ROOT / "data" / folder
-        if p.exists():
-            shutil.rmtree(p)
-            p.mkdir(parents=True, exist_ok=True)
-    apply_history = _PROJECT_ROOT / "data" / "outputs" / "apply_history.json"
-    if apply_history.exists():
-        apply_history.unlink()
+    import subprocess
+    subprocess.run(
+        [sys.executable, str(_PROJECT_ROOT / "scripts" / "seed_demo.py")],
+        cwd=str(_PROJECT_ROOT),
+        check=False,
+    )
     reset_demo_state(STATE_PATH)
     st.cache_data.clear()
     st.rerun()
