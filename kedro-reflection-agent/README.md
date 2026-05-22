@@ -121,16 +121,32 @@ Seven scorers in total: four deterministic heuristics (`subject_present`, `lengt
 
 ## Quick start
 
+This project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management.
+Install it once if you don't have it:
+
 ```bash
-make setup          # create .venv, install deps, restore seed data
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# or via Homebrew
+brew install uv
 ```
 
-Then fill in credentials (the real file is gitignored):
+Then bootstrap the project:
+
+```bash
+make setup          # uv sync --extra dev + restore seed data
+```
+
+Fill in credentials (the real file is gitignored):
 
 ```bash
 cp conf/local/credentials.yml.example conf/local/credentials.yml
 # Edit conf/local/credentials.yml — openai.api_key + langfuse_credentials
 ```
+
+> All Python dependencies are declared in `pyproject.toml`; `uv sync` reads
+> from there and creates `.venv` automatically.
 
 You'll need a Langfuse project with two prompts and one dataset created (the
 catalog references them by name):
@@ -145,16 +161,19 @@ first-time setup can be done by running each pipeline once.
 
 ## Makefile shortcuts
 
+All commands run inside the `uv`-managed `.venv` automatically — no need to
+activate the environment manually.
+
 | Command | What it does |
 |---|---|
-| `make install` | Create `.venv` and install all dependencies |
+| `make install` | `uv sync --extra dev` — create `.venv` and install all deps |
 | `make setup` | `install` + `seed` — full first-time setup |
 | `make seed` | Restore v1 prompt, skill file & eval cases; wipe run outputs |
 | `make reset` | Alias for `seed` — use after a demo to start clean |
-| `make app` | Launch the Streamlit dashboard (`streamlit run app/main.py`) |
-| `make viz` | Start Kedro-Viz standalone |
-| `make test` | Run the test suite |
-| `make run-cycle` | Full three-step pipeline cycle without the UI |
+| `make app` | `uv run streamlit run app/main.py` |
+| `make viz` | `uv run kedro viz run` |
+| `make test` | `uv run python -m pytest -q` |
+| `make run-cycle` | Full three-step pipeline cycle headless (no UI) |
 
 > **Reset vs seed:** both do the same thing — restore the weak v1 baseline and
 > clear `data/outputs/runs/` and `data/outputs/reflections/`. The
@@ -164,10 +183,13 @@ first-time setup can be done by running each pipeline once.
 ## Run
 
 ```bash
-# Launch the interactive demo UI:
-make app
+# Activate the venv once, then use kedro / streamlit directly:
+source .venv/bin/activate
 
-# Or run each pipeline step manually:
+# Launch the interactive demo UI:
+make app        # or: streamlit run app/main.py
+
+# Run each pipeline step manually:
 kedro run --pipelines campaign    --params "run_id=run_1"
 kedro run --pipelines evaluation  --params "run_id=run_1"
 kedro run --pipelines reflection  --params "run_id=run_1,reflection_id=refl_1"
@@ -176,8 +198,10 @@ kedro run --pipelines campaign    --params "run_id=run_2"
 kedro run --pipelines evaluation  --params "run_id=run_2"
 
 # Visualise the pipeline topology:
-make viz
+make viz        # or: kedro viz run
 ```
+
+> Without activating, prefix any command with `uv run` — e.g. `uv run kedro run …`.
 
 ## Configuration
 

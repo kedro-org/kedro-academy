@@ -1,17 +1,15 @@
 .PHONY: install seed test app viz reset run-cycle setup
 
-PYTHON   ?= .venv/bin/python
-KEDRO    ?= .venv/bin/kedro
-STREAMLIT ?= .venv/bin/streamlit
-PIP      ?= .venv/bin/pip
+UV        ?= uv
+PYTHON    ?= uv run python
+KEDRO     ?= uv run kedro
+STREAMLIT ?= uv run streamlit
 
 # ── setup ─────────────────────────────────────────────────────────────────────
 
+## Install all deps (creates .venv automatically via uv sync)
 install:
-	python3 -m venv .venv
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-	$(PIP) install -e .
+	$(UV) sync --extra dev
 
 ## Shortcut: install + seed in one go
 setup: install seed
