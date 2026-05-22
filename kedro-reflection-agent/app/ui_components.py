@@ -202,14 +202,19 @@ def inject_global_css() -> None:
     st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 
-def inject_page_chrome() -> None:
+def inject_page_chrome(kedro_avatar_url: str | None = None) -> None:
     """Inject fixed top accent bar and footer. Call once, early in the page."""
+    logo = (
+        f'<img src="{kedro_avatar_url}" width="18" height="18" '
+        f'style="border-radius:3px;vertical-align:middle;margin-right:8px;" />'
+        if kedro_avatar_url else ""
+    )
     st.markdown(
-        """
+        f"""
         <div class="top-accent-bar"></div>
         <div class="app-footer">
-          <span style="color:rgba(255,255,255,0.75);font-size:12px;">
-            B2B Campaign Agent &mdash; Reflection Loop
+          <span style="display:flex;align-items:center;color:rgba(255,255,255,0.75);font-size:12px;">
+            {logo}B2B Campaign Agent &mdash; Reflection Loop
           </span>
           <span style="color:rgba(255,255,255,0.35);font-size:11px;letter-spacing:0.04em;">
             DEMO ENVIRONMENT &nbsp;&middot;&nbsp; KEDRO &nbsp;&middot;&nbsp; &copy; 2026
@@ -220,14 +225,28 @@ def inject_page_chrome() -> None:
     )
 
 
-def page_header() -> None:
+def page_header(kedro_avatar_url: str | None = None) -> None:
+    kedro_badge = ""
+    if kedro_avatar_url:
+        kedro_badge = f"""
+        <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <img src="{kedro_avatar_url}" width="18" height="18"
+               style="border-radius:3px;vertical-align:middle;" />
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;
+                       color:{_BLUE};text-transform:uppercase;vertical-align:middle;">
+            Kedro
+          </span>
+        </div>"""
+    else:
+        kedro_badge = f"""
+        <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;
+                       color:{_BLUE};text-transform:uppercase;">Kedro</span>
+        </div>"""
     st.markdown(
         f"""
         <div style="padding:0 0 1.25rem 0;border-bottom:2px solid {_NAVY};margin-bottom:1.5rem;">
-          <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;">
-            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;
-                         color:{_BLUE};text-transform:uppercase;">Kedro</span>
-          </div>
+          {kedro_badge}
           <h1 style="font-size:26px;font-weight:700;color:{_NAVY};margin:0 0 4px 0;
                      letter-spacing:-0.02em;">
             B2B Campaign Agent&nbsp;&mdash;&nbsp;Reflection Loop
@@ -395,6 +414,7 @@ def email_card(
     body: str,
     score: float | None = None,
     failure_tags: list[str] | None = None,
+    passed: bool = False,
 ) -> None:
     """Styled email card. score is 0–1 internally, displayed as /10."""
     score10 = score * 10 if score is not None else None
@@ -407,12 +427,15 @@ def email_card(
         f'padding:3px 10px;font-size:12px;font-weight:700;">{score10:.1f}/10</span>'
         if score10 is not None else ""
     )
-    tags_html = " ".join(
-        f'<span style="background:#FEF2F2;color:#CC3333;border:1px solid #FECACA;'
-        f'border-radius:4px;padding:2px 8px;font-size:11px;font-weight:500;margin-right:4px;">'
-        f'{html.escape(t)}</span>'
-        for t in (failure_tags or [])[:4]
-    )
+    if passed:
+        tags_html = f'<span style="color:{_SUCCESS};font-size:12px;font-weight:600;">&#10003; Improved</span>'
+    else:
+        tags_html = " ".join(
+            f'<span style="background:#FEF2F2;color:#CC3333;border:1px solid #FECACA;'
+            f'border-radius:4px;padding:2px 8px;font-size:11px;font-weight:500;margin-right:4px;">'
+            f'{html.escape(t)}</span>'
+            for t in (failure_tags or [])[:4]
+        )
     st.markdown(
         f"""
         <div style="background:{_CARD_BG};border:1px solid {_BORDER};border-radius:8px;

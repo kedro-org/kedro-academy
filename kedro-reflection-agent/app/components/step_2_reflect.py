@@ -1,29 +1,23 @@
-"""Step 2 — Reflect on failures and approve improvements.
-
-Component tree:
-    render(state)
-    ├── _reflect_action(state)          # Run Reflection button + live log
-    ├── _summary_panel(md)              # narrative cards
-    ├── _prompt_diff(current, proposed) # word-level diff
-    ├── _skill_diff(current, proposed)  # word-level diff
-    ├── _eval_cases_preview(cases)      # proposed regression cases table
-    └── _approve_action(state)          # Approve & Apply button + live log
-"""
+"""Step 2 — Reflect on failures and approve improvements."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 
 from app import runner
-from app import state as demo_state
 from app import ui_components as ui
+from app import embeds
+from app.state import DemoState, save_demo_state, transition, DEFAULT_STATE_PATH
 
 _RUN_ID = "run_1"
 _REFLECTION_ID = "refl_1"
 _DATA = Path("data")
+_OUTPUTS = _DATA / "outputs"
+_REFL_DIR = _OUTPUTS / "reflections" / _REFLECTION_ID
 
 
 # ---------------------------------------------------------------------------
@@ -31,220 +25,222 @@ _DATA = Path("data")
 # ---------------------------------------------------------------------------
 
 @st.cache_data
+def _load_summary_md(reflection_id: str) -> str:
+    p = _OUTPUTS / "reflections" / reflection_id / "summary.md"
+    return p.read_text(encoding="utf-8") if p.exists() else ""
+
+
+@st.cache_data
 def _load_current_prompt() -> list[dict]:
     p = _DATA / "campaign" / "prompts" / "system_prompt.json"
-    return json.loads(p.read_text()) if p.exists() else []
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 @st.cache_data
 def _load_current_skill() -> str:
     p = _DATA / "campaign" / "skills" / "b2b_email_style.md"
-    return p.read_text() if p.exists() else ""
-
-
-@st.cache_data
-def _load_summary_md(reflection_id: str) -> str:
-    p = _DATA / "outputs" / "reflections" / reflection_id / "summary.md"
-    return p.read_text() if p.exists() else ""
+    return p.read_text(encoding="utf-8") if p.exists() else ""
 
 
 @st.cache_data
 def _load_proposed_prompt(reflection_id: str) -> list[dict]:
-    p = _DATA / "outputs" / "reflections" / reflection_id / "proposed_prompt.json"
-    return json.loads(p.read_text()) if p.exists() else []
+    p = _OUTPUTS / "reflections" / reflection_id / "proposed_prompt.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 @st.cache_data
 def _load_proposed_skill(reflection_id: str) -> str:
-    p = _DATA / "outputs" / "reflections" / reflection_id / "proposed_skill.md"
-    return p.read_text() if p.exists() else ""
+    p = _OUTPUTS / "reflections" / reflection_id / "proposed_skill.md"
+    return p.read_text(encoding="utf-8") if p.exists() else ""
 
 
 @st.cache_data
 def _load_proposed_eval_cases(reflection_id: str) -> list[dict]:
-    p = _DATA / "outputs" / "reflections" / reflection_id / "proposed_eval_cases.json"
-    return json.loads(p.read_text()) if p.exists() else []
+    p = _OUTPUTS / "reflections" / reflection_id / "proposed_eval_cases.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 @st.cache_data
 def _load_aggregate(run_id: str) -> dict:
-    p = _DATA / "outputs" / "runs" / run_id / "aggregate_scores.json"
-    return json.loads(p.read_text()) if p.exists() else {}
-
-
-# ---------------------------------------------------------------------------
-# Leaf components
-# ---------------------------------------------------------------------------
-
-def _summary_panel(md: str, agg: dict) -> None:
-    import re
-    issues = re.findall(r"^### (.+)$", md, re.MULTILINE)
-    changes = re.findall(r"^\- \*\*(.+?)\*\*: (.+)$", md, re.MULTILINE)
-    reasons = re.findall(r"^- (?!\*\*)(.+)$", md, re.MULTILINE)
-
-    cols = st.columns(3)
-    with cols[0]:
-        ui.card(
-            "Issues found",
-            "\n".join(f"• {i}" for i in issues[:4]) or md[:200],
-            border_left_color="#CBD5E0",
-        )
-    with cols[1]:
-        ui.card(
-            "Planned fixes",
-            "\n".join(f"• {t}: {c}" for t, c in changes[:4]),
-            border_left_color="#1A1A1A",
-        )
-    with cols[2]:
-        dims = agg.get("mean_per_scorer", {})
-        ui.card(
-            "Current scores",
-            "\n".join(
-                f"• {k}: {v * 10:.1f}/10" for k, v in dims.items()
-            ),
-            border_left_color="#0251AA",
-        )
-
-    with st.expander("Full narrative", expanded=False):
-        st.markdown(md)
-
-
-def _prompt_diff(current: list[dict], proposed: list[dict]) -> None:
-    cur_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in current)
-    prop_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in proposed)
-    ui.text_diff_card("Current prompt (v1)", "Proposed prompt (v2)", cur_text, prop_text)
-
-
-def _skill_diff(current: str, proposed: str) -> None:
-    ui.text_diff_card("Current skill file", "Proposed skill file", current, proposed)
-
-
-def _eval_cases_preview(cases: list[dict]) -> None:
-    if not cases:
-        st.info("No new eval cases proposed.")
-        return
-    rows = []
-    for case in cases:
-        inp = case.get("input", {})
-        rubric = (case.get("expected_output") or {}).get("rubric", {})
-        rows.append({
-            "ID": case.get("id", ""),
-            "Customer": inp.get("customer_id", ""),
-            "Product": inp.get("product_id", ""),
-            "CTA": rubric.get("expected_cta", ""),
-            "Tone": rubric.get("expected_tone", ""),
-            "Notes": rubric.get("notes", "")[:80] + "…" if len(rubric.get("notes", "")) > 80 else rubric.get("notes", ""),
-        })
-    st.dataframe(rows, width="stretch", hide_index=True)
-
-
-# ---------------------------------------------------------------------------
-# Action components
-# ---------------------------------------------------------------------------
-
-def _reflect_action(current_state: str) -> None:
-    disabled = not demo_state.reached("run_1_done") or demo_state.reached("reflected")
-    st.code(
-        f'kedro run --pipelines reflection --params "run_id={_RUN_ID},reflection_id={_REFLECTION_ID}"',
-        language="bash",
-    )
-    if st.button("Run Reflection", disabled=disabled, type="primary", key="btn_reflect"):
-        log_lines: list[str] = st.session_state.setdefault("step2_logs", [])
-        log_lines.clear()
-        log_target = ui.pipeline_log_slot()
-        with st.spinner("Running reflection meta-agent…"):
-            ok, _ = runner.run_reflection(
-                _RUN_ID, _REFLECTION_ID,
-                on_log=lambda line: (
-                    log_lines.append(line),
-                    ui.update_pipeline_log(log_target, log_lines),
-                ),
-            )
-        if ok:
-            st.cache_data.clear()
-            demo_state.set_state("reflected")
-            st.rerun()
-        else:
-            st.error("Reflection failed — see log above.")
-
-    if st.session_state.get("step2_logs"):
-        with st.expander("Pipeline log", expanded=False):
-            st.code("".join(st.session_state["step2_logs"][-150:]), language="log")
-
-
-def _approve_action(current_state: str) -> None:
-    disabled = not demo_state.reached("reflected") or demo_state.reached("applied")
-    st.code(
-        f'kedro run --pipelines apply --params "reflection_id={_REFLECTION_ID}"',
-        language="bash",
-    )
-    if st.button("Approve & Apply", disabled=disabled, type="primary", key="btn_apply"):
-        log_lines: list[str] = st.session_state.setdefault("step2_apply_logs", [])
-        log_lines.clear()
-        log_target = ui.pipeline_log_slot()
-        with st.spinner("Applying to live prompt, skill, and eval dataset…"):
-            ok, _ = runner.run_apply(
-                _REFLECTION_ID,
-                on_log=lambda line: (
-                    log_lines.append(line),
-                    ui.update_pipeline_log(log_target, log_lines),
-                ),
-            )
-        if ok:
-            st.cache_data.clear()
-            demo_state.set_state("applied")
-            st.success("Prompt v2 and regression eval cases are now active.")
-            st.rerun()
-        else:
-            st.error("Apply failed — see log above.")
-
-    if st.session_state.get("step2_apply_logs"):
-        with st.expander("Apply log", expanded=False):
-            st.code("".join(st.session_state["step2_apply_logs"][-150:]), language="log")
+    p = _OUTPUTS / "runs" / run_id / "aggregate_scores.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 # ---------------------------------------------------------------------------
 # Step root
 # ---------------------------------------------------------------------------
 
-def render(current_state: str) -> None:
-    reflected = demo_state.reached("reflected")
-    applied = demo_state.reached("applied")
+def render(demo: DemoState) -> None:
+    reflected = demo.state in ("reflected", "applied", "run_2_done")
+    applied = demo.state in ("applied", "run_2_done")
+
     ui.step_heading(
         "STEP 2 — Reflect & Approve",
         done=reflected,
-        muted=not demo_state.reached("run_1_done"),
+        muted=demo.state == "idle",
     )
 
-    if not demo_state.reached("run_1_done"):
-        st.caption("Complete Step 1 first.")
-        return
+    with ui.story_section("Pipeline"):
+        embeds.render_kedro_viz_pipeline_picker(
+            project_root=str(runner.PROJECT_ROOT),
+            pipelines=embeds.STEP2_PIPELINES,
+            default_pipeline_id="reflection",
+            height=480,
+            session_key="viz_pipeline_step2",
+        )
 
     with ui.story_section("Run"):
-        _reflect_action(current_state)
+        st.code(
+            f'kedro run --pipelines reflection --params "run_id={_RUN_ID},reflection_id={_REFLECTION_ID}"\n'
+            f'kedro run --pipelines apply --params "reflection_id={_REFLECTION_ID}"',
+            language="bash",
+        )
+        r1, _gap, r2 = st.columns([1, 0.1, 1])
+        with r1:
+            reflect_clicked = st.button(
+                "Run Reflection",
+                disabled=not demo.can_run_reflection(),
+                type="primary",
+                key="step2_reflect",
+            )
+        with r2:
+            apply_clicked = st.button(
+                "Approve & Apply",
+                disabled=not demo.can_apply(),
+                key="step2_apply",
+            )
 
-    if not reflected:
+        log_target = ui.pipeline_log_slot()
+
+        if reflect_clicked:
+            log_lines: list[str] = []
+            st.session_state["step2_logs"] = log_lines
+
+            def _log(line: str) -> None:
+                log_lines.append(line)
+                ui.update_pipeline_log(log_target, log_lines)
+
+            with st.spinner("Running reflection meta-agent…"):
+                ok, _ = runner.run_reflection(_RUN_ID, _REFLECTION_ID, on_log=_log)
+
+            if ok:
+                st.cache_data.clear()
+                new_demo = transition(demo, "reflected", reflection_id=_REFLECTION_ID)
+                save_demo_state(new_demo, DEFAULT_STATE_PATH)
+                st.rerun()
+            else:
+                st.error("Reflection failed — see log above.")
+
+        if apply_clicked:
+            log_lines_apply: list[str] = st.session_state.setdefault("step2_apply_logs", [])
+
+            def _log_apply(line: str) -> None:
+                log_lines_apply.append(line)
+                ui.update_pipeline_log(log_target, log_lines_apply)
+
+            with st.spinner("Applying to live prompt, skill, and eval dataset…"):
+                ok, _ = runner.run_apply(_REFLECTION_ID, on_log=_log_apply)
+
+            if ok:
+                st.cache_data.clear()
+                new_demo = transition(demo, "applied", applied_id=_REFLECTION_ID)
+                save_demo_state(new_demo, DEFAULT_STATE_PATH)
+                st.success("Prompt v2 and regression eval cases are now active.")
+                st.rerun()
+            else:
+                st.error("Apply failed — see log above.")
+
+    if demo.state == "idle":
+        st.caption("Finish Step 1 first.")
+        return
+    if not (_REFL_DIR / "summary.md").exists():
+        st.caption("Run reflection to unlock the tabs below.")
         return
 
     agg = _load_aggregate(_RUN_ID)
+    dims = agg.get("mean_per_scorer", {})
 
-    with ui.story_section("Proposal summary"):
-        _summary_panel(_load_summary_md(_REFLECTION_ID), agg)
-
-    with ui.story_section("Prompt diff  (v1 → proposed v2)"):
-        _prompt_diff(_load_current_prompt(), _load_proposed_prompt(_REFLECTION_ID))
-
-    with ui.story_section("Skill diff"):
-        with st.expander("Show skill diff", expanded=False):
-            _skill_diff(_load_current_skill(), _load_proposed_skill(_REFLECTION_ID))
-
-    with ui.story_section("New regression eval cases"):
-        with st.expander("Show proposed cases", expanded=False):
-            _eval_cases_preview(_load_proposed_eval_cases(_REFLECTION_ID))
-
-    st.divider()
-    with ui.story_section("Approve"):
-        if applied:
-            st.success("Changes applied — prompt v2 is now live. Run Step 3 to measure improvement.")
+    def tab_logs() -> None:
+        lines = st.session_state.get("step2_logs") or st.session_state.get("step2_apply_logs") or []
+        if lines:
+            st.code("".join(lines[-200:]), language="log")
         else:
-            _approve_action(current_state)
+            st.caption("Pipeline logs appear here after you run a step.")
+
+    def tab_proposal() -> None:
+        summary_md = _load_summary_md(_REFLECTION_ID)
+        current_prompt = _load_current_prompt()
+        proposed_prompt = _load_proposed_prompt(_REFLECTION_ID)
+        current_skill = _load_current_skill()
+        proposed_skill = _load_proposed_skill(_REFLECTION_ID)
+        new_cases = _load_proposed_eval_cases(_REFLECTION_ID)
+
+        import re
+        issues = re.findall(r"^### (.+)$", summary_md, re.MULTILINE)
+        changes = re.findall(r"^\- \*\*(.+?)\*\*: (.+)$", summary_md, re.MULTILINE)
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            ui.card(
+                "Issues found",
+                "\n".join(f"• {i}" for i in issues[:4]) or summary_md[:200],
+                border_left_color="#CBD5E0",
+            )
+        with c2:
+            ui.card(
+                "Planned fixes",
+                "\n".join(f"• {t}: {c}" for t, c in changes[:4]),
+                border_left_color="#1A1A1A",
+            )
+        with c3:
+            ui.card(
+                "Current scores",
+                "\n".join(f"• {k}: {v * 10:.1f}/10" for k, v in dims.items()),
+                border_left_color="#0251AA",
+            )
+
+        with st.expander("Full narrative", expanded=False):
+            st.markdown(summary_md)
+
+        st.markdown("**Prompt diff (v1 → proposed v2)**")
+        cur_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in current_prompt)
+        prop_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in proposed_prompt)
+        if cur_text or prop_text:
+            ui.text_diff_card("Current prompt (v1)", "Proposed prompt (v2)", cur_text, prop_text)
+
+        with st.expander("Skill diff", expanded=False):
+            if current_skill or proposed_skill:
+                ui.text_diff_card("Current skill file", "Proposed skill file", current_skill, proposed_skill)
+            else:
+                st.caption("No skill files found.")
+
+        with st.expander("New regression eval cases", expanded=False):
+            if not new_cases:
+                st.caption("No new eval cases proposed.")
+            else:
+                rows = []
+                for case in new_cases:
+                    inp = case.get("input", case)
+                    rubric = (case.get("expected_output") or case.get("rubric") or {})
+                    if isinstance(rubric, dict) and "rubric" in rubric:
+                        rubric = rubric["rubric"]
+                    rows.append({
+                        "ID": case.get("case_id", case.get("id", "")),
+                        "Customer": inp.get("customer_id", ""),
+                        "Product": inp.get("product_id", ""),
+                        "CTA": rubric.get("expected_cta", ""),
+                        "Tone": rubric.get("expected_tone", ""),
+                    })
+                st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+        if applied:
+            st.caption("Changes applied locally. Run Step 3 to measure improvement.")
+
+    def tab_langfuse() -> None:
+        embeds.render_langfuse_panel(title="Langfuse — project overview")
+
+    with ui.story_section("Observe & results"):
+        embeds.render_horizontal_tabs(
+            ["Run logs", "Proposal", "Langfuse"],
+            [tab_logs, tab_proposal, tab_langfuse],
+        )

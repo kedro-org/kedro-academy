@@ -5,6 +5,7 @@ Run with:  streamlit run app/main.py
 
 from __future__ import annotations
 
+import shutil
 import sys
 from pathlib import Path
 
@@ -14,7 +15,14 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import streamlit as st
 
-from app import state as demo_state
+from app.state import (
+    DEFAULT_STATE_PATH,
+    DemoState,
+    load_demo_state,
+    reset_demo_state,
+    save_demo_state,
+    transition,
+)
 from app import ui_components as ui
 from app.components import step_1_run, step_2_reflect, step_3_rerun
 
@@ -27,6 +35,22 @@ _STEP_INDEX = {
     "applied": 2,
     "run_2_done": 3,
 }
+
+STATE_PATH = _PROJECT_ROOT / "data" / "demo_state.json"
+
+
+def _do_reset() -> None:
+    for folder in ["outputs", "reporting", "intermediate"]:
+        p = _PROJECT_ROOT / "data" / folder
+        if p.exists():
+            shutil.rmtree(p)
+            p.mkdir(parents=True, exist_ok=True)
+    apply_history = _PROJECT_ROOT / "data" / "outputs" / "apply_history.json"
+    if apply_history.exists():
+        apply_history.unlink()
+    reset_demo_state(STATE_PATH)
+    st.cache_data.clear()
+    st.rerun()
 
 
 def main() -> None:
@@ -41,7 +65,7 @@ def main() -> None:
     ui.inject_global_css()
     ui.inject_page_chrome(kedro_avatar_url=_KEDRO_AVATAR)
 
-    current_state = demo_state.get_state()
+    demo = load_demo_state(STATE_PATH)
 
     hcol, rcol = st.columns([11, 1])
     with hcol:
@@ -51,19 +75,17 @@ def main() -> None:
             '<div style="padding-top:26px;display:flex;justify-content:flex-end;">',
             unsafe_allow_html=True,
         )
-        if st.button("Reset", key="reset_top", help="Clears demo state derived from disk"):
-            demo_state.set_state("idle")
-            st.cache_data.clear()
-            st.rerun()
+        if st.button("Reset", key="reset_top", help="Clears all run data and restores initial state"):
+            _do_reset()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    ui.workflow_bar(_STEP_INDEX.get(current_state, 0))
+    ui.workflow_bar(_STEP_INDEX.get(demo.state, 0))
 
-    step_1_run.render(current_state)
+    step_1_run.render(demo)
     st.divider()
-    step_2_reflect.render(current_state)
+    step_2_reflect.render(demo)
     st.divider()
-    step_3_rerun.render(current_state)
+    step_3_rerun.render(demo)
 
 
 if __name__ == "__main__":
