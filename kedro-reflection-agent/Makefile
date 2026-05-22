@@ -17,8 +17,9 @@ setup: install seed
 # ── seed / reset ──────────────────────────────────────────────────────────────
 
 ## Restore the v1 prompt, skill file, and eval cases; wipe all run outputs
+## Pass N=<number> to seed only the first N cases, e.g. make seed N=3
 seed:
-	$(PYTHON) scripts/seed_demo.py
+	$(PYTHON) scripts/seed_demo.py $(if $(N),--cases $(N),)
 
 ## Alias for seed (clearer intent when resetting mid-demo)
 reset: seed

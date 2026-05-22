@@ -24,12 +24,6 @@ _OUTPUTS = _DATA / "outputs" / "runs"
 # ---------------------------------------------------------------------------
 
 @st.cache_data
-def _load_aggregate(run_id: str) -> dict | None:
-    p = _OUTPUTS / run_id / "aggregate_scores.json"
-    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
-
-
-@st.cache_data
 def _load_emails(run_id: str) -> list[dict]:
     d = _OUTPUTS / run_id / "emails"
     if not d.exists():
@@ -38,11 +32,9 @@ def _load_emails(run_id: str) -> list[dict]:
 
 
 @st.cache_data
-def _load_scores_by_case(run_id: str) -> dict[str, dict]:
+def _load_scores_list(run_id: str) -> list[dict]:
     p = _OUTPUTS / run_id / "per_case_scores.json"
-    if not p.exists():
-        return {}
-    return {s["case_id"]: s for s in json.loads(p.read_text(encoding="utf-8"))}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 @st.cache_data
@@ -65,6 +57,21 @@ def _load_trace_metadata(run_id: str) -> list[dict]:
         return json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return []
+
+
+def _local_stats(scores_list: list[dict]) -> dict:
+    """Compute headline stats from a locally-filtered scores list."""
+    n = len(scores_list)
+    if n == 0:
+        return {"mean": 0.0, "pass_rate": 0.0, "n_passing": 0, "n": 0, "per_scorer": {}}
+    passing = sum(1 for s in scores_list if s.get("passing", False))
+    mean = sum(s.get("mean_score", 0.0) for s in scores_list) / n
+    scorer_vals: dict[str, list[float]] = {}
+    for sc in scores_list:
+        for ev in sc.get("evaluations", []):
+            scorer_vals.setdefault(ev["name"], []).append(ev.get("value", 0.0))
+    per_scorer = {k: sum(v) / len(v) for k, v in scorer_vals.items()}
+    return {"mean": mean, "pass_rate": passing / n, "n_passing": passing, "n": n, "per_scorer": per_scorer}
 
 
 # ---------------------------------------------------------------------------
@@ -129,12 +136,33 @@ def render(demo: DemoState) -> None:
         st.caption("Press re-run above, then the tabs below will populate.")
         return
 
-    run1 = _load_aggregate(_RUN_ID_1)
-    run2 = _load_aggregate(_RUN_ID_2)
-    scores1 = _load_scores_by_case(_RUN_ID_1)
-    scores2 = _load_scores_by_case(_RUN_ID_2)
-    emails1 = {e["case_id"]: e for e in _load_emails(_RUN_ID_1)}
-    emails2 = {e["case_id"]: e for e in _load_emails(_RUN_ID_2)}
+    # Load emails for both runs and derive local case ID sets
+    emails1_list = _load_emails(_RUN_ID_1)
+    emails2_list = _load_emails(_RUN_ID_2)
+    email_ids_1 = {e["case_id"] for e in emails1_list}
+    email_ids_2 = {e["case_id"] for e in emails2_list}
+    # Only compare cases present in BOTH runs
+    shared_ids = email_ids_1 & email_ids_2
+
+    emails1 = {e["case_id"]: e for e in emails1_list}
+    emails2 = {e["case_id"]: e for e in emails2_list}
+
+    # Filter per-case scores to locally generated emails only
+    scores1 = {
+        s["case_id"]: s
+        for s in _load_scores_list(_RUN_ID_1)
+        if s["case_id"] in email_ids_1
+    }
+    scores2 = {
+        s["case_id"]: s
+        for s in _load_scores_list(_RUN_ID_2)
+        if s["case_id"] in email_ids_2
+    }
+
+    # Compute all stats locally
+    stats1 = _local_stats([s for s in scores1.values() if s["case_id"] in shared_ids])
+    stats2 = _local_stats([s for s in scores2.values() if s["case_id"] in shared_ids])
+
     customers = _load_customers()
     products = _load_products()
     traces1 = _load_trace_metadata(_RUN_ID_1)
@@ -148,18 +176,15 @@ def render(demo: DemoState) -> None:
             st.caption("Pipeline logs appear here after you run a step.")
 
     def tab_compare() -> None:
-        if not run1 or not run2:
-            st.caption("Aggregate scores not found for one or both runs.")
+        if not shared_ids:
+            st.caption("No matching cases found across both runs.")
             return
 
-        ui.score_headline(run1["mean_total"], run2["mean_total"])
+        ui.score_headline(stats1["mean"], stats2["mean"])
 
-        if run1.get("mean_per_scorer") and run2.get("mean_per_scorer"):
+        if stats1["per_scorer"] and stats2["per_scorer"]:
             st.plotly_chart(
-                charts.dimension_bar_chart(
-                    run1["mean_per_scorer"],
-                    run2["mean_per_scorer"],
-                ),
+                charts.dimension_bar_chart(stats1["per_scorer"], stats2["per_scorer"]),
                 width="stretch",
                 key="step3_dimension_bar_chart",
             )
@@ -167,23 +192,24 @@ def render(demo: DemoState) -> None:
         c1, c2, c3 = st.columns(3)
         c1.metric(
             "Pass rate",
-            f"{run2['pass_rate']:.0%}",
-            delta=f"{(run2['pass_rate'] - run1['pass_rate']):+.0%}",
+            f"{stats2['pass_rate']:.0%}",
+            delta=f"{(stats2['pass_rate'] - stats1['pass_rate']):+.0%}",
         )
         c2.metric(
             "Mean score",
-            f"{run2['mean_total'] * 10:.2f} / 10",
-            delta=f"{(run2['mean_total'] - run1['mean_total']) * 10:+.2f}",
+            f"{stats2['mean'] * 10:.2f} / 10",
+            delta=f"{(stats2['mean'] - stats1['mean']) * 10:+.2f}",
         )
         c3.metric(
             "Passing cases",
-            f"{run2['n_passing']} / {run2['n_cases']}",
-            delta=run2["n_passing"] - run1["n_passing"],
+            f"{stats2['n_passing']} / {stats2['n']}",
+            delta=stats2["n_passing"] - stats1["n_passing"],
         )
 
         with st.expander("Per-case score deltas", expanded=True):
             rows = []
-            for cid, sc1 in scores1.items():
+            for cid in shared_ids:
+                sc1 = scores1.get(cid, {})
                 sc2 = scores2.get(cid, {})
                 rows.append({
                     "case_id": cid,
@@ -198,8 +224,12 @@ def render(demo: DemoState) -> None:
             )
 
         with st.expander("Email before/after — word-level diff (worst Run 1 cases)", expanded=True):
-            worst = sorted(scores1.items(), key=lambda kv: kv[1].get("mean_score", 1.0))[:3]
-            for cid, sc1 in worst:
+            worst = sorted(
+                [s for s in scores1.values() if s["case_id"] in shared_ids],
+                key=lambda s: s.get("mean_score", 1.0),
+            )[:3]
+            for sc1 in worst:
+                cid = sc1["case_id"]
                 e1 = emails1.get(cid, {})
                 e2 = emails2.get(cid, {})
                 sc2 = scores2.get(cid, {})

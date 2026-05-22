@@ -394,6 +394,8 @@ SEED_EVAL_CASES: list[dict] = [
 
 def _clear_outputs() -> None:
     """Delete all generated artefacts so the demo starts clean."""
+    from datetime import datetime, timezone
+
     for folder in ["runs", "reflections"]:
         p = ROOT / "data" / "outputs" / folder
         if p.exists():
@@ -401,9 +403,14 @@ def _clear_outputs() -> None:
         p.mkdir(parents=True, exist_ok=True)
         (p / ".gitkeep").touch()
 
+    # Write a fresh state file with a seed timestamp so the Streamlit UI
+    # detects the reset and clears its @st.cache_data on the next render.
     demo_state = ROOT / "data" / "demo_state.json"
-    if demo_state.exists():
-        demo_state.unlink()
+    seed_at = datetime.now(timezone.utc).isoformat()
+    demo_state.write_text(
+        json.dumps({"state": "idle", "seed_at": seed_at}, indent=2),
+        encoding="utf-8",
+    )
 
 
 def _restore_prompt() -> None:
@@ -420,20 +427,56 @@ def _restore_skill() -> None:
     print(f"  restored {path.relative_to(ROOT)}")
 
 
-def _restore_eval_cases() -> None:
+def _restore_eval_cases(n: int | None = None) -> None:
+    cases = SEED_EVAL_CASES[:n] if n is not None else SEED_EVAL_CASES
     path = ROOT / "data" / "evaluation" / "eval_cases.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(SEED_EVAL_CASES, indent=2), encoding="utf-8")
-    print(f"  restored {path.relative_to(ROOT)}")
+    path.write_text(json.dumps(cases, indent=2), encoding="utf-8")
+    print(f"  restored {path.relative_to(ROOT)} ({len(cases)} cases)")
+
+
+def _restore_targets(n: int | None = None) -> None:
+    # Derive targets from eval cases — they share case_id / customer_id / product_id.
+    all_targets = [
+        {
+            "case_id": c["id"],
+            "customer_id": c["input"]["customer_id"],
+            "product_id": c["input"]["product_id"],
+        }
+        for c in SEED_EVAL_CASES
+    ]
+    targets = all_targets[:n] if n is not None else all_targets
+    path = ROOT / "data" / "campaign" / "targets.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(targets, indent=2), encoding="utf-8")
+    print(f"  restored {path.relative_to(ROOT)} ({len(targets)} targets)")
 
 
 def main() -> None:
-    print("Resetting demo to seed state…")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Reset the demo to its seed state.")
+    parser.add_argument(
+        "--cases",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Seed only the first N eval cases and campaign targets (default: all 20).",
+    )
+    args = parser.parse_args()
+
+    n = args.cases
+    if n is not None and not (1 <= n <= len(SEED_EVAL_CASES)):
+        parser.error(f"--cases must be between 1 and {len(SEED_EVAL_CASES)}, got {n}")
+
+    label = f"{n} cases" if n is not None else "all 20 cases"
+    print(f"Resetting demo to seed state ({label})…")
     _clear_outputs()
     print("  cleared data/outputs/runs/, data/outputs/reflections/, demo_state.json (apply_history.json preserved)")
     _restore_prompt()
     _restore_skill()
-    _restore_eval_cases()
+    _restore_eval_cases(n)
+    _restore_targets(n)
     print("Done. The demo is ready to run from Step 1.")
 
 

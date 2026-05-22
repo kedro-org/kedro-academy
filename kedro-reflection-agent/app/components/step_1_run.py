@@ -22,12 +22,6 @@ _OUTPUTS = _DATA / "outputs" / "runs"
 # ---------------------------------------------------------------------------
 
 @st.cache_data
-def _load_aggregate(run_id: str) -> dict | None:
-    p = _OUTPUTS / run_id / "aggregate_scores.json"
-    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
-
-
-@st.cache_data
 def _load_emails(run_id: str) -> list[dict]:
     d = _OUTPUTS / run_id / "emails"
     if not d.exists():
@@ -41,6 +35,12 @@ def _load_scores_by_case(run_id: str) -> dict[str, dict]:
     if not p.exists():
         return {}
     return {s["case_id"]: s for s in json.loads(p.read_text(encoding="utf-8"))}
+
+
+@st.cache_data
+def _load_scores_list(run_id: str) -> list[dict]:
+    p = _OUTPUTS / run_id / "per_case_scores.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 @st.cache_data
@@ -86,7 +86,13 @@ def render(demo: DemoState) -> None:
             session_key="viz_pipeline_step1",
         )
 
-    agg = _load_aggregate(_RUN_ID) if done else None
+    # Filter scores to only cases that have a local email file — the Langfuse
+    # experiment may score the full dataset including historic/other-run cases.
+    _local_email_ids = {e["case_id"] for e in _load_emails(_RUN_ID)} if done else set()
+    scores_list = [
+        s for s in (_load_scores_list(_RUN_ID) if done else [])
+        if s["case_id"] in _local_email_ids
+    ]
 
     with ui.story_section("Run"):
         st.code(
@@ -94,7 +100,7 @@ def render(demo: DemoState) -> None:
             'kedro run --pipelines evaluation --params "run_id=run_1"',
             language="bash",
         )
-        c1, c2, c3, c4 = st.columns([2, 0.1, 1, 1])
+        c1, _, c3, c4 = st.columns([2, 0.1, 1, 1])
         with c1:
             run_clicked = st.button(
                 "Run Generate & Evaluate",
@@ -103,9 +109,17 @@ def render(demo: DemoState) -> None:
                 key="step1_run",
             )
         with c3:
-            st.metric("Mean score", f"{agg['mean_total'] * 10:.1f}/10" if agg else "—")
+            if scores_list:
+                _m = sum(s.get("mean_score", 0.0) for s in scores_list) / len(scores_list)
+                st.metric("Mean score", f"{_m * 10:.1f}/10")
+            else:
+                st.metric("Mean score", "—")
         with c4:
-            st.metric("Pass rate", f"{agg['pass_rate']:.0%}" if agg else "—")
+            if scores_list:
+                _p = sum(1 for s in scores_list if s.get("passing", False))
+                st.metric("Passing", f"{_p} / {len(scores_list)}")
+            else:
+                st.metric("Passing", "—")
 
         log_target = ui.pipeline_log_slot()
         if run_clicked:
@@ -132,7 +146,7 @@ def render(demo: DemoState) -> None:
         return
 
     emails = _load_emails(_RUN_ID)
-    scores = _load_scores_by_case(_RUN_ID)
+    scores = {k: v for k, v in _load_scores_by_case(_RUN_ID).items() if k in _local_email_ids}
     customers = _load_customers()
     products = _load_products()
 
@@ -144,15 +158,23 @@ def render(demo: DemoState) -> None:
             st.caption("Pipeline logs appear here after you run a step.")
 
     def tab_scoreboard() -> None:
-        if not agg:
-            st.caption("No aggregate scores yet.")
+        if not scores_list:
+            st.caption("No scores yet.")
             return
 
+        local_n = len(scores_list)
+        local_passing = sum(1 for s in scores_list if s.get("passing", False))
+        local_pass_rate = local_passing / local_n if local_n else 0.0
+        local_mean = (
+            sum(s.get("mean_score", 0.0) for s in scores_list) / local_n
+            if local_n else 0.0
+        )
+
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Mean score", f"{agg['mean_total'] * 10:.1f} / 10")
-        m2.metric("Pass rate", f"{agg['pass_rate']:.0%}")
-        m3.metric("Passing", f"{agg['n_passing']} / {agg['n_cases']}")
-        m4.metric("Emails", len(emails))
+        m1.metric("Mean score", f"{local_mean * 10:.1f} / 10")
+        m2.metric("Pass rate", f"{local_pass_rate:.0%}")
+        m3.metric("Passing", f"{local_passing} / {local_n}")
+        m4.metric("Emails generated", local_n)
 
         failure_tags = _compute_failure_tags(scores)
         if failure_tags:
@@ -162,20 +184,22 @@ def render(demo: DemoState) -> None:
                 key="step1_failure_tag_chart",
             )
 
+        # Compute per-scorer means from local scores only
+        scorer_vals: dict[str, list[float]] = {}
+        for sc in scores_list:
+            for ev in sc.get("evaluations", []):
+                scorer_vals.setdefault(ev["name"], []).append(ev.get("value", 0.0))
+        local_per_scorer = {k: sum(v) / len(v) for k, v in scorer_vals.items()}
         rows = [
             {"Scorer": k, "Score /10": round(v * 10, 2)}
-            for k, v in agg.get("mean_per_scorer", {}).items()
+            for k, v in local_per_scorer.items()
         ]
         if rows:
             st.dataframe(rows, width="stretch", hide_index=True)
 
         if emails:
-            st.markdown("**Sample emails — lowest scores first**")
-            worst_first = sorted(
-                emails,
-                key=lambda e: scores.get(e["case_id"], {}).get("mean_score", 1.0),
-            )
-            for email in worst_first[:3]:
+            st.markdown(f"**Generated emails ({len(emails)})**")
+            for email in emails:
                 sc = scores.get(email["case_id"], {})
                 cust = customers.get(email.get("customer_id", ""), {})
                 prod = products.get(email.get("product_id", ""), {})

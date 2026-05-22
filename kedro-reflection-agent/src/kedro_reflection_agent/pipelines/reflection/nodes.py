@@ -67,6 +67,9 @@ def prepare_reflection_context(
         rubric_by_case_id[item.id] = (item.expected_output or {}).get("rubric", {})
 
     scores = [CaseScore.model_validate(s) for s in per_case_scores]
+    # Drop cases that errored in the Langfuse experiment (no local email was
+    # generated for them — their output has no "body" field).
+    scores = [s for s in scores if s.output.get("body", "").strip()]
     failing = [s for s in scores if not s.passing]
 
     if not failing:
@@ -173,12 +176,18 @@ def reflect(
 
 
 def _extract_prompt_text(prompt: Any) -> str:
-    """Render all messages of a ChatPromptTemplate as a readable string.
+    """Extract the system message template from a ChatPromptTemplate.
 
-    Each message is shown as ``[role]\\n<template text>`` so the meta-agent
-    sees the full prompt structure, including the ``{skill}`` placeholder it
-    must preserve.
+    Only the system message content is returned — that is what the meta-agent
+    should improve and what ``new_prompt_text`` maps back to. The human
+    template is fixed and is re-attached in ``reflect()`` separately.
     """
+    for msg in prompt.messages:
+        role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()
+        if "system" in role:
+            inner = getattr(msg, "prompt", None)
+            return getattr(inner, "template", None) or str(msg)
+    # Fallback: join all messages if no system role found
     parts = []
     for msg in prompt.messages:
         role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()

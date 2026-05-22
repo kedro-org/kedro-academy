@@ -46,13 +46,8 @@ reflection_summary:
   filepath: data/outputs/reflections/${runtime_params:reflection_id,refl_1}/summary.md
 
 proposed_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  type: json.JSONDataset
   filepath: data/outputs/reflections/${runtime_params:reflection_id,refl_1}/proposed_prompt.json
-  prompt_name: "b2b-email-system-prompt"
-  prompt_type: "chat"
-  credentials: langfuse_credentials
-  sync_policy: local
-  mode: langchain
 
 proposed_skill:
   type: text.TextDataset

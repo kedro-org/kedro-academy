@@ -75,7 +75,13 @@ def commit_reflection(
 
 
 def _extract_messages(prompt: Any) -> list[dict]:
-    """Convert a ChatPromptTemplate back to a list of {role, content} dicts."""
+    """Convert proposed_prompt to a list of {role, content} dicts.
+
+    Accepts a plain list of dicts (json.JSONDataset) or a ChatPromptTemplate.
+    """
+    if isinstance(prompt, list):
+        return [{"role": m["role"], "content": m["content"]} for m in prompt]
+    # ChatPromptTemplate fallback
     messages = []
     for msg in prompt.messages:
         role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()

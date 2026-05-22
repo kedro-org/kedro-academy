@@ -168,7 +168,8 @@ activate the environment manually.
 |---|---|
 | `make install` | `uv sync --extra dev` — create `.venv` and install all deps |
 | `make setup` | `install` + `seed` — full first-time setup |
-| `make seed` | Restore v1 prompt, skill file & eval cases; wipe run outputs |
+| `make seed` | Restore v1 prompt, skill file & eval cases; wipe run outputs (all 20 cases) |
+| `make seed N=3` | Same as above but seed only the first N eval cases and campaign targets |
 | `make reset` | Alias for `seed` — use after a demo to start clean |
 | `make app` | `uv run streamlit run app/main.py` |
 | `make viz` | `uv run kedro viz run` |

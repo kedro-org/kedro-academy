@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -61,9 +62,23 @@ def _load_proposed_eval_cases(reflection_id: str) -> list[dict]:
 
 
 @st.cache_data
-def _load_aggregate(run_id: str) -> dict:
-    p = _OUTPUTS / "runs" / run_id / "aggregate_scores.json"
-    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+def _load_current_eval_cases() -> list[dict]:
+    p = _DATA / "evaluation" / "eval_cases.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
+
+
+@st.cache_data
+def _load_run_emails(run_id: str) -> list[dict]:
+    d = _OUTPUTS / "runs" / run_id / "emails"
+    if not d.exists():
+        return []
+    return [json.loads(f.read_text(encoding="utf-8")) for f in sorted(d.glob("*.json"))]
+
+
+@st.cache_data
+def _load_run_scores_list(run_id: str) -> list[dict]:
+    p = _OUTPUTS / "runs" / run_id / "per_case_scores.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
 # ---------------------------------------------------------------------------
@@ -157,8 +172,17 @@ def render(demo: DemoState) -> None:
         st.caption("Run reflection to unlock the tabs below.")
         return
 
-    agg = _load_aggregate(_RUN_ID)
-    dims = agg.get("mean_per_scorer", {})
+    # Compute per-scorer means from local email files only (same approach as step 1)
+    _run1_email_ids = {e["case_id"] for e in _load_run_emails(_RUN_ID)}
+    _run1_scores = [
+        s for s in _load_run_scores_list(_RUN_ID)
+        if s["case_id"] in _run1_email_ids
+    ]
+    _scorer_vals: dict[str, list[float]] = {}
+    for _sc in _run1_scores:
+        for _ev in _sc.get("evaluations", []):
+            _scorer_vals.setdefault(_ev["name"], []).append(_ev.get("value", 0.0))
+    local_per_scorer = {k: sum(v) / len(v) for k, v in _scorer_vals.items()}
 
     def tab_logs() -> None:
         lines = st.session_state.get("step2_logs") or st.session_state.get("step2_apply_logs") or []
@@ -174,62 +198,80 @@ def render(demo: DemoState) -> None:
         current_skill = _load_current_skill()
         proposed_skill = _load_proposed_skill(_REFLECTION_ID)
         new_cases = _load_proposed_eval_cases(_REFLECTION_ID)
+        current_cases = _load_current_eval_cases()
 
-        import re
         issues = re.findall(r"^### (.+)$", summary_md, re.MULTILINE)
         changes = re.findall(r"^\- \*\*(.+?)\*\*: (.+)$", summary_md, re.MULTILINE)
 
+        # 1. Cards: Current scores | Issues found | Planned fixes
         c1, c2, c3 = st.columns(3)
         with c1:
+            scores_text = (
+                "\n".join(f"• {k}: {v * 10:.1f}/10" for k, v in local_per_scorer.items())
+                or "No local scores available."
+            )
+            ui.card("Current scores", scores_text, border_left_color="#0251AA")
+        with c2:
+            issues_text = "\n".join(f"• {i[:80]}" for i in issues[:4])
             ui.card(
                 "Issues found",
-                "\n".join(f"• {i}" for i in issues[:4]) or summary_md[:200],
+                issues_text or summary_md[:200],
                 border_left_color="#CBD5E0",
             )
-        with c2:
+        with c3:
+            fixes_text = "\n".join(f"• {t}: {c[:60]}" for t, c in changes[:4])
             ui.card(
                 "Planned fixes",
-                "\n".join(f"• {t}: {c}" for t, c in changes[:4]),
+                fixes_text or "—",
                 border_left_color="#1A1A1A",
             )
-        with c3:
-            ui.card(
-                "Current scores",
-                "\n".join(f"• {k}: {v * 10:.1f}/10" for k, v in dims.items()),
-                border_left_color="#0251AA",
-            )
 
-        with st.expander("Full narrative", expanded=False):
-            st.markdown(summary_md)
-
+        # 2. Prompt diff
         st.markdown("**Prompt diff (v1 → proposed v2)**")
-        cur_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in current_prompt)
-        prop_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in proposed_prompt)
-        if cur_text or prop_text:
+        if not proposed_prompt:
+            st.caption("No proposed prompt from this reflection run — the skill file was updated instead.")
+        else:
+            cur_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in current_prompt)
+            prop_text = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in proposed_prompt)
             ui.text_diff_card("Current prompt (v1)", "Proposed prompt (v2)", cur_text, prop_text)
 
-        with st.expander("Skill diff", expanded=False):
+        # 3. Skill diff
+        with st.expander("Skill diff", expanded=True):
             if current_skill or proposed_skill:
                 ui.text_diff_card("Current skill file", "Proposed skill file", current_skill, proposed_skill)
             else:
                 st.caption("No skill files found.")
 
-        with st.expander("New regression eval cases", expanded=False):
+        # 4. Evals diff — proposed additions to the eval suite
+        with st.expander("Evals diff", expanded=False):
             if not new_cases:
                 st.caption("No new eval cases proposed.")
             else:
+                current_ids = {c.get("id", c.get("case_id", "")) for c in current_cases}
+                n_new = sum(1 for c in new_cases if c.get("id", c.get("case_id", "")) not in current_ids)
+                n_mod = len(new_cases) - n_new
+                st.info(
+                    f"The reflection agent proposed {n_new} new eval case(s) to add to the "
+                    f"evaluation suite, targeting the failure patterns it identified. "
+                    f"{len(current_cases)} existing cases are unchanged.",
+                    icon="ℹ️",
+                )
                 rows = []
                 for case in new_cases:
+                    case_id = case.get("id", case.get("case_id", ""))
                     inp = case.get("input", case)
                     rubric = (case.get("expected_output") or case.get("rubric") or {})
                     if isinstance(rubric, dict) and "rubric" in rubric:
                         rubric = rubric["rubric"]
+                    notes = rubric.get("notes", "")
                     rows.append({
-                        "ID": case.get("case_id", case.get("id", "")),
+                        "Status": "✦ New" if case_id not in current_ids else "Modified",
+                        "ID": case_id,
                         "Customer": inp.get("customer_id", ""),
                         "Product": inp.get("product_id", ""),
                         "CTA": rubric.get("expected_cta", ""),
                         "Tone": rubric.get("expected_tone", ""),
+                        "Notes": notes[:80] + "…" if len(notes) > 80 else notes,
                     })
                 st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 

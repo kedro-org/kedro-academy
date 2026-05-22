@@ -31,6 +31,7 @@ class DemoState(BaseModel):
     reflection_id: str | None = None
     applied_id: str | None = None
     run_2_id: str | None = None
+    seed_at: str | None = None  # set by seed script; detected by UI to clear cache
 
     def can_run_agent_step1(self) -> bool:
         return self.state == "idle"

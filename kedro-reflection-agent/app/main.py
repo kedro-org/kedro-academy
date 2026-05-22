@@ -64,6 +64,12 @@ def main() -> None:
 
     demo = load_demo_state(STATE_PATH)
 
+    # Detect an external seed/reset (make seed / make reset) by comparing the
+    # seed_at timestamp in demo_state.json against the last one seen this session.
+    if demo.seed_at != st.session_state.get("_seed_at"):
+        st.cache_data.clear()
+        st.session_state["_seed_at"] = demo.seed_at
+
     hcol, rcol = st.columns([11, 1])
     with hcol:
         ui.page_header(kedro_avatar_url=_KEDRO_AVATAR)
