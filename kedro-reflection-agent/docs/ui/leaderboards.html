@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leaderboards — Reflection Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif']},colors:{brand:{50:'#EEF2FF',100:'#E0E7FF',200:'#C7D2FE',500:'#2251FF',600:'#1A3FCC'},teal:{50:'#F0FDFA',500:'#00C4B4'}}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;font-size:13.5px;font-weight:500;color:#475569;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-item:hover{background:#F1F5F9;color:#1E293B;}
+    .nav-item.active{background:#EEF2FF;color:#2251FF;font-weight:600;}
+    .nav-item .badge{margin-left:auto;background:#2251FF;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;}
+    .card{background:#fff;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgb(0 0 0/.06);}
+    ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px;}
+    #sidebar{transition:transform .25s cubic-bezier(.4,0,.2,1);}
+    @media(max-width:1024px){#sidebar{position:fixed;top:0;left:0;height:100vh;z-index:50;transform:translateX(-100%);}#sidebar.open{transform:translateX(0);}}
+    .rank-1{background:linear-gradient(135deg,#FEF9C3,#FDE68A);}
+    .rank-2{background:linear-gradient(135deg,#F1F5F9,#E2E8F0);}
+    .rank-3{background:linear-gradient(135deg,#FEF3C7,#FDE68A44);}
+  </style>
+</head>
+<body class="h-full text-slate-900 antialiased">
+<div class="flex h-full min-h-screen">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-0 left-0 h-screen z-40 lg:static lg:translate-x-0">
+  <div class="px-5 py-5 border-b border-slate-100">
+    <a href="reflection-hub.html" class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#2251FF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div><div class="text-sm font-bold text-slate-900 leading-tight">Reflection Hub</div><div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Agentic Reflection System</div></div>
+    </a>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+    <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-2 mb-2">Workspace</div>
+    <a href="reflection-hub.html" class="nav-item"><i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>Overview</a>
+    <a href="teams.html" class="nav-item"><i data-lucide="users" class="w-4 h-4 shrink-0"></i>Teams</a>
+    <a href="campaigns.html" class="nav-item"><i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>Campaigns</a>
+    <a href="sales.html" class="nav-item"><i data-lucide="briefcase" class="w-4 h-4 shrink-0"></i>Sales</a>
+    <a href="products.html" class="nav-item"><i data-lucide="package" class="w-4 h-4 shrink-0"></i>Products</a>
+    <a href="customer-support.html" class="nav-item"><i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>Customer Support</a>
+    <a href="marketing.html" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i>Marketing</a>
+    <div class="border-t border-slate-100 my-3"></div>
+    <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-2 mb-2">Platform</div>
+    <a href="reflections.html" class="nav-item"><i data-lucide="refresh-cw" class="w-4 h-4 shrink-0"></i>Reflections</a>
+    <a href="review-center.html" class="nav-item"><i data-lucide="clipboard-check" class="w-4 h-4 shrink-0"></i>Review Center<span class="badge">24</span></a>
+    <a href="leaderboards.html" class="nav-item active"><i data-lucide="trophy" class="w-4 h-4 shrink-0"></i>Leaderboards</a>
+    <a href="insights.html" class="nav-item"><i data-lucide="lightbulb" class="w-4 h-4 shrink-0"></i>Insights</a>
+    <a href="reports.html" class="nav-item"><i data-lucide="file-text" class="w-4 h-4 shrink-0"></i>Reports</a>
+    <a href="settings.html" class="nav-item"><i data-lucide="settings" class="w-4 h-4 shrink-0"></i>Settings</a>
+  </nav>
+  <div class="px-3 pb-4">
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+        <span class="text-xs font-semibold text-slate-700">Reflection Agent</span>
+        <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">Active</span>
+      </div>
+      <div class="text-[11px] text-slate-500 mb-3 leading-relaxed">B2B Sales loop running · run_2 in progress</div>
+      <a href="sales.html" class="block w-full text-center text-xs font-semibold border rounded-lg py-1.5 transition-colors" style="color:#2251FF;border-color:#C7D2FE;background:#EEF2FF">View Agent Activity</a>
+    </div>
+  </div>
+</aside>
+<div id="overlay" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col min-w-0">
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-6 py-3.5 flex items-center gap-4">
+    <button class="lg:hidden p-1.5 rounded-lg hover:bg-slate-100" onclick="toggleSidebar()"><i data-lucide="menu" class="w-5 h-5 text-slate-500"></i></button>
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <a href="reflection-hub.html" class="hover:text-slate-900">Portfolio</a>
+      <span>/</span><span class="font-semibold text-slate-900">Leaderboards</span>
+    </div>
+    <div class="flex-1"></div>
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#2251FF">RK</div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto px-6 py-6">
+    <!-- Podium -->
+    <div class="card p-6 mb-6">
+      <div class="text-center mb-6">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Current Portfolio Ranking</div>
+        <div class="text-lg font-bold text-slate-900">Agent Quality Leaderboard</div>
+      </div>
+      <div class="flex items-end justify-center gap-4">
+        <!-- 2nd -->
+        <div class="text-center">
+          <div class="w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-3 rank-2">
+            <div class="text-2xl font-black text-slate-500">2</div>
+          </div>
+          <div class="w-32 bg-slate-100 rounded-xl p-3 mx-auto" style="height:80px;display:flex;flex-direction:column;justify-content:flex-end">
+            <div class="text-xs font-bold text-slate-600 text-center">Customer Care</div>
+            <div class="text-xl font-black text-slate-800 text-center">0.83</div>
+          </div>
+        </div>
+        <!-- 1st -->
+        <div class="text-center">
+          <div class="text-2xl mb-1">🏆</div>
+          <div class="w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-3 rank-1">
+            <div class="text-2xl font-black text-amber-700">1</div>
+          </div>
+          <div class="w-36 rounded-xl p-3 mx-auto" style="background:#EEF2FF;height:110px;display:flex;flex-direction:column;justify-content:flex-end">
+            <div class="text-xs font-bold text-blue-700 text-center">B2B Sales</div>
+            <div class="text-2xl font-black text-blue-700 text-center">0.94</div>
+          </div>
+        </div>
+        <!-- 3rd -->
+        <div class="text-center">
+          <div class="w-20 h-20 rounded-xl flex items-center justify-center mx-auto mb-3 rank-3">
+            <div class="text-2xl font-black text-amber-600">3</div>
+          </div>
+          <div class="w-32 bg-slate-50 rounded-xl p-3 mx-auto" style="height:60px;display:flex;flex-direction:column;justify-content:flex-end">
+            <div class="text-xs font-bold text-slate-600 text-center">Cons. Marketing</div>
+            <div class="text-xl font-black text-slate-800 text-center">0.85</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <!-- Score radar -->
+      <div class="card p-5">
+        <div class="font-semibold text-slate-900 text-sm mb-4">Dimension Comparison — All Agents</div>
+        <canvas id="radarChart" height="200"></canvas>
+      </div>
+      <!-- Improvement velocity -->
+      <div class="card p-5">
+        <div class="font-semibold text-slate-900 text-sm mb-4">Improvement Velocity (Δ Score / Reflection)</div>
+        <canvas id="velChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Detailed table -->
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100">
+        <span class="font-semibold text-slate-900 text-sm">Detailed Dimension Scores</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-100">
+            <tr>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rank</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Agent</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Overall</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Tone</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Personalisation</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">CTA</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Conciseness</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Best Δ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            <tr>
+              <td class="px-5 py-3.5"><span class="text-lg">🥇</span></td>
+              <td class="px-4 py-3.5"><a href="sales.html" class="text-xs font-semibold text-blue-700 hover:underline">B2B Sales</a></td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-emerald-600">0.94</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.96</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.91</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.95</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.93</td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-emerald-600">+0.12</td>
+            </tr>
+            <tr>
+              <td class="px-5 py-3.5"><span class="text-lg">🥈</span></td>
+              <td class="px-4 py-3.5"><a href="customer-support.html" class="text-xs font-semibold text-teal-700 hover:underline">Customer Care</a></td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-slate-700">0.83</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.88</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.79</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.85</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.82</td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-emerald-600">+0.12</td>
+            </tr>
+            <tr>
+              <td class="px-5 py-3.5"><span class="text-lg">🥉</span></td>
+              <td class="px-4 py-3.5"><a href="marketing.html" class="text-xs font-semibold text-purple-700 hover:underline">Consumer Marketing</a></td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-slate-700">0.85</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.82</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.88</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.84</td>
+              <td class="px-4 py-3.5 text-right text-xs text-slate-600">0.87</td>
+              <td class="px-4 py-3.5 text-right text-xs font-bold text-emerald-600">+0.08</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+  lucide.createIcons();
+  function toggleSidebar(){const s=document.getElementById('sidebar'),o=document.getElementById('overlay');s.classList.toggle('open');o.classList.toggle('hidden');}
+  // Radar
+  new Chart(document.getElementById('radarChart').getContext('2d'),{type:'radar',data:{
+    labels:['Tone','Personalisation','CTA','Conciseness','Compliance'],
+    datasets:[
+      {label:'B2B Sales',data:[0.96,0.91,0.95,0.93,0.92],borderColor:'#2251FF',backgroundColor:'rgba(34,81,255,.1)',pointBackgroundColor:'#2251FF'},
+      {label:'Consumer Mktg',data:[0.82,0.88,0.84,0.87,0.80],borderColor:'#8B5CF6',backgroundColor:'rgba(139,92,246,.08)',pointBackgroundColor:'#8B5CF6'},
+      {label:'Customer Care',data:[0.88,0.79,0.85,0.82,0.86],borderColor:'#00C4B4',backgroundColor:'rgba(0,196,180,.08)',pointBackgroundColor:'#00C4B4'}
+    ]
+  },options:{responsive:true,plugins:{legend:{labels:{font:{size:10},boxWidth:8}}},scales:{r:{min:.6,max:1,ticks:{font:{size:9},stepSize:.1},grid:{color:'#F1F5F9'},pointLabels:{font:{size:10}}}}}});
+  // Velocity bar
+  new Chart(document.getElementById('velChart').getContext('2d'),{type:'bar',data:{
+    labels:['B2B Sales','Cons. Mktg','Customer Care'],
+    datasets:[{label:'Δ Score per Reflection',data:[0.12,0.08,0.10],backgroundColor:['#2251FF','#8B5CF6','#00C4B4'],borderRadius:6}]
+  },options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:.2,ticks:{font:{size:10},callback:v=>'+'+v.toFixed(2)},grid:{color:'#F1F5F9'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
+</script>
+</body>
+</html>

@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reflection Hub — Agentic Reflection System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            brand: { 50:'#EEF2FF', 100:'#E0E7FF', 200:'#C7D2FE', 500:'#2251FF', 600:'#1A3FCC' },
+            teal:  { 50:'#F0FDFA', 500:'#00C4B4', 600:'#0EB5A6' },
+          },
+          boxShadow: {
+            card: '0 1px 3px 0 rgb(0 0 0 / .07), 0 1px 2px -1px rgb(0 0 0 / .07)',
+            'card-hover': '0 4px 12px 0 rgb(0 0 0 / .10), 0 2px 4px -1px rgb(0 0 0 / .08)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #F8FAFC; }
+
+    /* ── sidebar links ── */
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 8px;
+      font-size: 13.5px; font-weight: 500; color: #475569;
+      cursor: pointer; transition: background .15s, color .15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: #F1F5F9; color: #1E293B; }
+    .nav-item.active { background: #EEF2FF; color: #2251FF; font-weight: 600; }
+    .nav-item .badge {
+      margin-left: auto; background: #2251FF; color: #fff;
+      border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 700;
+    }
+
+    /* ── cards ── */
+    .card  { background:#fff; border-radius:14px; border:1px solid #E2E8F0; box-shadow:0 1px 3px rgb(0 0 0/.06); }
+    .card-hover:hover { box-shadow:0 4px 14px rgb(0 0 0/.09); transform:translateY(-1px); transition:all .2s; }
+
+    /* ── scrollbar ── */
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
+
+    /* ── progress bar ── */
+    .progress { height:5px; border-radius:3px; background:#F1F5F9; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+
+    /* ── skeleton ── */
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    .skeleton {
+      background: linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);
+      background-size: 200% 100%; animation: shimmer 1.6s infinite; border-radius:6px;
+    }
+
+    /* ── review card ── */
+    .review-card { min-width:320px; max-width:320px; }
+
+    /* ── insight card gradient ── */
+    .insight-card {
+      background: linear-gradient(135deg,#fff 0%,#F8FAFC 100%);
+      border: 1px solid #E2E8F0; border-radius:12px; padding:16px;
+      box-shadow:0 1px 3px rgb(0 0 0/.05);
+    }
+
+    /* ── dark mode ── */
+    html.dark body { background:#0F172A; }
+    html.dark .card { background:#1E293B; border-color:#334155; }
+    html.dark .nav-item { color:#94A3B8; }
+    html.dark .nav-item:hover { background:#1E293B; color:#F1F5F9; }
+    html.dark .nav-item.active { background:#1E3A8A22; color:#93C5FD; }
+    html.dark .progress { background:#334155; }
+    html.dark .insight-card { background:#1E293B; border-color:#334155; }
+    html.dark #sidebar { background:#0F172A; border-color:#1E293B; }
+    html.dark #top-header { background:#0F172A; border-color:#1E293B; }
+    html.dark .skeleton { background:linear-gradient(90deg,#1E293B 25%,#334155 50%,#1E293B 75%); background-size:200% 100%; }
+
+    /* ── sidebar transition ── */
+    #sidebar { transition: transform .25s cubic-bezier(.4,0,.2,1); }
+    @media(max-width:1024px) {
+      #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:50; transform:translateX(-100%); }
+      #sidebar.open { transform:translateX(0); }
+      #overlay { display:block; }
+    }
+  </style>
+</head>
+
+<body class="h-full text-slate-900 antialiased">
+
+<!-- ═══════════════════════════════ LAYOUT WRAPPER ═══════════════════════════ -->
+<div class="flex h-full min-h-screen">
+
+  <!-- ══════════════════════════════ SIDEBAR ══════════════════════════════════ -->
+  <aside id="sidebar" class="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-0 left-0 h-screen z-40 lg:static lg:translate-x-0">
+
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-700 text-slate-900 leading-tight font-bold">Reflection Hub</div>
+          <div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Agentic Reflection System</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+
+      <div class="text-[10px] font-600 text-slate-400 uppercase tracking-widest px-2 mb-2 font-semibold">Workspace</div>
+
+      <a href="reflection-hub.html" class="nav-item active"><i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> Overview</a>
+      <a href="teams.html" class="nav-item"><i data-lucide="users" class="w-4 h-4 shrink-0"></i> Teams</a>
+      <a href="campaigns.html" class="nav-item"><i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i> Campaigns</a>
+      <a href="sales.html" class="nav-item"><i data-lucide="briefcase" class="w-4 h-4 shrink-0"></i> Sales</a>
+      <a href="products.html" class="nav-item"><i data-lucide="package" class="w-4 h-4 shrink-0"></i> Products</a>
+      <a href="customer-support.html" class="nav-item"><i data-lucide="headphones" class="w-4 h-4 shrink-0"></i> Customer Support</a>
+      <a href="marketing.html" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i> Marketing</a>
+      <div class="border-t border-slate-100 my-3"></div>
+      <div class="text-[10px] font-600 text-slate-400 uppercase tracking-widest px-2 mb-2 font-semibold">Platform</div>
+      <a href="reflections.html" class="nav-item"><i data-lucide="refresh-cw" class="w-4 h-4 shrink-0"></i> Reflections</a>
+      <a href="review-center.html" class="nav-item"><i data-lucide="clipboard-check" class="w-4 h-4 shrink-0"></i> Review Center <span class="badge">24</span></a>
+      <a href="leaderboards.html" class="nav-item"><i data-lucide="trophy" class="w-4 h-4 shrink-0"></i> Leaderboards</a>
+      <a href="insights.html" class="nav-item"><i data-lucide="lightbulb" class="w-4 h-4 shrink-0"></i> Insights</a>
+      <a href="reports.html" class="nav-item"><i data-lucide="file-text" class="w-4 h-4 shrink-0"></i> Reports</a>
+      <a href="settings.html" class="nav-item"><i data-lucide="settings" class="w-4 h-4 shrink-0"></i> Settings</a>
+    </nav>
+
+    <!-- Agent Status -->
+    <div class="px-3 pb-4">
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-semibold text-slate-700">Reflection Agent</span>
+          <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">Active</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mb-3 leading-relaxed">B2B Sales loop running · run_2 in progress</div>
+        <a href="sales.html" class="block w-full text-center text-xs font-semibold text-brand-500 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-lg py-1.5 transition-colors">View Agent Activity</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden" onclick="toggleSidebar()"></div>
+
+  <!-- ══════════════════════════ MAIN CONTENT ══════════════════════════════════ -->
+  <div class="flex-1 flex flex-col min-w-0 lg:ml-0">
+
+    <!-- ── TOP HEADER ── -->
+    <header id="top-header" class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-6 py-3.5 flex items-center gap-4">
+      <!-- Mobile menu -->
+      <button class="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 text-slate-500" onclick="toggleSidebar()">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Welcome -->
+      <div class="flex-1">
+        <h1 class="text-base font-semibold text-slate-900">Welcome back, Ravi 👋</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Here's what your reflection agents found this week.</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-2.5">
+        <!-- Date range -->
+        <button class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 transition-colors">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          Q2 2026 &nbsp;·&nbsp; Last 30 days
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+        </button>
+
+        <!-- Filter -->
+        <button class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 transition-colors">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+          Filters
+        </button>
+
+        <!-- Dark mode toggle -->
+        <button id="dark-toggle" onclick="toggleDark()" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors" title="Toggle dark mode">
+          <i data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="relative p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <!-- Avatar -->
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-teal-500 flex items-center justify-center text-white text-xs font-bold cursor-pointer">RK</div>
+      </div>
+    </header>
+
+    <!-- ── PAGE BODY ── -->
+    <main class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+
+      <!-- ── KPI STRIP ── -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+
+        <!-- Reflections Generated -->
+        <div class="card p-4 card-hover cursor-default">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center">
+              <i data-lucide="refresh-cw" class="w-4.5 h-4.5 text-brand-500" style="width:18px;height:18px"></i>
+            </div>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">↑ 12%</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900 leading-none mb-1">1,248</div>
+          <div class="text-xs text-slate-500 font-medium">Reflections Generated</div>
+          <div class="text-[11px] text-slate-400 mt-1">vs 1,114 last period</div>
+        </div>
+
+        <!-- Pending -->
+        <div class="card p-4 card-hover cursor-default">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+              <i data-lucide="clock" class="w-4.5 h-4.5 text-amber-500" style="width:18px;height:18px"></i>
+            </div>
+            <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">24 new</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900 leading-none mb-1">24</div>
+          <div class="text-xs text-slate-500 font-medium">Awaiting Review</div>
+          <div class="text-[11px] text-slate-400 mt-1">↳ 3 cross-unit proposals</div>
+        </div>
+
+        <!-- Approved -->
+        <div class="card p-4 card-hover cursor-default">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <i data-lucide="check-circle" class="w-4.5 h-4.5 text-emerald-500" style="width:18px;height:18px"></i>
+            </div>
+            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">↑ 8%</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900 leading-none mb-1">186</div>
+          <div class="text-xs text-slate-500 font-medium">Approved This Week</div>
+          <div class="text-[11px] text-slate-400 mt-1">2 rollbacks this quarter</div>
+        </div>
+
+        <!-- Implementation Rate -->
+        <div class="card p-4 card-hover cursor-default">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
+              <i data-lucide="zap" class="w-4.5 h-4.5 text-violet-500" style="width:18px;height:18px"></i>
+            </div>
+            <span class="text-[10px] font-semibold text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2 py-0.5">↑ 5pp</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900 leading-none mb-1">68<span class="text-base font-semibold text-slate-400">%</span></div>
+          <div class="text-xs text-slate-500 font-medium">Implementation Rate</div>
+          <div class="text-[11px] text-slate-400 mt-1">Target: 75% by Q3</div>
+        </div>
+
+        <!-- Impact Score -->
+        <div class="card p-4 card-hover cursor-default">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
+              <i data-lucide="trending-up" class="w-4.5 h-4.5 text-teal-500" style="width:18px;height:18px"></i>
+            </div>
+            <span class="text-[10px] font-semibold text-teal-600 bg-teal-50 border border-teal-200 rounded-full px-2 py-0.5">↑ 0.4</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900 leading-none mb-1">8.7<span class="text-base font-semibold text-slate-400">/10</span></div>
+          <div class="text-xs text-slate-500 font-medium">Impact Score</div>
+          <div class="text-[11px] text-slate-400 mt-1">Platform avg across units</div>
+        </div>
+
+      </div>
+
+      <!-- ── MAIN GRID ROW 1 ── -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Domain Progress Table (2/3) -->
+        <div class="lg:col-span-2 card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Reflection Progress by Domain</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Quality scores and implementation rates · Q2 2026</p>
+            </div>
+            <button class="text-xs font-medium text-brand-500 hover:text-brand-600 transition-colors">View all →</button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-100">
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-3 pr-4">Domain</th>
+                  <th class="text-right text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-3 px-3">Reflections</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-3 px-3 w-36">Approved %</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-3 px-3 w-36">Implemented %</th>
+                  <th class="text-right text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-3 pl-3">Score</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+
+                <!-- B2B Sales -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="briefcase" class="text-brand-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">B2B Sales</div>
+                        <div class="text-[10px] text-slate-400">Enterprise outreach</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">312</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-brand-500" style="width:82%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">82%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-emerald-500" style="width:74%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">74%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-emerald-600">0.94</span>
+                    <span class="text-[10px] text-emerald-400 ml-1">↑</span>
+                  </td>
+                </tr>
+
+                <!-- Consumer Mkt -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="megaphone" class="text-teal-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">Consumer Mkt</div>
+                        <div class="text-[10px] text-slate-400">Plan &amp; device offers</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">284</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-teal-500" style="width:71%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">71%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-amber-400" style="width:62%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">62%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-amber-500">0.88</span>
+                    <span class="text-[10px] text-slate-400 ml-1">↔</span>
+                  </td>
+                </tr>
+
+                <!-- Customer Care -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="headphones" class="text-amber-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">Customer Care</div>
+                        <div class="text-[10px] text-slate-400">Support replies</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">197</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-amber-400" style="width:64%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">64%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-rose-400" style="width:54%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">54%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-rose-500">0.81</span>
+                    <span class="text-[10px] text-rose-400 ml-1">↓</span>
+                  </td>
+                </tr>
+
+                <!-- Products -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="package" class="text-violet-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">Products</div>
+                        <div class="text-[10px] text-slate-400">Feature &amp; roadmap</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">241</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-violet-500" style="width:77%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">77%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-violet-400" style="width:69%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">69%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-violet-600">0.91</span>
+                    <span class="text-[10px] text-emerald-400 ml-1">↑</span>
+                  </td>
+                </tr>
+
+                <!-- Campaigns -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="bar-chart-2" class="text-pink-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">Campaigns</div>
+                        <div class="text-[10px] text-slate-400">Outreach &amp; ads</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">128</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-pink-400" style="width:58%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">58%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-pink-300" style="width:51%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">51%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-slate-600">0.85</span>
+                    <span class="text-[10px] text-slate-400 ml-1">↔</span>
+                  </td>
+                </tr>
+
+                <!-- Teams -->
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="users" class="text-slate-500" style="width:13px;height:13px"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-800">Teams</div>
+                        <div class="text-[10px] text-slate-400">Cross-functional</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3 text-right text-xs font-semibold text-slate-700">86</td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-slate-400" style="width:70%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">70%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <div class="flex items-center gap-2">
+                      <div class="progress flex-1"><div class="progress-fill bg-slate-300" style="width:65%"></div></div>
+                      <span class="text-[11px] font-medium text-slate-600 w-8 text-right">65%</span>
+                    </div>
+                  </td>
+                  <td class="py-3 pl-3 text-right">
+                    <span class="text-xs font-bold text-emerald-600">0.89</span>
+                    <span class="text-[10px] text-emerald-400 ml-1">↑</span>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Themes (1/3) -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Top Reflection Themes</h2>
+              <p class="text-xs text-slate-400 mt-0.5">By volume this week</p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+
+            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default">
+              <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
+                <i data-lucide="heart" class="text-rose-400" style="width:14px;height:14px"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Customer Experience</div>
+                <div class="progress mt-1"><div class="progress-fill bg-rose-400" style="width:78%"></div></div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-slate-800">342</div>
+                <div class="text-[10px] text-slate-400">27%</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                <i data-lucide="tag" class="text-amber-400" style="width:14px;height:14px"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Pricing &amp; Discounts</div>
+                <div class="progress mt-1"><div class="progress-fill bg-amber-400" style="width:62%"></div></div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-slate-800">271</div>
+                <div class="text-[10px] text-slate-400">22%</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default">
+              <div class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
+                <i data-lucide="target" class="text-brand-500" style="width:14px;height:14px"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Lead Quality</div>
+                <div class="progress mt-1"><div class="progress-fill bg-brand-500" style="width:48%"></div></div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-slate-800">209</div>
+                <div class="text-[10px] text-slate-400">17%</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default">
+              <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                <i data-lucide="layers" class="text-violet-400" style="width:14px;height:14px"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Product Usability</div>
+                <div class="progress mt-1"><div class="progress-fill bg-violet-400" style="width:41%"></div></div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-slate-800">178</div>
+                <div class="text-[10px] text-slate-400">14%</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors cursor-default">
+              <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                <i data-lucide="timer" class="text-teal-500" style="width:14px;height:14px"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Response Time</div>
+                <div class="progress mt-1"><div class="progress-fill bg-teal-400" style="width:30%"></div></div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-slate-800">131</div>
+                <div class="text-[10px] text-slate-400">10%</div>
+              </div>
+            </div>
+
+          </div>
+
+          <button class="mt-4 w-full text-xs font-semibold text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg py-2 transition-colors">
+            View all themes
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── MAIN GRID ROW 2 ── -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Trend Chart (2/3) -->
+        <div class="lg:col-span-2 card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Reflection Trend</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Generated · Approved · Implemented &nbsp;— last 7 days</p>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] font-medium text-slate-500">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-brand-500 inline-block"></span>Generated</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>Approved</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-400 inline-block"></span>Implemented</span>
+            </div>
+          </div>
+          <div style="height:220px; position:relative;">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Leaderboard (1/3) -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Team Leaderboard</h2>
+              <p class="text-xs text-slate-400 mt-0.5">By impact score · Q2 2026</p>
+            </div>
+            <i data-lucide="trophy" class="text-amber-400" style="width:16px;height:16px"></i>
+          </div>
+
+          <div class="space-y-3">
+
+            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-amber-50 border border-amber-100">
+              <div class="text-sm font-bold text-amber-500 w-5 text-center shrink-0">1</div>
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-brand-500 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">GS</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Growth Squad</div>
+                <div class="progress mt-1"><div class="progress-fill bg-amber-400" style="width:92%"></div></div>
+              </div>
+              <div class="text-xs font-bold text-amber-600 shrink-0">9.2</div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="text-sm font-bold text-slate-400 w-5 text-center shrink-0">2</div>
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">RR</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Revenue Rangers</div>
+                <div class="progress mt-1"><div class="progress-fill bg-emerald-400" style="width:88%"></div></div>
+              </div>
+              <div class="text-xs font-bold text-emerald-600 shrink-0">8.8</div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="text-sm font-bold text-slate-400 w-5 text-center shrink-0">3</div>
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">CC</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Customer Champions</div>
+                <div class="progress mt-1"><div class="progress-fill bg-teal-400" style="width:83%"></div></div>
+              </div>
+              <div class="text-xs font-bold text-teal-600 shrink-0">8.3</div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="text-sm font-bold text-slate-400 w-5 text-center shrink-0">4</div>
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">PP</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Product Pioneers</div>
+                <div class="progress mt-1"><div class="progress-fill bg-violet-400" style="width:79%"></div></div>
+              </div>
+              <div class="text-xs font-bold text-violet-600 shrink-0">7.9</div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="text-sm font-bold text-slate-400 w-5 text-center shrink-0">5</div>
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">MM</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-slate-800 truncate">Marketing Mavericks</div>
+                <div class="progress mt-1"><div class="progress-fill bg-pink-400" style="width:74%"></div></div>
+              </div>
+              <div class="text-xs font-bold text-pink-600 shrink-0">7.4</div>
+            </div>
+
+          </div>
+
+          <button class="mt-4 w-full text-xs font-semibold text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg py-2 transition-colors">
+            View full leaderboard
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── ISSUE MATRIX ── -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Issue Matrix</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Failure patterns across domains · 2 flagged systemic · scores below 0.80 need attention</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Legend -->
+            <div class="hidden sm:flex items-center gap-4 text-[10px] font-medium text-slate-400 mr-2">
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-rose-500"></span>Critical &lt;0.65</span>
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-amber-400"></span>Needs work 0.65–0.79</span>
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-brand-300" style="background:#93AEFF"></span>Acceptable 0.80–0.89</span>
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>Good ≥0.90</span>
+            </div>
+            <button class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 transition-colors flex items-center gap-1.5">
+              <i data-lucide="sliders-horizontal" style="width:12px;height:12px"></i> Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 w-48">Failure Pattern</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">B2B Sales</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Consumer Mkt</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Customer Care</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Products</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Campaigns</th>
+                  <th class="text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3 w-28">Systemic</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+
+                <!-- Ungrounded claims — systemic -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="alert-triangle" class="text-rose-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Ungrounded claims</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:72px;background:#EF4444"></div><span class="text-xs font-bold text-rose-600 tabular-nums">0.58 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:80px;background:#EF4444"></div><span class="text-xs font-bold text-rose-600 tabular-nums">0.54 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:24px;background:#34D399;opacity:0.6"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.90</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:56px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.71 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.68</span></div></td>
+                  <td class="px-4 py-3.5 text-center">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">⚠ Systemic</span>
+                  </td>
+                </tr>
+
+                <!-- Shallow personalisation — systemic -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="user-x" class="text-rose-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Shallow personalisation</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:60px;background:#F59E0B"></div><span class="text-xs font-bold text-amber-600 tabular-nums">0.64 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:44px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.72</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:48px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.74</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.70</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:40px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.75</span></div></td>
+                  <td class="px-4 py-3.5 text-center">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">⚠ Systemic</span>
+                  </td>
+                </tr>
+
+                <!-- Weak call-to-action -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="mouse-pointer-click" class="text-slate-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Weak call-to-action</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:20px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.89</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:68px;background:#F59E0B"></div><span class="text-xs font-bold text-amber-600 tabular-nums">0.63 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:10px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.95</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:28px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.84</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:56px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.70</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="text-xs text-slate-300">–</span></td>
+                </tr>
+
+                <!-- Tone mismatch -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="message-square" class="text-slate-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Tone mismatch</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:8px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.96</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:16px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.92</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:88px;background:#EF4444"></div><span class="text-xs font-bold text-rose-600 tabular-nums">0.55 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:24px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.88</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:32px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.85</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="text-xs text-slate-300">–</span></td>
+                </tr>
+
+                <!-- Missing product detail -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="file-search" class="text-slate-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Missing product detail</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:48px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.74</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:32px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.81</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:6px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.97</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:44px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.73</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#F59E0B"></div><span class="text-xs font-semibold text-amber-600 tabular-nums">0.69</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="text-xs text-slate-300">–</span></td>
+                </tr>
+
+                <!-- Length / structure -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="align-left" class="text-slate-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Length / structure</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:16px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.93</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:10px;background:#34D399;opacity:0.55"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.95</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#F59E0B"></div><span class="text-xs font-bold text-amber-600 tabular-nums">0.62 ▼</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:24px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.87</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:40px;background:#93AEFF;opacity:0.8"></div><span class="text-xs font-semibold text-brand-500 tabular-nums">0.82</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="text-xs text-slate-300">–</span></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Systemic callout footer -->
+          <div class="border-t border-slate-100 px-5 py-3 bg-amber-50/60 flex items-center gap-3">
+            <i data-lucide="alert-triangle" class="text-amber-500 shrink-0" style="width:14px;height:14px"></i>
+            <p class="text-xs text-amber-700 font-medium">
+              <strong>2 systemic patterns detected</strong> — Ungrounded claims and Shallow personalisation appear across all tracked domains.
+              These require a <strong>platform-level fix</strong>, not a per-team intervention.
+            </p>
+            <button class="ml-auto text-xs font-semibold text-brand-500 hover:text-brand-600 whitespace-nowrap transition-colors">
+              Create platform proposal →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUCCESS MATRIX ── -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Success Matrix</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Patterns working well across domains · consistently high scores signal repeatable strengths</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="hidden sm:flex items-center gap-4 text-[10px] font-medium text-slate-400 mr-2">
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>Excellent ≥0.90</span>
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-300"></span>Good 0.80–0.89</span>
+              <span class="flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-amber-300"></span>Watch 0.70–0.79</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-emerald-50/60 border-b border-emerald-100">
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3 w-48">Strength Pattern</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">B2B Sales</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Consumer Mkt</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Customer Care</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Products</th>
+                  <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Campaigns</th>
+                  <th class="text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3 w-28">Consistent</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+
+                <!-- Subject line clarity -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="type" class="text-emerald-500 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Subject line clarity</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:76px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.94</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:68px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.92</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.88</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:80px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.95</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#10B981"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.91</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">✓ Strength</span></td>
+                </tr>
+
+                <!-- Structural completeness -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="layout-list" class="text-emerald-500 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Structural completeness</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:84px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.96</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:72px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.93</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:56px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.87</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:80px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.95</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#10B981"></div><span class="text-xs font-semibold text-emerald-600 tabular-nums">0.90</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">✓ Strength</span></td>
+                </tr>
+
+                <!-- Factual product grounding -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="shield-check" class="text-emerald-500 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Factual product grounding</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.91</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:48px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.84</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:76px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.94</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:72px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.93</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.88</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">✓ Strength</span></td>
+                </tr>
+
+                <!-- Professional tone -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="smile" class="text-emerald-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Professional tone</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:80px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.95</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:56px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.89</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:76px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.94</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:72px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.93</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.88</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">✓ Strength</span></td>
+                </tr>
+
+                <!-- Urgency & timing -->
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="clock" class="text-amber-400 shrink-0" style="width:13px;height:13px"></i>
+                      <span class="text-xs font-semibold text-slate-800">Urgency &amp; timing signals</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:52px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.88</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:64px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.91</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:36px;background:#FCD34D"></div><span class="text-xs font-semibold text-amber-500 tabular-nums">0.79</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:44px;background:#6EE7B7"></div><span class="text-xs font-semibold text-emerald-500 tabular-nums">0.85</span></div></td>
+                  <td class="px-4 py-3.5"><div class="flex items-center gap-2"><div class="h-3.5 rounded" style="width:68px;background:#10B981"></div><span class="text-xs font-bold text-emerald-600 tabular-nums">0.92</span></div></td>
+                  <td class="px-4 py-3.5 text-center"><span class="text-xs text-slate-300">–</span></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Strength callout footer -->
+          <div class="border-t border-emerald-100 px-5 py-3 bg-emerald-50/50 flex items-center gap-3">
+            <i data-lucide="check-circle" class="text-emerald-500 shrink-0" style="width:14px;height:14px"></i>
+            <p class="text-xs text-emerald-700 font-medium">
+              <strong>4 consistent strengths</strong> — Subject clarity, structural completeness, factual grounding, and professional tone are stable across all domains.
+              These are your <strong>platform-wide baselines</strong> to protect in every reflection cycle.
+            </p>
+            <button class="ml-auto text-xs font-semibold text-emerald-600 hover:text-emerald-700 whitespace-nowrap transition-colors">
+              Export as benchmark →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVIEW CENTER ── -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Review Center</h2>
+            <p class="text-xs text-slate-400 mt-0.5">24 proposals awaiting your decision</p>
+          </div>
+          <button class="text-xs font-medium text-brand-500 hover:text-brand-600 flex items-center gap-1 transition-colors">
+            Open full queue <i data-lucide="arrow-right" style="width:13px;height:13px"></i>
+          </button>
+        </div>
+
+        <div class="flex gap-4 overflow-x-auto pb-2" style="scrollbar-width:thin">
+
+          <!-- Card 1 -->
+          <div class="review-card card card-hover flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-semibold text-brand-500 bg-brand-50 border border-brand-200 rounded-full px-2.5 py-0.5">B2B Sales</span>
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">High Impact</span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-900 mb-1.5 leading-snug">Adjust discount strategy for enterprise accounts</h3>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3 flex-1">Reflection identifies that enterprise accounts respond 34% better to value-led pitches over price-led ones. Proposed prompt update reduces discount mentions.</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-400 mb-3">
+              <span class="flex items-center gap-1"><i data-lucide="zap" style="width:11px;height:11px;color:#8B5CF6"></i> Score: 9.1</span>
+              <span class="flex items-center gap-1"><i data-lucide="shield-check" style="width:11px;height:11px;color:#10B981"></i> 94% confidence</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-3">Source: run_1 · 12 eval cases</div>
+            <div class="flex gap-2 mt-auto">
+              <button class="flex-1 text-[11px] font-semibold text-slate-500 border border-slate-200 hover:border-rose-300 hover:text-rose-500 rounded-lg py-2 px-4 transition-colors">Reject</button>
+              <button class="flex-1 text-[11px] font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg py-2 px-4 transition-colors">Review</button>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="review-card card card-hover flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-semibold text-teal-600 bg-teal-50 border border-teal-200 rounded-full px-2.5 py-0.5">Consumer Mkt</span>
+              <span class="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">Medium Impact</span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-900 mb-1.5 leading-snug">Increase budget for retargeting campaigns</h3>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3 flex-1">Agent proposes that upgrade offer emails perform 28% better when retargeting is active. Skill update includes retargeting context in email body.</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-400 mb-3">
+              <span class="flex items-center gap-1"><i data-lucide="zap" style="width:11px;height:11px;color:#8B5CF6"></i> Score: 7.8</span>
+              <span class="flex items-center gap-1"><i data-lucide="shield-check" style="width:11px;height:11px;color:#10B981"></i> 81% confidence</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-3">Source: refl_1 · Consumer eval set</div>
+            <div class="flex gap-2 mt-auto">
+              <button class="flex-1 text-[11px] font-semibold text-slate-500 border border-slate-200 hover:border-rose-300 hover:text-rose-500 rounded-lg py-2 px-4 transition-colors">Reject</button>
+              <button class="flex-1 text-[11px] font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg py-2 px-4 transition-colors">Review</button>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="review-card card card-hover flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">Customer Care</span>
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">High Impact</span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-900 mb-1.5 leading-snug">Implement auto-response for Tier 1 queries</h3>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3 flex-1">Reflection identifies tone mismatch in 23% of Tier 1 support replies. Proposes stricter tone rubric and reply template update for routine queries.</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-400 mb-3">
+              <span class="flex items-center gap-1"><i data-lucide="zap" style="width:11px;height:11px;color:#8B5CF6"></i> Score: 8.9</span>
+              <span class="flex items-center gap-1"><i data-lucide="shield-check" style="width:11px;height:11px;color:#10B981"></i> 89% confidence</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-3">Source: run_1 · 20 eval cases</div>
+            <div class="flex gap-2 mt-auto">
+              <button class="flex-1 text-[11px] font-semibold text-slate-500 border border-slate-200 hover:border-rose-300 hover:text-rose-500 rounded-lg py-2 px-4 transition-colors">Reject</button>
+              <button class="flex-1 text-[11px] font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg py-2 px-4 transition-colors">Review</button>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="review-card card card-hover flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-semibold text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-0.5">Products</span>
+              <span class="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">Medium Impact</span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-900 mb-1.5 leading-snug">Improve onboarding flow for new users</h3>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3 flex-1">Agent detects missing product detail patterns in 31% of outreach. Proposes enhanced feature mention rubric targeting specific customer pain points.</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-400 mb-3">
+              <span class="flex items-center gap-1"><i data-lucide="zap" style="width:11px;height:11px;color:#8B5CF6"></i> Score: 7.4</span>
+              <span class="flex items-center gap-1"><i data-lucide="shield-check" style="width:11px;height:11px;color:#10B981"></i> 77% confidence</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-3">Source: refl_1 · Products eval set</div>
+            <div class="flex gap-2 mt-auto">
+              <button class="flex-1 text-[11px] font-semibold text-slate-500 border border-slate-200 hover:border-rose-300 hover:text-rose-500 rounded-lg py-2 px-4 transition-colors">Reject</button>
+              <button class="flex-1 text-[11px] font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg py-2 px-4 transition-colors">Review</button>
+            </div>
+          </div>
+
+          <!-- Card 5 — cross-unit proposal -->
+          <div class="review-card flex flex-col" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1px solid #C7D2FE;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgb(0 0 0/.06)">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[10px] font-semibold text-brand-500 bg-white border border-brand-200 rounded-full px-2.5 py-0.5">🔁 Cross-Unit</span>
+              <span class="text-[10px] font-bold text-brand-600 bg-white border border-brand-200 rounded-full px-2 py-0.5">Platform</span>
+            </div>
+            <h3 class="text-xs font-semibold text-slate-900 mb-1.5 leading-snug">Propagate "Grounding fix" from B2B Sales → Consumer Mkt</h3>
+            <p class="text-[11px] text-slate-600 leading-relaxed mb-3 flex-1">B2B Sales prompt v4 resolved ungrounded claims (0.58→0.91). The same failure pattern is open in Consumer Mkt at 0.54. Adopting the fix may close a 0.10-point gap.</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-500 mb-3">
+              <span class="flex items-center gap-1"><i data-lucide="zap" style="width:11px;height:11px;color:#8B5CF6"></i> Est. +0.10</span>
+              <span class="flex items-center gap-1"><i data-lucide="shield-check" style="width:11px;height:11px;color:#10B981"></i> 92% confidence</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-3">Auto-detected by portfolio engine</div>
+            <div class="flex gap-2 mt-auto">
+              <button class="flex-1 text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-500 rounded-lg py-2 px-4 transition-colors">Dismiss</button>
+              <button class="flex-1 text-[11px] font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg py-2 px-4 transition-colors">Adopt</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── INSIGHTS BAR ── -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-slate-900">AI-Generated Insights</h2>
+          <span class="text-[10px] font-medium text-slate-400">Updated 12 min ago</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div class="insight-card">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="shield-check" class="text-emerald-600" style="width:14px;height:14px"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-800 mb-1 leading-snug">High-confidence reflections perform better</div>
+                <div class="text-[11px] text-slate-500 leading-relaxed">Proposals with &gt;85% confidence have a 91% approval rate vs 63% below that threshold.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="heart" class="text-rose-500" style="width:14px;height:14px"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-800 mb-1 leading-snug">CX reflections drive the highest impact</div>
+                <div class="text-[11px] text-slate-500 leading-relaxed">Customer experience theme averages 8.9/10 impact, 15% above the platform mean.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="users" class="text-violet-600" style="width:14px;height:14px"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-800 mb-1 leading-snug">Teams implementing &gt;70% outperform peers</div>
+                <div class="text-[11px] text-slate-500 leading-relaxed">Top-quartile teams by implementation rate show 2.3× more improvement in eval scores.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="trending-up" class="text-brand-500" style="width:14px;height:14px"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-800 mb-1 leading-snug">B2B Sales is the top domain this week</div>
+                <div class="text-[11px] text-slate-500 leading-relaxed">Score improved from 0.88 → 0.94 following the grounding fix. Now the platform benchmark.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main><!-- /main -->
+  </div><!-- /main content -->
+</div><!-- /layout -->
+
+<!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
+<script>
+  // ── Lucide icons ──
+  lucide.createIcons();
+
+  // ── Chart.js trend chart ──
+  const ctx = document.getElementById('trendChart');
+  if (ctx) {
+    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Generated',
+            data: [182, 201, 178, 220, 195, 160, 112],
+            borderColor: '#2251FF',
+            backgroundColor: 'rgba(34,81,255,0.06)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#2251FF',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true,
+          },
+          {
+            label: 'Approved',
+            data: [124, 149, 131, 167, 148, 122, 85],
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16,185,129,0.04)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#10B981',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true,
+          },
+          {
+            label: 'Implemented',
+            data: [88, 109, 97, 128, 112, 89, 61],
+            borderColor: '#8B5CF6',
+            backgroundColor: 'rgba(139,92,246,0.04)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#8B5CF6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#1E293B',
+            bodyColor: '#475569',
+            borderColor: '#E2E8F0',
+            borderWidth: 1,
+            padding: 12,
+            boxShadow: '0 4px 12px rgb(0 0 0 / .10)',
+            callbacks: {
+              title: (items) => `${items[0].label}`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { font: { size: 11, family: 'Inter' }, color: '#94A3B8' }
+          },
+          y: {
+            grid: { color: '#F1F5F9', drawBorder: false },
+            border: { display: false, dash: [4,4] },
+            ticks: { font: { size: 11, family: 'Inter' }, color: '#94A3B8', stepSize: 50 },
+            min: 0,
+          }
+        }
+      }
+    });
+  }
+
+  // ── Sidebar toggle (mobile) ──
+  function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('overlay');
+    sb.classList.toggle('open');
+    ov.classList.toggle('hidden');
+  }
+
+  // ── Dark mode ──
+  function toggleDark() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    const icon = document.querySelector('#dark-toggle i');
+    if (html.classList.contains('dark')) {
+      icon.setAttribute('data-lucide', 'sun');
+    } else {
+      icon.setAttribute('data-lucide', 'moon');
+    }
+    lucide.createIcons();
+  }
+</script>
+
+</body>
+</html>
