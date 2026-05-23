@@ -1,10 +1,21 @@
 # Catalog entries used by the `apply` pipeline.
 #
-# Inputs:
-#   - approved reflection: data/outputs/reflections/{reflection_id}/...
+# Inputs (reused from other catalogs — no new entries needed):
+#   - proposed_prompt:    catalog_reflection.yml  (LangfusePromptDataset)
+#   - proposed_skill:     catalog_reflection.yml  (text.TextDataset)
+#   - proposed_eval_cases:catalog_reflection.yml  (LangfuseEvaluationDataset)
 #
-# Outputs:
-#   - new prompt:        pushed to Langfuse (new version of the campaign prompt)
-#   - new skill:         written to data/campaign/skills/b2b_email_style.md
-#   - new eval cases:    pushed to Langfuse evaluation dataset
-#   - audit:             data/outputs/apply_history.json (append-only)
+# Output targets (reused from other catalogs — no new entries needed):
+#   - system_prompt:      catalog_campaign.yml    (LangfusePromptDataset → new Langfuse version)
+#   - skill_text:         catalog_campaign.yml    (text.TextDataset → overwrites disk)
+#   - eval_cases:         catalog_evaluation.yml  (LangfuseEvaluationDataset → appends)
+#
+# New output:
+#   - apply_history:      data/outputs/apply_history.json (append-only, managed in node)
+
+
+# --- Audit log ---------------------------------------------------------------
+
+apply_history:
+  type: json.JSONDataset
+  filepath: data/outputs/apply_history.json
