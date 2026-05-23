@@ -20,7 +20,7 @@ from pathlib import Path
 
 
 def main() -> None:
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8020
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
 
     # Resolve docs/ui/ relative to this script's location
     ui_dir = Path(__file__).parent / "ui"
