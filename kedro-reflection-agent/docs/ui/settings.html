@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — Reflection Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif']},colors:{brand:{50:'#EEF2FF',100:'#E0E7FF',200:'#C7D2FE',500:'#2251FF',600:'#1A3FCC'},teal:{50:'#F0FDFA',500:'#00C4B4'}}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;font-size:13.5px;font-weight:500;color:#475569;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-item:hover{background:#F1F5F9;color:#1E293B;}
+    .nav-item.active{background:#EEF2FF;color:#2251FF;font-weight:600;}
+    .nav-item .badge{margin-left:auto;background:#2251FF;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;}
+    .card{background:#fff;border-radius:14px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgb(0 0 0/.06);}
+    ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px;}
+    #sidebar{transition:transform .25s cubic-bezier(.4,0,.2,1);}
+    @media(max-width:1024px){#sidebar{position:fixed;top:0;left:0;height:100vh;z-index:50;transform:translateX(-100%);}#sidebar.open{transform:translateX(0);}}
+    .tab-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;color:#64748B;cursor:pointer;border:none;background:transparent;transition:all .15s;display:flex;align-items:center;gap:8px;width:100%;text-align:left;}
+    .tab-btn.active{background:#EEF2FF;color:#2251FF;font-weight:600;}
+    .tab-btn:hover:not(.active){background:#F1F5F9;color:#1E293B;}
+    .toggle{width:36px;height:20px;border-radius:20px;background:#CBD5E1;cursor:pointer;transition:background .2s;position:relative;flex-shrink:0;}
+    .toggle.on{background:#2251FF;}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;}
+    .toggle.on::after{transform:translateX(16px);}
+    input[type="text"],input[type="number"],select,textarea{border:1px solid #E2E8F0;border-radius:8px;padding:7px 12px;font-size:13px;color:#1E293B;background:#fff;outline:none;transition:border-color .15s;}
+    input[type="text"]:focus,input[type="number"]:focus,select:focus,textarea:focus{border-color:#2251FF;box-shadow:0 0 0 3px rgba(34,81,255,.1);}
+  </style>
+</head>
+<body class="h-full text-slate-900 antialiased">
+<div class="flex h-full min-h-screen">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-0 left-0 h-screen z-40 lg:static lg:translate-x-0">
+  <div class="px-5 py-5 border-b border-slate-100">
+    <a href="reflection-hub.html" class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#2251FF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div><div class="text-sm font-bold text-slate-900 leading-tight">Reflection Hub</div><div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Agentic Reflection System</div></div>
+    </a>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+    <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-2 mb-2">Workspace</div>
+    <a href="reflection-hub.html" class="nav-item"><i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>Overview</a>
+    <a href="teams.html" class="nav-item"><i data-lucide="users" class="w-4 h-4 shrink-0"></i>Teams</a>
+    <a href="campaigns.html" class="nav-item"><i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i>Campaigns</a>
+    <a href="sales.html" class="nav-item"><i data-lucide="briefcase" class="w-4 h-4 shrink-0"></i>Sales</a>
+    <a href="products.html" class="nav-item"><i data-lucide="package" class="w-4 h-4 shrink-0"></i>Products</a>
+    <a href="customer-support.html" class="nav-item"><i data-lucide="headphones" class="w-4 h-4 shrink-0"></i>Customer Support</a>
+    <a href="marketing.html" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4 shrink-0"></i>Marketing</a>
+    <div class="border-t border-slate-100 my-3"></div>
+    <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-2 mb-2">Platform</div>
+    <a href="reflections.html" class="nav-item"><i data-lucide="refresh-cw" class="w-4 h-4 shrink-0"></i>Reflections</a>
+    <a href="review-center.html" class="nav-item"><i data-lucide="clipboard-check" class="w-4 h-4 shrink-0"></i>Review Center<span class="badge">24</span></a>
+    <a href="leaderboards.html" class="nav-item"><i data-lucide="trophy" class="w-4 h-4 shrink-0"></i>Leaderboards</a>
+    <a href="insights.html" class="nav-item"><i data-lucide="lightbulb" class="w-4 h-4 shrink-0"></i>Insights</a>
+    <a href="reports.html" class="nav-item"><i data-lucide="file-text" class="w-4 h-4 shrink-0"></i>Reports</a>
+    <a href="settings.html" class="nav-item active"><i data-lucide="settings" class="w-4 h-4 shrink-0"></i>Settings</a>
+  </nav>
+  <div class="px-3 pb-4">
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+        <span class="text-xs font-semibold text-slate-700">Reflection Agent</span>
+        <span class="ml-auto text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">Active</span>
+      </div>
+      <div class="text-[11px] text-slate-500 mb-3 leading-relaxed">B2B Sales loop running · run_2 in progress</div>
+      <a href="sales.html" class="block w-full text-center text-xs font-semibold border rounded-lg py-1.5 transition-colors" style="color:#2251FF;border-color:#C7D2FE;background:#EEF2FF">View Agent Activity</a>
+    </div>
+  </div>
+</aside>
+<div id="overlay" class="hidden fixed inset-0 bg-black/40 z-30 lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- MAIN -->
+<div class="flex-1 flex flex-col min-w-0">
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-6 py-3.5 flex items-center gap-4">
+    <button class="lg:hidden p-1.5 rounded-lg hover:bg-slate-100" onclick="toggleSidebar()"><i data-lucide="menu" class="w-5 h-5 text-slate-500"></i></button>
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <a href="reflection-hub.html" class="hover:text-slate-900">Portfolio</a>
+      <span>/</span><span class="font-semibold text-slate-900">Settings</span>
+    </div>
+    <div class="flex-1"></div>
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#2251FF">RK</div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto px-6 py-6">
+    <div class="flex gap-6">
+      <!-- Tab nav -->
+      <div class="w-48 shrink-0">
+        <div class="space-y-0.5">
+          <button class="tab-btn active" onclick="showTab('general',this)"><i data-lucide="sliders" class="w-4 h-4"></i>General</button>
+          <button class="tab-btn" onclick="showTab('agents',this)"><i data-lucide="cpu" class="w-4 h-4"></i>Agents</button>
+          <button class="tab-btn" onclick="showTab('evaluation',this)"><i data-lucide="check-square" class="w-4 h-4"></i>Evaluation</button>
+          <button class="tab-btn" onclick="showTab('notifications',this)"><i data-lucide="bell" class="w-4 h-4"></i>Notifications</button>
+          <button class="tab-btn" onclick="showTab('api',this)"><i data-lucide="code" class="w-4 h-4"></i>API & Keys</button>
+        </div>
+      </div>
+
+      <!-- Tab content -->
+      <div class="flex-1 min-w-0 space-y-4">
+
+        <!-- General -->
+        <div id="tab-general">
+          <div class="card p-6 mb-4">
+            <div class="font-semibold text-slate-900 mb-4">Platform</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Platform Name</div><div class="text-xs text-slate-400 mt-0.5">Shown in all reports and emails</div></div>
+                <input type="text" value="Reflection Hub" class="w-48 text-sm"/>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Default LLM Model</div><div class="text-xs text-slate-400 mt-0.5">Used for generation and meta-agent</div></div>
+                <select class="w-48 text-sm">
+                  <option>claude-sonnet-4-6</option>
+                  <option>claude-opus-4-7</option>
+                  <option>claude-haiku-4-5</option>
+                </select>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Human Approval Required</div><div class="text-xs text-slate-400 mt-0.5">Block apply until a reviewer approves</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Auto-run Reflection After Eval</div><div class="text-xs text-slate-400 mt-0.5">Trigger meta-agent when avg score drops below threshold</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Reflection Trigger Threshold</div><div class="text-xs text-slate-400 mt-0.5">Min average score to skip reflection</div></div>
+                <input type="number" value="0.90" step="0.01" min="0" max="1" class="w-24 text-sm text-right"/>
+              </div>
+            </div>
+          </div>
+          <div class="card p-6">
+            <div class="font-semibold text-slate-900 mb-4">Kedro Orchestration</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Kedro Project Root</div><div class="text-xs text-slate-400 mt-0.5">Absolute path to project directory</div></div>
+                <input type="text" value="/app/kedro-reflection-agent" class="w-72 text-sm font-mono text-xs"/>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium text-slate-800">Audit Log Path</div><div class="text-xs text-slate-400 mt-0.5">Append-only JSON event store</div></div>
+                <input type="text" value="data/outputs/apply_history.json" class="w-72 text-sm font-mono text-xs"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agents -->
+        <div id="tab-agents" class="hidden">
+          <div class="card p-6 mb-4">
+            <div class="font-semibold text-slate-900 mb-4">Agent Configuration</div>
+            <div class="space-y-5">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-semibold text-slate-800 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>B2B Sales Agent</div>
+                  <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Active</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pl-4">
+                  <div><div class="text-xs text-slate-500 mb-1">Prompt Prompt Label (Langfuse)</div><input type="text" value="b2b_sales_system_prompt" class="w-full text-xs font-mono"/></div>
+                  <div><div class="text-xs text-slate-500 mb-1">Skill File</div><input type="text" value="data/skills/b2b_sales.md" class="w-full text-xs font-mono"/></div>
+                  <div><div class="text-xs text-slate-500 mb-1">Targets File</div><input type="text" value="data/campaign/targets.json" class="w-full text-xs font-mono"/></div>
+                  <div><div class="text-xs text-slate-500 mb-1">Eval Dataset (Langfuse)</div><input type="text" value="b2b_sales_eval" class="w-full text-xs font-mono"/></div>
+                </div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-semibold text-slate-800 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>Consumer Marketing Agent</div>
+                  <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Planning</span>
+                </div>
+                <div class="text-xs text-slate-400 pl-4">Agent not yet deployed. Configure and enable below.</div>
+                <div class="mt-2 pl-4"><button class="text-xs font-semibold px-4 py-2 rounded-lg border" style="color:#2251FF;border-color:#C7D2FE;background:#EEF2FF">Configure Agent</button></div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-semibold text-slate-800 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>Customer Care Agent</div>
+                  <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Planning</span>
+                </div>
+                <div class="text-xs text-slate-400 pl-4">Agent not yet deployed. Configure and enable below.</div>
+                <div class="mt-2 pl-4"><button class="text-xs font-semibold px-4 py-2 rounded-lg border" style="color:#2251FF;border-color:#C7D2FE;background:#EEF2FF">Configure Agent</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation -->
+        <div id="tab-evaluation" class="hidden">
+          <div class="card p-6">
+            <div class="font-semibold text-slate-900 mb-4">Evaluation Framework</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Judge Model</div><div class="text-xs text-slate-400 mt-0.5">LLM used to score outputs</div></div>
+                <select class="w-48 text-sm"><option>claude-sonnet-4-6</option><option>claude-opus-4-7</option></select>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Worst-case Sample Size</div><div class="text-xs text-slate-400 mt-0.5">Top-N failing cases sent to meta-agent</div></div>
+                <input type="number" value="5" class="w-20 text-sm text-right"/>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Enable Heuristic Scorers</div><div class="text-xs text-slate-400 mt-0.5">Word count, keyword, CTA detection</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Auto-add Regression Cases</div><div class="text-xs text-slate-400 mt-0.5">Proposed cases go to Review Center automatically</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Langfuse Base URL</div><div class="text-xs text-slate-400 mt-0.5">Prompt registry endpoint</div></div>
+                <input type="text" value="https://cloud.langfuse.com" class="w-64 text-sm font-mono text-xs"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="tab-notifications" class="hidden">
+          <div class="card p-6">
+            <div class="font-semibold text-slate-900 mb-4">Notification Preferences</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between"><div><div class="text-sm font-medium">New Proposal Ready</div><div class="text-xs text-slate-400">When reflection proposes changes needing review</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between"><div><div class="text-sm font-medium">Score Drop Alert</div><div class="text-xs text-slate-400">When latest run scores below previous baseline</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between"><div><div class="text-sm font-medium">Rollback Event</div><div class="text-xs text-slate-400">When a reflection is rolled back</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between"><div><div class="text-sm font-medium">Weekly Digest Email</div><div class="text-xs text-slate-400">Summary every Monday 08:00</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Webhook URL</div><div class="text-xs text-slate-400">POST events to Slack or Teams</div></div>
+                <input type="text" placeholder="https://hooks.slack.com/…" class="w-72 text-sm"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API -->
+        <div id="tab-api" class="hidden">
+          <div class="card p-6 mb-4">
+            <div class="font-semibold text-slate-900 mb-4">API Keys</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Anthropic API Key</div><div class="text-xs text-slate-400">Used for generation and reflection</div></div>
+                <div class="flex items-center gap-2">
+                  <input type="text" value="sk-ant-••••••••••••••" class="w-52 text-sm font-mono"/>
+                  <button class="text-xs font-medium text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white hover:bg-slate-50">Rotate</button>
+                </div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Langfuse Public Key</div><div class="text-xs text-slate-400">Prompt registry access</div></div>
+                <div class="flex items-center gap-2">
+                  <input type="text" value="pk-lf-••••••••••••" class="w-52 text-sm font-mono"/>
+                  <button class="text-xs font-medium text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white hover:bg-slate-50">Rotate</button>
+                </div>
+              </div>
+              <div class="border-t border-slate-100"></div>
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-medium">Langfuse Secret Key</div><div class="text-xs text-slate-400">Required for prompt writes</div></div>
+                <div class="flex items-center gap-2">
+                  <input type="text" value="sk-lf-••••••••••••" class="w-52 text-sm font-mono"/>
+                  <button class="text-xs font-medium text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white hover:bg-slate-50">Rotate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-6">
+            <div class="font-semibold text-slate-900 mb-2">Platform API Token</div>
+            <div class="text-xs text-slate-500 mb-3">Use this token to trigger runs programmatically via the REST API.</div>
+            <div class="flex items-center gap-3 bg-slate-50 rounded-lg border border-slate-200 p-3">
+              <code class="text-xs font-mono text-slate-700 flex-1">rhub_tok_••••••••••••••••••••••••••••••</code>
+              <button class="text-xs font-medium text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white">Copy</button>
+              <button class="text-xs font-medium text-red-500 border border-red-200 rounded-lg px-3 py-1.5 bg-white">Revoke</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save bar -->
+        <div class="flex justify-end pt-2">
+          <button class="text-sm font-semibold text-white rounded-lg px-6 py-2.5 transition-colors" style="background:#2251FF">Save Changes</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+  lucide.createIcons();
+  function toggleSidebar(){const s=document.getElementById('sidebar'),o=document.getElementById('overlay');s.classList.toggle('open');o.classList.toggle('hidden');}
+  function showTab(id, el){
+    document.querySelectorAll('[id^="tab-"]').forEach(t=>t.classList.add('hidden'));
+    document.getElementById('tab-'+id).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
