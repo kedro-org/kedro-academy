@@ -23,7 +23,7 @@ Then open **http://localhost:8080/index.html**
 
 | Page | File | Description |
 |---|---|---|
-| **Org Overview** | `index.html` ← Summary Cards, Leaderboard, Trends, Cross-Agent Learning, Issue Matrix, Success Matrix
+| **Org Overview** | `index.html` | Summary Cards, Leaderboard, Trends, Cross-Agent Learning, Issue Matrix, Success Matrix
 | **Campaigns** | `campaign.html` | Agent selector (B2B Sales / Consumer Marketing / Customer Care), 4-stage Pipeline Observability (Campaign & Evaluate → Scouts → Reflect & Propose → Approve & Apply), each stage with Kedro-Viz / Run Logs / Langfuse sub-tabs, Multi-run Insights |
 
 ---
