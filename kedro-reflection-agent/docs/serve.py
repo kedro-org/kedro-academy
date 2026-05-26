@@ -37,7 +37,7 @@ def main() -> None:
             reset = "\033[0m"
             print(f"  {colour}{status}{reset}  {args[0]}")
 
-    url = f"http://localhost:{port}/reflection-hub.html"
+    url = f"http://localhost:{port}/index.html"
 
     with socketserver.TCPServer(("", port), Handler) as httpd:
         print(f"\n  🚀  Reflection Hub\n")
