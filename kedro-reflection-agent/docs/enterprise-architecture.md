@@ -69,6 +69,10 @@ Then open **http://localhost:8080/reflection-hub.html**
         │  │ Evaluate │             │ │  │ Evaluate │              │ │  │ Evaluate │              │
         │  └───┬──────┘             │ │  └───┬──────┘              │ │  └───┬──────┘              │
         │      ▼                    │ │      ▼                     │ │      ▼                     │
+        │  ┌──────────┐             │ │  ┌──────────┐              │ │  ┌──────────┐              │
+        │  │  Scouts  │→ signals    │ │  │  Scouts  │→ signals     │ │  │  Scouts  │→ signals     │
+        │  └───┬──────┘             │ │  └───┬──────┘              │ │  └───┬──────┘              │
+        │      ▼ (threshold met)    │ │      ▼ (threshold met)     │ │      ▼ (threshold met)     │
         │  ┌─────────┐              │ │  ┌─────────┐               │ │  ┌─────────┐               │
         │  │ Reflect │              │ │  │ Reflect │               │ │  │ Reflect │               │
         │  └───┬─────┘              │ │  └───┬─────┘               │ │  └───┬─────┘               │
@@ -117,16 +121,57 @@ Then open **http://localhost:8080/reflection-hub.html**
 
 ## Agent Loop — Invariant Shape
 
-Every agent follows the same six-step loop. Adding a fourth agent is a configuration exercise, not an engineering project.
+Every agent follows the same seven-step loop. Adding a fourth agent is a configuration exercise, not an engineering project.
 
 | Step | What happens | UI touchpoint |
 |---|---|---|
 | **Generate** | Agent drafts its work (emails, offers, reply suggestions) against live targets | `campaigns.html` |
 | **Evaluate** | LLM judge + deterministic heuristics score each output against domain rubric | `sales.html` / domain pages |
-| **Reflect** | Meta-agent reads scores + worst cases and proposes improvements | `reflections.html` |
+| **Scout** | Lightweight rule-based detectors scan outputs and emit signals (rubric miss, score regression, tone drift, …) | `reflections.html` (signal feed) |
+| **Reflect** | Meta-agent reads signal clusters and worst cases — only fires when signals exceed a threshold | `reflections.html` |
 | **Propose** | Improved system prompt, updated skill file, new regression cases written to disk | `review-center.html` |
 | **Human Approval** | Platform/domain reviewer inspects the diff before anything goes live | `review-center.html` |
 | **Apply** | Approved changes versioned into Langfuse; local files synced; audit row appended | `reflections.html` (audit trail) |
+
+---
+
+## Pattern Scouts
+
+Lightweight, rule-based detectors that sit between **Evaluate** and **Reflect**. Each scout watches for one narrow class of failure and emits a **Signal** — a structured record that accumulates across runs before the meta-agent engages.
+
+**Signal contract:**
+
+```
+{
+  signal_type:   string          # the scout's name, e.g. "score_regression"
+  agent_id:      string          # which agent produced this
+  run_id:        string          # which campaign run
+  confidence:    high|medium|low
+  evidence_text: string          # excerpt, capped at ~1500 chars
+  reason:        string          # which rule fired, with the threshold value
+}
+```
+
+### Built-in Scouts
+
+| Scout | Triggers when… | Confidence |
+|---|---|---|
+| `rubric_miss` | Any rubric field (`expected_cta`, `required_mentions`, `forbidden_mentions`) not met on ≥2 cases | `high` |
+| `score_regression` | Any scored dimension drops >10 pts vs. rolling 5-run average | `medium` / `high` if >20 pts |
+| `hallucination_flag` | Forbidden mention or fabricated product detail detected by heuristic | `high` |
+| `tone_drift` | Tone dimension falls below per-agent configured floor for ≥3 consecutive cases | `medium` |
+| `cross_unit_pattern` | Same `signal_type` appearing in ≥2 BU agents within the same rolling window | `high` |
+
+### Design Rules
+
+- **Pure and deterministic.** No LLM calls, no network calls. Read everything from the run outputs and `parameters.yml`.
+- **Run fast.** O(n) over outputs — designed to add negligible cost to every run.
+- **Calibrate confidence.** Reserve `high` for unambiguous cases. A scout firing on >30% of runs will be dismissed as noise by the meta-agent and wastes LLM budget.
+- **`reason` is self-contained.** The signal row must be understandable without surrounding context — quote the matched value, name the threshold, include the delta.
+
+### Adding a Scout
+
+Implement `detect(outputs, params) → list[Signal]` in `src/scouts/`, register it in `conf/base/parameters.yml` under `signal_types`, add tunable thresholds to `conf/base/parameters_scouts.yml`. The rest of the pipeline picks it up automatically — no changes to Evaluate, Reflect, or Propose.
 
 ---
 
@@ -222,6 +267,7 @@ docs/
 | Per-agent loop (B2B Sales) — end-to-end | ✅ Working |
 | Consumer Marketing agent | ⬜ Next |
 | Customer Care agent | ⬜ Next |
+| Pattern Scouts — scout layer between Evaluate and Reflect | ⬜ Next |
 | Portfolio Intelligence layer | ⬜ Next |
 | Cross-agent learning engine | ⬜ Next |
 | UI prototype — all 13 pages | ✅ Complete (`docs/ui/`) |
