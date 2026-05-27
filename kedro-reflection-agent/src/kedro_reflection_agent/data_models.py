@@ -91,6 +91,7 @@ class RunMetadata(BaseModel):
     """Per-run summary persisted alongside the partitioned emails."""
 
     run_id: str
+    agent_id: str
     n_cases: int
     n_emails: int
     n_errors: int

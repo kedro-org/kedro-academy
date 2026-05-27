@@ -1,6 +1,6 @@
 [
   {
-    "id": "case_001",
+    "id": "ab1a91c5-a560-4bad-8246-428164ae3dd4",
     "input": {
       "customer_id": "cust_002",
       "product_id": "prod_001"
@@ -24,7 +24,7 @@
     }
   },
   {
-    "id": "case_002",
+    "id": "753c78d2-a2a2-483e-b4cc-5e8ec8c8d048",
     "input": {
       "customer_id": "cust_001",
       "product_id": "prod_005"
@@ -48,7 +48,7 @@
     }
   },
   {
-    "id": "case_003",
+    "id": "1beac8da-aada-4900-a915-2f15144777cc",
     "input": {
       "customer_id": "cust_005",
       "product_id": "prod_002"
@@ -72,7 +72,7 @@
     }
   },
   {
-    "id": "case_004",
+    "id": "72a3a6c8-802c-41c9-9769-c1e4438f1689",
     "input": {
       "customer_id": "cust_009",
       "product_id": "prod_002"
@@ -96,7 +96,7 @@
     }
   },
   {
-    "id": "case_005",
+    "id": "5428d4d1-8e60-4503-8eea-56692fe776c3",
     "input": {
       "customer_id": "cust_002",
       "product_id": "prod_003"
@@ -118,7 +118,7 @@
     }
   },
   {
-    "id": "case_006",
+    "id": "1f575503-f7a1-49d1-811c-b793b635337d",
     "input": {
       "customer_id": "cust_004",
       "product_id": "prod_001"
@@ -141,7 +141,7 @@
     }
   },
   {
-    "id": "case_007",
+    "id": "64fd21cb-1a1d-40c6-af7a-c055c7172bc5",
     "input": {
       "customer_id": "cust_006",
       "product_id": "prod_001"
@@ -165,7 +165,7 @@
     }
   },
   {
-    "id": "case_008",
+    "id": "b90ba8f7-4e3a-4f10-91c1-047a742becb6",
     "input": {
       "customer_id": "cust_007",
       "product_id": "prod_003"
@@ -188,7 +188,7 @@
     }
   },
   {
-    "id": "case_009",
+    "id": "a072f63d-4adb-46f4-a891-620e910356d8",
     "input": {
       "customer_id": "cust_003",
       "product_id": "prod_002"
@@ -212,7 +212,7 @@
     }
   },
   {
-    "id": "case_010",
+    "id": "e928d539-6c3e-45cb-b664-85a629ae13e4",
     "input": {
       "customer_id": "cust_003",
       "product_id": "prod_004"
@@ -235,7 +235,7 @@
     }
   },
   {
-    "id": "case_011",
+    "id": "ec8e29b9-dd5c-4697-9e1b-83c87acc86e6",
     "input": {
       "customer_id": "cust_006",
       "product_id": "prod_004"
@@ -259,7 +259,7 @@
     }
   },
   {
-    "id": "case_012",
+    "id": "484a93c3-5201-42b7-939b-eecb1d5e8ad8",
     "input": {
       "customer_id": "cust_010",
       "product_id": "prod_003"
@@ -283,7 +283,7 @@
     }
   },
   {
-    "id": "case_013",
+    "id": "38b44678-58fc-4604-8dc2-a562f6923c32",
     "input": {
       "customer_id": "cust_001",
       "product_id": "prod_001"
@@ -307,7 +307,7 @@
     }
   },
   {
-    "id": "case_014",
+    "id": "61a10e53-6d12-46a1-a570-874b6605a384",
     "input": {
       "customer_id": "cust_008",
       "product_id": "prod_002"
@@ -331,7 +331,7 @@
     }
   },
   {
-    "id": "case_015",
+    "id": "333e7014-3cc0-48df-8bf5-d0663ee7126c",
     "input": {
       "customer_id": "cust_010",
       "product_id": "prod_001"
@@ -355,7 +355,7 @@
     }
   },
   {
-    "id": "case_016",
+    "id": "9aefcf1a-f091-4f27-bc46-09eecb9e3e1c",
     "input": {
       "customer_id": "cust_008",
       "product_id": "prod_001"
@@ -379,7 +379,7 @@
     }
   },
   {
-    "id": "case_017",
+    "id": "dfc293fa-8ae8-4cc6-a568-4592d09d703b",
     "input": {
       "customer_id": "cust_005",
       "product_id": "prod_003"
@@ -402,7 +402,7 @@
     }
   },
   {
-    "id": "case_018",
+    "id": "7a39b6d0-c807-472e-94da-187803c12791",
     "input": {
       "customer_id": "cust_004",
       "product_id": "prod_004"
@@ -425,7 +425,7 @@
     }
   },
   {
-    "id": "case_019",
+    "id": "729cc211-4590-42e1-9347-d515b6df2856",
     "input": {
       "customer_id": "cust_007",
       "product_id": "prod_001"
@@ -448,7 +448,7 @@
     }
   },
   {
-    "id": "case_020",
+    "id": "44fe32b9-f843-45d0-b552-67fa2b07f351",
     "input": {
       "customer_id": "cust_009",
       "product_id": "prod_005"
