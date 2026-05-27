@@ -9,6 +9,9 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
+# Confidence levels used by all scouts.
+Confidence = Literal["high", "medium", "low"]
+
 
 # --- seed data ----------------------------------------------------------------
 
@@ -161,6 +164,26 @@ class AggregateScore(BaseModel):
     judge_prompt_version: Optional[int] = None
     started_at: str
     finished_at: str
+
+
+# --- scouts models ------------------------------------------------------------
+
+
+class Signal(BaseModel):
+    """One signal record emitted by a Pattern Scout.
+
+    Written to ``data/outputs/runs/<run_id>/signals.json`` (per run) and also
+    appended to ``data/outputs/signal_index.json`` (rolling cross-run index
+    used by the ``cross_unit_pattern`` scout and Portfolio Intelligence).
+    """
+
+    signal_type: str          # scout name, e.g. "score_regression"
+    agent_id: str             # which agent produced this run
+    run_id: str               # which campaign run triggered this signal
+    confidence: Confidence
+    evidence_text: str        # excerpt / explanation, capped at ~1500 chars
+    reason: str               # which rule fired, with the threshold value
+    created_at: str           # UTC ISO-8601 timestamp
 
 
 # --- reflection models --------------------------------------------------------
