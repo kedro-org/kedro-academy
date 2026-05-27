@@ -1,6 +1,7 @@
 # Catalog entries used by the `campaign` pipeline.
 #
 # Conventions:
+#   - agent_id    : runtime param
 #   - run_id      : runtime param, defaults to `default` (see parameters.yml)
 #   - LLM, prompt and tracer follow the kedro-agentic-workflows patterns
 #     (langchain.ChatOpenAIDataset, kedro_datasets_experimental.langfuse.*)
@@ -22,8 +23,8 @@ llm:
 
 system_prompt:
   type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
-  filepath: data/campaign/prompts/system_prompt.json
-  prompt_name: "b2b-email-system-prompt"
+  filepath: data/${runtime_params:agent_id}/campaign/prompts/system_prompt.json
+  prompt_name: "${runtime_params:agent_id}-system-prompt"
   prompt_type: "chat"
   credentials: langfuse_credentials
   sync_policy: local      # local | remote | strict
@@ -36,7 +37,7 @@ system_prompt:
 
 skill_text:
   type: text.TextDataset
-  filepath: data/campaign/skills/b2b_email_style.md
+  filepath: data/${runtime_params:agent_id}/campaign/skills/${runtime_params:agent_id}_style.md
 
 
 # --- Seed data (disk only) ---------------------------------------------------
@@ -57,7 +58,7 @@ products:
 
 targets:
   type: json.JSONDataset
-  filepath: data/campaign/targets.json
+  filepath: data/${runtime_params:agent_id}/campaign/targets.json
 
 
 # --- Tracer (write-only from this pipeline's perspective) --------------------
@@ -68,14 +69,14 @@ agent_tracer:
   mode: langchain         # langchain | openai | sdk
 
 
-# --- Outputs (partitioned by run_id) -----------------------------------------
+# --- Outputs (partitioned by run_id + agent_id) ------------------------------
 
 emails:
   type: partitions.PartitionedDataset
-  path: data/outputs/runs/${runtime_params:run_id,default}/emails/
+  path: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/emails/
   dataset: json.JSONDataset
   filename_suffix: .json
 
 run_metadata:
   type: json.JSONDataset
-  filepath: data/outputs/runs/${runtime_params:run_id,default}/run_metadata.json
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/run_metadata.json

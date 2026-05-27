@@ -1,17 +1,7 @@
 # Pipeline-agnostic catalog entries.
 #
-# Per-pipeline datasets live in conf/base/catalog_<pipeline_name>.yml. This
-# file is reserved for catalog config that applies across the whole project,
-# so the convention "open catalog_<pipeline>.yml to see that pipeline's
-# datasets" stays clean.
-
-
-# --- Default dataset for in-memory node outputs -----------------------------
-# Kedro auto-creates a MemoryDataset for any node output that isn't otherwise
-# in the catalog (LLM contexts, prepared inputs, callable factories, etc.).
-# We override the default with `copy_mode: "assign"` so non-picklable objects
-# (langchain Runnables, LangfuseTracer, etc.) are passed by reference between
-# nodes instead of being deep-copied.
+# Override copy_mode so non-picklable objects (LangChain Runnables, Langfuse
+# tracers, etc.) are passed by reference between nodes instead of deep-copied.
 
 "{default_dataset}":
   type: MemoryDataset

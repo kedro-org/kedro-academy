@@ -1,20 +1,6 @@
 # Catalog entries used by the `scouts` pipeline.
-#
-# Inputs (reused from other catalogs — no new entries needed):
-#   - per_case_scores:  catalog_evaluation.yml  → data/outputs/runs/{run_id}/per_case_scores.json
-#   - aggregate_scores: catalog_evaluation.yml  → data/outputs/runs/{run_id}/aggregate_scores.json
-#   - eval_cases:       catalog_evaluation.yml  → data/evaluation/eval_cases.json (rubric source)
-#
-# Outputs:
-#   - signals:          data/outputs/runs/{run_id}/signals.json  — per-run signal list
-#
-# The cross-agent signal index (data/outputs/signal_index.json) is managed
-# inside the node directly (append-only, same pattern as apply_history.json)
-# because it is both read and written in the same step.
-
 
 # --- Per-run signal list ------------------------------------------------------
-
 signals:
   type: json.JSONDataset
-  filepath: data/outputs/runs/${runtime_params:run_id,default}/signals.json
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/signals.json
