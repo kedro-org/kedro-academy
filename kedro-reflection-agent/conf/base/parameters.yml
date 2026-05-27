@@ -35,6 +35,36 @@ body_length_min: 300
 body_length_max: 2000
 
 
+# --- scouts -----------------------------------------------------------------
+
+# Which agent produced this run — used in signal records and the signal index.
+# Override per invocation: --params "agent_id=consumer_mktg"
+agent_id: b2b_sales
+
+# score_regression: fires when any scored dimension drops more than this many
+# points (0-1 scale) vs the rolling average of the last N runs.
+scout_regression_delta_medium: 0.10   # delta > 0.10 → medium confidence
+scout_regression_delta_high:   0.20   # delta > 0.20 → high confidence
+scout_regression_window:       5      # number of past runs to average over
+
+# rubric_miss: fires when a rubric-derived heuristic (cta_present,
+# subject_present, no_fake_skus) scores 0.0 on ≥ this many cases.
+scout_rubric_miss_min_cases: 2
+
+# hallucination_flag: fires when no_fake_skus == 0.0 on ≥ this many cases.
+scout_hallucination_min_cases: 1
+
+# tone_drift: fires when a quality/tone dimension falls below this floor
+# for ≥ this many consecutive cases (sorted by case_id for stability).
+scout_tone_floor: 0.70
+scout_tone_min_cases: 3
+
+# cross_unit_pattern: fires when the same signal_type appears in ≥ this many
+# distinct agents within the last N runs in the signal index.
+scout_cross_unit_min_agents: 2
+scout_cross_unit_window: 10
+
+
 # --- reflection -------------------------------------------------------------
 
 # Pinned reflection identifier; controls where artifacts are written under
