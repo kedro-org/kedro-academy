@@ -214,13 +214,13 @@
             <button onclick="selectVizPipeline('campaign','campaign')" id="vizPip-campaign-campaign" class="viz-pip-btn active">Campaign</button>
             <button onclick="selectVizPipeline('campaign','evaluation')" id="vizPip-campaign-evaluation" class="viz-pip-btn">Evaluation</button>
           </div>
-          <a id="vizOpenLink-campaign" href="http://127.0.0.1:4141?pid=campaign" target="_blank"
+          <a id="vizOpenLink-campaign" href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank"
              class="ml-auto text-[11px] font-semibold flex items-center gap-1 hover:underline" style="color:#2251FF">
             Open in new tab <i data-lucide="external-link" class="w-3 h-3"></i>
           </a>
         </div>
         <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative" style="height:500px;">
-          <iframe id="vizFrame-campaign" src="http://127.0.0.1:4141?pid=campaign"
+          <iframe id="vizFrame-campaign" src="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true"
                   class="w-full h-full border-0" title="Kedro-Viz — Campaign"></iframe>
           <div id="vizFallback-campaign" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 text-center px-8">
             <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center">
@@ -229,7 +229,7 @@
             <div class="text-sm font-bold text-slate-300 mb-1">Kedro-Viz not running</div>
             <div class="text-xs text-slate-500 max-w-xs">Start it from the project root, then refresh.</div>
             <pre class="rounded-xl bg-slate-800 px-5 py-3 text-[12px] text-emerald-400 font-mono">kedro viz run</pre>
-            <a href="http://127.0.0.1:4141" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
+            <a href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
           </div>
         </div>
       </div>
@@ -476,19 +476,19 @@
             <button onclick="selectVizPipeline('reflect','reflection')" id="vizPip-reflect-reflection" class="viz-pip-btn active">Reflection</button>
             <button onclick="selectVizPipeline('reflect','apply')" id="vizPip-reflect-apply" class="viz-pip-btn">Apply</button>
           </div>
-          <a id="vizOpenLink-reflect" href="http://127.0.0.1:4141?pid=reflection" target="_blank"
+          <a id="vizOpenLink-reflect" href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank"
              class="ml-auto text-[11px] font-semibold flex items-center gap-1 hover:underline" style="color:#2251FF">
             Open in new tab <i data-lucide="external-link" class="w-3 h-3"></i>
           </a>
         </div>
         <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative" style="height:500px;">
-          <iframe id="vizFrame-reflect" src="http://127.0.0.1:4141?pid=reflection"
+          <iframe id="vizFrame-reflect" src="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true"
                   class="w-full h-full border-0" title="Kedro-Viz — Reflection"></iframe>
           <div id="vizFallback-reflect" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 text-center px-8">
             <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-slate-500"></i></div>
             <div class="text-sm font-bold text-slate-300 mb-1">Kedro-Viz not running</div>
             <pre class="rounded-xl bg-slate-800 px-5 py-3 text-[12px] text-emerald-400 font-mono">kedro viz run</pre>
-            <a href="http://127.0.0.1:4141" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
+            <a href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
           </div>
         </div>
       </div>
@@ -1050,7 +1050,7 @@ function switchStageSub(stageId, subId) {
 function selectVizPipeline(stageId, pid) {
   document.querySelectorAll(`[id^="vizPip-${stageId}-"]`).forEach(b =>
     b.classList.toggle('active', b.id === `vizPip-${stageId}-${pid}`));
-  const url = `http://127.0.0.1:4141?pid=${pid}`;
+  const url = `https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true`;
   document.getElementById('vizFrame-' + stageId).src = url;
   document.getElementById('vizOpenLink-' + stageId).href = url;
 }
