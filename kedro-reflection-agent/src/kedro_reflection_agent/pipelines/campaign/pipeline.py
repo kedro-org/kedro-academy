@@ -39,6 +39,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "skill_text",
                     "agent_tracer",
                     "params:run_id",
+                    "params:agent_id",
                     "params:model_name",
                     "params:system_prompt_version",
                 ],

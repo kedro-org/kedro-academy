@@ -94,6 +94,7 @@ def generate_emails(
     skill_text: str,
     agent_tracer: CallbackHandler,
     run_id: str,
+    agent_id: str,
     model_name: str,
     system_prompt_version: int,
 ) -> tuple[dict[str, dict], dict]:
@@ -183,6 +184,7 @@ def generate_emails(
     total_elapsed = time.perf_counter() - run_started
     run_metadata = RunMetadata(
         run_id=run_id,
+        agent_id=agent_id,
         n_cases=len(agent_inputs),
         n_emails=len(emails),
         n_errors=n_errors,
