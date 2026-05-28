@@ -27,7 +27,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=prepare_agent_inputs,
-                inputs=["targets", "customers", "products"],
+                inputs=["targets", "customers", "products", "customer_profiles", "product_details"],
                 outputs="agent_inputs",
                 name="prepare_agent_inputs_node",
             ),

@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": "You are an expert evaluator of telco consumer marketing messages. Score the offer message on the dimensions below. Each score is 0.0 to 1.0."
+  },
+  {
+    "role": "human",
+    "content": "Evaluate this personalised offer message.\n\nSubscriber context:\n{customer}\n\nOffer:\n{product}\n\nMessage:\n{output}\n\nScore on:\n- offer_relevance: does the offer match the subscriber's profile and usage? (0-1)\n- personalisation: does it reference specific subscriber details (plan, device, usage)? (0-1)\n- urgency_cta: is there a clear, compelling call to action? (0-1)\n- tone: is the tone friendly and benefit-led, not pushy? (0-1)\n- compliance: no false claims about coverage, pricing, or availability? (0-1)\n\nReturn JSON only with keys: offer_relevance, offer_relevance_reason, personalisation, personalisation_reason, urgency_cta, urgency_cta_reason, tone, tone_reason, compliance, compliance_reason"
+  }
+]

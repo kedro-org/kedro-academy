@@ -21,7 +21,7 @@ from typing import Any
 from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 
-from ...data_models import Customer, Email, EmailOutput, Product, RunMetadata
+from ...models.shared import CampaignTarget, CustomerBase, Email, EmailOutput, ProductBase, RunMetadata
 from .._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
@@ -31,37 +31,52 @@ def prepare_agent_inputs(
     targets: list[dict],
     customers: list[dict],
     products: list[dict],
+    customer_profiles: list[dict],
+    product_details: list[dict],
 ) -> list[dict]:
     """Prepare the batch of inputs the agent will run on.
 
-    Resolves each campaign target ``{case_id, customer_id, product_id}`` into
-    fully-populated Customer / Product objects by joining against the seed
-    catalogues.
+    Validates global base records (CustomerBase, ProductBase), then merges each
+    with its agent-specific enrichment profile before handing to the LLM chain.
 
     Returns one dict per case: ``{case_id, customer, product}`` ready for the
     LLM chain.
     """
-    customer_by_id = {c["customer_id"]: Customer(**c) for c in customers}
-    product_by_id = {p["product_id"]: Product(**p) for p in products}
+    customer_base_by_id = {CustomerBase(**c).customer_id: CustomerBase(**c).model_dump()
+                           for c in customers}
+    product_base_by_id = {ProductBase(**p).product_id: ProductBase(**p).model_dump()
+                          for p in products}
+    customer_profile_by_id = {c["customer_id"]: c for c in customer_profiles}
+    product_details_by_id = {p["product_id"]: p for p in product_details}
 
     agent_inputs: list[dict] = []
-    for target in targets:
-        case_id = target["case_id"]
-        cust_id = target["customer_id"]
-        prod_id = target["product_id"]
+    for raw_target in targets:
+        t = CampaignTarget(**raw_target)
+        case_id = t.case_id
+        cust_id = t.customer_id
+        prod_id = t.product_id
 
-        if cust_id not in customer_by_id:
+        if cust_id not in customer_base_by_id:
             logger.warning("Skipping case %s: customer %s not found", case_id, cust_id)
             continue
-        if prod_id not in product_by_id:
+        if prod_id not in product_base_by_id:
             logger.warning("Skipping case %s: product %s not found", case_id, prod_id)
             continue
+
+        customer = {
+            **customer_base_by_id[cust_id],
+            **customer_profile_by_id.get(cust_id, {}),
+        }
+        product = {
+            **product_base_by_id[prod_id],
+            **product_details_by_id.get(prod_id, {}),
+        }
 
         agent_inputs.append(
             {
                 "case_id": case_id,
-                "customer": customer_by_id[cust_id],
-                "product": product_by_id[prod_id],
+                "customer": customer,
+                "product": product,
             }
         )
 
@@ -108,18 +123,18 @@ def generate_emails(
 
     for idx, agent_input in enumerate(agent_inputs, start=1):
         case_id: str = agent_input["case_id"]
-        customer: Customer = agent_input["customer"]
-        product: Product = agent_input["product"]
+        customer: dict = agent_input["customer"]
+        product: dict = agent_input["product"]
 
         logger.info(
             "[%d/%d] %s: %s × %s",
-            idx, total, case_id, customer.customer_id, product.product_id,
+            idx, total, case_id, customer["customer_id"], product["product_id"],
         )
 
         invoke_payload = {
             "skill": skill_text,
-            "customer": json.dumps(customer.model_dump(), indent=2),
-            "product": json.dumps(product.model_dump(), indent=2),
+            "customer": json.dumps(customer, indent=2),
+            "product": json.dumps(product, indent=2),
         }
         invoke_config: dict[str, Any] = {
             "callbacks": [agent_tracer],
@@ -128,8 +143,8 @@ def generate_emails(
             # output below still carries the int `prompt_version`.
             "metadata": {
                 "case_id": case_id,
-                "customer_id": customer.customer_id,
-                "product_id": product.product_id,
+                "customer_id": customer["customer_id"],
+                "product_id": product["product_id"],
                 "run_id": run_id,
                 "prompt_version": str(system_prompt_version),
                 "skill_version": skill_version,
@@ -147,8 +162,8 @@ def generate_emails(
 
         emails[case_id] = Email(
             case_id=case_id,
-            customer_id=customer.customer_id,
-            product_id=product.product_id,
+            customer_id=customer["customer_id"],
+            product_id=product["product_id"],
             subject=result.subject,
             body=result.body,
             trace_id=None,

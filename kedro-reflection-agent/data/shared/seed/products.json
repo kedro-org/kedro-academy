@@ -1,0 +1,92 @@
+[
+  {
+    "product_id": "prod_001",
+    "name": "SD-WAN Pro",
+    "type": "enterprise_solution",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_002",
+    "name": "5G Private Network",
+    "type": "enterprise_solution",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_003",
+    "name": "Managed Cloud Connect",
+    "type": "enterprise_solution",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_004",
+    "name": "IoT Fleet Connectivity",
+    "type": "enterprise_solution",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_005",
+    "name": "UC Suite Pro",
+    "type": "enterprise_solution",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_006",
+    "name": "Unlimited 5G",
+    "type": "consumer_plan",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_007",
+    "name": "Essential 20GB",
+    "type": "consumer_plan",
+    "tier": "basic"
+  },
+  {
+    "product_id": "prod_008",
+    "name": "Family Bundle",
+    "type": "consumer_plan",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_009",
+    "name": "Roaming Plus",
+    "type": "consumer_plan",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_010",
+    "name": "Prepaid Starter",
+    "type": "consumer_plan",
+    "tier": "basic"
+  },
+  {
+    "product_id": "prod_011",
+    "name": "iPhone 15 Pro",
+    "type": "device",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_012",
+    "name": "Samsung Galaxy S24",
+    "type": "device",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_013",
+    "name": "iPad Pro",
+    "type": "device",
+    "tier": "premium"
+  },
+  {
+    "product_id": "prod_014",
+    "name": "Nokia 5G Router",
+    "type": "device",
+    "tier": "standard"
+  },
+  {
+    "product_id": "prod_015",
+    "name": "Apple Watch S9",
+    "type": "device",
+    "tier": "standard"
+  }
+]

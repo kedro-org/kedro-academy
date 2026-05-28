@@ -31,7 +31,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ...data_models import CaseScore, Signal
+from ...models.shared import CaseScore, Signal
 from .._common import utc_now_iso
 
 logger = logging.getLogger(__name__)
@@ -228,7 +228,7 @@ def _detect_score_regression(
                 reason=(
                     f"Drop of {delta:.3f} exceeds "
                     f"{'high' if confidence == 'high' else 'medium'} "
-                    f"threshold ({delta_high if confidence == 'high' else delta_medium})."
+                    f"threshold ({delta_high if confidence >= 0.7 else delta_medium})."
                 ),
                 created_at=utc_now_iso(),
             )
@@ -255,7 +255,7 @@ def _load_past_scorer_means(
     current ``run_id`` are included. Sorted by ``started_at`` ascending;
     the last ``window`` entries are kept.
     """
-    runs_root = Path("data/outputs/runs")
+    runs_root = Path(f"data/{agent_id}/outputs/runs")
     if not runs_root.exists():
         return {}
 
@@ -264,18 +264,9 @@ def _load_past_scorer_means(
         if not run_dir.is_dir() or run_dir.name == run_id:
             continue
         agg_path = run_dir / "aggregate_scores.json"
-        meta_path = run_dir / "run_metadata.json"
         if not agg_path.exists():
             continue
         agg = json.loads(agg_path.read_text())
-        # Filter by agent_id if run_metadata exists.
-        if meta_path.exists():
-            meta = json.loads(meta_path.read_text())
-            if meta.get("agent_id") and meta["agent_id"] != agent_id:
-                continue
-        # For legacy runs without agent_id, assume b2b_sales.
-        elif agent_id != "b2b_sales":
-            continue
         started_at = agg.get("started_at", "")
         candidates.append((started_at, agg.get("mean_per_scorer", {})))
 
