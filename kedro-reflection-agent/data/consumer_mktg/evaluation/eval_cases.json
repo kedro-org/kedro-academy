@@ -1,0 +1,132 @@
+[
+  {
+    "id": "case_001",
+    "input": {"customer_id": "cust_011", "product_id": "prod_011"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current usage near data limit", "iPhone upgrade benefit", "trade-in or monthly plan"],
+        "forbidden_mentions": ["fake pricing", "guaranteed coverage claims", "made-up specs"],
+        "expected_cta": "trial",
+        "expected_tone": "friendly",
+        "notes": "Premium subscriber already on Unlimited — pitch iPhone 15 Pro on device plan. Must reference their existing plan and offer upgrade path, not sell them data."
+      }
+    }
+  },
+  {
+    "id": "case_002",
+    "input": {"customer_id": "cust_012", "product_id": "prod_006"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current Essential 20GB plan", "data usage approaching limit", "Unlimited 5G benefit"],
+        "forbidden_mentions": ["fake pricing", "guaranteed 5G everywhere", "unnecessary urgency"],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "Budget subscriber on Essential 20GB — upgrade pitch to Unlimited 5G. Reference their current plan and explain the specific benefit of removing the cap."
+      }
+    }
+  },
+  {
+    "id": "case_003",
+    "input": {"customer_id": "cust_013", "product_id": "prod_012"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["Family Bundle context", "Samsung Galaxy S24 features", "monthly plan option"],
+        "forbidden_mentions": ["fake pricing", "guaranteed delivery dates", "made-up specs"],
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "notes": "Mid segment Family Bundle subscriber — pitch Samsung Galaxy S24. Message should connect family usage to device upgrade, not generic spec sheet."
+      }
+    }
+  },
+  {
+    "id": "case_004",
+    "input": {"customer_id": "cust_014", "product_id": "prod_007"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current Prepaid plan", "benefit of Essential 20GB contract", "no-contract or rolling option"],
+        "forbidden_mentions": ["fake pricing", "lock-in language", "guaranteed speeds"],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Budget Prepaid subscriber — step-up to Essential 20GB. Acknowledge no-contract preference and frame upgrade as flexible, not a lock-in."
+      }
+    }
+  },
+  {
+    "id": "case_005",
+    "input": {"customer_id": "cust_015", "product_id": "prod_015"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["existing Unlimited 5G plan", "Apple Watch health features", "connectivity with iPhone"],
+        "forbidden_mentions": ["fake pricing", "medical claims", "guaranteed battery life"],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "Premium Unlimited subscriber — cross-sell Apple Watch Series 9. Connect to health/lifestyle benefits and their existing iPhone ecosystem, not generic specs."
+      }
+    }
+  },
+  {
+    "id": "case_006",
+    "input": {"customer_id": "cust_016", "product_id": "prod_006"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current Essential 20GB plan", "loyalty tenure of 5+ years", "Unlimited 5G value"],
+        "forbidden_mentions": ["fake pricing", "guaranteed 5G everywhere", "pressure tactics"],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "Long-tenure budget subscriber on Essential — upgrade pitch to Unlimited. Message must acknowledge loyalty and frame upgrade as a reward, not a upsell."
+      }
+    }
+  },
+  {
+    "id": "case_007",
+    "input": {"customer_id": "cust_017", "product_id": "prod_013"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["Roaming Plus usage context", "iPad Pro business productivity", "connectivity on the go"],
+        "forbidden_mentions": ["fake pricing", "guaranteed roaming coverage", "made-up performance claims"],
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "notes": "Mid segment subscriber with Roaming Plus — cross-sell iPad Pro for travel productivity. Connect device to their roaming lifestyle, not generic tablet features."
+      }
+    }
+  },
+  {
+    "id": "case_008",
+    "input": {"customer_id": "cust_018", "product_id": "prod_007"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current Prepaid Starter plan", "Essential 20GB benefit", "flexible 30-day option"],
+        "forbidden_mentions": ["fake pricing", "lock-in language", "overpromising coverage"],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "New budget subscriber on Prepaid — step-up to Essential 20GB. New customers need reassurance; message should be warm and low-pressure."
+      }
+    }
+  },
+  {
+    "id": "case_009",
+    "input": {"customer_id": "cust_019", "product_id": "prod_011"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["long tenure of 7+ years", "current Unlimited 5G plan", "iPhone 15 Pro upgrade benefit"],
+        "forbidden_mentions": ["fake pricing", "false upgrade urgency", "made-up specs"],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "Long-tenure premium subscriber — pitch iPhone 15 Pro as loyalty reward. Message must acknowledge their loyalty prominently and position upgrade as appreciation, not upsell."
+      }
+    }
+  },
+  {
+    "id": "case_010",
+    "input": {"customer_id": "cust_020", "product_id": "prod_008"},
+    "expected_output": {
+      "rubric": {
+        "required_mentions": ["current Essential 20GB plan", "Family Bundle value", "per-line savings"],
+        "forbidden_mentions": ["fake pricing", "assuming they have a family", "guaranteed savings claims"],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Budget subscriber — pitch Family Bundle. Message must ask about household context and frame savings as conditional on having multiple users, not assume a family."
+      }
+    }
+  }
+]

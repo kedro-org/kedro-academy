@@ -30,12 +30,8 @@ from kedro.pipeline import LLMContext
 from langfuse import Evaluation
 from langfuse._client.datasets import DatasetClient
 
-from ...data_models import (
-    AggregateScore,
-    CaseScore,
-    EvaluationRecord,
-    JudgeScore,
-)
+from ...models.b2b_sales import JudgeScore
+from ...models.shared import AggregateScore, CaseScore, EvaluationRecord
 from .._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)

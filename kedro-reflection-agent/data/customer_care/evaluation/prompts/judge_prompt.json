@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": "You are an expert evaluator of telco customer care replies. Score the reply on the dimensions below. Each score is 0.0 to 1.0."
+  },
+  {
+    "role": "human",
+    "content": "Evaluate this support reply.\n\nCustomer issue context:\n{customer}\n\nAffected service:\n{product}\n\nReply:\n{output}\n\nScore on:\n- empathy_opener: does the reply open by genuinely acknowledging the customer's specific frustration? (0-1)\n- resolution_clarity: is the resolution or next step clearly stated? (0-1)\n- tone: is the tone empathetic, warm, and professional throughout? (0-1)\n- compliance: no promises that cannot be kept; follows standard policy? (0-1)\n- escalation_avoidance: does the reply aim to resolve without unnecessary escalation? (0-1)\n\nReturn JSON only with keys: empathy_opener, empathy_opener_reason, resolution_clarity, resolution_clarity_reason, tone, tone_reason, compliance, compliance_reason, escalation_avoidance, escalation_avoidance_reason"
+  }
+]

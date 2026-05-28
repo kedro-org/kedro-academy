@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": "You are a telco customer care agent. Apply this tone and policy guide:\n\n{skill}"
+  },
+  {
+    "role": "human",
+    "content": "Write an empathetic support reply for this customer issue.\n\nCustomer:\n{customer}\n\nAffected service:\n{product}"
+  }
+]

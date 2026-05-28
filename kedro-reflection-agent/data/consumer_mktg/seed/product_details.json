@@ -1,0 +1,121 @@
+[
+  {
+    "product_id": "prod_006",
+    "monthly_price": 55.0,
+    "key_features": [
+      "Unlimited 5G data",
+      "Unlimited calls and texts",
+      "10GB EU roaming included",
+      "Priority network access"
+    ],
+    "upgrade_benefit": "Never worry about data limits again — stream, game, and work from anywhere.",
+    "target_segment": "premium"
+  },
+  {
+    "product_id": "prod_007",
+    "monthly_price": 18.0,
+    "key_features": [
+      "20GB 4G/5G data",
+      "Unlimited calls and texts",
+      "3GB EU roaming included"
+    ],
+    "upgrade_benefit": "Great value for everyday use — plenty of data for browsing, social media and streaming.",
+    "target_segment": "budget"
+  },
+  {
+    "product_id": "prod_008",
+    "monthly_price": 35.0,
+    "key_features": [
+      "50GB shared 5G data across 4 SIMs",
+      "Unlimited calls and texts on all lines",
+      "Family Safety controls included",
+      "6GB EU roaming per line"
+    ],
+    "upgrade_benefit": "Connect the whole family on one plan and save compared to individual contracts.",
+    "target_segment": "mid"
+  },
+  {
+    "product_id": "prod_009",
+    "monthly_price": 42.0,
+    "key_features": [
+      "30GB 5G data",
+      "Unlimited calls and texts",
+      "25GB EU/worldwide roaming",
+      "Roaming in 70+ destinations"
+    ],
+    "upgrade_benefit": "Stay connected wherever you travel — unlimited roaming across Europe and beyond.",
+    "target_segment": "mid"
+  },
+  {
+    "product_id": "prod_010",
+    "monthly_price": 10.0,
+    "key_features": [
+      "5GB 4G data",
+      "200 minutes calls",
+      "Unlimited texts",
+      "No contract, top-up anytime"
+    ],
+    "upgrade_benefit": "Flexible no-contract plan — perfect for light users or as a backup SIM.",
+    "target_segment": "budget"
+  },
+  {
+    "product_id": "prod_011",
+    "monthly_price": 55.0,
+    "key_features": [
+      "A17 Pro chip for unmatched performance",
+      "48MP main camera with 3x optical zoom",
+      "ProMotion 120Hz always-on display",
+      "USB-C with USB 3 speeds"
+    ],
+    "upgrade_benefit": "The ultimate iPhone — pro-grade camera, titanium build, and all-day battery life.",
+    "target_segment": "premium"
+  },
+  {
+    "product_id": "prod_012",
+    "monthly_price": 48.0,
+    "key_features": [
+      "Snapdragon 8 Gen 3 processor",
+      "200MP main camera",
+      "6.8-inch Dynamic AMOLED display",
+      "5000mAh battery with 45W charging"
+    ],
+    "upgrade_benefit": "Android's flagship — stunning display, all-day battery, and the best-in-class camera system.",
+    "target_segment": "premium"
+  },
+  {
+    "product_id": "prod_013",
+    "monthly_price": 45.0,
+    "key_features": [
+      "M4 chip with Neural Engine",
+      "13-inch Ultra Retina XDR display",
+      "Up to 16GB unified memory",
+      "5G connectivity included"
+    ],
+    "upgrade_benefit": "Pro-level productivity on the go — ideal for creatives, students, and professionals.",
+    "target_segment": "premium"
+  },
+  {
+    "product_id": "prod_014",
+    "monthly_price": 25.0,
+    "key_features": [
+      "5G Wi-Fi router with mesh support",
+      "Supports up to 64 devices",
+      "Easy setup via mobile app",
+      "Compatible with all major operators"
+    ],
+    "upgrade_benefit": "Supercharge your home broadband — ultrafast 5G speeds with whole-home coverage.",
+    "target_segment": "mid"
+  },
+  {
+    "product_id": "prod_015",
+    "monthly_price": 22.0,
+    "key_features": [
+      "Advanced health and fitness tracking",
+      "ECG and blood oxygen monitoring",
+      "Crash Detection and Emergency SOS",
+      "Always-on Retina display"
+    ],
+    "upgrade_benefit": "Stay on top of your health and safety — the smartwatch that could save your life.",
+    "target_segment": "premium"
+  }
+]

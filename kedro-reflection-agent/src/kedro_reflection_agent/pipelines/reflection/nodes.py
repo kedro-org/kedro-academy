@@ -25,12 +25,7 @@ from typing import Any
 
 from kedro.pipeline import LLMContext
 
-from ...data_models import (
-    AggregateScore,
-    CaseScore,
-    ReflectionOutput,
-    ReflectionSummary,
-)
+from ...models.shared import AggregateScore, CaseScore, ReflectionOutput, ReflectionSummary
 from .._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)

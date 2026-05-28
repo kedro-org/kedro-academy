@@ -44,21 +44,29 @@ skill_text:
 
 customers:
   type: json.JSONDataset
-  filepath: data/seed/customers.json
+  filepath: data/shared/seed/customers.json
 
 products:
   type: json.JSONDataset
-  filepath: data/seed/products.json
+  filepath: data/shared/seed/products.json
+
+# --- agent enriched data  (disk only) ------------------------------------------
+customer_profiles:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/seed/customer_profiles.json
+
+product_details:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/seed/product_details.json
 
 
-# --- Campaign targets (the pairs to generate emails for) --------------------
-# Owned by `campaign`. Shares the `case_id` namespace with the evaluation
-# dataset (`eval_cases` in catalog_evaluation.yml); evaluation joins emails to
-# rubrics by case_id.
+# --- Campaign targets (the pairs to run this agent on) ----------------------
+# Shares the `case_id` namespace with eval_cases (catalog_evaluation.yml);
+# evaluation joins outputs to rubrics by case_id.
 
 targets:
   type: json.JSONDataset
-  filepath: data/${runtime_params:agent_id}/campaign/targets.json
+  filepath: data/${runtime_params:agent_id}/seed/targets.json
 
 
 # --- Tracer (write-only from this pipeline's perspective) --------------------
