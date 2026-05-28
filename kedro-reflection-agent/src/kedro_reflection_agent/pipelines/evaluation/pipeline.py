@@ -50,13 +50,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=init_judge_evaluator,
-                inputs=["judge_context", "customers", "products"],
+                inputs=["judge_context", "customers", "products", "params:agent_id"],
                 outputs="judge_evaluator",
                 name="init_judge_evaluator_node",
             ),
             node(
                 func=make_campaign_task,
-                inputs="params:run_id",
+                inputs=["params:run_id", "params:agent_id"],
                 outputs="campaign_task",
                 name="make_campaign_task_node",
             ),
@@ -68,6 +68,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "heuristic_evaluators",
                     "judge_evaluator",
                     "params:run_id",
+                    "params:agent_id",
                     "params:model_name",
                     "params:system_prompt_version",
                     "params:judge_model_name",
