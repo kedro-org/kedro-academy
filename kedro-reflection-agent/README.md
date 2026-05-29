@@ -1,257 +1,348 @@
-# kedro-reflection-agent
+# Reflection Hub
 
-A Kedro + Streamlit demo of an **agentic reflection / continuous learning** loop.
+> **Self-improving agent platform for telco.**
+> One platform investment, N business units. Governance built in. Value compounds as the portfolio grows.
 
-A B2B campaign agent (telco sales) generates personalised outreach emails.
-After an evaluation pass, a meta-agent reflects on the failures and proposes
-updates to the system prompt, the skill file, and the eval set itself.
-Re-running the agent against the new artifacts produces visibly better emails.
+Three AI agents run the same five-pipeline loop — generate → evaluate → scout → reflect → apply. A shared Portfolio Intelligence layer surfaces quality trends, issue patterns, and cross-agent learnings. Every change goes through a human approval gate before it touches production.
 
-For the full pipeline design and rationale see [`DESIGN.md`](DESIGN.md).
+For the full system design see [`docs/enterprise-architecture.md`](docs/enterprise-architecture.md).
+
+---
+
+## Why this architecture
+
+**Scale** — One platform investment serves N business units. Evaluation, governance, and audit are not rebuilt per team. Adding a fourth agent is a configuration exercise: new data files under `data/{agent_id}/`, new Langfuse prompts and dataset. Zero code changes.
+
+**Governance built in** — No change touches production without a human approval gate. Every prompt version, every skill update, every apply event is traceable to a run ID.
+
+**Compounding value** — A failure caught in one unit becomes a regression test there *and* surfaces an opportunity for the others. The platform gets smarter as the portfolio grows.
+
+---
+
+## System layers
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PORTFOLIO INTELLIGENCE LAYER                        ║
+║  Quality Trend · Issue Matrix · Cross-Agent Learning · Audit Roll-up ║
+╚══════════════╤═════════════════╤════════════════════╤═══════════════╝
+               │                 │                    │
+    ┌──────────▼──────┐  ┌───────▼──────────┐  ┌─────▼───────────────┐
+    │  B2B Sales       │  │ Consumer Mktg    │  │  Customer Care       │
+    │  Enterprise      │  │  Plan & device   │  │   Support reply      │
+    │  outreach emails │  │  upgrade offers  │  │   suggestions        │
+    │                  │  │                  │  │                      │
+    │  Generate        │  │  Generate        │  │  Generate            │
+    │  Evaluate        │  │  Evaluate        │  │  Evaluate            │
+    │  Scout → signals │  │  Scout → signals │  │  Scout → signals     │
+    │  Reflect         │  │  Reflect         │  │  Reflect             │
+    │  ✋ Approve       │  │  ✋ Approve       │  │  ✋ Approve           │
+    │  Apply           │  │  Apply           │  │  Apply               │
+    └──────────────────┘  └──────────────────┘  └──────────────────────┘
+               │                 │                    │
+╔══════════════▼═════════════════▼════════════════════▼═══════════════╗
+║                    SHARED PLATFORM SERVICES                          ║
+║  Prompt Registry · Skill Library · Eval Framework · Audit Log        ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## Portfolio Intelligence
+
+| View | Question answered | UI page | Audience |
+|---|---|---|---|
+| **Quality Trend** | Who's improving, stalling, regressing? | Org Overview | Leadership |
+| **Issue Matrix** | Which failure modes are unit-specific vs. systemic? | Org Overview | Platform team |
+| **Cross-Agent Learning** | When a fix in one unit matches an open failure in another, should it travel? | Org Overview | Platform team |
+| **Audit Roll-up** | What changed, when, who approved it, any rollbacks? | Campaigns | Governance |
+
+---
 
 ## Status
 
-| Component                | Status                                                                     |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Synthetic data + prompts | ✅ committed under `data/`                                                 |
-| `campaign` pipeline      | ✅ implemented — generates emails + emits Langfuse traces                  |
-| `evaluation` pipeline    | ✅ implemented — drives a Langfuse `run_experiment(...)`                   |
-| `reflection` pipeline    | ✅ implemented — meta-agent proposes new prompt, skill, and eval cases     |
-| `apply` pipeline         | ✅ implemented — commits approved proposal to live locations               |
-| Streamlit dashboard      | ✅ implemented — 3-step interactive demo with Langfuse observability panel |
+| Component | Status |
+|---|---|
+| `campaign` pipeline | ✅ — generates outputs + Langfuse traces |
+| `evaluation` pipeline | ✅ — LLM judge + heuristics, per-agent scorer dimensions |
+| `scouts` pipeline | ✅ — 5 pattern scouts, signal index |
+| `reflection` pipeline | ✅ — meta-agent proposes prompt / skill / eval cases |
+| `apply` pipeline | ✅ — commits approved proposal, audit log |
+| `RunIndexHook` | ✅ — cross-run audit index after each pipeline |
+| B2B Sales agent | ✅ end-to-end |
+| Consumer Marketing agent | ⬜ data + models ready; Langfuse setup pending |
+| Customer Care agent | ⬜ data + models ready; Langfuse setup pending |
+| Streamlit UI | ✅ — 3-step demo (B2B) |
+| Portfolio Intelligence UI | ⬜ HTML prototypes in `docs/ui/` — not wired to live data yet |
 
-End-to-end demo is **fully runnable**: campaign → evaluation → reflection → apply → campaign → evaluation, all orchestrated through the UI or CLI.
+---
+
+## Agent loop — invariant shape
+
+Every agent follows the same seven-step loop. The pipeline code does not change when adding an agent.
+
+| Step | What happens | UI touchpoint |
+|---|---|---|
+| **Generate** | Agent drafts outputs against live targets | Campaigns — Stage 1 |
+| **Evaluate** | LLM judge + heuristics score each output against domain rubric | Campaigns — Stage 1 Langfuse tab |
+| **Scout** | Rule-based detectors scan outputs and emit signals | Campaigns — Stage 2 Signals tab |
+| **Reflect** | Meta-agent reads signal clusters and worst-case outputs | Campaigns — Stage 3 |
+| **Propose** | Improved prompt, skill file, regression cases written to disk | Campaigns — Stage 3 Proposal tab |
+| **Human Approval** | Reviewer inspects the diff before anything goes live | Campaigns — Stage 4 gate |
+| **Apply** | Approved changes versioned into Langfuse; audit row appended | Campaigns — Stage 4 Run Logs |
+
+---
+
+## Agents
+
+| Agent | Description | Judge dimensions |
+|---|---|---|
+| `b2b_sales` | Enterprise outreach emails | writing_quality, personalization, groundedness |
+| `consumer_mktg` | Plan & device upgrade offers | offer_relevance, personalisation, urgency_cta, tone, compliance |
+| `customer_care` | Empathetic support replies | empathy_opener, resolution_clarity, tone, compliance, escalation_avoidance |
+
+All agents share four heuristic scorers: `subject_present`, `length_in_range`, `no_fake_skus`, `cta_present`.
+
+---
+
+## Pattern scouts
+
+Five deterministic, LLM-free detectors between Evaluate and Reflect.
+
+| Scout | Triggers when… | Confidence |
+|---|---|---|
+| `rubric_miss` | Any rubric field not met on ≥ 2 cases | `high` |
+| `score_regression` | Any dimension drops > 10 pts vs. rolling 5-run average | `medium` / `high` if > 20 pts |
+| `hallucination_flag` | Forbidden mention or fabricated detail detected on ≥ 1 case | `high` |
+| `tone_drift` | Tone dimension below floor for ≥ 3 consecutive cases | `medium` |
+| `cross_unit_pattern` | Same `signal_type` in ≥ 2 agents in the same rolling window | `high` |
+
+Design rules: pure and deterministic (no LLM calls), O(n) over outputs, `reason` field is self-contained (quotes threshold + observed value).
+
+---
+
+## Evaluation framework
+
+Two distinct layers — often conflated:
+
+**1. Shared infrastructure** (identical across all agents)
+- `run_experiment()` Langfuse experiment runner
+- Kedro pipeline shape and catalog pattern
+- 4-slot heuristic scorer scaffold
+- `CaseScore` / `AggregateScore` disk schema
+
+**2. Per-agent configuration** (swapped via `agent_id` at runtime)
+- `judge_prompt` — scoring criteria and dimension definitions
+- `JudgeScore` model — scorer names derived from model fields
+- Heuristic implementations — domain-specific structural checks
+- Eval dataset — separate Langfuse dataset per agent
+
+**3. Per-case rubric** (on every eval case)
+```json
+{
+  "required_mentions": ["fleet management", "uptime SLA"],
+  "forbidden_mentions": ["generic connectivity"],
+  "expected_cta": "demo",
+  "expected_tone": "consultative"
+}
+```
+
+---
+
+## Storage & data layer
+
+| Store | Path | Written by | Read by |
+|---|---|---|---|
+| **Run outputs** | `data/{agent_id}/outputs/runs/{run_id}/` | campaign, evaluation, scouts | reflection, Portfolio Intelligence |
+| **Signal store** | `…/signals.json` | scouts | reflection (threshold check), Portfolio Intelligence |
+| **Run index** | `data/outputs/run_index.json` | `RunIndexHook` (after each pipeline) | Portfolio Intelligence, UI |
+| **Signal index** | `data/outputs/signal_index.json` | `cross_unit_pattern` scout | `cross_unit_pattern` scout, Portfolio Intelligence |
+| **Reflection store** | `data/{agent_id}/outputs/reflections/{reflection_id}/` | reflection, apply | human reviewer, apply pipeline |
+| **Apply history** | `data/outputs/apply_history.json` | apply pipeline (append-only) | Portfolio Intelligence, governance |
+| **Prompt registry** | Langfuse (versioned) | apply pipeline | campaign (injected at runtime) |
+| **Skill library** | `data/{agent_id}/campaign/skills/` | apply pipeline | campaign (injected at runtime) |
+
+> POC approach: all stores are flat JSON files. Natural migration path: signal store + run index → SQLite or DuckDB; prompts + eval datasets stay in Langfuse.
+
+---
 
 ## Project shape
 
 ```
 kedro-reflection-agent/
-├── conf/
-│   ├── base/
-│   │   ├── catalog.yml                 # pipeline-agnostic (default_dataset)
-│   │   ├── catalog_campaign.yml
-│   │   ├── catalog_evaluation.yml
-│   │   ├── catalog_reflection.yml
-│   │   ├── catalog_apply.yml
-│   │   └── parameters.yml              # runtime defaults
-│   ├── local/
-│   │   ├── credentials.yml             # gitignored — real keys go here
-│   │   └── credentials.yml.example    # template (committed)
-│   └── logging.yml
+├── conf/base/
+│   ├── catalog.yml                     # {default_dataset} override only
+│   ├── catalog_campaign.yml
+│   ├── catalog_evaluation.yml
+│   ├── catalog_scouts.yml
+│   ├── catalog_reflection.yml
+│   ├── catalog_apply.yml
+│   └── parameters.yml                  # agent_id is mandatory (no default)
 ├── data/
-│   ├── seed/                           # synthetic customers + products
-│   ├── campaign/                       # targets, system prompt, skill file
-│   ├── evaluation/                     # eval cases + judge prompt
-│   ├── reflection/                     # meta-agent prompt
-│   ├── demo_state.json                 # UI state machine (written by seed script)
-│   └── outputs/                        # all pipeline writes go here (gitignored)
-│       ├── runs/{run_id}/
-│       └── reflections/{reflection_id}/
+│   ├── shared/seed/
+│   │   ├── customers.json              # 20 global customer base records
+│   │   └── products.json               # 15 global product base records
+│   └── {agent_id}/
+│       ├── seed/
+│       │   ├── customer_profiles.json  # agent-specific enrichment (FK: customer_id)
+│       │   ├── product_details.json    # agent-specific enrichment (FK: product_id)
+│       │   └── targets.json            # (case_id, customer_id, product_id)
+│       ├── campaign/prompts/ + skills/
+│       ├── evaluation/eval_cases.json + prompts/
+│       ├── reflection/prompts/
+│       └── outputs/                    # gitignored
 ├── src/kedro_reflection_agent/
-│   ├── data_models.py                  # shared Pydantic models
-│   ├── pipeline_registry.py
+│   ├── models/
+│   │   ├── shared/                     # EmailOutput, CaseScore, Signal, RunIndexEntry, …
+│   │   ├── b2b_sales/                  # JudgeScore, CustomerProfile, ProductDetails
+│   │   ├── consumer_mktg/              # JudgeScore, CustomerProfile, ProductDetails
+│   │   └── customer_care/              # JudgeScore, CustomerProfile, ProductDetails
+│   ├── hooks.py                        # RunIndexHook
 │   ├── settings.py
 │   └── pipelines/
-│       ├── _common.py                  # build_structured_chain, utc_now_iso
-│       ├── campaign/{nodes.py, pipeline.py}
-│       ├── evaluation/{nodes.py, pipeline.py}
-│       ├── reflection/{nodes.py, pipeline.py}
-│       └── apply/{nodes.py, pipeline.py}
+│       ├── campaign/ evaluation/ scouts/ reflection/ apply/
+│       └── _common.py
 ├── app/                                # Streamlit dashboard
-│   ├── main.py                         # entry point + reset logic
-│   ├── runner.py                       # blocking kedro subprocess runner
-│   ├── state.py                        # DemoState machine + persistence
-│   ├── ui_components.py                # shared UI chrome
-│   ├── charts.py                       # Plotly chart helpers
-│   ├── embeds.py                       # Langfuse + Kedro-Viz panel renderers
-│   ├── langfuse_analytics.py           # Langfuse public API client
-│   ├── kedro_viz_server.py             # background Kedro-Viz subprocess
-│   └── components/
-│       ├── step_1_run.py               # Step 1: generate + evaluate
-│       ├── step_2_reflect.py           # Step 2: reflect + apply
-│       └── step_3_rerun.py             # Step 3: re-run + compare
-├── scripts/
-│   └── seed_demo.py                    # restore v1 baseline; wipe run outputs
-├── tests/
-├── Makefile
-└── DESIGN.md
+├── docs/
+│   ├── enterprise-architecture.md
+│   └── ui/
+│       ├── index.html                  # Org Overview prototype
+│       └── campaign.html               # Campaigns page prototype
+├── scripts/seed_demo.py
+└── Makefile
 ```
 
-## Synthetic data
-
-All input data is hand-crafted and committed. There is no data-generation step.
-
-| File                                             | Items | Schema                                                                                                         |
-| ------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- |
-| `data/seed/customers.json`                       |  10   | `customer_id`, `company_name`, `industry`, `company_size`, `employee_count`, `current_products`, `account_tenure_years`, `primary_contact_name`, `primary_contact_role`, `region` |
-| `data/seed/products.json`                        |   5   | `product_id`, `name`, `short_description`, `target_segment`, `key_benefits`, `pricing_tier`                    |
-| `data/campaign/targets.json`                     |  20   | `case_id`, `customer_id`, `product_id`                                                                         |
-| `data/campaign/prompts/system_prompt.json`       |   1   | chat-style Langfuse prompt; v1 is deliberately mediocre                                                        |
-| `data/campaign/skills/b2b_email_style.md`        |   1   | markdown skill file injected into the system prompt via `{skill}`                                              |
-| `data/evaluation/eval_cases.json`                |  20   | Langfuse dataset items with rubric (`required_mentions`, `forbidden_mentions`, `expected_cta`, `expected_tone`) |
-| `data/evaluation/prompts/judge_prompt.json`      |   1   | chat-style Langfuse prompt for the LLM judge                                                                   |
-| `data/reflection/prompts/meta_agent_prompt.json` |   1   | chat-style prompt for the reflection meta-agent                                                                |
-
-`case_id` is shared between `targets.json` and `eval_cases.json` so evaluation can join emails to rubrics by id.
-
-## What's built
-
-### `campaign` pipeline — 3 nodes
-
-```
-agent_context_node          ->  agent_context
-prepare_agent_inputs_node   ->  agent_inputs
-generate_emails_node        ->  emails        (data/outputs/runs/{run_id}/emails/{case_id}.json)
-                                run_metadata  (data/outputs/runs/{run_id}/run_metadata.json)
-```
-
-Composes a `ChatPromptTemplate | LLM.with_structured_output(EmailOutput)` chain per case, attaching a Langfuse callback so every generation produces a trace.
-
-### `evaluation` pipeline — 5 nodes
-
-```
-judge_context_node              ->  judge_context
-init_heuristic_evaluators_node  ->  4 heuristic evaluator callables
-init_judge_evaluator_node       ->  1 combined LLM-judge evaluator (3 Evaluations per call)
-make_campaign_task_node         ->  task callable (disk lookup by case_id)
-run_experiment_node             ->  per_case_scores   (data/outputs/runs/{run_id}/per_case_scores.json)
-                                    aggregate_scores  (data/outputs/runs/{run_id}/aggregate_scores.json)
-                                    + named dataset run in Langfuse
-```
-
-Seven scorers: four deterministic heuristics (`subject_present`, `length_in_range`, `no_fake_skus`, `cta_present`) and three LLM-judge dimensions (`writing_quality`, `personalization`, `groundedness`). One judge LLM call per email (not per dimension).
-
-### `reflection` pipeline — 3 nodes
-
-```
-meta_agent_context_node         ->  meta_agent_context
-prepare_reflection_context_node ->  reflection_context
-reflect_node                    ->  summary.md             (data/outputs/reflections/{reflection_id}/)
-                                    proposed_prompt.json
-                                    proposed_skill.md
-                                    proposed_eval_cases.json
-```
-
-The meta-agent reads the current prompt + skill + worst-N failing cases and produces a structured proposal. Errored experiment cases (no local email) are filtered out. Reflection is open-loop — it never touches live artifacts.
-
-### `apply` pipeline — 1 node
-
-```
-commit_reflection_node  ->  system_prompt  (new version pushed to Langfuse)
-                            skill_text     (data/campaign/skills/b2b_email_style.md overwritten)
-                            eval_cases     (new items pushed to Langfuse dataset)
-                            apply_history  (data/outputs/apply_history.json appended)
-```
-
-Takes an approved `reflection_id` and commits all three artifacts, recording an audit row.
+---
 
 ## Quick start
 
-This project uses [uv](https://docs.astral.sh/uv/) for environment management.
+Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
-brew install uv            # macOS; or: curl -LsSf https://astral.sh/uv/install.sh | sh
-make setup                 # uv sync --extra dev + restore seed data
+brew install uv
+make setup
 cp conf/local/credentials.yml.example conf/local/credentials.yml
-# Edit credentials.yml — fill in openai.api_key + langfuse_credentials
+# fill in: openai.api_key, langfuse_credentials (host, public_key, secret_key, project_id)
 ```
 
-You'll need a Langfuse project with:
-- prompt `b2b-email-system-prompt`
-- prompt `b2b-email-judge-prompt`
-- dataset `b2b-campaign-agent-eval`
+**Langfuse setup** — one dataset and two prompts per agent. For B2B:
+```
+Dataset:  b2b_sales-eval
+Prompt:   b2b_sales-system-prompt   ← seed from data/b2b_sales/campaign/prompts/system_prompt.json
+Prompt:   b2b_sales-judge-prompt    ← seed from data/b2b_sales/evaluation/prompts/judge_prompt.json
+```
 
-Add `project_id` to `langfuse_credentials` to enable deep-links in the observability panel.
-
-### Self-hosting Langfuse v3 (Podman)
-
+**Self-hosted Langfuse (Podman):**
 ```bash
-podman machine init && podman machine start   # macOS only
+podman machine init && podman machine start
 git clone https://github.com/langfuse/langfuse.git && cd langfuse
 podman-compose up -d
-curl http://localhost:3000/api/public/health  # → {"status":"ok"}
+curl http://localhost:3000/api/public/health   # → {"status":"ok"}
+# Set host: http://localhost:3000 in credentials.yml
 ```
 
-Set `host: http://localhost:3000` in `conf/local/credentials.yml`. No API rate limits on a self-hosted instance.
+**UI prototypes (no backend required):**
+```bash
+python -m http.server 8080 --directory docs/ui
+# open http://localhost:8080/index.html      — Org Overview
+# open http://localhost:8080/campaign.html   — Campaigns page
+```
+
+---
 
 ## Makefile shortcuts
 
-| Command          | What it does                                                     |
-| ---------------- | ---------------------------------------------------------------- |
-| `make install`   | `uv sync --extra dev` — create `.venv` and install all deps      |
-| `make setup`     | `install` + `seed` — full first-time setup                       |
-| `make seed`      | Restore v1 baseline; wipe run outputs (all 20 cases)             |
-| `make seed N=3`  | Seed only the first N eval cases and campaign targets            |
-| `make reset`     | Alias for `seed`                                                 |
-| `make app`       | `uv run streamlit run app/main.py`                               |
-| `make viz`       | `uv run kedro viz run`                                           |
-| `make test`      | `uv run python -m pytest -q`                                     |
-| `make run-cycle` | Full six-step pipeline cycle headless (no UI)                    |
+| Command | What it does |
+|---|---|
+| `make install` | `uv sync --extra dev` — create `.venv` and install all deps |
+| `make setup` | `install` + `seed` — full first-time setup |
+| `make seed` | Reset all 3 agents to v1 baseline; wipe run outputs |
+| `make seed N=5` | Seed only first 5 cases per agent |
+| `make seed AGENT=b2b_sales` | Reset one agent only |
+| `make seed AGENT=b2b_sales N=3` | One agent, 3 cases |
+| `make reset` | Alias for `seed` |
+| `make app` | Launch Streamlit UI (`streamlit run app/main.py`) |
+| `make viz` | Launch Kedro-Viz pipeline graph |
+| `make test` | Run pytest |
+| `make run-cycle` | Full headless demo cycle for b2b_sales |
 
-> `data/outputs/apply_history.json` is preserved across resets so you can track apply cycles across sessions.
+> `data/outputs/apply_history.json` is preserved across resets.
 
-## Run
+---
+
+## Running pipelines manually
+
+`agent_id` is mandatory — there is no default fallback.
 
 ```bash
-make app    # launch the interactive UI
+# Full default loop (campaign + evaluation + scouts)
+kedro run --params "agent_id=b2b_sales,run_id=run_1"
 
-# Or run each step manually:
-uv run kedro run --pipelines campaign    --params "run_id=run_1"
-uv run kedro run --pipelines evaluation  --params "run_id=run_1"
-uv run kedro run --pipelines reflection  --params "run_id=run_1,reflection_id=refl_1"
-uv run kedro run --pipelines apply       --params "reflection_id=refl_1"
-uv run kedro run --pipelines campaign    --params "run_id=run_2"
-uv run kedro run --pipelines evaluation  --params "run_id=run_2"
+# Individual pipelines
+kedro run --pipeline campaign    --params "agent_id=b2b_sales,run_id=run_1"
+kedro run --pipeline evaluation  --params "agent_id=b2b_sales,run_id=run_1"
+kedro run --pipeline scouts      --params "agent_id=b2b_sales,run_id=run_1"
+kedro run --pipeline reflection  --params "agent_id=b2b_sales,run_id=run_1,reflection_id=refl_1"
+kedro run --pipeline apply       --params "agent_id=b2b_sales,reflection_id=refl_1"
+
+# Other agents
+kedro run --params "agent_id=consumer_mktg,run_id=run_1"
+kedro run --params "agent_id=customer_care,run_id=run_1"
 ```
 
-## Configuration
+---
 
-| Param                      | Default       | Used by                                |
-| -------------------------- | ------------- | -------------------------------------- |
-| `run_id`                   | `default`     | output paths for campaign + evaluation |
-| `model_name`               | `gpt-4o-mini` | campaign LLM                           |
-| `system_prompt_version`    | `1`           | which Langfuse system-prompt version   |
-| `judge_model_name`         | `gpt-4o`      | evaluation LLM                         |
-| `judge_prompt_version`     | `1`           | which Langfuse judge-prompt version    |
-| `passing_threshold`        | `0.92`        | per-case mean cutoff for `n_passing`   |
-| `body_length_min` / `_max` | `300` / `2000`| heuristic body-length scorer           |
-| `reflection_id`            | `refl_1`      | output paths for reflection + apply    |
+## Parameters
 
-## Outputs
+| Param | Default | Notes |
+|---|---|---|
+| `agent_id` | **mandatory** | no fallback — must be passed explicitly |
+| `run_id` | `default` | controls output path |
+| `reflection_id` | `refl_1` | controls reflection output path |
+| `model_name` | `gpt-4o-mini` | campaign LLM |
+| `system_prompt_version` | `1` | Langfuse prompt version |
+| `judge_model_name` | `gpt-4o` | evaluation LLM judge |
+| `judge_prompt_version` | `1` | Langfuse judge prompt version |
+| `passing_threshold` | `0.92` | per-case mean cutoff for `n_passing` |
+| `body_length_min/max` | `300/2000` | heuristic length scorer bounds |
+| `meta_agent_model_name` | `gpt-4o` | reflection meta-agent |
+
+Scout thresholds (all in `parameters.yml`): `scout_regression_delta_medium/high`, `scout_regression_window`, `scout_rubric_miss_min_cases`, `scout_hallucination_min_cases`, `scout_tone_floor/min_cases`, `scout_cross_unit_min_agents/window`.
+
+---
+
+## Output layout
 
 ```
-data/outputs/
+data/{agent_id}/outputs/
 ├── runs/{run_id}/
-│   ├── emails/{case_id}.json     # one file per generated email
+│   ├── emails/{case_id}.json     # generated output per case
 │   ├── run_metadata.json         # model, versions, counts, timestamps
-│   ├── per_case_scores.json      # case_id, evaluations, mean_score, passing
-│   └── aggregate_scores.json     # mean per scorer, pass_rate, dataset_run_url
-├── reflections/{reflection_id}/
-│   ├── summary.md                # narrative: identified / fixed / reasons
-│   ├── proposed_prompt.json      # new system prompt messages
-│   ├── proposed_skill.md         # new skill file content
-│   └── proposed_eval_cases.json  # new eval cases derived from failures
-└── apply_history.json            # append-only audit log
+│   ├── per_case_scores.json      # per-case evaluations, mean_score, passing
+│   ├── aggregate_scores.json     # pass_rate, mean_per_scorer, Langfuse URL
+│   └── signals.json              # scout signals for this run
+└── reflections/{reflection_id}/
+    ├── summary.md
+    ├── proposed_prompt.json
+    ├── proposed_skill.md
+    └── proposed_eval_cases.json
+
+data/outputs/                     # cross-agent shared stores
+├── run_index.json                # rolling audit index — all agents, all runs
+├── signal_index.json             # rolling cross-agent signal log
+└── apply_history.json            # append-only apply audit log
 ```
 
-## Langfuse observability
-
-Every Langfuse tab shows (when `langfuse_credentials` is configured):
-
-- **Metrics row** — total traces, LLM cost today, observations today
-- **Score averages** bar chart — all 7 eval dimensions averaged across runs
-- **Token usage by model** — stacked input/output tokens with total cost (from `/api/public/metrics`)
-- **Daily traces** and **daily cost** time-series (from `/api/public/metrics/daily`)
-- **Recent traces** expander with deep-links into the Langfuse UI
-
-## Known shortcuts (intentional)
-
-- **Skill file on disk only.** The system prompt and judge prompt are Langfuse-versioned; the skill markdown is a plain `text.TextDataset`. A future slice can version it in Langfuse too.
-- **`evaluation` reuses cached emails.** The experiment task is a disk lookup — not a re-invocation — so the UI email and the scored email are byte-identical.
-- **Scores mirrored to disk.** `per_case_scores.json` and `aggregate_scores.json` let `reflection` work offline without a Langfuse round-trip.
+---
 
 ## Where to look next
 
-- [`DESIGN.md`](DESIGN.md) — full per-pipeline contract for all four pipelines
-- `src/kedro_reflection_agent/data_models.py` — Pydantic models shared by all pipelines
-- `src/kedro_reflection_agent/pipelines/_common.py` — shared helpers
+| File | What's there |
+|---|---|
+| [`docs/enterprise-architecture.md`](docs/enterprise-architecture.md) | Full system design, mermaid flowchart, storage layer |
+| `src/kedro_reflection_agent/models/` | All Pydantic models — shared and per-agent |
+| `src/kedro_reflection_agent/hooks.py` | `RunIndexHook` — cross-run audit index |
+| `src/kedro_reflection_agent/pipelines/_common.py` | Shared helpers |
+| `conf/local/credentials.yml.example` | Credentials template |
+| `docs/ui/index.html` | Org Overview UI prototype |
+| `docs/ui/campaign.html` | Campaigns page UI prototype |
