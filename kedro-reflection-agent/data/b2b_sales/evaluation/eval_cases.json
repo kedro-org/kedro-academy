@@ -1,9 +1,10 @@
 [
   {
-    "id": "ab1a91c5-a560-4bad-8246-428164ae3dd4",
+    "id": "a17c30cf-88d0-576f-8c93-056d4f4c0965",
     "input": {
       "customer_id": "cust_002",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_001"
     },
     "expected_output": {
       "rubric": {
@@ -19,15 +20,16 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "consultative",
-        "notes": "Upsell from SD-WAN Basic to Pro. Acknowledge the existing Basic tier and articulate the incremental value of Pro (centralized policy, application-aware shaping)."
+        "notes": "Upsell from SD-WAN Basic to Pro. Acknowledge the existing Basic tier and articulate the incremental value of Pro."
       }
     }
   },
   {
-    "id": "753c78d2-a2a2-483e-b4cc-5e8ec8c8d048",
+    "id": "2b0b4c68-d8bb-5e96-85da-33699ea312fc",
     "input": {
       "customer_id": "cust_001",
-      "product_id": "prod_005"
+      "product_id": "prod_005",
+      "case_id": "case_002"
     },
     "expected_output": {
       "rubric": {
@@ -43,15 +45,16 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "friendly",
-        "notes": "Upsell from UC Basic to UC Pro for a small retail company. Email should be short, friendly, and emphasise the contact-centre and video features as a step up from telephony."
+        "notes": "Upsell from UC Basic to UC Pro for a small retail company. Short, friendly, emphasise contact-centre and video features."
       }
     }
   },
   {
-    "id": "1beac8da-aada-4900-a915-2f15144777cc",
+    "id": "8c3e6d72-cfe2-5e2c-9216-6b59882191bf",
     "input": {
       "customer_id": "cust_005",
-      "product_id": "prod_002"
+      "product_id": "prod_002",
+      "case_id": "case_003"
     },
     "expected_output": {
       "rubric": {
@@ -67,15 +70,16 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "consultative",
-        "notes": "Strong fit. Email should connect 5G Private Network to a concrete manufacturing use case (e.g. AGVs, robotics) and reference their existing IoT Fleet investment."
+        "notes": "Strong fit. Connect 5G Private Network to a concrete manufacturing use case (AGVs, robotics) and reference their existing IoT Fleet investment."
       }
     }
   },
   {
-    "id": "72a3a6c8-802c-41c9-9769-c1e4438f1689",
+    "id": "6e2141bb-39a8-510a-8352-778a8ce961f6",
     "input": {
       "customer_id": "cust_009",
-      "product_id": "prod_002"
+      "product_id": "prod_002",
+      "case_id": "case_004"
     },
     "expected_output": {
       "rubric": {
@@ -87,19 +91,20 @@
         "forbidden_mentions": [
           "fake SKU",
           "specific discount percentage",
-          "claims unsupported by the product card"
+          "claims unsupported by product card"
         ],
         "expected_cta": "meeting",
         "expected_tone": "formal",
-        "notes": "Strong fit for utilities OT. Email should reference grid/field operations and connect 5G Private Network to deterministic low-latency requirements."
+        "notes": "Strong fit for utilities OT. Reference grid/field operations and connect 5G Private Network to deterministic low-latency requirements."
       }
     }
   },
   {
-    "id": "5428d4d1-8e60-4503-8eea-56692fe776c3",
+    "id": "da46917d-bcb8-5380-9994-37abc67dbfd7",
     "input": {
       "customer_id": "cust_002",
-      "product_id": "prod_003"
+      "product_id": "prod_003",
+      "case_id": "case_005"
     },
     "expected_output": {
       "rubric": {
@@ -113,15 +118,16 @@
         ],
         "expected_cta": "call",
         "expected_tone": "consultative",
-        "notes": "Cross-sell to existing customer with SD-WAN + IoT. Email should articulate how Managed Cloud Connect complements their current stack (warehouse management, telemetry ingestion)."
+        "notes": "Cross-sell to existing customer with SD-WAN + IoT. Connect Managed Cloud Connect to warehouse management and telemetry ingestion."
       }
     }
   },
   {
-    "id": "1f575503-f7a1-49d1-811c-b793b635337d",
+    "id": "5075adb4-317f-5fb3-9aee-03630c840449",
     "input": {
       "customer_id": "cust_004",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_006"
     },
     "expected_output": {
       "rubric": {
@@ -136,15 +142,16 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "consultative",
-        "notes": "Mid retailer with multiple stores - good SD-WAN fit. Email should reference store-to-HQ connectivity and POS reliability."
+        "notes": "Mid retailer with multiple stores \u2014 SD-WAN fit. Reference store-to-HQ connectivity and POS reliability."
       }
     }
   },
   {
-    "id": "64fd21cb-1a1d-40c6-af7a-c055c7172bc5",
+    "id": "95dc6ba8-d97a-5029-9b09-50c7247b48f7",
     "input": {
       "customer_id": "cust_006",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_007"
     },
     "expected_output": {
       "rubric": {
@@ -160,15 +167,16 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "formal",
-        "notes": "Healthcare buyer with cloud connect already - SD-WAN positions as the underlay. Email should be formal and avoid unsupported compliance claims."
+        "notes": "Healthcare buyer with cloud connect already \u2014 SD-WAN as the underlay. Formal tone; avoid unsupported compliance claims."
       }
     }
   },
   {
-    "id": "b90ba8f7-4e3a-4f10-91c1-047a742becb6",
+    "id": "21d309ea-4351-5a38-aa92-ff511b63ae50",
     "input": {
       "customer_id": "cust_007",
-      "product_id": "prod_003"
+      "product_id": "prod_003",
+      "case_id": "case_008"
     },
     "expected_output": {
       "rubric": {
@@ -183,15 +191,16 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "consultative",
-        "notes": "Media mid-market with cloud-heavy workflows. Email should connect Managed Cloud Connect to post-production / content distribution use cases."
+        "notes": "Media mid-market with cloud-heavy workflows. Connect Managed Cloud Connect to post-production / content distribution use cases."
       }
     }
   },
   {
-    "id": "a072f63d-4adb-46f4-a891-620e910356d8",
+    "id": "9a848e99-b6ac-5268-9868-20c05fc0fde0",
     "input": {
       "customer_id": "cust_003",
-      "product_id": "prod_002"
+      "product_id": "prod_002",
+      "case_id": "case_009"
     },
     "expected_output": {
       "rubric": {
@@ -207,15 +216,16 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "formal",
-        "notes": "Ambiguous fit. If pitching 5G Private to a bank, email must justify the use case (branch resilience, on-prem trading floor, secure campus) - not just describe the product."
+        "notes": "Ambiguous fit. Must justify the use case (branch resilience, trading floor, secure campus) \u2014 not just describe the product."
       }
     }
   },
   {
-    "id": "e928d539-6c3e-45cb-b664-85a629ae13e4",
+    "id": "504634ae-5b5b-5ffd-a0e3-21464d259fb4",
     "input": {
       "customer_id": "cust_003",
-      "product_id": "prod_004"
+      "product_id": "prod_004",
+      "case_id": "case_010"
     },
     "expected_output": {
       "rubric": {
@@ -230,15 +240,16 @@
         ],
         "expected_cta": "call",
         "expected_tone": "consultative",
-        "notes": "Weak fit. A good email would either ground IoT Fleet in a banking-specific use case (ATM telemetry, secure logistics) or be deliberately exploratory rather than overselling."
+        "notes": "Weak fit. Ground IoT Fleet in a banking-specific use case or be exploratory rather than overselling."
       }
     }
   },
   {
-    "id": "ec8e29b9-dd5c-4697-9e1b-83c87acc86e6",
+    "id": "4bac333d-462e-53cc-9599-6c38900a4ef3",
     "input": {
       "customer_id": "cust_006",
-      "product_id": "prod_004"
+      "product_id": "prod_004",
+      "case_id": "case_011"
     },
     "expected_output": {
       "rubric": {
@@ -254,15 +265,16 @@
         ],
         "expected_cta": "call",
         "expected_tone": "consultative",
-        "notes": "Unusual fit. Healthcare IoT could mean connected medical devices or ambulance fleets. Email should explicitly name a use case rather than describing the product generically."
+        "notes": "Healthcare IoT \u2014 name a use case (connected medical devices, ambulance fleets) rather than describing the product generically."
       }
     }
   },
   {
-    "id": "484a93c3-5201-42b7-939b-eecb1d5e8ad8",
+    "id": "2168b367-71b0-539d-b745-a5c8b504d65e",
     "input": {
       "customer_id": "cust_010",
-      "product_id": "prod_003"
+      "product_id": "prod_003",
+      "case_id": "case_012"
     },
     "expected_output": {
       "rubric": {
@@ -278,15 +290,16 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "friendly",
-        "notes": "Small fintech, no current products. Email should be friendly, acknowledge they are early stage, and pitch Managed Cloud Connect as a foundational layer rather than as an enterprise overhaul."
+        "notes": "Small fintech, no current products. Friendly, foundational pitch \u2014 not an enterprise overhaul."
       }
     }
   },
   {
-    "id": "38b44678-58fc-4604-8dc2-a562f6923c32",
+    "id": "78d3aec3-6af2-5763-aba9-c5b4a495c0e9",
     "input": {
       "customer_id": "cust_001",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_013"
     },
     "expected_output": {
       "rubric": {
@@ -302,15 +315,16 @@
         ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Mismatch. A 45-person retail company doesn't need premium SD-WAN. A good email either acknowledges the size mismatch and offers a fit-check conversation, or doesn't push the product."
+        "notes": "Mismatch. Acknowledge size mismatch; offer a fit-check conversation rather than hard selling."
       }
     }
   },
   {
-    "id": "61a10e53-6d12-46a1-a570-874b6605a384",
+    "id": "f12c0ce4-e008-5abe-a71a-4d8a69a69b4c",
     "input": {
       "customer_id": "cust_008",
-      "product_id": "prod_002"
+      "product_id": "prod_002",
+      "case_id": "case_014"
     },
     "expected_output": {
       "rubric": {
@@ -326,15 +340,16 @@
         ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Clear mismatch. New small-business customer pitched a premium enterprise product. The email should acknowledge the mismatch or focus on discovery rather than hard-selling."
+        "notes": "Clear mismatch. New small-business customer \u2014 focus on discovery rather than hard-selling."
       }
     }
   },
   {
-    "id": "333e7014-3cc0-48df-8bf5-d0663ee7126c",
+    "id": "0e9fbf28-7bd4-57a0-9477-17be0a441c89",
     "input": {
       "customer_id": "cust_010",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_015"
     },
     "expected_output": {
       "rubric": {
@@ -350,15 +365,16 @@
         ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Mismatch. Small fintech doesn't typically need premium SD-WAN. The email should be exploratory and gated on whether they are multi-site."
+        "notes": "Mismatch. Exploratory and gated on whether they are multi-site."
       }
     }
   },
   {
-    "id": "9aefcf1a-f091-4f27-bc46-09eecb9e3e1c",
+    "id": "6dbfe1ae-5e6b-5f86-af7e-3e452610c74e",
     "input": {
       "customer_id": "cust_008",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_016"
     },
     "expected_output": {
       "rubric": {
@@ -374,15 +390,16 @@
         ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Mismatch. Small new logistics customer pitched premium SD-WAN. Email should be exploratory or acknowledge the size mismatch."
+        "notes": "Mismatch. Small new logistics customer \u2014 exploratory or acknowledge the size mismatch."
       }
     }
   },
   {
-    "id": "dfc293fa-8ae8-4cc6-a568-4592d09d703b",
+    "id": "48a5012a-47f9-50d1-b6fb-c02aedbf05a6",
     "input": {
       "customer_id": "cust_005",
-      "product_id": "prod_003"
+      "product_id": "prod_003",
+      "case_id": "case_017"
     },
     "expected_output": {
       "rubric": {
@@ -397,15 +414,16 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "consultative",
-        "notes": "Cross-sell to existing enterprise customer. Email should connect Managed Cloud Connect to MES/ERP cloud workloads and reference their existing connectivity products."
+        "notes": "Cross-sell to existing enterprise customer. Connect Managed Cloud Connect to MES/ERP cloud workloads."
       }
     }
   },
   {
-    "id": "7a39b6d0-c807-472e-94da-187803c12791",
+    "id": "37234093-7216-5bf2-a6de-ac767c5f8048",
     "input": {
       "customer_id": "cust_004",
-      "product_id": "prod_004"
+      "product_id": "prod_004",
+      "case_id": "case_018"
     },
     "expected_output": {
       "rubric": {
@@ -420,15 +438,16 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "consultative",
-        "notes": "Retail IoT angle. Email should ground IoT Fleet Connectivity in a concrete retail use case (delivery vans, refrigeration monitoring, store sensors)."
+        "notes": "Retail IoT \u2014 ground in a concrete retail use case (delivery vans, refrigeration monitoring, store sensors)."
       }
     }
   },
   {
-    "id": "729cc211-4590-42e1-9347-d515b6df2856",
+    "id": "a49f274f-fd53-527c-9182-2743bb64b666",
     "input": {
       "customer_id": "cust_007",
-      "product_id": "prod_001"
+      "product_id": "prod_001",
+      "case_id": "case_019"
     },
     "expected_output": {
       "rubric": {
@@ -443,22 +462,23 @@
         ],
         "expected_cta": "demo",
         "expected_tone": "consultative",
-        "notes": "Mid media company - SD-WAN fits if they have multiple production sites or heavy cloud workflows. Email should justify the fit on workflow grounds, not company size alone."
+        "notes": "Mid media company \u2014 justify SD-WAN fit on workflow grounds, not company size alone."
       }
     }
   },
   {
-    "id": "44fe32b9-f843-45d0-b552-67fa2b07f351",
+    "id": "5e54c196-bc9a-53b5-9089-7997061ce725",
     "input": {
       "customer_id": "cust_009",
-      "product_id": "prod_005"
+      "product_id": "prod_005",
+      "case_id": "case_020"
     },
     "expected_output": {
       "rubric": {
         "required_mentions": [
           "industry: utilities",
           "company_size: enterprise",
-          "use case: field-workforce communications or contact-centre for customer support"
+          "use case: field-workforce communications or contact-centre"
         ],
         "forbidden_mentions": [
           "fake SKU",
@@ -466,7 +486,7 @@
         ],
         "expected_cta": "meeting",
         "expected_tone": "formal",
-        "notes": "Cross-sell UC to a utilities enterprise without current UC. Email should ground the pitch in a specific use case (dispatch, field-workforce, customer contact-centre) rather than generic UC features."
+        "notes": "Cross-sell UC to utilities enterprise. Ground in a specific use case (dispatch, field-workforce, customer contact-centre)."
       }
     }
   }
