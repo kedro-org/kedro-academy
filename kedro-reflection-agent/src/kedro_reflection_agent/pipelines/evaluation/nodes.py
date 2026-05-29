@@ -30,17 +30,17 @@ from kedro.pipeline import LLMContext
 from langfuse import Evaluation
 from langfuse._client.datasets import DatasetClient
 
-from ...models import b2b_sales as b2b_models
-from ...models import consumer_mktg as consumer_mktg_models
-from ...models import customer_care as customer_care_models
-from ...models.shared import AggregateScore, CaseScore, EvaluationRecord
+from kedro_reflection_agent.models import b2b_sales as b2b_models
+from kedro_reflection_agent.models import consumer_mktg as consumer_mktg_models
+from kedro_reflection_agent.models import customer_care as customer_care_models
+from kedro_reflection_agent.models.shared import AggregateScore, CaseScore, EvaluationRecord
 
 _JUDGE_SCORE_BY_AGENT: dict[str, type] = {
     "b2b_sales": b2b_models.JudgeScore,
     "consumer_mktg": consumer_mktg_models.JudgeScore,
     "customer_care": customer_care_models.JudgeScore,
 }
-from .._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
 

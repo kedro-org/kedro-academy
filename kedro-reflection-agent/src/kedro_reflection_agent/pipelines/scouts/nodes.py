@@ -31,8 +31,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ...models.shared import CaseScore, Signal
-from .._common import utc_now_iso
+from kedro_reflection_agent.models.shared import CaseScore, Signal
+from kedro_reflection_agent.pipelines._common import utc_now_iso
 
 logger = logging.getLogger(__name__)
 
