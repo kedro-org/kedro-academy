@@ -21,8 +21,8 @@ from typing import Any
 from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 
-from ...models.shared import CampaignTarget, CustomerBase, Email, EmailOutput, ProductBase, RunMetadata
-from .._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.models.shared import CampaignTarget, CustomerBase, Email, EmailOutput, ProductBase, RunMetadata
+from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
