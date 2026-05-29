@@ -1,131 +1,251 @@
 [
   {
-    "id": "case_001",
-    "input": {"customer_id": "cust_011", "product_id": "prod_006"},
+    "id": "7f1da4ae-f10b-553b-8cf5-216b88505766",
+    "input": {
+      "customer_id": "cust_011",
+      "product_id": "prod_006",
+      "case_id": "case_001"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge billing error", "investigate or credit action", "apologise for inconvenience"],
-        "forbidden_mentions": ["blame the customer", "deny the issue without checking", "fake reference numbers"],
+        "required_mentions": [
+          "acknowledge billing error",
+          "investigate or credit action",
+          "apologise for inconvenience"
+        ],
+        "forbidden_mentions": [
+          "blame the customer",
+          "deny the issue without checking",
+          "fake reference numbers"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Billing dispute on Unlimited 5G. Reply must apologise, confirm the investigation action, and offer a timeline — not dismiss the claim."
+        "notes": "Billing dispute on Unlimited 5G. Apologise, confirm investigation, offer timeline."
       }
     }
   },
   {
-    "id": "case_002",
-    "input": {"customer_id": "cust_012", "product_id": "prod_007"},
+    "id": "f1aa1e16-ab4f-524a-902b-0ee491547b94",
+    "input": {
+      "customer_id": "cust_012",
+      "product_id": "prod_007",
+      "case_id": "case_002"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge signal issue", "network check or engineer visit", "timeline for resolution"],
-        "forbidden_mentions": ["dismiss as device fault without checking", "promise specific fix date", "blame the customer's location"],
+        "required_mentions": [
+          "acknowledge signal issue",
+          "network check or engineer visit",
+          "timeline for resolution"
+        ],
+        "forbidden_mentions": [
+          "dismiss as device fault without checking",
+          "promise specific fix date",
+          "blame customer's location"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Network coverage issue on Essential 20GB. Reply must acknowledge the persistent issue, offer a concrete next step (engineer visit or network check), and not dismiss it."
+        "notes": "Network coverage issue. Offer a concrete next step; do not dismiss."
       }
     }
   },
   {
-    "id": "case_003",
-    "input": {"customer_id": "cust_013", "product_id": "prod_008"},
+    "id": "b6090a26-42c7-59dc-ad0a-8a6d05ca9a35",
+    "input": {
+      "customer_id": "cust_013",
+      "product_id": "prod_008",
+      "case_id": "case_003"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge missing top-up credit", "check or restore credit action", "24-hour processing context"],
-        "forbidden_mentions": ["claim top-up was not received", "ask customer to top up again without checking", "fake case numbers"],
+        "required_mentions": [
+          "acknowledge missing top-up credit",
+          "check or restore credit action",
+          "24-hour processing context"
+        ],
+        "forbidden_mentions": [
+          "claim top-up was not received",
+          "ask customer to top up again without checking",
+          "fake case numbers"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Prepaid top-up credit not appearing. Reply should acknowledge the delay, confirm it will be investigated, and set expectations — not tell the customer to wait indefinitely."
+        "notes": "Top-up credit not appearing. Acknowledge, investigate, set expectations."
       }
     }
   },
   {
-    "id": "case_004",
-    "input": {"customer_id": "cust_014", "product_id": "prod_010"},
+    "id": "54cbfb52-9a40-5bcc-8929-b019dfea4d5d",
+    "input": {
+      "customer_id": "cust_014",
+      "product_id": "prod_010",
+      "case_id": "case_004"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge roaming charges despite add-on", "investigate or refund action", "confirm Roaming Plus coverage"],
-        "forbidden_mentions": ["deny Roaming Plus covers Spain", "blame customer for not activating", "no concrete action"],
+        "required_mentions": [
+          "acknowledge roaming charges despite add-on",
+          "investigate or refund action",
+          "confirm Roaming Plus coverage"
+        ],
+        "forbidden_mentions": [
+          "deny Roaming Plus covers Spain",
+          "blame customer for not activating",
+          "no concrete action"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Roaming charges on Prepaid despite Roaming Plus add-on. Reply must acknowledge the charge dispute, offer to investigate and refund if confirmed, and not shift blame."
+        "notes": "Roaming charge dispute. Investigate and offer refund if confirmed; no blame shifting."
       }
     }
   },
   {
-    "id": "case_005",
-    "input": {"customer_id": "cust_015", "product_id": "prod_006"},
+    "id": "e161d01c-c17a-596f-bde9-6b86034eaea3",
+    "input": {
+      "customer_id": "cust_015",
+      "product_id": "prod_006",
+      "case_id": "case_005"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge price increase", "retention offer or explanation of value", "no cancellation pressure"],
-        "forbidden_mentions": ["dismiss the concern", "threaten contract terms", "deny the price increase"],
+        "required_mentions": [
+          "acknowledge price increase",
+          "retention offer or explanation of value",
+          "no cancellation pressure"
+        ],
+        "forbidden_mentions": [
+          "dismiss the concern",
+          "threaten contract terms",
+          "deny the price increase"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Cancellation threat due to price increase on Unlimited 5G. Reply must acknowledge the concern empathetically, offer retention value (loyalty discount / plan review), and not pressure the customer."
+        "notes": "Cancellation threat due to price increase. Empathetic; offer retention value without pressure."
       }
     }
   },
   {
-    "id": "case_006",
-    "input": {"customer_id": "cust_016", "product_id": "prod_007"},
+    "id": "35741850-ed75-5cb3-8d97-9ec8128d52e9",
+    "input": {
+      "customer_id": "cust_016",
+      "product_id": "prod_007",
+      "case_id": "case_006"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge wrong billing amount", "confirm plan change or refund action", "apologise for error"],
-        "forbidden_mentions": ["claim plan was not changed", "ask customer to pay the wrong amount", "no concrete resolution"],
+        "required_mentions": [
+          "acknowledge wrong billing amount",
+          "confirm plan change or refund action",
+          "apologise for error"
+        ],
+        "forbidden_mentions": [
+          "claim plan was not changed",
+          "ask customer to pay the wrong amount",
+          "no concrete resolution"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Wrong plan still being charged after requested downgrade. Reply must acknowledge the error, confirm the correct plan will be applied, and offer a credit for the difference."
+        "notes": "Wrong plan charged after downgrade. Acknowledge error, confirm correct plan, offer credit."
       }
     }
   },
   {
-    "id": "case_007",
-    "input": {"customer_id": "cust_017", "product_id": "prod_009"},
+    "id": "256a7e34-2d68-5c83-a2b0-5bfc7aa25d48",
+    "input": {
+      "customer_id": "cust_017",
+      "product_id": "prod_009",
+      "case_id": "case_007"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge call quality issue", "troubleshooting steps or escalation", "timeline or follow-up"],
-        "forbidden_mentions": ["blame customer's device", "dismiss EC1 as a known blackspot without checking", "no next step"],
+        "required_mentions": [
+          "acknowledge call quality issue",
+          "troubleshooting steps or escalation",
+          "timeline or follow-up"
+        ],
+        "forbidden_mentions": [
+          "blame customer's device",
+          "dismiss EC1 as a known blackspot without checking",
+          "no next step"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Cannot make calls in specific postcode area on Roaming Plus. Reply should acknowledge the location-specific issue, offer network diagnostics, and commit to a follow-up."
+        "notes": "Location-specific call issue. Acknowledge, offer diagnostics, commit to follow-up."
       }
     }
   },
   {
-    "id": "case_008",
-    "input": {"customer_id": "cust_018", "product_id": "prod_010"},
+    "id": "cedea269-e3e7-54bb-baae-4bc476b86e00",
+    "input": {
+      "customer_id": "cust_018",
+      "product_id": "prod_010",
+      "case_id": "case_008"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge unexpected charge", "investigate porting fee legitimacy", "refund if error confirmed"],
-        "forbidden_mentions": ["insist the charge is valid without checking", "ask customer to prove they did not request port", "no action"],
+        "required_mentions": [
+          "acknowledge unexpected charge",
+          "investigate porting fee legitimacy",
+          "refund if error confirmed"
+        ],
+        "forbidden_mentions": [
+          "insist the charge is valid without checking",
+          "ask customer to prove they did not request port",
+          "no action"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Unexpected number porting fee on Prepaid. Reply must acknowledge the charge as potentially erroneous, confirm an investigation, and offer a refund if the fee was not authorised."
+        "notes": "Unexpected porting fee. Investigate and refund if not authorised."
       }
     }
   },
   {
-    "id": "case_009",
-    "input": {"customer_id": "cust_019", "product_id": "prod_008"},
+    "id": "5f627378-9a8f-5a9d-a1fe-5c176592b0d5",
+    "input": {
+      "customer_id": "cust_019",
+      "product_id": "prod_008",
+      "case_id": "case_009"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge checkout error", "alternative way to add line", "escalate if website fault persists"],
-        "forbidden_mentions": ["blame the customer's browser", "say the product is unavailable", "no workaround offered"],
+        "required_mentions": [
+          "acknowledge checkout error",
+          "alternative way to add line",
+          "escalate if website fault persists"
+        ],
+        "forbidden_mentions": [
+          "blame the customer's browser",
+          "say the product is unavailable",
+          "no workaround offered"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Website error when adding 5th line to Family Bundle. Reply should acknowledge the technical issue, offer an alternative (phone, store), and not just tell the customer to try again."
+        "notes": "Website error adding 5th line. Offer alternative (phone, store); do not just say try again."
       }
     }
   },
   {
-    "id": "case_010",
-    "input": {"customer_id": "cust_020", "product_id": "prod_007"},
+    "id": "514663f5-f636-5033-91dd-e000e71a5a99",
+    "input": {
+      "customer_id": "cust_020",
+      "product_id": "prod_007",
+      "case_id": "case_010"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["acknowledge billing error", "credit or refund action", "confirm no port request was made"],
-        "forbidden_mentions": ["claim porting fee is standard", "ask customer to pay the charge", "no concrete resolution"],
+        "required_mentions": [
+          "acknowledge billing error",
+          "credit or refund action",
+          "confirm no port request was made"
+        ],
+        "forbidden_mentions": [
+          "claim porting fee is standard",
+          "ask customer to pay the charge",
+          "no concrete resolution"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Incorrect porting fee on Essential 20GB. Reply must take the dispute seriously, confirm investigation, and proactively offer a refund — not defend the charge."
+        "notes": "Incorrect porting fee. Take dispute seriously; proactively offer a refund."
       }
     }
   }

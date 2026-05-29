@@ -1,131 +1,251 @@
 [
   {
-    "id": "case_001",
-    "input": {"customer_id": "cust_011", "product_id": "prod_011"},
+    "id": "04a27fbb-bbe7-5c84-b8ea-650302b4f4ee",
+    "input": {
+      "customer_id": "cust_011",
+      "product_id": "prod_011",
+      "case_id": "case_001"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current usage near data limit", "iPhone upgrade benefit", "trade-in or monthly plan"],
-        "forbidden_mentions": ["fake pricing", "guaranteed coverage claims", "made-up specs"],
+        "required_mentions": [
+          "current usage near data limit",
+          "iPhone upgrade benefit",
+          "trade-in or monthly plan"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed coverage claims",
+          "made-up specs"
+        ],
         "expected_cta": "trial",
         "expected_tone": "friendly",
-        "notes": "Premium subscriber already on Unlimited — pitch iPhone 15 Pro on device plan. Must reference their existing plan and offer upgrade path, not sell them data."
+        "notes": "Premium subscriber already on Unlimited \u2014 pitch iPhone 15 Pro on device plan. Must reference their existing plan and offer upgrade path, not sell them data."
       }
     }
   },
   {
-    "id": "case_002",
-    "input": {"customer_id": "cust_012", "product_id": "prod_006"},
+    "id": "2eeb6340-bcf0-5f0e-9ae1-24786d179dd4",
+    "input": {
+      "customer_id": "cust_012",
+      "product_id": "prod_006",
+      "case_id": "case_002"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current Essential 20GB plan", "data usage approaching limit", "Unlimited 5G benefit"],
-        "forbidden_mentions": ["fake pricing", "guaranteed 5G everywhere", "unnecessary urgency"],
+        "required_mentions": [
+          "current Essential 20GB plan",
+          "data usage approaching limit",
+          "Unlimited 5G benefit"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed 5G everywhere",
+          "unnecessary urgency"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Budget subscriber on Essential 20GB — upgrade pitch to Unlimited 5G. Reference their current plan and explain the specific benefit of removing the cap."
+        "notes": "Budget subscriber on Essential 20GB \u2014 upgrade to Unlimited 5G. Reference current plan and explain benefit of removing the cap."
       }
     }
   },
   {
-    "id": "case_003",
-    "input": {"customer_id": "cust_013", "product_id": "prod_012"},
+    "id": "43618eaf-cafe-5fbc-be2e-2f212aec0ff5",
+    "input": {
+      "customer_id": "cust_013",
+      "product_id": "prod_012",
+      "case_id": "case_003"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["Family Bundle context", "Samsung Galaxy S24 features", "monthly plan option"],
-        "forbidden_mentions": ["fake pricing", "guaranteed delivery dates", "made-up specs"],
+        "required_mentions": [
+          "Family Bundle context",
+          "Samsung Galaxy S24 features",
+          "monthly plan option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed delivery dates",
+          "made-up specs"
+        ],
         "expected_cta": "demo",
         "expected_tone": "friendly",
-        "notes": "Mid segment Family Bundle subscriber — pitch Samsung Galaxy S24. Message should connect family usage to device upgrade, not generic spec sheet."
+        "notes": "Mid segment Family Bundle subscriber \u2014 pitch Samsung Galaxy S24. Connect family usage to device upgrade."
       }
     }
   },
   {
-    "id": "case_004",
-    "input": {"customer_id": "cust_014", "product_id": "prod_007"},
+    "id": "0a464622-f229-5ef0-b8b7-1a7176ee0877",
+    "input": {
+      "customer_id": "cust_014",
+      "product_id": "prod_007",
+      "case_id": "case_004"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current Prepaid plan", "benefit of Essential 20GB contract", "no-contract or rolling option"],
-        "forbidden_mentions": ["fake pricing", "lock-in language", "guaranteed speeds"],
+        "required_mentions": [
+          "current Prepaid plan",
+          "benefit of Essential 20GB contract",
+          "no-contract or rolling option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "lock-in language",
+          "guaranteed speeds"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Budget Prepaid subscriber — step-up to Essential 20GB. Acknowledge no-contract preference and frame upgrade as flexible, not a lock-in."
+        "notes": "Budget Prepaid subscriber \u2014 step-up to Essential 20GB. Frame upgrade as flexible, not a lock-in."
       }
     }
   },
   {
-    "id": "case_005",
-    "input": {"customer_id": "cust_015", "product_id": "prod_015"},
+    "id": "0181522b-ae5c-5dd3-9e1e-0f7a37d5eff8",
+    "input": {
+      "customer_id": "cust_015",
+      "product_id": "prod_015",
+      "case_id": "case_005"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["existing Unlimited 5G plan", "Apple Watch health features", "connectivity with iPhone"],
-        "forbidden_mentions": ["fake pricing", "medical claims", "guaranteed battery life"],
+        "required_mentions": [
+          "existing Unlimited 5G plan",
+          "Apple Watch health features",
+          "connectivity with iPhone"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "medical claims",
+          "guaranteed battery life"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Premium Unlimited subscriber — cross-sell Apple Watch Series 9. Connect to health/lifestyle benefits and their existing iPhone ecosystem, not generic specs."
+        "notes": "Premium Unlimited subscriber \u2014 cross-sell Apple Watch. Connect to health/lifestyle benefits and iPhone ecosystem."
       }
     }
   },
   {
-    "id": "case_006",
-    "input": {"customer_id": "cust_016", "product_id": "prod_006"},
+    "id": "765c7335-b2cf-54b4-9e96-a1cb4d68816a",
+    "input": {
+      "customer_id": "cust_016",
+      "product_id": "prod_006",
+      "case_id": "case_006"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current Essential 20GB plan", "loyalty tenure of 5+ years", "Unlimited 5G value"],
-        "forbidden_mentions": ["fake pricing", "guaranteed 5G everywhere", "pressure tactics"],
+        "required_mentions": [
+          "current Essential 20GB plan",
+          "loyalty tenure of 5+ years",
+          "Unlimited 5G value"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed 5G everywhere",
+          "pressure tactics"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Long-tenure budget subscriber on Essential — upgrade pitch to Unlimited. Message must acknowledge loyalty and frame upgrade as a reward, not a upsell."
+        "notes": "Long-tenure budget subscriber \u2014 upgrade to Unlimited. Acknowledge loyalty and frame upgrade as a reward."
       }
     }
   },
   {
-    "id": "case_007",
-    "input": {"customer_id": "cust_017", "product_id": "prod_013"},
+    "id": "4d8d644d-4318-5274-aa1a-9eeefc712a9b",
+    "input": {
+      "customer_id": "cust_017",
+      "product_id": "prod_013",
+      "case_id": "case_007"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["Roaming Plus usage context", "iPad Pro business productivity", "connectivity on the go"],
-        "forbidden_mentions": ["fake pricing", "guaranteed roaming coverage", "made-up performance claims"],
+        "required_mentions": [
+          "Roaming Plus usage context",
+          "iPad Pro business productivity",
+          "connectivity on the go"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed roaming coverage",
+          "made-up performance claims"
+        ],
         "expected_cta": "demo",
         "expected_tone": "friendly",
-        "notes": "Mid segment subscriber with Roaming Plus — cross-sell iPad Pro for travel productivity. Connect device to their roaming lifestyle, not generic tablet features."
+        "notes": "Roaming Plus subscriber \u2014 cross-sell iPad Pro for travel productivity. Connect to their roaming lifestyle."
       }
     }
   },
   {
-    "id": "case_008",
-    "input": {"customer_id": "cust_018", "product_id": "prod_007"},
+    "id": "4d07172c-5eaf-5623-a48d-febcac4fee7d",
+    "input": {
+      "customer_id": "cust_018",
+      "product_id": "prod_007",
+      "case_id": "case_008"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current Prepaid Starter plan", "Essential 20GB benefit", "flexible 30-day option"],
-        "forbidden_mentions": ["fake pricing", "lock-in language", "overpromising coverage"],
+        "required_mentions": [
+          "current Prepaid Starter plan",
+          "Essential 20GB benefit",
+          "flexible 30-day option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "lock-in language",
+          "overpromising coverage"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "New budget subscriber on Prepaid — step-up to Essential 20GB. New customers need reassurance; message should be warm and low-pressure."
+        "notes": "New budget subscriber on Prepaid \u2014 step-up to Essential 20GB. Warm and low-pressure."
       }
     }
   },
   {
-    "id": "case_009",
-    "input": {"customer_id": "cust_019", "product_id": "prod_011"},
+    "id": "231ca3b3-8870-53cd-88b3-d589ab3ac48e",
+    "input": {
+      "customer_id": "cust_019",
+      "product_id": "prod_011",
+      "case_id": "case_009"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["long tenure of 7+ years", "current Unlimited 5G plan", "iPhone 15 Pro upgrade benefit"],
-        "forbidden_mentions": ["fake pricing", "false upgrade urgency", "made-up specs"],
+        "required_mentions": [
+          "long tenure of 7+ years",
+          "current Unlimited 5G plan",
+          "iPhone 15 Pro upgrade benefit"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "false upgrade urgency",
+          "made-up specs"
+        ],
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Long-tenure premium subscriber — pitch iPhone 15 Pro as loyalty reward. Message must acknowledge their loyalty prominently and position upgrade as appreciation, not upsell."
+        "notes": "Long-tenure premium subscriber \u2014 pitch iPhone 15 Pro as loyalty reward. Acknowledge loyalty prominently."
       }
     }
   },
   {
-    "id": "case_010",
-    "input": {"customer_id": "cust_020", "product_id": "prod_008"},
+    "id": "90259683-e23c-5bd2-9530-9b9bc0d76af3",
+    "input": {
+      "customer_id": "cust_020",
+      "product_id": "prod_008",
+      "case_id": "case_010"
+    },
     "expected_output": {
       "rubric": {
-        "required_mentions": ["current Essential 20GB plan", "Family Bundle value", "per-line savings"],
-        "forbidden_mentions": ["fake pricing", "assuming they have a family", "guaranteed savings claims"],
+        "required_mentions": [
+          "current Essential 20GB plan",
+          "Family Bundle value",
+          "per-line savings"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "assuming they have a family",
+          "guaranteed savings claims"
+        ],
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Budget subscriber — pitch Family Bundle. Message must ask about household context and frame savings as conditional on having multiple users, not assume a family."
+        "notes": "Budget subscriber \u2014 pitch Family Bundle. Ask about household context; frame savings as conditional on having multiple users."
       }
     }
   }
