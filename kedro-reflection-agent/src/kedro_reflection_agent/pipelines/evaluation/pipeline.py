@@ -67,6 +67,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "campaign_task",
                     "heuristic_evaluators",
                     "judge_evaluator",
+                    "targets",
                     "params:run_id",
                     "params:agent_id",
                     "params:model_name",

@@ -20,21 +20,12 @@ logger = logging.getLogger(__name__)
 
 _HISTORY_PATH = Path("data/outputs/apply_history.json")
 
-# Local file that backs the LangfusePromptDataset for system_prompt.
-# LangfusePromptDataset.save() only calls create_prompt() on the remote side;
-# it never updates the local file.  With sync_policy: local the next campaign
-# load treats the local file as the source of truth, detects a hash-mismatch
-# against the new Langfuse version, and pushes the old content back — making
-# the reflection a no-op.  We therefore mirror every successful apply back to
-# disk so the two sides stay in sync.
-_SYSTEM_PROMPT_PATH = Path("data/campaign/prompts/system_prompt.json")
-
-
 def commit_reflection(
     proposed_prompt: Any,
     proposed_skill: str,
     proposed_eval_cases: Any,
     reflection_id: str,
+    agent_id: str,
 ) -> tuple[list[dict], str, list[dict], list[dict]]:
     """Commit an approved reflection proposal to the live locations.
 
@@ -46,15 +37,25 @@ def commit_reflection(
     """
     messages = _extract_messages(proposed_prompt)
 
-    # Keep the local prompt file in sync with what LangfusePromptDataset will
-    # push to Langfuse (it only writes remotely).  Without this the next
-    # campaign run's sync_policy: local would overwrite Langfuse back to v1.
-    _SYSTEM_PROMPT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _SYSTEM_PROMPT_PATH.write_text(json.dumps(messages, indent=2), encoding="utf-8")
+    prompts_dir = Path("data") / agent_id / "campaign" / "prompts"
+    skills_dir = Path("data") / agent_id / "campaign" / "skills"
+
+    # Archive the current active files before overwriting, so each apply cycle
+    # leaves a numbered snapshot: system_prompt_v1.json, system_prompt_v2.json, …
+    # The archive number is the outgoing version (current file before this apply).
+    prompt_version = _archive_file(
+        prompts_dir / "system_prompt.json",
+        json.dumps(messages, indent=2),
+    )
+    skill_version = _archive_file(
+        skills_dir / f"{agent_id}_style.md",
+        proposed_skill,
+    )
     logger.info(
-        "apply %s: wrote updated system prompt to %s",
+        "apply %s: archived prompt → v%d, skill → v%d; wrote new active files",
         reflection_id,
-        _SYSTEM_PROMPT_PATH,
+        prompt_version - 1,
+        skill_version - 1,
     )
 
     new_eval_cases = [
@@ -69,6 +70,8 @@ def commit_reflection(
     audit_row = {
         "reflection_id": reflection_id,
         "applied_at": utc_now_iso(),
+        "prompt_version": prompt_version,
+        "skill_version": skill_version,
         "new_prompt_messages": messages,
         "new_skill_text": proposed_skill,
         "new_eval_case_ids": [ec["id"] for ec in new_eval_cases],
@@ -118,3 +121,30 @@ def _load_history() -> list[dict]:
     if _HISTORY_PATH.exists():
         return json.loads(_HISTORY_PATH.read_text())
     return []
+
+
+def _archive_file(active_path: Path, new_content: str) -> int:
+    """Archive ``active_path`` as a numbered snapshot, then write ``new_content``.
+
+    Snapshots are named ``<stem>_v{N}<suffix>`` alongside the active file.
+    The function counts existing snapshots to determine the outgoing version
+    number, archives the current content as v{N}, writes the new content as
+    the active file, and returns the *new* version number (N + 1).
+
+    On the very first apply:
+      - v1 was written by seed_demo.py as the active file.
+      - This archives it as ``system_prompt_v1.json`` / ``*_style_v1.md``.
+      - The new proposed content becomes the active file (v2 in Langfuse terms).
+    """
+    active_path.parent.mkdir(parents=True, exist_ok=True)
+    stem, suffix = active_path.stem, active_path.suffix
+
+    existing = list(active_path.parent.glob(f"{stem}_v*{suffix}"))
+    outgoing_version = len(existing) + 1
+
+    if active_path.exists():
+        archive_path = active_path.parent / f"{stem}_v{outgoing_version}{suffix}"
+        archive_path.write_text(active_path.read_text(encoding="utf-8"), encoding="utf-8")
+
+    active_path.write_text(new_content, encoding="utf-8")
+    return outgoing_version + 1  # the version that just became active

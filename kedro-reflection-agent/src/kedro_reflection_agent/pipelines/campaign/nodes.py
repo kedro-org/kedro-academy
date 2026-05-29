@@ -12,7 +12,6 @@ the Langfuse-stored system prompt.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import time
@@ -105,7 +104,9 @@ def generate_emails(
       - run_metadata: dict for the JSON run-summary dataset
     """
     chain = build_structured_chain(agent_context, "system_prompt", EmailOutput)
-    skill_version = _hash_skill(skill_text)
+    # Skill and prompt are always versioned together via the apply pipeline,
+    # so the integer skill version equals the prompt version.
+    skill_version = system_prompt_version
     started_at = utc_now_iso()
     run_started = time.perf_counter()
 
@@ -114,7 +115,7 @@ def generate_emails(
     total = len(agent_inputs)
 
     logger.info(
-        "campaign %s: starting %d generations | model=%s prompt_v=%s skill_v=%s",
+        "campaign %s: starting %d generations | model=%s prompt_v=%d skill_v=%d",
         run_id,
         total,
         model_name,
@@ -148,7 +149,7 @@ def generate_emails(
                 "product_id": product["product_id"],
                 "run_id": run_id,
                 "prompt_version": str(system_prompt_version),
-                "skill_version": skill_version,
+                "skill_version": str(skill_version),
             },
             "run_name": f"campaign:{case_id}",
         }
@@ -198,7 +199,7 @@ def generate_emails(
     avg = total_elapsed / total if total else 0.0
     logger.info(
         "campaign %s: generated %d/%d emails (%d errors) in %.1fs (avg %.1fs/case) "
-        "| model=%s prompt_v=%s skill_v=%s",
+        "| model=%s prompt_v=%d skill_v=%d",
         run_id,
         run_metadata["n_emails"],
         run_metadata["n_cases"],
@@ -213,8 +214,3 @@ def generate_emails(
     return emails, run_metadata
 
 
-# --- helpers -----------------------------------------------------------------
-
-
-def _hash_skill(skill_text: str) -> str:
-    return hashlib.sha256(skill_text.encode("utf-8")).hexdigest()[:12]

@@ -288,6 +288,7 @@ def run_experiment(
     campaign_task: Callable[..., dict[str, Any]],
     heuristic_evaluators: list[Callable[..., Evaluation]],
     judge_evaluator: Callable[..., list[Evaluation]],
+    targets: list[dict],
     run_id: str,
     agent_id: str,
     model_name: str,
@@ -305,6 +306,21 @@ def run_experiment(
     started_at = utc_now_iso()
     experiment_name = (
         f"campaign_{run_id}_prompt_v{system_prompt_version}"
+    )
+
+    # Restrict the experiment to items that were seeded in this run.
+    # Langfuse retains all items across resets; targets.json defines the
+    # actual scope (e.g. make seed N=5 → only 5 items should be evaluated).
+    target_case_ids = {t["case_id"] for t in targets}
+    eval_cases.items = [
+        item for item in eval_cases.items
+        if item.input.get("case_id") in target_case_ids
+    ]
+    logger.info(
+        "evaluation %s: restricted to %d/%d eval_cases items matching targets",
+        run_id,
+        len(eval_cases.items),
+        len(target_case_ids),
     )
 
     result = eval_cases.run_experiment(
