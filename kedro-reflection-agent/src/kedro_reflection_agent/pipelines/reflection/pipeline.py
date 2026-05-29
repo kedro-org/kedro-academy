@@ -49,6 +49,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "reflection_context",
                     "params:run_id",
                     "params:reflection_id",
+                    "params:agent_id",
                 ],
                 outputs=[
                     "reflection_summary",

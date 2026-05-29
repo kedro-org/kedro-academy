@@ -80,7 +80,7 @@ def make_campaign_task(run_id: str, agent_id: str) -> Callable[..., dict[str, An
     emails_dir = Path("data") / agent_id / "outputs" / "runs" / run_id / "emails"
 
     def campaign_task(*, item, **kwargs) -> dict[str, Any]:
-        case_id = getattr(item, "id", None) or item.input.get("case_id")
+        case_id = item.input.get("case_id") or getattr(item, "id", None)
         path = emails_dir / f"{case_id}.json"
         if not path.exists():
             return {

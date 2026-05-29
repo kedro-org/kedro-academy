@@ -26,6 +26,7 @@ from typing import Any
 from kedro.pipeline import LLMContext
 
 from ...models.shared import AggregateScore, CaseScore, ReflectionOutput, ReflectionSummary
+from ...utils.id_service import dataset_item_id
 from .._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,7 @@ def reflect(
     reflection_context: dict[str, str],
     run_id: str,
     reflection_id: str,
+    agent_id: str,
 ) -> tuple[str, list[dict], str, list[dict]]:
     """Invoke the meta-agent and produce the four reflection artifacts.
 
@@ -150,8 +152,12 @@ def reflect(
 
     proposed_eval_cases = [
         {
-            "id": ec.case_id,
-            "input": {"customer_id": ec.customer_id, "product_id": ec.product_id},
+            "id": dataset_item_id(agent_id, ec.case_id),
+            "input": {
+                "case_id": ec.case_id,
+                "customer_id": ec.customer_id,
+                "product_id": ec.product_id,
+            },
             "expected_output": {"rubric": ec.rubric.model_dump()},
         }
         for ec in result.new_eval_cases

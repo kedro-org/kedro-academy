@@ -21,6 +21,8 @@ import json
 import shutil
 from pathlib import Path
 
+from kedro_reflection_agent.utils.id_service import dataset_item_id
+
 ROOT = Path(__file__).parent.parent
 
 AGENTS = ["b2b_sales", "consumer_mktg", "customer_care"]
@@ -510,15 +512,26 @@ def _seed_agent(agent: str, n: int | None) -> None:
     _write_json(ROOT / "data" / agent / "campaign" / "prompts" / "system_prompt.json", SYSTEM_PROMPTS[agent])
     _write_text(ROOT / "data" / agent / "campaign" / "skills" / f"{agent}_style.md", SKILLS[agent])
 
-    # Eval cases
-    _write_json(ROOT / "data" / agent / "evaluation" / "eval_cases.json", cases)
-
-    # Targets — derived from eval cases
+    # Targets — derived from eval cases; use logical case_id as the file key.
     targets = [
         {"case_id": c["id"], **c["input"]}
         for c in cases
     ]
     _write_json(ROOT / "data" / agent / "seed" / "targets.json", targets)
+
+    # Eval cases — replace logical "id" with a deterministic UUID so that
+    # item.id is always the same across Langfuse resets.  The logical case_id
+    # is preserved in input["case_id"] so campaign_task can still find the
+    # email file by its human-readable name (case_001.json).
+    eval_cases = [
+        {
+            **c,
+            "id": dataset_item_id(agent, c["id"]),
+            "input": {**c["input"], "case_id": c["id"]},
+        }
+        for c in cases
+    ]
+    _write_json(ROOT / "data" / agent / "evaluation" / "eval_cases.json", eval_cases)
 
     label = f"{len(cases)} cases"
     print(f"  seeded {label}")
