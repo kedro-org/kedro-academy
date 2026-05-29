@@ -24,7 +24,7 @@ class Email(BaseModel):
     body: str
     trace_id: Optional[str] = None
     prompt_version: Optional[int] = None
-    skill_version: Optional[str] = None
+    skill_version: Optional[int] = None
     model_name: str
     run_id: str
     generated_at: str
@@ -40,6 +40,6 @@ class RunMetadata(BaseModel):
     n_errors: int
     model_name: str
     prompt_version: Optional[int] = None
-    skill_version: Optional[str] = None
+    skill_version: Optional[int] = None
     started_at: str
     finished_at: str

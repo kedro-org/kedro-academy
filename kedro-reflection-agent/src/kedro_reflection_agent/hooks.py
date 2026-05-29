@@ -1,7 +1,7 @@
 """Kedro project hooks.
 
-RunIndexHook
-────────────
+RunIndexHook (for poc)
+──────────────────────
 Observes pipeline completions and upserts a RunIndexEntry into
 data/outputs/run_index.json after each relevant pipeline:
 
@@ -32,6 +32,22 @@ from .models.shared import RunIndexEntry
 logger = logging.getLogger(__name__)
 
 _RUN_INDEX_PATH = Path("data/outputs/run_index.json")
+
+# Maps a sentinel node name (unique per pipeline) to the pipeline identifier.
+_SENTINEL_NODE_TO_PIPELINE: dict[str, str] = {
+    "generate_emails_node": "campaign",
+    "run_experiment_node": "evaluation",
+    "run_scouts_node": "scouts",
+    "reflect_node": "reflection",
+    "commit_reflection_node": "apply",
+}
+
+
+def _pipeline_name_from_nodes(node_names: set[str]) -> str:
+    for sentinel, name in _SENTINEL_NODE_TO_PIPELINE.items():
+        if sentinel in node_names:
+            return name
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -76,8 +92,9 @@ class RunIndexHook:
         pipeline: Any,
         catalog: Any,
     ) -> None:
-        pipeline_name: str = run_params.get("pipeline_name") or ""
-        params: dict = run_params.get("extra_params") or {}
+        node_names = {n.name for n in pipeline.nodes}
+        pipeline_name: str = _pipeline_name_from_nodes(node_names)
+        params: dict = run_params.get("runtime_params") or {}
         run_id: str | None = params.get("run_id")
         agent_id: str | None = params.get("agent_id")
 
@@ -134,7 +151,7 @@ class RunIndexHook:
             prompt_name=f"{agent_id}-system-prompt",
             prompt_version=run_meta.get("prompt_version"),
             prompt_snapshot=prompt_snapshot,
-            skill_version=run_meta.get("skill_version", ""),
+            skill_version=run_meta.get("skill_version"),
             skill_snapshot=skill_snapshot,
             n_cases=run_meta.get("n_cases", 0),
             n_outputs=run_meta.get("n_emails", 0),
