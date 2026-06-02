@@ -68,6 +68,7 @@ def commit_reflection(
     ]
 
     audit_row = {
+        "agent_id": agent_id,
         "reflection_id": reflection_id,
         "applied_at": utc_now_iso(),
         "prompt_version": prompt_version,

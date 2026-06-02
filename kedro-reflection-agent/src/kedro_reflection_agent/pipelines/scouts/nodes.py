@@ -228,7 +228,7 @@ def _detect_score_regression(
                 reason=(
                     f"Drop of {delta:.3f} exceeds "
                     f"{'high' if confidence == 'high' else 'medium'} "
-                    f"threshold ({delta_high if confidence >= 0.7 else delta_medium})."
+                    f"threshold ({delta_high if confidence == 'high' else delta_medium})."
                 ),
                 created_at=utc_now_iso(),
             )
@@ -465,11 +465,11 @@ def _detect_hallucination(
 # Per-agent tone/quality dimensions to monitor.  Maps agent_id → list of
 # scorer names treated as tone/quality proxies.  Falls back to the B2B set.
 _TONE_DIMENSIONS: dict[str, list[str]] = {
-    "b2b_sales": ["writing_quality", "personalization"],
-    "consumer_mktg": ["tone", "offer_relevance"],
-    "customer_care": ["tone", "empathy_opener"],
+    "b2b_sales": ["writing_quality", "personalization", "groundedness"],
+    "consumer_mktg": ["offer_relevance", "personalisation", "urgency_cta", "tone", "compliance"],
+    "customer_care": ["empathy_opener", "resolution_clarity", "tone", "compliance", "escalation_avoidance"],
 }
-_TONE_DIMENSIONS_DEFAULT = ["writing_quality", "personalization"]
+_TONE_DIMENSIONS_DEFAULT = ["writing_quality", "personalization", "groundedness"]
 
 
 def _detect_tone_drift(

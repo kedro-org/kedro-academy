@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components_v1
 
 _PROJECT_ROOT = Path(__file__).parent.parent.parent
 
@@ -68,7 +67,7 @@ def render_kedro_viz(
 
     if status == "ready":
         url = f"{KEDRO_VIZ_BASE}/?pid={pipeline}&expandAllPipelines=true"
-        components_v1.iframe(url, height=500, scrolling=True)
+        st.iframe(url, height=500)
 
     elif status == "starting":
         st.markdown(

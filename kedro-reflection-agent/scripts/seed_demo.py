@@ -468,6 +468,178 @@ EVAL_CASES: dict[str, list[dict]] = {
 
 
 # ---------------------------------------------------------------------------
+# Langfuse prompt baselines (seeded locally; sync_policy:local means these
+# are used directly without requiring the prompts to exist in Langfuse).
+# ---------------------------------------------------------------------------
+
+JUDGE_PROMPTS: dict[str, list[dict]] = {
+    "b2b_sales": [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict evaluator of B2B outreach emails. You score each email on three dimensions, each in the range 0.0 to 1.0.\n\n"
+                "DIMENSIONS\n\n"
+                "1. writing_quality\n"
+                "   - Clarity, grammar, flow, professional tone.\n"
+                "   - Does the tone match the rubric's `expected_tone`?\n"
+                "   - Are there awkward phrasings, run-on sentences, jargon dumps?\n"
+                "   - 1.0 = polished, on-tone, easy to read. 0.5 = readable but uneven. 0.0 = poor.\n\n"
+                "2. personalization\n"
+                "   - Does the email genuinely use the customer's industry, company_size, account_tenure_years, primary_contact_name/role, and especially `current_products`?\n"
+                "   - Generic mentions of the company name only = low. Real tailoring (upsell context, role-relevant framing, tenure-aware tone) = high.\n"
+                "   - Cross-check the rubric's `required_mentions` and `forbidden_mentions`. Missing any required mention or hitting any forbidden mention should hurt this score.\n"
+                "   - 1.0 = the email could only have been written for this customer. 0.0 = could be sent to anyone.\n\n"
+                "3. groundedness\n"
+                "   - Does the email make ONLY claims supported by the product's `short_description` and `key_benefits`?\n"
+                "   - Penalise hallucinated numbers, fake SKUs, made-up metrics, invented case studies, fabricated discounts.\n"
+                "   - 1.0 = every factual claim is traceable to the product card. 0.0 = mostly hallucinated.\n\n"
+                "For each dimension provide both:\n"
+                "  - the score (a float between 0.0 and 1.0)\n"
+                "  - a one-sentence reason citing the specific evidence (or lack of it) in the email.\n\n"
+                "Be strict. Use the full range. Reserve 1.0 only for emails that genuinely earn it."
+            ),
+        },
+        {
+            "role": "human",
+            "content": (
+                "Evaluate this outreach email.\n\n"
+                "Customer:\n{customer}\n\nProduct:\n{product}\n\n"
+                "Rubric (what the email should achieve):\n{rubric}\n\n"
+                "Email:\nSubject: {subject}\n\nBody:\n{body}"
+            ),
+        },
+    ],
+    "consumer_mktg": [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict evaluator of consumer marketing messages for a telecom provider. Score each message on five dimensions, each 0.0–1.0.\n\n"
+                "DIMENSIONS\n\n"
+                "1. offer_relevance\n"
+                "   - Does the offer match the subscriber's current plan, device, or usage pattern?\n"
+                "   - Is the upgrade path logical (e.g. stepping up from Essential to Unlimited, not selling them something they already have)?\n"
+                "   - 1.0 = offer is exactly right for this subscriber's situation. 0.0 = irrelevant or already owned.\n\n"
+                "2. personalisation\n"
+                "   - Does the message reference the subscriber's specific plan, tenure, usage, or device?\n"
+                "   - Generic 'great news for you!' without subscriber data = low.\n"
+                "   - 1.0 = message could only have been written for this subscriber. 0.0 = entirely generic.\n\n"
+                "3. urgency_cta\n"
+                "   - Is there a clear, single call to action?\n"
+                "   - Is urgency present without being pushy or creating false scarcity?\n"
+                "   - 1.0 = clear CTA matching rubric's expected_cta, appropriate urgency. 0.0 = no CTA or contradicts rubric.\n\n"
+                "4. tone\n"
+                "   - Is the tone friendly, warm, and benefit-led?\n"
+                "   - Does it match the rubric's expected_tone?\n"
+                "   - 1.0 = on-tone, engaging, non-pushy. 0.0 = off-tone, pressuring, or robotic.\n\n"
+                "5. compliance\n"
+                "   - Are all claims accurate? No fake pricing, no guaranteed coverage, no fabricated speeds or specs.\n"
+                "   - Are forbidden_mentions from the rubric absent?\n"
+                "   - 1.0 = fully accurate, no misleading claims. 0.0 = false or prohibited claims present.\n\n"
+                "For each dimension provide the score and a one-sentence reason citing specific evidence.\n"
+                "Be strict. Use the full range."
+            ),
+        },
+        {
+            "role": "human",
+            "content": (
+                "Evaluate this consumer marketing message.\n\n"
+                "Subscriber:\n{customer}\n\nOffer:\n{product}\n\n"
+                "Rubric (what the message should achieve):\n{rubric}\n\n"
+                "Message:\nSubject: {subject}\n\nBody:\n{body}"
+            ),
+        },
+    ],
+    "customer_care": [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict evaluator of customer care support replies for a telecom provider. Score each reply on five dimensions, each 0.0–1.0.\n\n"
+                "DIMENSIONS\n\n"
+                "1. empathy_opener\n"
+                "   - Does the reply open by genuinely acknowledging the customer's specific issue?\n"
+                "   - Generic 'Thank you for contacting us' without acknowledging the issue = low.\n"
+                "   - 1.0 = opener is warm and specific to the customer's problem. 0.0 = dismissive or entirely generic.\n\n"
+                "2. resolution_clarity\n"
+                "   - Is the resolution path clear? Does the agent state what action is being taken?\n"
+                "   - Is a concrete next step provided (timeline, callback, credit, fix)?\n"
+                "   - 1.0 = clear resolution with concrete next step. 0.0 = vague, no action stated.\n\n"
+                "3. tone\n"
+                "   - Is the tone warm, professional, and non-defensive?\n"
+                "   - Does it avoid blame-shifting or dismissing the customer?\n"
+                "   - 1.0 = empathetic and professional throughout. 0.0 = cold, defensive, or blaming.\n\n"
+                "4. compliance\n"
+                "   - Does the reply avoid false promises, fake reference numbers, or claims unsupported by policy?\n"
+                "   - Are forbidden_mentions from the rubric absent?\n"
+                "   - 1.0 = fully compliant, no unsupported claims. 0.0 = false promises or prohibited content.\n\n"
+                "5. escalation_avoidance\n"
+                "   - Does the reply resolve or meaningfully progress the issue rather than prematurely escalating or asking the customer to try again?\n"
+                "   - 1.0 = concrete resolution path, no unnecessary escalation. 0.0 = deflects or escalates without reason.\n\n"
+                "For each dimension provide the score and a one-sentence reason citing specific evidence.\n"
+                "Be strict. Use the full range."
+            ),
+        },
+        {
+            "role": "human",
+            "content": (
+                "Evaluate this customer care reply.\n\n"
+                "Customer:\n{customer}\n\nAffected service:\n{product}\n\n"
+                "Rubric (what the reply should achieve):\n{rubric}\n\n"
+                "Reply:\nSubject: {subject}\n\nBody:\n{body}"
+            ),
+        },
+    ],
+}
+
+_META_AGENT_SYSTEM = (
+    "You are a reflection meta-agent for a {agent_label} generation system. "
+    "Your job is to analyse evaluation failures and propose concrete, evidence-based improvements.\n\n"
+    "You will receive:\n"
+    "- The current system prompt, which contains a skill-injection placeholder where the style guide is inserted at runtime\n"
+    "- The current skill file (markdown style guide)\n"
+    "- Aggregate evaluation scores across all generated outputs\n"
+    "- The worst-scoring cases: the outputs produced, per-scorer evaluator feedback, and the rubric that defined what the output should achieve\n\n"
+    "Your task:\n"
+    "1. Identify the dominant failure patterns across the worst cases — be specific and cite evaluator comments as evidence.\n"
+    "2. Write a complete improved system prompt that directly addresses those failures. IMPORTANT: the current system prompt you receive contains a skill-injection placeholder; you must carry it over into your improved prompt exactly as written — do not rename, remove, or relocate it.\n"
+    "3. Write a complete improved skill file (markdown) that reinforces the new prompt.\n"
+    "4. Propose 2–3 new evaluation cases that target the exact failure modes you identified. Each new case must:\n"
+    "   - Reuse a real customer_id and product_id from the worst-scoring cases you were shown.\n"
+    "   - Include a precise rubric: required_mentions (list of strings), forbidden_mentions (list of strings), expected_cta (one of: meeting, demo, call, reply, trial), expected_tone (one of: formal, consultative, friendly), and notes explaining why this case specifically targets the failure mode.\n"
+    "   - Use a case_id of the form 'regression_NNN' (e.g. regression_001).\n\n"
+    "Every change must be traceable to a specific failure pattern in the data. Do not make changes unsupported by the evidence.\n\n"
+    "Critical constraint — do NOT regress passing dimensions:\n"
+    "Before proposing any change, examine the aggregate_scores_json and identify which "
+    "dimensions are ALREADY above the passing_threshold. Those dimensions are working correctly "
+    "and must be preserved. Your proposed prompt and skill changes must be surgical: fix the "
+    "weakest dimensions without removing or diluting the instructions that currently support "
+    "the strong ones. If a proposed change would risk regressing a passing dimension in order "
+    "to fix a failing one, choose a more conservative additive approach instead — add guidance "
+    "for the weak dimension rather than replacing guidance for the strong one."
+)
+
+_META_AGENT_HUMAN = (
+    "Current system prompt:\n{current_prompt}\n\n"
+    "Current skill file:\n{skill_text}\n\n"
+    "Aggregate scores:\n{aggregate_scores_json}\n\n"
+    "Worst-scoring cases (outputs, evaluator feedback, rubrics):\n{failing_cases_json}"
+)
+
+_AGENT_LABELS = {
+    "b2b_sales": "B2B outreach email",
+    "consumer_mktg": "consumer marketing message",
+    "customer_care": "customer care support reply",
+}
+
+META_AGENT_PROMPTS: dict[str, list[dict]] = {
+    agent: [
+        {"role": "system", "content": _META_AGENT_SYSTEM.format(agent_label=label)},
+        {"role": "human", "content": _META_AGENT_HUMAN},
+    ]
+    for agent, label in _AGENT_LABELS.items()
+}
+
+
+# ---------------------------------------------------------------------------
 # Reset helpers
 # ---------------------------------------------------------------------------
 
@@ -481,6 +653,13 @@ def _clear_outputs(agents: list[str]) -> None:
                 shutil.rmtree(p)
             p.mkdir(parents=True, exist_ok=True)
             (p / ".gitkeep").touch()
+
+    # Clear cross-run and observability indexes so CLI and UI resets are identical
+    outputs = ROOT / "data" / "outputs"
+    for fname in ("run_index.json", "apply_history.json", "signal_index.json"):
+        f = outputs / fname
+        if f.exists():
+            f.unlink()
 
     demo_state = ROOT / "data" / "demo_state.json"
     seed_at = datetime.now(timezone.utc).isoformat()
@@ -496,6 +675,13 @@ def _write_json(path: Path, data: object) -> None:
     print(f"  wrote {path.relative_to(ROOT)}")
 
 
+def _write_json_if_absent(path: Path, data: object) -> None:
+    if path.exists():
+        print(f"  kept  {path.relative_to(ROOT)}")
+        return
+    _write_json(path, data)
+
+
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
@@ -508,9 +694,25 @@ def _seed_agent(agent: str, n: int | None) -> None:
     if n is not None:
         cases = cases[:n]
 
+    # Wipe directories that accumulate versioned/stale artifacts from the apply pipeline.
+    # evaluation/prompts and reflection/prompts are NOT wiped — judge prompts and
+    # meta-agent prompts are static evaluation infrastructure that must never be reset.
+    for _dir in [
+        ROOT / "data" / agent / "campaign" / "prompts",
+        ROOT / "data" / agent / "campaign" / "skills",
+    ]:
+        if _dir.exists():
+            shutil.rmtree(_dir)
+        _dir.mkdir(parents=True, exist_ok=True)
+
     # Prompt + skill (weak v1 baseline)
     _write_json(ROOT / "data" / agent / "campaign" / "prompts" / "system_prompt.json", SYSTEM_PROMPTS[agent])
     _write_text(ROOT / "data" / agent / "campaign" / "skills" / f"{agent}_style.md", SKILLS[agent])
+
+    # Seed judge and meta-agent prompts only on first run (never overwrite — they are
+    # static evaluation infrastructure and must not change between reflection cycles).
+    _write_json_if_absent(ROOT / "data" / agent / "evaluation" / "prompts" / "judge_prompt.json", JUDGE_PROMPTS[agent])
+    _write_json_if_absent(ROOT / "data" / agent / "reflection" / "prompts" / "meta_agent_prompt.json", META_AGENT_PROMPTS[agent])
 
     # Targets — derived from eval cases; use logical case_id as the file key.
     targets = [

@@ -116,43 +116,31 @@ def get_targets(agent_id: str) -> list[dict]:
 
 # ── Reflection artifacts ──────────────────────────────────────────────────────
 
-def get_reflection_summary(reflection_id: str) -> str:
-    """Read reflections/{reflection_id}/summary.md — searches common locations."""
-    for base in [
-        _DATA / "outputs" / "reflections" / reflection_id / "summary.md",
-        _DATA / "b2b_sales" / "outputs" / "reflections" / reflection_id / "summary.md",
-        _DATA / "consumer_mktg" / "outputs" / "reflections" / reflection_id / "summary.md",
-        _DATA / "customer_care" / "outputs" / "reflections" / reflection_id / "summary.md",
-    ]:
-        if base.exists():
-            try:
-                return base.read_text(encoding="utf-8")
-            except Exception:  # noqa: BLE001
-                pass
+def get_reflection_summary(agent_id: str, reflection_id: str) -> str:
+    path = _DATA / agent_id / "outputs" / "reflections" / reflection_id / "summary.md"
+    if path.exists():
+        try:
+            return path.read_text(encoding="utf-8")
+        except Exception:  # noqa: BLE001
+            pass
     return ""
 
 
-def get_proposed_prompt(reflection_id: str) -> list[dict]:
-    for base in [
-        _DATA / "outputs" / "reflections" / reflection_id / "proposed_prompt.json",
-        _DATA / "b2b_sales" / "outputs" / "reflections" / reflection_id / "proposed_prompt.json",
-    ]:
-        data = _read_json(base)
-        if isinstance(data, list):
-            return data
+def get_proposed_prompt(agent_id: str, reflection_id: str) -> list[dict]:
+    path = _DATA / agent_id / "outputs" / "reflections" / reflection_id / "proposed_prompt.json"
+    data = _read_json(path)
+    if isinstance(data, list):
+        return data
     return []
 
 
-def get_proposed_skill(reflection_id: str) -> str:
-    for base in [
-        _DATA / "outputs" / "reflections" / reflection_id / "proposed_skill.md",
-        _DATA / "b2b_sales" / "outputs" / "reflections" / reflection_id / "proposed_skill.md",
-    ]:
-        if base.exists():
-            try:
-                return base.read_text(encoding="utf-8")
-            except Exception:  # noqa: BLE001
-                pass
+def get_proposed_skill(agent_id: str, reflection_id: str) -> str:
+    path = _DATA / agent_id / "outputs" / "reflections" / reflection_id / "proposed_skill.md"
+    if path.exists():
+        try:
+            return path.read_text(encoding="utf-8")
+        except Exception:  # noqa: BLE001
+            pass
     return ""
 
 

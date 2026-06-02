@@ -33,18 +33,6 @@ logger = logging.getLogger(__name__)
 
 _N_WORST_CASES = 5
 
-# Human-message template preserved verbatim from the current system_prompt.json.
-# Only the system message changes across reflection cycles; the data-provision
-# template (customer / product / skill injection) stays constant.
-#
-# Source of truth: data/campaign/prompts/system_prompt.json (human message),
-# also embedded in scripts/seed_demo.py (SEED_SYSTEM_PROMPT).
-# Keep all three in sync if the human message ever changes.
-_HUMAN_TEMPLATE = (
-    "Write an outreach email to this customer about this product.\n\n"
-    "Customer:\n{customer}\n\nProduct:\n{product}"
-)
-
 
 def prepare_reflection_context(
     system_prompt: Any,
@@ -121,6 +109,7 @@ def prepare_reflection_context(
 def reflect(
     meta_agent_context: LLMContext,
     reflection_context: dict[str, str],
+    system_prompt: Any,
     run_id: str,
     reflection_id: str,
     agent_id: str,
@@ -147,7 +136,7 @@ def reflect(
 
     proposed_prompt = [
         {"role": "system", "content": result.new_prompt_text},
-        {"role": "human", "content": _HUMAN_TEMPLATE},
+        {"role": "human", "content": _extract_human_template(system_prompt)},
     ]
 
     proposed_eval_cases = [
@@ -181,12 +170,7 @@ def reflect(
 
 
 def _extract_prompt_text(prompt: Any) -> str:
-    """Extract the system message template from a ChatPromptTemplate.
-
-    Only the system message content is returned — that is what the meta-agent
-    should improve and what ``new_prompt_text`` maps back to. The human
-    template is fixed and is re-attached in ``reflect()`` separately.
-    """
+    """Extract the system message template from a ChatPromptTemplate."""
     for msg in prompt.messages:
         role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()
         if "system" in role:
@@ -200,6 +184,20 @@ def _extract_prompt_text(prompt: Any) -> str:
         template_str = getattr(inner, "template", None) or str(msg)
         parts.append(f"[{role}]\n{template_str}")
     return "\n\n".join(parts)
+
+
+def _extract_human_template(prompt: Any) -> str:
+    """Extract the human message template from a ChatPromptTemplate.
+
+    The human template is fixed per-agent (subscriber vs customer vs issue framing)
+    and must be preserved unchanged across reflection cycles.
+    """
+    for msg in prompt.messages:
+        role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()
+        if "human" in role or "user" in role:
+            inner = getattr(msg, "prompt", None)
+            return getattr(inner, "template", None) or str(msg)
+    return ""
 
 
 def _render_summary_md(

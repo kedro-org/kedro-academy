@@ -60,7 +60,14 @@ def _judge_names(judge_score_cls: type) -> tuple[str, ...]:
 # Regex patterns used by the heuristic evaluators below.
 _SKU_PATTERN = re.compile(r"\b[A-Z]{2,}-?\d+\b")
 _CTA_PATTERN = re.compile(
-    r"\b(meeting|demo|call|reply|schedule|book(?:ing)?\s+a?\s*time|let'?s\s+(?:talk|chat|connect))\b",
+    r"\b("
+    # B2B CTAs
+    r"meeting|demo|call|reply|schedule|book(?:ing)?\s+a?\s*time|let'?s\s+(?:talk|chat|connect)"
+    r"|"
+    # Consumer / care CTAs
+    r"upgrade|switch|sign\s*up|get\s*started|try|click|tap|visit|explore|find\s*out|learn\s*more"
+    r"|contact\s*us|reach\s*out|get\s*in\s*touch|respond|chat"
+    r")\b",
     re.IGNORECASE,
 )
 

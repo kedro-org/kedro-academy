@@ -83,7 +83,7 @@ def render_multi_run_insights(agent_id: str, run_index: list[dict]) -> None:
         )
         fig = score_progression_chart(run_index, agent_id)
         if fig:
-            st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
+            st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
         else:
             st.markdown(
                 '<div style="height:160px;background:#F8FAFC;border:1px solid #E2E8F0;'

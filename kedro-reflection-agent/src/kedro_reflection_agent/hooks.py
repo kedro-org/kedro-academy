@@ -65,11 +65,11 @@ def _save_index(records: list[dict]) -> None:
     _RUN_INDEX_PATH.write_text(json.dumps(records, indent=2), encoding="utf-8")
 
 
-def _upsert(run_id: str, updates: dict) -> None:
-    """Merge `updates` into the existing entry for run_id, or append a new one."""
+def _upsert(run_id: str, agent_id: str, updates: dict) -> None:
+    """Merge `updates` into the existing entry for (run_id, agent_id), or append a new one."""
     records = _load_index()
     for i, r in enumerate(records):
-        if r.get("run_id") == run_id:
+        if r.get("run_id") == run_id and r.get("agent_id") == agent_id:
             records[i] = {**r, **updates}
             _save_index(records)
             return
@@ -111,7 +111,7 @@ class RunIndexHook:
             elif pipeline_name == "reflection":
                 reflection_id = params.get("reflection_id")
                 if reflection_id:
-                    _upsert(run_id, {"reflection_id": reflection_id})
+                    _upsert(run_id, agent_id, {"reflection_id": reflection_id})
             elif pipeline_name == "apply":
                 self._after_apply(run_id, agent_id, catalog)
         except Exception:
@@ -157,7 +157,7 @@ class RunIndexHook:
             n_outputs=run_meta.get("n_emails", 0),
             n_errors=run_meta.get("n_errors", 0),
         )
-        _upsert(run_id, entry.model_dump())
+        _upsert(run_id, agent_id, entry.model_dump())
         logger.info("RunIndexHook: campaign entry written for %s/%s (seq=%d)", agent_id, run_id, run_seq)
 
     def _after_evaluation(
@@ -174,7 +174,7 @@ class RunIndexHook:
         if prev and prev.get("pass_rate") is not None and agg.get("pass_rate") is not None:
             delta_pass = round(agg["pass_rate"] - prev["pass_rate"], 4)
 
-        _upsert(run_id, {
+        _upsert(run_id, agent_id, {
             "pass_rate": agg.get("pass_rate"),
             "mean_score": agg.get("mean_total"),
             "mean_per_scorer": agg.get("mean_per_scorer"),
@@ -205,7 +205,7 @@ class RunIndexHook:
             if st and st not in types:
                 types.append(st)
 
-        _upsert(run_id, {
+        _upsert(run_id, agent_id, {
             "n_signals": len(signals),
             "signal_types": types,
             "signals_by_confidence": by_conf,
@@ -219,7 +219,7 @@ class RunIndexHook:
         if not history:
             return
         latest = history[-1]
-        _upsert(run_id, {
+        _upsert(run_id, agent_id, {
             "reflection_applied": True,
             "applied_at": latest.get("applied_at"),
             "applied_by": latest.get("applied_by"),
