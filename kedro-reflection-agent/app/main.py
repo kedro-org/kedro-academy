@@ -16,6 +16,7 @@ import streamlit as st
 
 from app.styles import inject_css
 from app.pages.campaign import render as render_campaign
+from app.pages.org_overview import render as render_org_overview
 
 
 def _make_favicon():
@@ -70,7 +71,11 @@ def main() -> None:
         wait=False,
     )
 
-    render_campaign()
+    page = st.query_params.get("page", "org_overview")
+    if page == "campaigns":
+        render_campaign()
+    else:
+        render_org_overview()
 
 
 if __name__ == "__main__":

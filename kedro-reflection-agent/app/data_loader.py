@@ -185,6 +185,14 @@ def get_latest_run_id_for_agent(agent_id: str) -> str | None:
     return agent_runs[0].get("run_id")
 
 
+def get_eval_cases(agent_id: str) -> list[dict]:
+    """Return eval cases list from disk for *agent_id*."""
+    data = _read_json(_DATA / agent_id / "evaluation" / "eval_cases.json")
+    if isinstance(data, list):
+        return data
+    return []
+
+
 def get_latest_score_for_agent(agent_id: str) -> float | None:
     """Return the mean_score from the latest run's run_index entry."""
     run_index = get_run_index()

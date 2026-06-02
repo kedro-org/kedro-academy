@@ -157,6 +157,151 @@ def dimension_bars_chart(mean_per_scorer: dict[str, float]) -> go.Figure | None:
 
 # ── Dimension delta comparison (multi-run) ────────────────────────────────────
 
+# ── Portfolio trend (multi-agent) ─────────────────────────────────────────────
+
+_AGENT_COLORS = {
+    "b2b_sales": "#2251FF",
+    "consumer_mktg": "#8B5CF6",
+    "customer_care": "#00C4B4",
+}
+_AGENT_LABELS = {
+    "b2b_sales": "B2B Sales",
+    "consumer_mktg": "Cons. Marketing",
+    "customer_care": "Customer Care",
+}
+
+
+def portfolio_trend_chart(run_index: list[dict]) -> go.Figure | None:
+    """Multi-line chart: one line per agent, x=run sequence, y=mean_score."""
+    from collections import defaultdict
+
+    by_agent: dict[str, list[dict]] = defaultdict(list)
+    for r in run_index:
+        aid = r.get("agent_id")
+        if aid and r.get("mean_score") is not None:
+            by_agent[aid].append(r)
+
+    if not by_agent:
+        return None
+
+    fig = go.Figure()
+
+    for agent_id in ["b2b_sales", "consumer_mktg", "customer_care"]:
+        runs = sorted(by_agent.get(agent_id, []),
+                      key=lambda r: (r.get("started_at") or "", r.get("run_seq", 0)))
+        if not runs:
+            continue
+        color = _AGENT_COLORS.get(agent_id, "#64748B")
+        label = _AGENT_LABELS.get(agent_id, agent_id)
+        xs = [r.get("run_id", f"run_{i+1}") for i, r in enumerate(runs)]
+        ys = [float(r["mean_score"]) for r in runs]
+        fig.add_trace(go.Scatter(
+            x=xs, y=ys, mode="lines+markers", name=label,
+            line=dict(color=color, width=2),
+            marker=dict(size=7, color=color, line=dict(color="white", width=1.5)),
+            hovertemplate="<b>%{x}</b><br>Score: %{y:.2f}<extra></extra>",
+        ))
+
+    fig.update_layout(
+        plot_bgcolor="white", paper_bgcolor="white",
+        height=175, margin=dict(l=0, r=8, t=8, b=0),
+        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#64748B"), title=None),
+        yaxis=dict(
+            showgrid=True, gridcolor="#F1F5F9",
+            range=[0.5, 1.0],
+            tickformat=".2f",
+            tickfont=dict(size=10, color="#64748B"), title=None,
+        ),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+            font=dict(size=10), itemwidth=30,
+        ),
+        font=dict(family="Inter, sans-serif"),
+    )
+    return fig
+
+
+def dimension_radar_chart(agent_scores: dict[str, dict[str, float]]) -> go.Figure | None:
+    """Radar chart: dimensions on axes, one trace per agent.
+
+    agent_scores: {agent_id: {canonical_dim: score}}
+    """
+    if not agent_scores:
+        return None
+
+    # Canonical radar dimensions (shared across agents)
+    dims = ["Writing/Tone", "Personalisation", "CTA/Resolution", "Groundedness", "Compliance"]
+
+    # Map raw scorer names → canonical dim
+    _DIM_MAP = {
+        "writing_quality": "Writing/Tone",
+        "tone": "Writing/Tone",
+        "personalization": "Personalisation",
+        "personalisation": "Personalisation",
+        "cta_present": "CTA/Resolution",
+        "urgency_cta": "CTA/Resolution",
+        "resolution_clarity": "CTA/Resolution",
+        "no_fake_skus": "Groundedness",
+        "groundedness": "Groundedness",
+        "compliance": "Compliance",
+    }
+
+    fig = go.Figure()
+    for agent_id in ["b2b_sales", "consumer_mktg", "customer_care"]:
+        raw = agent_scores.get(agent_id)
+        if not raw:
+            continue
+        color = _AGENT_COLORS.get(agent_id, "#64748B")
+        label = _AGENT_LABELS.get(agent_id, agent_id)
+
+        # Average raw scorers into canonical dims
+        buckets: dict[str, list[float]] = {d: [] for d in dims}
+        for scorer, val in raw.items():
+            canonical = _DIM_MAP.get(scorer)
+            if canonical:
+                buckets[canonical].append(float(val))
+        values = [
+            sum(buckets[d]) / len(buckets[d]) if buckets[d] else 0.0
+            for d in dims
+        ]
+        # Close the radar loop
+        values_closed = values + [values[0]]
+        dims_closed = dims + [dims[0]]
+
+        fig.add_trace(go.Scatterpolar(
+            r=values_closed, theta=dims_closed, fill="toself", name=label,
+            line=dict(color=color, width=2),
+            fillcolor=color.replace(")", ",0.07)").replace("rgb", "rgba") if color.startswith("rgb") else color + "12",
+            marker=dict(size=4),
+            hovertemplate="<b>%{theta}</b>: %{r:.2f}<extra></extra>",
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True, range=[0.5, 1.0],
+                tickfont=dict(size=9, color="#94A3B8"),
+                gridcolor="#F1F5F9", linecolor="#E2E8F0",
+                tickvals=[0.6, 0.7, 0.8, 0.9, 1.0],
+                ticktext=["0.6", "0.7", "0.8", "0.9", "1.0"],
+                showticklabels=True,
+            ),
+            angularaxis=dict(tickfont=dict(size=10, color="#0F172A"), linecolor="#E2E8F0"),
+            bgcolor="white",
+        ),
+        paper_bgcolor="white",
+        height=175,
+        margin=dict(l=24, r=24, t=8, b=8),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5,
+            font=dict(size=10), itemwidth=30,
+        ),
+        font=dict(family="Inter, sans-serif"),
+        showlegend=True,
+    )
+    return fig
+
+
 def dimension_delta_table_html(runs: list[dict]) -> str:
     """Return HTML for the before/after dimension comparison table.
 
