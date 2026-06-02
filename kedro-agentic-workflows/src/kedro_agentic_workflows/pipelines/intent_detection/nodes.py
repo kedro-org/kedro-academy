@@ -3,7 +3,6 @@ from typing import Any
 
 from kedro.pipeline import LLMContext
 from kedro.pipeline.preview_contract import MermaidPreview
-from langfuse.langchain import CallbackHandler
 from langchain_core.messages import HumanMessage, AIMessage
 import pandas as pd
 import questionary
@@ -67,16 +66,15 @@ def load_context(
     user_id: int,
     user_data: pd.DataFrame,
     session_id: int,
-    intent_tracer_langfuse: CallbackHandler,
+    intent_tracer: Any,
 ):
     """
     Build user context and tracing configuration for LangChain.
 
-    Args:
-        user_id: Active user ID.
-        user_data: DataFrame containing user profile info.
-        session_id: Current session ID.
-        intent_tracer_langfuse: Langfuse tracer dataset for callback handling.
+    `intent_tracer` is the LangChain callback returned by whichever provider's
+    TraceDataset (mode=langchain) is bound in the active config env — Langfuse's
+    `CallbackHandler` or Opik's `OpikTracer`. The intent flow only needs a
+    LangChain-compatible callback, so this function stays provider-agnostic.
 
     Returns:
         Tuple of (user_context, session_config).
@@ -84,15 +82,8 @@ def load_context(
     user_context = {"profile": {"user_id": user_id, "name": user_data.at[0, "name"]}}
     session_config = {
         "configurable": {"thread_id": str(session_id)},
-        "callbacks": [intent_tracer_langfuse],
+        "callbacks": [intent_tracer],
     }
-
-    # Example alternative using Opik
-    # session_config = {
-    #     "configurable": {"thread_id": str(session_id)},
-    #     "callbacks": [intent_tracer_opik]
-    # }
-
     return user_context, session_config
 
 

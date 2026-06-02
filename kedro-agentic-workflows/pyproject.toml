@@ -7,7 +7,7 @@ requires-python = ">=3.9"
 name = "kedro_agentic_workflows"
 readme = "README.md"
 dynamic = [ "version",]
-dependencies = [ "ipython>=8.10", "jupyterlab>=3.0", "notebook", "kedro~=1.0.0",]
+dependencies = [ "ipython>=8.10", "jupyterlab>=3.0", "notebook", "kedro>=1.2.0",]
 
 [project.scripts]
 kedro-agentic-workflows = "kedro_agentic_workflows.__main__:main"
