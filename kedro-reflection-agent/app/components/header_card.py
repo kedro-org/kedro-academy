@@ -92,7 +92,7 @@ def render_header_card(agent_id: str, run_index: list[dict]) -> None:
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                 <h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:0;
-                           letter-spacing:-0.02em;">{label} — Enterprise Outreach Agent</h2>
+                           letter-spacing:-0.02em;">{label} — {cfg.get("subtitle", "Agent")}</h2>
               </div>
               <p style="font-size:13.5px;color:#475569;margin:0 0 14px 0;
                         line-height:1.6;max-width:720px;">

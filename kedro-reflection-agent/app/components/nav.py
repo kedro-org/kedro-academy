@@ -27,18 +27,22 @@ def _do_reset() -> None:
 
 
 def render_nav(current_page: str) -> None:
-    """Render the fixed nav bar and the Reset Demo button inside it.
+    """Render the fixed nav bar.
 
-    The nav is plain HTML (position:fixed).  The Reset button is a native
-    st.button rendered immediately after the nav's st.markdown call — making
-    the two element-containers adjacent siblings.  CSS gives the button's
-    element-container `position:fixed` so it floats into the nav's right side.
-    The anchor div `#rh-nav-reset` embedded in the nav markdown is the CSS hook.
+    Each interactive element uses the same anchor-hook pattern as Reset Demo:
+      st.markdown(contains #anchor)   ← CSS: element-container:has(#anchor)
+      st.button(...)                  ← CSS: has(#anchor) + .element-container → position:fixed
+
+    Order:
+      nav HTML      ← contains #rh-nav-reset
+      Reset button  ← has(#rh-nav-reset) + .element-container → top-right
+      st.markdown   ← contains #rh-nav-ov
+      Org Ov button ← has(#rh-nav-ov)  + .element-container → top-left (190px)
+      st.markdown   ← contains #rh-nav-camp
+      Campaigns btn ← has(#rh-nav-camp) + .element-container → top-left (310px)
     """
     logo_icon = ic("trending-up", size=14, color="#fff")
 
-    # The hidden anchor `#rh-nav-reset` at the end of this markdown is the CSS
-    # hook for targeting the *next* element-container (the Reset button).
     st.markdown(
         f"""
         <style>
@@ -47,19 +51,15 @@ def render_nav(current_page: str) -> None:
         </style>
 
         <nav id="rh-nav" style="
-            position:fixed;top:0;left:0;right:0;
-            width:100%;z-index:99999;
-            background:rgba(255,255,255,0.97);
-            backdrop-filter:blur(8px);
-            border-bottom:1px solid #E2E8F0;
-            box-shadow:0 1px 3px rgba(0,0,0,0.06);
+            position:fixed;top:0;left:0;right:0;width:100%;z-index:99999;
+            background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);
+            border-bottom:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,0.06);
         ">
           <div style="
-              max-width:1400px;margin:0 auto;
-              height:56px;padding:0 24px;
+              max-width:1400px;margin:0 auto;height:56px;padding:0 24px;
               display:flex;align-items:center;gap:8px;
           ">
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-right:16px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
               <div style="width:28px;height:28px;border-radius:7px;background:#2251FF;
                           display:flex;align-items:center;justify-content:center;">{logo_icon}</div>
               <span style="font-size:14px;font-weight:700;color:#0F172A;
@@ -68,22 +68,6 @@ def render_nav(current_page: str) -> None:
                            border:1px solid #E2E8F0;border-radius:4px;
                            padding:2px 6px;letter-spacing:0.02em;white-space:nowrap;">
                 Powered by Kedro
-              </span>
-            </div>
-            <div style="display:flex;align-items:center;gap:2px;">
-              <span style="display:inline-flex;align-items:center;padding:6px 12px;
-                           border-radius:8px;font-size:13.5px;
-                           font-weight:{'600' if current_page == 'org_overview' else '500'};
-                           color:{'#2251FF' if current_page == 'org_overview' else '#64748B'};
-                           background:{'#EEF2FF' if current_page == 'org_overview' else 'transparent'};">
-                Org Overview
-              </span>
-              <span style="display:inline-flex;align-items:center;padding:6px 12px;
-                           border-radius:8px;font-size:13.5px;
-                           font-weight:{'600' if current_page == 'campaigns' else '500'};
-                           color:{'#2251FF' if current_page == 'campaigns' else '#64748B'};
-                           background:{'#EEF2FF' if current_page == 'campaigns' else 'transparent'};">
-                Campaigns
               </span>
             </div>
           </div>
@@ -95,9 +79,24 @@ def render_nav(current_page: str) -> None:
         unsafe_allow_html=True,
     )
 
-    # This st.button call is immediately adjacent to the nav markdown above —
-    # CSS targets `.element-container:has(#rh-nav-reset) + .element-container`
-    # and fixes it into the top-right corner of the nav bar.
-    if st.button("↺  Reset Demo", key="nav_reset_demo", help="Re-seed demo data and restore initial state"):
+    # Reset Demo ─ CSS hook: has(#rh-nav-reset) + .element-container
+    if st.button("↺  Reset Demo", key="nav_reset_demo",
+                 help="Re-seed demo data and restore initial state"):
         with st.spinner("Resetting demo…"):
             _do_reset()
+
+    # The anchor ID encodes active/inactive — CSS targets each ID separately.
+    # Both buttons are type="secondary" to avoid any global primary CSS conflict.
+    ov_anchor = "rh-nav-ov-active" if current_page == "org_overview" else "rh-nav-ov"
+    st.markdown(f'<div id="{ov_anchor}" style="display:none"></div>',
+                unsafe_allow_html=True)
+    if st.button("Org Overview", key="nav_btn_ov"):
+        st.query_params["page"] = "org_overview"
+        st.rerun()
+
+    camp_anchor = "rh-nav-camp-active" if current_page == "campaigns" else "rh-nav-camp"
+    st.markdown(f'<div id="{camp_anchor}" style="display:none"></div>',
+                unsafe_allow_html=True)
+    if st.button("Campaigns", key="nav_btn_camp"):
+        st.query_params["page"] = "campaigns"
+        st.rerun()

@@ -14,6 +14,7 @@ from app.data_loader import get_latest_score_for_agent
 AGENTS: dict[str, dict] = {
     "b2b_sales": {
         "label": "B2B Sales",
+        "subtitle": "Enterprise Outreach Agent",
         "icon": "briefcase",
         "color": "#2251FF",
         "bg": "#EEF2FF",
@@ -23,6 +24,7 @@ AGENTS: dict[str, dict] = {
     },
     "consumer_mktg": {
         "label": "Consumer Marketing",
+        "subtitle": "Plan & Device Offers Agent",
         "icon": "bar-chart-2",
         "color": "#8B5CF6",
         "bg": "#F5F3FF",
@@ -32,6 +34,7 @@ AGENTS: dict[str, dict] = {
     },
     "customer_care": {
         "label": "Customer Care",
+        "subtitle": "Support Reply Agent",
         "icon": "headphones",
         "color": "#00C4B4",
         "bg": "#F0FDFA",

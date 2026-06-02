@@ -128,6 +128,96 @@ GLOBAL_CSS = """
     color: inherit !important;
   }
 
+  /* ── Nav page-link buttons ────────────────────────────────────────────────
+     The anchor ID itself encodes active/inactive state:
+       #rh-nav-ov-active  / #rh-nav-camp-active  → highlighted (blue on light-blue)
+       #rh-nav-ov         / #rh-nav-camp          → dimmed (grey, transparent)
+     Both buttons are always type="secondary" — no conflict with global primary CSS.
+  ── */
+
+  /* Collapse all four anchor containers */
+  .element-container:has(#rh-nav-ov),
+  .element-container:has(#rh-nav-ov-active),
+  .element-container:has(#rh-nav-camp),
+  .element-container:has(#rh-nav-camp-active) {
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Position — Org Overview (active or inactive) */
+  .element-container:has(#rh-nav-ov) + .element-container,
+  .element-container:has(#rh-nav-ov-active) + .element-container {
+    position: fixed !important;
+    top: 11px !important;
+    left: 500px !important;
+    z-index: 999999 !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Position — Campaigns (active or inactive) */
+  .element-container:has(#rh-nav-camp) + .element-container,
+  .element-container:has(#rh-nav-camp-active) + .element-container {
+    position: fixed !important;
+    top: 11px !important;
+    left: 620px !important;
+    z-index: 999999 !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Inactive style — grey transparent link */
+  .element-container:has(#rh-nav-ov) + .element-container button,
+  .element-container:has(#rh-nav-camp) + .element-container button {
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+  }
+  .element-container:has(#rh-nav-ov) + .element-container button:hover,
+  .element-container:has(#rh-nav-camp) + .element-container button:hover {
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
+  }
+  .element-container:has(#rh-nav-ov) + .element-container button *,
+  .element-container:has(#rh-nav-camp) + .element-container button * {
+    color: inherit !important;
+  }
+
+  /* Active style — blue text on light-blue bg */
+  .element-container:has(#rh-nav-ov-active) + .element-container button,
+  .element-container:has(#rh-nav-camp-active) + .element-container button {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #2251FF !important;
+    background: #EEF2FF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+  }
+  .element-container:has(#rh-nav-ov-active) + .element-container button:hover,
+  .element-container:has(#rh-nav-camp-active) + .element-container button:hover {
+    background: #E0E7FF !important;
+    color: #1A3FCC !important;
+  }
+  .element-container:has(#rh-nav-ov-active) + .element-container button *,
+  .element-container:has(#rh-nav-camp-active) + .element-container button * {
+    color: #2251FF !important;
+  }
+
   /* ── Nav ── */
   .nav-bar {
     display: flex;
