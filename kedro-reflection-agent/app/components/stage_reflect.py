@@ -7,7 +7,6 @@ import json
 import re
 
 import streamlit as st
-import streamlit.components.v1 as components_v1
 
 from app.data_loader import (
     get_proposed_prompt,
@@ -19,6 +18,19 @@ from app.data_loader import (
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
 _KEDRO_VIZ_URL = "http://localhost:4141"
+_SELECT_RUN_LOGS_JS = (
+    "<script>(function(){"
+    "var d=window.parent.document;"
+    "var me=Array.from(d.querySelectorAll('iframe')).find(function(f){return f.contentWindow===window;});"
+    "if(!me)return;"
+    "var tls=Array.from(d.querySelectorAll('[role=\"tablist\"]'));"
+    "var cl=null;"
+    "tls.forEach(function(tl){if(me.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_PRECEDING){cl=tl;}});"
+    "if(!cl)return;"
+    "var btn=Array.from(cl.querySelectorAll('button[role=\"tab\"]')).find(function(t){return t.textContent.includes('Run Logs');});"
+    "if(btn)btn.click();"
+    "})();</script>"
+)
 
 
 def _msg_text(messages: list[dict]) -> str:
@@ -66,31 +78,48 @@ def _diff_html(before: str, after: str) -> tuple[str, str]:
 
 
 def _parse_summary(summary_md: str) -> tuple[list[str], list[str], list[str]]:
-    """Naively extract Issues / Changes / Expected Gains from a markdown summary."""
+    """Extract Issues / Changes / Reasons from the reflection summary markdown.
+
+    Matches the format produced by _render_summary_md in the reflection pipeline:
+      ## Issues identified  → ### heading per issue (h3 title = the issue text)
+      ## Changes proposed   → - **target**: change  (bullet lines)
+      ## Reasons            → - reason              (bullet lines)
+    """
     issues: list[str] = []
     changes: list[str] = []
-    gains: list[str] = []
-    current: list[str] | None = None
+    reasons: list[str] = []
+    section: str = ""
+
     for line in summary_md.splitlines():
-        lower = line.lower().strip()
-        if "issue" in lower or "problem" in lower or "weakness" in lower:
-            current = issues
-        elif "change" in lower or "propos" in lower or "modif" in lower:
-            current = changes
-        elif "gain" in lower or "expect" in lower or "improve" in lower:
-            current = gains
-        elif line.strip().startswith(("-", "*", "•")) and current is not None:
-            item = line.strip().lstrip("-*• ").strip()
-            if item:
-                current.append(item)
-    # Fallback: if nothing parsed, split the text into thirds roughly
-    if not issues and not changes and not gains and summary_md.strip():
-        lines = [l.strip() for l in summary_md.splitlines() if l.strip()]
-        third = max(1, len(lines) // 3)
-        issues = lines[:third]
-        changes = lines[third : 2 * third]
-        gains = lines[2 * third :]
-    return issues[:5], changes[:5], gains[:5]
+        stripped = line.strip()
+        lower = stripped.lower()
+
+        # Section headers (## level)
+        if stripped.startswith("## "):
+            if "issue" in lower:
+                section = "issues"
+            elif "change" in lower or "propos" in lower:
+                section = "changes"
+            elif "reason" in lower:
+                section = "reasons"
+            else:
+                section = ""
+            continue
+
+        if section == "issues":
+            # Issues are rendered as ### headings
+            if stripped.startswith("### "):
+                item = stripped[4:].strip()
+                if item:
+                    issues.append(item)
+        elif section in ("changes", "reasons"):
+            # Changes and reasons are rendered as bullet points
+            if stripped.startswith(("-", "*", "•")):
+                item = stripped.lstrip("-*• ").strip()
+                if item:
+                    (changes if section == "changes" else reasons).append(item)
+
+    return issues[:5], changes[:5], reasons[:5]
 
 
 def render_stage_reflect(
@@ -131,35 +160,28 @@ def render_stage_reflect(
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    if run_clicked:
-        from app import runner
-        log_placeholder = st.empty()
-        log_lines: list[str] = []
-
-        def on_log(line: str) -> None:
-            log_lines.append(line)
-            st.session_state["reflect_logs"] = log_lines.copy()
-            clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
-            log_placeholder.code(clean, language="log")
-
-        with st.spinner("Running reflection pipeline…"):
-            ok, _ = runner.run_reflection(run_id_display, refl_id_display, on_log=on_log)
-
-        if ok:
-            st.success("Reflection completed. Proposal ready.")
-        else:
-            st.error("Reflection pipeline failed — check logs below.")
-        st.rerun()
-
     # ── Sub-tabs ──────────────────────────────────────────────────────────────
+    _logs_key = f"show_run_logs_{agent_id}"
+    if run_clicked:
+        st.session_state[_logs_key] = True
+    _show_logs = st.session_state.pop(_logs_key, False)
+    _goto_approve = st.session_state.pop(f"goto_approve_{agent_id}", False)
     tab_viz, tab_logs, tab_langfuse, tab_proposal = st.tabs(["⊞ Kedro-Viz", ">_ Run Logs", "∿ Langfuse", "✎ Proposal"])
+    if _show_logs:
+        st.iframe(_SELECT_RUN_LOGS_JS, height=1)
+    elif _goto_approve:
+        st.iframe(
+            "<script>Array.from(window.parent.document.querySelectorAll('button[role=\"tab\"]'))"
+            ".find(t=>t.textContent.includes('Approve'))?.click();</script>",
+            height=1,
+        )
 
     # ── Kedro-Viz tab ─────────────────────────────────────────────────────────
     with tab_viz:
         try:
             import urllib.request
             urllib.request.urlopen(_KEDRO_VIZ_URL, timeout=1)
-            components_v1.iframe(_KEDRO_VIZ_URL, height=520, scrolling=True)
+            st.iframe(_KEDRO_VIZ_URL, height=520)
         except Exception:
             st.markdown(
                 """
@@ -181,9 +203,47 @@ def render_stage_reflect(
 
     # ── Run Logs tab ──────────────────────────────────────────────────────────
     with tab_logs:
-        log_lines: list[str] = st.session_state.get("reflect_logs", [])
-        clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-200:])) or "No log output yet."
-        st.code(clean, language="log")
+        if run_clicked:
+            from app import runner
+            log_placeholder = st.empty()
+            log_lines: list[str] = []
+
+            def on_log(line: str) -> None:
+                log_lines.append(line)
+                st.session_state[f"reflect_logs_{agent_id}"] = log_lines.copy()
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
+                log_placeholder.code(clean, language="log")
+
+            with st.spinner("Running reflection pipeline…"):
+                ok, _ = runner.run_reflection(run_id_display, refl_id_display, agent_id, on_log=on_log)
+
+            if ok:
+                st.success("Reflection completed. Proposal ready.")
+            else:
+                st.error("Reflection pipeline failed — check logs above.")
+            st.session_state[_logs_key] = True
+            st.rerun()
+        else:
+            log_lines = st.session_state.get(f"reflect_logs_{agent_id}", [])
+            if log_lines:
+                active_filter = st.segmented_control(
+                    "Filter",
+                    options=["All", "INFO", "ERROR"],
+                    default="All",
+                    key="log_filter_reflect",
+                    label_visibility="collapsed",
+                )
+                if active_filter == "INFO":
+                    filtered = [l for l in log_lines if "INFO" in l]
+                elif active_filter == "ERROR":
+                    filtered = [l for l in log_lines if "ERROR" in l]
+                else:
+                    filtered = log_lines
+                clean = _ANSI_ESCAPE.sub("", "".join(filtered[-200:]))
+                if clean:
+                    st.code(clean, language="log")
+                else:
+                    st.caption("No matching log lines for this filter.")
 
     # ── Langfuse tab ─────────────────────────────────────────────────────────
     with tab_langfuse:
@@ -198,7 +258,7 @@ def render_stage_reflect(
             with col3:
                 st.metric("Input tokens", "—")
             with col4:
-                st.metric("Proposals", "1" if get_reflection_summary(reflection_id) else "—")
+                st.metric("Proposals", "1" if get_reflection_summary(agent_id, reflection_id) else "—")
 
     # ── Proposal tab ─────────────────────────────────────────────────────────
     with tab_proposal:
@@ -206,9 +266,9 @@ def render_stage_reflect(
             st.info("Run the reflection pipeline first to see the proposal.")
             return
 
-        summary_md = get_reflection_summary(reflection_id)
-        proposed_prompt = get_proposed_prompt(reflection_id)
-        proposed_skill = get_proposed_skill(reflection_id)
+        summary_md = get_reflection_summary(agent_id, reflection_id)
+        proposed_prompt = get_proposed_prompt(agent_id, reflection_id)
+        proposed_skill = get_proposed_skill(agent_id, reflection_id)
         current_prompt = get_system_prompt(agent_id)
         current_skill = get_skill_text(agent_id)
 
@@ -239,7 +299,7 @@ def render_stage_reflect(
 
         # 3-column summary cards
         if summary_md:
-            issues, changes, gains = _parse_summary(summary_md)
+            issues, changes, reasons = _parse_summary(summary_md)
             card_cols = st.columns(3)
 
             with card_cols[0]:
@@ -284,15 +344,15 @@ def render_stage_reflect(
 
             with card_cols[2]:
                 items_html = "".join(
-                    f'<li style="margin-bottom:4px;">{html.escape(g)}</li>' for g in gains
-                ) or "<li style='color:#94A3B8;'>Unknown</li>"
+                    f'<li style="margin-bottom:4px;">{html.escape(r)}</li>' for r in reasons
+                ) or "<li style='color:#94A3B8;'>None identified</li>"
                 st.markdown(
                     f"""
                     <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;
                                 padding:16px;">
                       <div style="font-size:12px;font-weight:700;color:#15803D;
                                   text-transform:uppercase;letter-spacing:0.06em;
-                                  margin-bottom:10px;">Expected Gains</div>
+                                  margin-bottom:10px;">Reasons</div>
                       <ul style="font-size:13px;color:#14532D;margin:0;padding-left:16px;
                                  line-height:1.6;">
                         {items_html}
@@ -396,9 +456,9 @@ def render_stage_reflect(
         with btn_col:
             if st.button(
                 "Review & Approve →",
-                key=f"goto_approve_{agent_id}",
+                key=f"goto_approve_btn_{agent_id}",
                 type="primary",
                 width="stretch",
             ):
-                st.session_state["active_stage"] = 3  # 0-indexed stage 4
+                st.session_state[f"goto_approve_{agent_id}"] = True
                 st.rerun()

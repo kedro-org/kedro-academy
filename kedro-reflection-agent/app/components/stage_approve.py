@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import difflib
 import html
 import re
 
@@ -21,6 +22,54 @@ from app.data_loader import (
 from app.components.charts import dimension_delta_table_html
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
+_SELECT_RUN_LOGS_JS = (
+    "<script>(function(){"
+    "var d=window.parent.document;"
+    "var me=Array.from(d.querySelectorAll('iframe')).find(function(f){return f.contentWindow===window;});"
+    "if(!me)return;"
+    "var tls=Array.from(d.querySelectorAll('[role=\"tablist\"]'));"
+    "var cl=null;"
+    "tls.forEach(function(tl){if(me.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_PRECEDING){cl=tl;}});"
+    "if(!cl)return;"
+    "var btn=Array.from(cl.querySelectorAll('button[role=\"tab\"]')).find(function(t){return t.textContent.includes('Run Logs');});"
+    "if(btn)btn.click();"
+    "})();</script>"
+)
+
+
+def _word_diff_html(before: str, after: str) -> tuple[str, str]:
+    """Return (before_html, after_html) with word-level diff highlights."""
+    a_words = before.split()
+    b_words = after.split()
+    matcher = difflib.SequenceMatcher(None, a_words, b_words, autojunk=False)
+    a_parts: list[str] = []
+    b_parts: list[str] = []
+    _del = "background:#FFE4E4;color:#9B1C1C;border-radius:2px;padding:1px 3px;"
+    _ins = "background:#D1FAE5;color:#065F46;border-radius:2px;padding:1px 3px;"
+    for tag, a0, a1, b0, b1 in matcher.get_opcodes():
+        if tag == "equal":
+            a_parts.extend(html.escape(w) for w in a_words[a0:a1])
+            b_parts.extend(html.escape(w) for w in b_words[b0:b1])
+        elif tag == "replace":
+            a_parts.extend(
+                f'<mark style="{_del}text-decoration:line-through;">{html.escape(w)}</mark>'
+                for w in a_words[a0:a1]
+            )
+            b_parts.extend(
+                f'<mark style="{_ins}">{html.escape(w)}</mark>'
+                for w in b_words[b0:b1]
+            )
+        elif tag == "delete":
+            a_parts.extend(
+                f'<mark style="{_del}text-decoration:line-through;">{html.escape(w)}</mark>'
+                for w in a_words[a0:a1]
+            )
+        elif tag == "insert":
+            b_parts.extend(
+                f'<mark style="{_ins}">{html.escape(w)}</mark>'
+                for w in b_words[b0:b1]
+            )
+    return " ".join(a_parts), " ".join(b_parts)
 
 
 def _score_color(v: float) -> str:
@@ -41,19 +90,21 @@ def render_stage_approve(
 
     refl_id_display = reflection_id or "refl_1"
     run_id_display = run_id or "run_1"
+    _logs_key = f"show_run_logs_{agent_id}"
 
     # Check if already applied
     apply_history = get_apply_history()
     already_applied = any(
-        h.get("reflection_id") == refl_id_display for h in apply_history
+        h.get("reflection_id") == refl_id_display
+        and h.get("agent_id", agent_id) == agent_id  # backward-compat: old entries lack agent_id
+        for h in apply_history
     )
 
-    # ── Approval gate banner ──────────────────────────────────────────────────
+    # ── Approval gate ─────────────────────────────────────────────────────────
     if not already_applied:
         if reflection_id:
-            # Reflection run exists — show active approval gate
-            proposed_prompt = get_proposed_prompt(reflection_id) if reflection_id else []
-            proposed_skill = get_proposed_skill(reflection_id) if reflection_id else ""
+            proposed_prompt = get_proposed_prompt(agent_id, reflection_id)
+            proposed_skill = get_proposed_skill(agent_id, reflection_id)
             current_prompt = get_system_prompt(agent_id)
 
             prompt_pill = ""
@@ -120,7 +171,10 @@ def render_stage_approve(
                 unsafe_allow_html=True,
             )
 
-            approve_col, _ = st.columns([1, 4])
+            _m = re.match(r'^(.+?)(\d+)$', run_id_display)
+            next_run_id = f"{_m.group(1)}{int(_m.group(2)) + 1}" if _m else "run_2"
+
+            approve_col, _ = st.columns([2, 4])
             with approve_col:
                 approve_clicked = st.button(
                     "✓ Approve & Apply",
@@ -136,21 +190,27 @@ def render_stage_approve(
 
                 def on_log(line: str) -> None:
                     log_lines.append(line)
-                    st.session_state["apply_logs"] = log_lines.copy()
+                    st.session_state[f"apply_logs_{agent_id}"] = log_lines.copy()
                     clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
                     log_placeholder.code(clean, language="log")
 
                 with st.spinner("Applying changes…"):
-                    ok, _ = runner.run_apply(refl_id_display, on_log=on_log)
+                    ok, _ = runner.run_apply(refl_id_display, agent_id, on_log=on_log)
 
                 if ok:
-                    st.success("Changes applied successfully. Ready for run 2.")
+                    st.success(f"Apply complete — running campaign + evaluation for {next_run_id}…")
+                    with st.spinner(f"Running campaign + evaluation ({next_run_id})…"):
+                        ok2, _ = runner.run_campaign(next_run_id, agent_id, on_log=on_log)
+                    if ok2:
+                        st.success(f"Run {next_run_id} complete.")
+                    else:
+                        st.error(f"Campaign pipeline failed for {next_run_id} — check logs.")
                 else:
                     st.error("Apply pipeline failed — check logs below.")
+                st.session_state[_logs_key] = True
                 st.rerun()
 
         else:
-            # No reflection run yet — show waiting state gate
             st.markdown(
                 """
                 <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;
@@ -173,10 +233,9 @@ def render_stage_approve(
                 """,
                 unsafe_allow_html=True,
             )
+        return
 
-        return  # Don't show post-approval tabs until applied
-
-    # ── Post-approval: show tabs ──────────────────────────────────────────────
+    # ── Post-approval: tabs + banner + re-run strip ───────────────────────────
     st.markdown(
         """
         <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;
@@ -191,18 +250,92 @@ def render_stage_approve(
         unsafe_allow_html=True,
     )
 
-    tab_viz, tab_logs, tab_langfuse, tab_compare = st.tabs(["⊞ Kedro-Viz", ">_ Run Logs", "∿ Langfuse", "⧉ Compare Responses"])
+    # ── Re-run campaign strip ─────────────────────────────────────────────────
+    _m = re.match(r'^(.+?)(\d+)$', run_id_display)
+    _default_next = f"{_m.group(1)}{int(_m.group(2)) + 1}" if _m else "run_2"
+    next_run_id = st.session_state.get(f"next_run_id_post_{agent_id}", _default_next)
 
-    # ── Kedro-Viz tab ─────────────────────────────────────────────────────────
+    col_cmd, col_btn = st.columns([5, 1])
+    with col_cmd:
+        st.markdown(
+            f"""
+            <div class="command-strip">
+              <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
+              <span class="command-text">kedro run --pipelines campaign,evaluation,scouts
+                --params agent_id={agent_id},run_id={next_run_id}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_btn:
+        st.markdown('<div style="padding-top:4px;">', unsafe_allow_html=True)
+        rerun_clicked = st.button(
+            "▶ Run",
+            key=f"rerun_campaign_{agent_id}",
+            type="primary",
+            width="stretch",
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    if rerun_clicked:
+        st.session_state[_logs_key] = True
+
+    _show_logs = st.session_state.pop(_logs_key, False)
+    tab_viz, tab_logs, tab_langfuse, tab_compare = st.tabs(["⊞ Kedro-Viz", ">_ Run Logs", "∿ Langfuse", "⧉ Compare Responses"])
+    if _show_logs:
+        st.iframe(_SELECT_RUN_LOGS_JS, height=1)
+
     with tab_viz:
         from app.components.kedro_viz_tab import render_kedro_viz
         render_kedro_viz(agent_id, ["apply"], stage_key="approve")
 
     # ── Run Logs tab ──────────────────────────────────────────────────────────
     with tab_logs:
-        log_lines: list[str] = st.session_state.get("apply_logs", [])
-        clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-200:])) or "No log output yet."
-        st.code(clean, language="log")
+        if rerun_clicked:
+            from app import runner
+            log_lines: list[str] = []
+            log_placeholder = st.empty()
+
+            def on_log(line: str) -> None:
+                log_lines.append(line)
+                st.session_state[f"apply_logs_{agent_id}"] = log_lines.copy()
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
+                log_placeholder.code(clean, language="log")
+
+            with st.spinner(f"Running campaign + evaluation ({next_run_id})…"):
+                ok, _ = runner.run_campaign(next_run_id, agent_id, on_log=on_log)
+
+            if ok:
+                st.success(f"Run {next_run_id} complete.")
+                _n = re.match(r'^(.+?)(\d+)$', next_run_id)
+                st.session_state[f"next_run_id_post_{agent_id}"] = (
+                    f"{_n.group(1)}{int(_n.group(2)) + 1}" if _n else next_run_id
+                )
+            else:
+                st.error(f"Pipeline failed for {next_run_id} — check logs above.")
+            st.session_state[_logs_key] = True
+            st.rerun()
+
+        log_lines = st.session_state.get(f"apply_logs_{agent_id}", [])
+        if log_lines:
+            active_filter = st.segmented_control(
+                "Filter",
+                options=["All", "INFO", "ERROR"],
+                default="All",
+                key="log_filter_approve",
+                label_visibility="collapsed",
+            )
+            if active_filter == "INFO":
+                filtered = [l for l in log_lines if "INFO" in l]
+            elif active_filter == "ERROR":
+                filtered = [l for l in log_lines if "ERROR" in l]
+            else:
+                filtered = log_lines
+            clean = _ANSI_ESCAPE.sub("", "".join(filtered[-200:]))
+            if clean:
+                st.code(clean, language="log")
+            else:
+                st.caption("No matching log lines for this filter.")
 
     # ── Langfuse tab ─────────────────────────────────────────────────────────
     with tab_langfuse:
@@ -304,19 +437,29 @@ def render_stage_approve(
             )
             table_html = dimension_delta_table_html([run1_meta, run2_meta])
             if table_html:
-                st.markdown(
+                st.html(
                     f'<div style="background:#FFFFFF;border:1px solid #E2E8F0;'
-                    f'border-radius:10px;overflow:hidden;">{table_html}</div>',
-                    unsafe_allow_html=True,
+                    f'border-radius:10px;overflow:hidden;">{table_html}</div>'
                 )
 
-        # Case selector
+        # Case selector — keyed by human-readable case_id from task output
         emails1 = get_emails(agent_id, run1_id)
         emails2 = get_emails(agent_id, run2_id)
-        per_case1 = {c.get("case_id"): c for c in get_per_case_scores(agent_id, run1_id)}
-        per_case2 = {c.get("case_id"): c for c in get_per_case_scores(agent_id, run2_id)}
 
-        all_cases = sorted(set(emails1) | set(emails2) | set(per_case1) | set(per_case2))
+        def _per_case_by_output_id(agent: str, rid: str) -> dict[str, dict]:
+            """Build score lookup keyed by human-readable case_id (from task output)."""
+            result: dict[str, dict] = {}
+            for c in get_per_case_scores(agent, rid):
+                key = (c.get("output") or {}).get("case_id") or c.get("case_id") or ""
+                if key:
+                    result[key] = c
+            return result
+
+        per_case1 = _per_case_by_output_id(agent_id, run1_id)
+        per_case2 = _per_case_by_output_id(agent_id, run2_id)
+
+        # Only show cases that have at least one email — skip UUID-only rows
+        all_cases = sorted(set(emails1) | set(emails2))
 
         if not all_cases:
             st.info("No email outputs found. Ensure the pipeline writes emails to the outputs directory.")
@@ -343,29 +486,36 @@ def render_stage_approve(
                     st.session_state[f"selected_case_{agent_id}"] = case_id
                     selected_case = case_id
 
-        # Side-by-side email panels
+        # Side-by-side email panels with word-level diff on body
         email1 = emails1.get(selected_case, {})
         email2 = emails2.get(selected_case, {})
         case1_scores = per_case1.get(selected_case, {})
         case2_scores = per_case2.get(selected_case, {})
 
-        score1_case = float(case1_scores.get("case_total") or case1_scores.get("score") or 0)
-        score2_case = float(case2_scores.get("case_total") or case2_scores.get("score") or 0)
+        score1_case = float(case1_scores.get("mean_score") or case1_scores.get("case_total") or 0)
+        score2_case = float(case2_scores.get("mean_score") or case2_scores.get("case_total") or 0)
+
+        body1 = email1.get("body") or email1.get("Body") or email1.get("content") or ""
+        body2 = email2.get("body") or email2.get("Body") or email2.get("content") or ""
+        body1_html, body2_html = _word_diff_html(body1, body2)
 
         email_cols = st.columns(2)
-        for col, email, score_case, run_label, border_color, run_id_label in [
-            (email_cols[0], email1, score1_case, f"{run1_id} — Before", "#FECACA", run1_id),
-            (email_cols[1], email2, score2_case, f"{run2_id} — After", "#86EFAC", run2_id),
+        for col, email, body_html, score_case, run_label, border_color in [
+            (email_cols[0], email1, body1_html, score1_case, f"{run1_id} — Before", "#FECACA"),
+            (email_cols[1], email2, body2_html, score2_case, f"{run2_id} — After", "#86EFAC"),
         ]:
             with col:
                 subject = email.get("subject") or email.get("Subject") or "—"
-                body = email.get("body") or email.get("Body") or email.get("content") or ""
                 company = email.get("company") or email.get("customer_id") or "—"
                 product = email.get("product") or email.get("product_id") or "—"
                 score_display = f"{score_case:.1%}" if score_case else "—"
                 sc_color = _score_color(score_case) if score_case else "#94A3B8"
+                body_content = (
+                    body_html if body_html.strip()
+                    else '<span style="color:#94A3B8;">No email output found</span>'
+                )
 
-                st.markdown(
+                st.html(
                     f"""
                     <div style="background:#FFFFFF;border:1.5px solid {border_color};
                                 border-radius:10px;padding:16px;">
@@ -393,9 +543,8 @@ def render_stage_approve(
                       </div>
                       <div style="font-size:12.5px;line-height:1.65;color:#334155;
                                   white-space:pre-wrap;max-height:300px;overflow-y:auto;">
-                        {html.escape(body) if body else '<span style="color:#94A3B8;">No email output found</span>'}
+                        {body_content}
                       </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )

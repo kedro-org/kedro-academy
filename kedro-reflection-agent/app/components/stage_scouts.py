@@ -10,6 +10,20 @@ from app.data_loader import get_signals
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
 
+_SELECT_RUN_LOGS_JS = (
+    "<script>(function(){"
+    "var d=window.parent.document;"
+    "var me=Array.from(d.querySelectorAll('iframe')).find(function(f){return f.contentWindow===window;});"
+    "if(!me)return;"
+    "var tls=Array.from(d.querySelectorAll('[role=\"tablist\"]'));"
+    "var cl=null;"
+    "tls.forEach(function(tl){if(me.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_PRECEDING){cl=tl;}});"
+    "if(!cl)return;"
+    "var btn=Array.from(cl.querySelectorAll('button[role=\"tab\"]')).find(function(t){return t.textContent.includes('Run Logs');});"
+    "if(btn)btn.click();"
+    "})();</script>"
+)
+
 _SIGNAL_DESCRIPTIONS = {
     "rubric_miss": "One or more eval cases scored below the rubric threshold.",
     "low_pass_rate": "Pass rate fell below the configured minimum.",
@@ -47,43 +61,63 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
 
     signals = get_signals(agent_id, run_id or "") if run_id else []
     n_signals = len(signals)
-
-    # ── Command strip ─────────────────────────────────────────────────────────
-    if n_signals:
-        badge_html = (
-            f'<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;'
-            f'padding:3px 10px;border-radius:100px;border:1px solid #FCD34D;white-space:nowrap;'
-            f'flex-shrink:0;">'
-            f'⚡ {n_signals} signal{"s" if n_signals != 1 else ""} · threshold met</span>'
-        )
-    else:
-        badge_html = (
-            '<span style="background:#F0FDF4;color:#15803D;font-size:11px;font-weight:700;'
-            'padding:3px 10px;border-radius:100px;border:1px solid #86EFAC;white-space:nowrap;'
-            'flex-shrink:0;">✓ 0 signals · clean run</span>'
-        )
-    st.markdown(
-        f"""
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-                    background:#0F172A;border-radius:10px;padding:12px 16px;
-                    margin-bottom:16px;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
-              Runs automatically after evaluation — pure Python, deterministic, no LLM, no network
-            </div>
-            <code style="font-size:11px;color:#4ADE80;font-family:monospace;
-                         background:transparent;">
-              scouts.detect(outputs, params) → list[Signal]
-            </code>
-          </div>
-          {badge_html}
-        </div>
-        """,
-        unsafe_allow_html=True,
+    run_id_display = run_id or "run_1"
+    cmd = (
+        f"kedro run --pipelines scouts "
+        f"--params agent_id={agent_id},run_id={run_id_display}"
     )
 
+    # ── Command strip ─────────────────────────────────────────────────────────
+    col_cmd, col_btn = st.columns([5, 1])
+    with col_cmd:
+        if n_signals:
+            badge_html = (
+                f'<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;'
+                f'padding:3px 10px;border-radius:100px;border:1px solid #FCD34D;">'
+                f'⚡ {n_signals} signal{"s" if n_signals != 1 else ""} · threshold met</span>'
+            )
+        else:
+            badge_html = (
+                '<span style="background:#F0FDF4;color:#15803D;font-size:11px;font-weight:700;'
+                'padding:3px 10px;border-radius:100px;border:1px solid #86EFAC;">'
+                '✓ 0 signals</span>'
+            )
+        st.markdown(
+            f"""
+            <div class="command-strip">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
+                  Pure Python, deterministic, no LLM — fires signals when eval thresholds are breached
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
+                  <span class="command-text">{cmd}</span>
+                </div>
+                <div style="margin-top:8px;">{badge_html}</div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_btn:
+        st.markdown('<div style="padding-top:4px;">', unsafe_allow_html=True)
+        run_clicked = st.button(
+            "▶ Run",
+            key=f"run_scouts_{agent_id}",
+            type="primary",
+            width="stretch",
+            disabled=run_id is None,
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
     # ── Sub-tabs ──────────────────────────────────────────────────────────────
-    tab_signals, tab_logs, tab_viz = st.tabs(["◎ Signals", ">_ Run Logs", "⊞ Kedro-Viz"])
+    _logs_key = f"show_run_logs_scouts_{agent_id}"
+    if run_clicked:
+        st.session_state[_logs_key] = True
+    _show_logs = st.session_state.pop(_logs_key, False)
+    tab_viz, tab_signals, tab_logs = st.tabs(["⊞ Kedro-Viz", "◎ Signals", ">_ Run Logs"])
+    if _show_logs:
+        st.iframe(_SELECT_RUN_LOGS_JS, height=1)
 
     # ── Signals tab ───────────────────────────────────────────────────────────
     with tab_signals:
@@ -107,9 +141,7 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
 
         if not run_id:
             st.info("Run the campaign pipeline first to see scout results.")
-            return
-
-        if n_signals > 0:
+        elif n_signals > 0:
             # Threshold banner
             st.markdown(
                 """
@@ -237,18 +269,30 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
 
     # ── Run Logs tab ──────────────────────────────────────────────────────────
     with tab_logs:
-        # Scouts don't produce interactive logs — show static message
-        log_content = (
-            "INFO  [scouts] Running scout rules...\n"
-            f"INFO  [scouts] agent_id={agent_id} run_id={run_id or 'N/A'}\n"
-            + (
-                "\n".join(
-                    f"INFO  [scouts] Signal fired: {s.get('signal_type', 'unknown')} "
-                    f"(confidence={s.get('confidence', 'high')})"
-                    for s in signals
-                )
-                if signals
-                else "INFO  [scouts] No signals fired — thresholds met."
-            )
-        )
-        st.code(log_content, language="log")
+        if run_clicked:
+            from app import runner
+            log_lines: list[str] = []
+            log_placeholder = st.empty()
+
+            def on_log(line: str) -> None:
+                log_lines.append(line)
+                st.session_state[f"scouts_logs_{agent_id}"] = log_lines.copy()
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
+                log_placeholder.code(clean, language="log")
+
+            with st.spinner("Running scouts pipeline…"):
+                ok, _ = runner.run_scouts(run_id_display, agent_id, on_log=on_log)
+
+            if ok:
+                st.success("Scouts complete.")
+            else:
+                st.error("Scouts pipeline failed — check logs above.")
+            st.session_state[_logs_key] = True
+            st.cache_data.clear()
+            st.rerun()
+        else:
+            log_lines = st.session_state.get(f"scouts_logs_{agent_id}", [])
+            if log_lines:
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-200:]))
+                if clean:
+                    st.code(clean, language="log")

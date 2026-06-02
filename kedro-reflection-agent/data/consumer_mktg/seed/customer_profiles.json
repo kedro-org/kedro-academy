@@ -2,7 +2,7 @@
   {
     "customer_id": "cust_011",
     "current_plan_id": "prod_006",
-    "device_model": "iPhone 15 Pro",
+    "device_model": "iPhone 12",
     "data_usage_gb_monthly": 45.0,
     "monthly_spend": 55.0,
     "segment": "premium"

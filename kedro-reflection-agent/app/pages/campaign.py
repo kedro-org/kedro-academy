@@ -31,8 +31,9 @@ def _resolve_run_ids(agent_id: str, run_index: list[dict]) -> tuple[str | None, 
             break
     if not reflection_id:
         history = get_apply_history()
-        if history:
-            reflection_id = history[-1].get("reflection_id")
+        agent_history = [h for h in history if h.get("agent_id") == agent_id]
+        if agent_history:
+            reflection_id = agent_history[-1].get("reflection_id")
 
     return run_id, reflection_id
 

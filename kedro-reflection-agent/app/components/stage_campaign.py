@@ -11,10 +11,27 @@ from app.components.charts import dimension_bars_chart
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
 
+# JS injected via st.iframe to click the Run Logs tab in the nearest
+# preceding tablist — uses document position so it targets the right stage
+# even when multiple stages with sub-tabs are rendered simultaneously.
+_SELECT_RUN_LOGS_JS = (
+    "<script>(function(){"
+    "var d=window.parent.document;"
+    "var me=Array.from(d.querySelectorAll('iframe')).find(function(f){return f.contentWindow===window;});"
+    "if(!me)return;"
+    "var tls=Array.from(d.querySelectorAll('[role=\"tablist\"]'));"
+    "var cl=null;"
+    "tls.forEach(function(tl){if(me.compareDocumentPosition(tl)&Node.DOCUMENT_POSITION_PRECEDING){cl=tl;}});"
+    "if(!cl)return;"
+    "var btn=Array.from(cl.querySelectorAll('button[role=\"tab\"]')).find(function(t){return t.textContent.includes('Run Logs');});"
+    "if(btn)btn.click();"
+    "})();</script>"
+)
+
 
 def _clean_log(lines: list[str]) -> str:
     raw = "".join(lines[-200:])
-    return _ANSI_ESCAPE.sub("", raw) or "No log output yet."
+    return _ANSI_ESCAPE.sub("", raw)
 
 
 def _kpi_card(label: str, value: str, delta: str = "", delta_positive: bool = True) -> str:
@@ -43,7 +60,10 @@ def render_stage_campaign(
 
     # ── Command strip ─────────────────────────────────────────────────────────
     run_id_display = run_id or "run_1"
-    cmd = f"kedro run --pipelines campaign,evaluation --params run_id={run_id_display}"
+    cmd = (
+        f"kedro run --pipelines campaign,evaluation "
+        f"--params agent_id={agent_id},run_id={run_id_display}"
+    )
 
     col_cmd, col_btn = st.columns([5, 1])
     with col_cmd:
@@ -53,7 +73,7 @@ def render_stage_campaign(
               <div style="flex:1;min-width:0;">
                 <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
                   Generate outreach emails → evaluate on writing quality, personalisation,
-                  groundedness, CTA → run scouts
+                  groundedness, CTA
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                   <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
@@ -79,29 +99,14 @@ def render_stage_campaign(
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Handle run button ─────────────────────────────────────────────────────
-    if run_clicked:
-        from app import runner
-        log_placeholder = st.empty()
-        log_lines: list[str] = []
-
-        def on_log(line: str) -> None:
-            log_lines.append(line)
-            st.session_state["run_1_logs"] = log_lines.copy()
-            clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
-            log_placeholder.code(clean, language="log")
-
-        with st.spinner("Running campaign + evaluation pipeline…"):
-            ok, _ = runner.run_campaign(run_id_display, on_log=on_log)
-
-        if ok:
-            st.success("Campaign + evaluation completed successfully.")
-        else:
-            st.error("Pipeline failed — check logs below.")
-        st.rerun()
-
     # ── Sub-tabs ──────────────────────────────────────────────────────────────
+    _logs_key = f"show_run_logs_{agent_id}"
+    if run_clicked:
+        st.session_state[_logs_key] = True
+    _show_logs = st.session_state.pop(_logs_key, False)
     tab_viz, tab_logs, tab_langfuse = st.tabs(["⊞ Kedro-Viz", ">_ Run Logs", "∿ Langfuse"])
+    if _show_logs:
+        st.iframe(_SELECT_RUN_LOGS_JS, height=1)
 
     # ── Kedro-Viz tab ─────────────────────────────────────────────────────────
     with tab_viz:
@@ -109,25 +114,47 @@ def render_stage_campaign(
 
     # ── Run Logs tab ──────────────────────────────────────────────────────────
     with tab_logs:
-        log_lines: list[str] = st.session_state.get("run_1_logs", [])
+        if run_clicked:
+            from app import runner
+            log_lines: list[str] = []
+            log_placeholder = st.empty()
 
-        active_filter = st.segmented_control(
-            "Filter",
-            options=["All", "INFO", "ERROR"],
-            default="All",
-            key="log_filter_campaign",
-            label_visibility="collapsed",
-        )
+            def on_log(line: str) -> None:
+                log_lines.append(line)
+                st.session_state[f"campaign_logs_{agent_id}"] = log_lines.copy()
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
+                log_placeholder.code(clean, language="log")
 
-        if active_filter == "INFO":
-            filtered = [l for l in log_lines if "INFO" in l or "info" in l]
-        elif active_filter == "ERROR":
-            filtered = [l for l in log_lines if "ERROR" in l or "error" in l]
+            with st.spinner("Running campaign + evaluation pipeline…"):
+                ok, _ = runner.run_campaign(run_id_display, agent_id, on_log=on_log)
+
+            if ok:
+                st.success("Campaign + evaluation completed successfully.")
+            else:
+                st.error("Pipeline failed — check logs above.")
+            st.session_state[_logs_key] = True
+            st.rerun()
         else:
-            filtered = log_lines
-
-        clean = _clean_log(filtered)
-        st.code(clean, language="log")
+            log_lines = st.session_state.get(f"campaign_logs_{agent_id}", [])
+            if log_lines:
+                active_filter = st.segmented_control(
+                    "Filter",
+                    options=["All", "INFO", "ERROR"],
+                    default="All",
+                    key="log_filter_campaign",
+                    label_visibility="collapsed",
+                )
+                if active_filter == "INFO":
+                    filtered = [l for l in log_lines if "INFO" in l]
+                elif active_filter == "ERROR":
+                    filtered = [l for l in log_lines if "ERROR" in l]
+                else:
+                    filtered = log_lines
+                clean = _clean_log(filtered)
+                if clean:
+                    st.code(clean, language="log")
+                else:
+                    st.caption("No matching log lines for this filter.")
 
     # ── Langfuse tab ─────────────────────────────────────────────────────────
     with tab_langfuse:
@@ -136,9 +163,10 @@ def render_stage_campaign(
         if agg is None:
             st.info("Run the campaign pipeline to see Langfuse analytics here.")
         else:
-            mean_score = float(agg.get("mean_score") or 0)
+            mean_score = float(agg.get("mean_total") or agg.get("mean_score") or 0)
             n_cases = int(agg.get("n_cases") or 0)
-            n_errors = int(agg.get("n_errors") or 0)
+            n_passing = int(agg.get("n_passing") or 0)
+            n_errors = n_cases - n_passing
             pass_rate = float(agg.get("pass_rate") or 0)
             langfuse_url = agg.get("langfuse_experiment_url") or agg.get("dataset_run_url")
 

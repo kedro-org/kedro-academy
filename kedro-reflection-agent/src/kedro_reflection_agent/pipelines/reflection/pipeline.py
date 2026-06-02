@@ -47,6 +47,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs=[
                     "meta_agent_context",
                     "reflection_context",
+                    "system_prompt",
                     "params:run_id",
                     "params:reflection_id",
                     "params:agent_id",

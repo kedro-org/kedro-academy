@@ -13,27 +13,12 @@ _PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def _do_reset() -> None:
-    """Full demo reset: seed data + wipe observability outputs + clear UI state.
-
-    seed_demo.py intentionally preserves run_index.json, apply_history.json and
-    signal_index.json across resets.  For a full UI reset we delete those too so
-    the Observability panel shows a clean slate.
-    """
+    """Full demo reset: seed data + clear UI state."""
     subprocess.run(
         [sys.executable, str(_PROJECT_ROOT / "scripts" / "seed_demo.py")],
         cwd=str(_PROJECT_ROOT),
         check=False,
     )
-
-    # Files that seed_demo.py deliberately keeps but the UI reset must clear
-    _outputs = _PROJECT_ROOT / "data" / "outputs"
-    for _fname in ("run_index.json", "apply_history.json", "signal_index.json"):
-        _f = _outputs / _fname
-        if _f.exists():
-            _f.unlink()
-
-    from app.state import DEFAULT_STATE_PATH, reset_demo_state
-    reset_demo_state(DEFAULT_STATE_PATH)
     st.cache_data.clear()
     _keep = {"kedro_viz_proc", "kedro_viz_start_attempted"}
     for k in [k for k in st.session_state if k not in _keep]:
