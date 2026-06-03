@@ -2,7 +2,7 @@
 
 [![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
 
-**Enterprise self-improving AI agents, orchestrated with Kedro.** One platform investment, three business units in this demo, governance built in.
+**Enterprise self-improving AI agents, orchestrated with Kedro.** One platform investment, three business units impacted and governance built in.
 
 
 ![Reflection Hub](docs/assets/images/reflection_hub.png)
