@@ -37,11 +37,13 @@ viz:
 # ── full demo cycle (headless) ────────────────────────────────────────────────
 
 ## Run the complete three-step pipeline cycle without the UI
+## Pass agent=<agent_id> to target a specific agent, e.g. make run-cycle agent=b2b_sales
+agent ?= b2b_sales
 run-cycle:
-	$(KEDRO) run --pipelines campaign    --params=agent_id=b2b_sales,run_id=run_1
-	$(KEDRO) run --pipelines evaluation  --params=agent_id=b2b_sales,run_id=run_1
-	$(KEDRO) run --pipelines scouts      --params=agent_id=b2b_sales,run_id=run_1
-	$(KEDRO) run --pipelines reflection  --params=agent_id=b2b_sales,run_id=run_1,reflection_id=refl_1
-	$(KEDRO) run --pipelines apply       --params=agent_id=b2b_sales,reflection_id=refl_1
-	$(KEDRO) run --pipelines campaign    --params=agent_id=b2b_sales,run_id=run_2
-	$(KEDRO) run --pipelines evaluation  --params=agent_id=b2b_sales,run_id=run_2
+	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines evaluation  --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines scouts      --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines reflection  --params=agent_id=$(agent),run_id=run_1,reflection_id=refl_1
+	$(KEDRO) run --pipelines apply       --params=agent_id=$(agent),reflection_id=refl_1
+	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_2
+	$(KEDRO) run --pipelines evaluation  --params=agent_id=$(agent),run_id=run_2

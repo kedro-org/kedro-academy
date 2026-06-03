@@ -11,6 +11,8 @@
 
 One platform runs the same governed loop for three business units: generate, evaluate, scout, reflect, approve, apply. This repository is a proof-of-concept with a Streamlit front end and synthetic data.
 
+**Why Kedro?** The five pipelines (`campaign`, `evaluation`, `scouts`, `reflection`, `apply`) are written once and parameterised by `agent_id`. Adding a new business unit is configuration — new seed data, prompts, and eval cases under `data/{agent_id}/` — not new pipeline code. Kedro enforces declared inputs/outputs, versioned artifacts, and a reproducible run graph, which is what makes the governed loop auditable and portable across agents.
+
 | Document | Audience |
 | --- | --- |
 | [`docs/Architecture.md`](docs/Architecture.md) | Executive |
@@ -50,7 +52,7 @@ Open **http://localhost:8501/** (Org Overview) or **http://localhost:8501/?page=
 
 ---
 
-**Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls (for b2b_sales).
+**Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls (defaults to `b2b_sales`; pass `agent=<id>` to target another agent.).
 
 **Reset demo data:**
 
@@ -68,7 +70,10 @@ make seed AGENT=b2b_sales # seed only specific agent
 | --- | --- |
 | `make app` | Streamlit UI (`app/main.py`) |
 | `make viz` | Kedro-Viz pipeline graph |
-| `make run-cycle` | Full headless cycle for `b2b_sales` |
+| `make run-cycle` | Full headless cycle (default: `b2b_sales`) |
+| `make run-cycle agent=b2b_sales` | Full headless cycle for a specific agent |
+
+**Valid agent IDs:** `b2b_sales`, `consumer_mktg`, `customer_care`
 
 **Manual pipelines** (`agent_id` is required):
 
@@ -87,19 +92,43 @@ More commands and parameters: [`DESIGN.md`](DESIGN.md).
 
 ```
 kedro-reflection-agent/
-├── app/                    # Streamlit UI
-├── conf/base/              # Kedro catalog + parameters
+├── app/                            # Streamlit UI
+│   ├── main.py                     # entry point
+│   ├── pages/                      # org_overview · campaign
+│   ├── components/                 # reusable UI widgets
+│   ├── data_loader.py
+│   ├── runner.py                   # triggers Kedro pipelines from UI
+│   └── state.py
+├── conf/
+│   ├── base/                       # catalog (per-pipeline) + parameters
+│   └── local/credentials.yml       # API keys (gitignored)
 ├── data/
-│   ├── shared/seed/        # 20 customers, 15 products
-│   └── {agent_id}/         # per-BU seed, prompts, outputs/
+│   ├── shared/                     # 20 customers, 15 products (seed)
+│   ├── b2b_sales/                  # per-agent seed, prompts, outputs
+│   ├── consumer_mktg/
+│   ├── customer_care/
+│   └── demo_state.json
 ├── docs/
-│   ├── Architecture.md     # executive + demo script
-│   ├── images/             # screenshots (you add)
-│   └── ui/                 # HTML prototypes
-├── src/kedro_reflection_agent/pipelines/
-│   campaign · evaluation · scouts · reflection · apply
-├── DESIGN.md
+│   ├── Architecture.md
+│   ├── assets/                     # gif + images
+│   └── ui/                         # HTML prototypes
+├── src/kedro_reflection_agent/
+│   ├── pipelines/
+│   │   ├── campaign/               # generate outreach
+│   │   ├── evaluation/             # score against rubric
+│   │   ├── scouts/                 # find improvement opportunities
+│   │   ├── reflection/             # synthesise prompt edits
+│   │   └── apply/                  # write new prompt version
+│   ├── models/
+│   │   ├── shared/                 # campaign · evaluation · reflection · scouts
+│   │   ├── b2b_sales/
+│   │   ├── consumer_mktg/
+│   │   └── customer_care/
+│   ├── datasets/                   # custom Kedro dataset types
+│   ├── utils/
+│   └── hooks.py
 ├── scripts/seed_demo.py
+├── DESIGN.md
 └── Makefile
 ```
 
