@@ -39,26 +39,30 @@ One platform runs the same governed loop for three business units: generate, eva
 
   ```bash
   make setup
+  # This will do `make install` and `make seed N=20` creating 20 eval cases and targets for each agent
+  # You can run `make install` and `make seed N=5` if you want to demo 5 cases (which the project already has)
+  
   cp conf/local/credentials.yml.example conf/local/credentials.yml
   # Required: openai.api_key
   # Langfuse traces / prompt registry): langfuse_credentials
+  
   make app
+  # This will open the app at `http://localhost:8502/`
   ```
 
-Open **http://localhost:8501/** (Org Overview) or **http://localhost:8501/?page=campaigns** (per-agent pipeline stages).
 
 ![Reflection Hub Gif](docs/assets/reflection_hub.gif)
 
 
 ---
 
-**Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls (defaults to `b2b_sales`; pass `agent=<id>` to target another agent.).
+**Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls during demo (defaults to `b2b_sales`; pass `agent=<id>` to target another agent. **Valid agent IDs:** `b2b_sales`, `consumer_mktg`, `customer_care`).
 
 **Reset demo data:**
 
 ```bash
 make seed        # all 3 agents, 20 cases each
-make seed N=3    # fewer cases per agent
+make seed N=5    # fewer cases per agent
 ```
 
 ---
@@ -70,11 +74,11 @@ make seed N=3    # fewer cases per agent
 | `make app` | Streamlit UI (`app/main.py`) |
 | `make viz` | Kedro-Viz pipeline graph |
 | `make run-cycle` | Full headless cycle (default: `b2b_sales`) |
-| `make run-cycle agent=b2b_sales` | Full headless cycle for a specific agent |
+| `make run-cycle agent=b2b_sales` | Full headless cycle for a specific agent. **Valid agent IDs:** `b2b_sales`, `consumer_mktg`, `customer_care` |
 
-**Valid agent IDs:** `b2b_sales`, `consumer_mktg`, `customer_care`
 
-**Manual pipelines** (`agent_id` is required):
+
+**Manual pipeline runs** (`agent_id` is required):
 
 ```bash
 uv run kedro run --pipelines campaign,evaluation,scouts \
@@ -83,7 +87,6 @@ uv run kedro run --pipelines campaign,evaluation,scouts \
 
 More commands and parameters: [`DESIGN.md`](DESIGN.md).
 
-**Optional Langfuse** — one dataset and prompts per agent (e.g. `b2b_sales-eval`, `b2b_sales-system-prompt`). Seed files live under `data/{agent_id}/`. Langfuse is a bonus observability layer; Kedro outputs on disk drive the UI.
 
 ---
 
