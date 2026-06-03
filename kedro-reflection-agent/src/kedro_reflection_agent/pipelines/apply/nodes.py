@@ -14,27 +14,18 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from .._common import utc_now_iso
+from kedro_reflection_agent.pipelines._common import load_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
 _HISTORY_PATH = Path("data/outputs/apply_history.json")
-
-# Local file that backs the LangfusePromptDataset for system_prompt.
-# LangfusePromptDataset.save() only calls create_prompt() on the remote side;
-# it never updates the local file.  With sync_policy: local the next campaign
-# load treats the local file as the source of truth, detects a hash-mismatch
-# against the new Langfuse version, and pushes the old content back — making
-# the reflection a no-op.  We therefore mirror every successful apply back to
-# disk so the two sides stay in sync.
-_SYSTEM_PROMPT_PATH = Path("data/campaign/prompts/system_prompt.json")
-
 
 def commit_reflection(
     proposed_prompt: Any,
     proposed_skill: str,
     proposed_eval_cases: Any,
     reflection_id: str,
+    agent_id: str,
 ) -> tuple[list[dict], str, list[dict], list[dict]]:
     """Commit an approved reflection proposal to the live locations.
 
@@ -46,16 +37,16 @@ def commit_reflection(
     """
     messages = _extract_messages(proposed_prompt)
 
-    # Keep the local prompt file in sync with what LangfusePromptDataset will
-    # push to Langfuse (it only writes remotely).  Without this the next
-    # campaign run's sync_policy: local would overwrite Langfuse back to v1.
-    _SYSTEM_PROMPT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _SYSTEM_PROMPT_PATH.write_text(json.dumps(messages, indent=2), encoding="utf-8")
-    logger.info(
-        "apply %s: wrote updated system prompt to %s",
-        reflection_id,
-        _SYSTEM_PROMPT_PATH,
-    )
+    # Write the new prompt to disk so the local file is always up-to-date.
+    # The Kedro catalog save (LangfusePromptDataset) pushes to Langfuse but does
+    # not reliably overwrite the local file, which causes sync_policy:local to
+    # push the stale local back to Langfuse on the next campaign load.
+    prompt_path = Path("data") / agent_id / "campaign" / "prompts" / "system_prompt.json"
+    prompt_path.parent.mkdir(parents=True, exist_ok=True)
+    prompt_path.write_text(json.dumps(messages, indent=2), encoding="utf-8")
+
+    new_version = load_prompt_version(agent_id) + 1
+    logger.info("apply %s: prompt_version %d → %d", reflection_id, new_version - 1, new_version)
 
     new_eval_cases = [
         {
@@ -67,8 +58,11 @@ def commit_reflection(
     ]
 
     audit_row = {
+        "agent_id": agent_id,
         "reflection_id": reflection_id,
         "applied_at": utc_now_iso(),
+        "prompt_version": new_version,
+        "skill_version": new_version,
         "new_prompt_messages": messages,
         "new_skill_text": proposed_skill,
         "new_eval_case_ids": [ec["id"] for ec in new_eval_cases],
@@ -118,3 +112,5 @@ def _load_history() -> list[dict]:
     if _HISTORY_PATH.exists():
         return json.loads(_HISTORY_PATH.read_text())
     return []
+
+

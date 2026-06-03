@@ -27,6 +27,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "proposed_skill",
                     "proposed_eval_cases",
                     "params:reflection_id",
+                    "params:agent_id",
                 ],
                 outputs=[
                     "system_prompt",

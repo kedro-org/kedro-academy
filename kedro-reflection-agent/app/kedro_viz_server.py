@@ -45,19 +45,40 @@ def _kedro_cmd() -> list[str]:
     return [sys.executable, "-m", "kedro"]
 
 
-def ensure_kedro_viz_running(project_root: str | Path) -> VizStatus:
-    """Ensure Kedro-Viz is listening on 4141; start a background process if needed."""
+def ensure_kedro_viz_running(
+    project_root: str | Path,
+    agent_params: str = "agent_id=b2b_sales",
+    *,
+    wait: bool = True,
+) -> VizStatus:
+    """Ensure Kedro-Viz is listening on 4141; start a background process if needed.
+
+    Args:
+        project_root: Kedro project root directory.
+        agent_params: Runtime params string passed to ``kedro viz run --params``.
+            Used only to satisfy OmegaConf interpolations in the catalog
+            (e.g. ``agent_id=consumer_mktg``).  Any valid agent value works —
+            Kedro-Viz only needs the catalog to resolve so it can build the graph.
+        wait: If False, spawn the process and return ``"starting"`` immediately
+            without polling.  Useful for early boot from main.py so the page
+            render is not blocked.
+    """
     if _port_open(KEDRO_VIZ_HOST, KEDRO_VIZ_PORT):
         return "ready"
 
     proc: subprocess.Popen[str] | None = st.session_state.get("kedro_viz_proc")
+
+    # Process already spawned — poll briefly or return early
     if proc is not None and proc.poll() is None:
+        if not wait:
+            return "starting"
         for _ in range(12):
             if _port_open(KEDRO_VIZ_HOST, KEDRO_VIZ_PORT):
                 return "ready"
             time.sleep(0.25)
         return "starting"
 
+    # Previous attempt exited non-zero → failed
     if st.session_state.get("kedro_viz_start_attempted") and proc is not None and proc.poll() is not None:
         return "failed"
 
@@ -65,11 +86,10 @@ def ensure_kedro_viz_running(project_root: str | Path) -> VizStatus:
     cmd = _kedro_cmd() + [
         "viz",
         "run",
-        "--host",
-        KEDRO_VIZ_HOST,
-        "--port",
-        str(KEDRO_VIZ_PORT),
+        "--host", KEDRO_VIZ_HOST,
+        "--port", str(KEDRO_VIZ_PORT),
         "--no-browser",
+        "--params", agent_params,
     ]
     try:
         proc = subprocess.Popen(
@@ -85,6 +105,9 @@ def ensure_kedro_viz_running(project_root: str | Path) -> VizStatus:
 
     st.session_state.kedro_viz_proc = proc
     st.session_state.kedro_viz_start_attempted = True
+
+    if not wait:
+        return "starting"
 
     for _ in range(20):
         if proc.poll() is not None:

@@ -1,0 +1,82 @@
+[
+  {
+    "customer_id": "cust_011",
+    "current_plan_id": "prod_006",
+    "device_model": "iPhone 12",
+    "data_usage_gb_monthly": 45.0,
+    "monthly_spend": 55.0,
+    "segment": "premium"
+  },
+  {
+    "customer_id": "cust_012",
+    "current_plan_id": "prod_007",
+    "device_model": "Samsung Galaxy A54",
+    "data_usage_gb_monthly": 12.0,
+    "monthly_spend": 18.0,
+    "segment": "budget"
+  },
+  {
+    "customer_id": "cust_013",
+    "current_plan_id": "prod_008",
+    "device_model": "Samsung Galaxy S24",
+    "data_usage_gb_monthly": 28.0,
+    "monthly_spend": 35.0,
+    "segment": "mid"
+  },
+  {
+    "customer_id": "cust_014",
+    "current_plan_id": "prod_010",
+    "device_model": "Motorola Moto G",
+    "data_usage_gb_monthly": 5.0,
+    "monthly_spend": 10.0,
+    "segment": "budget"
+  },
+  {
+    "customer_id": "cust_015",
+    "current_plan_id": "prod_006",
+    "device_model": "iPhone 14",
+    "data_usage_gb_monthly": 60.0,
+    "monthly_spend": 55.0,
+    "segment": "premium"
+  },
+  {
+    "customer_id": "cust_016",
+    "current_plan_id": "prod_007",
+    "device_model": "Google Pixel 7a",
+    "data_usage_gb_monthly": 18.0,
+    "monthly_spend": 18.0,
+    "segment": "budget"
+  },
+  {
+    "customer_id": "cust_017",
+    "current_plan_id": "prod_009",
+    "device_model": "Samsung Galaxy S23",
+    "data_usage_gb_monthly": 22.0,
+    "monthly_spend": 42.0,
+    "segment": "mid"
+  },
+  {
+    "customer_id": "cust_018",
+    "current_plan_id": "prod_010",
+    "device_model": "Nokia G22",
+    "data_usage_gb_monthly": 3.0,
+    "monthly_spend": 10.0,
+    "segment": "budget"
+  },
+  {
+    "customer_id": "cust_019",
+    "current_plan_id": "prod_008",
+    "device_model": "iPhone 13",
+    "data_usage_gb_monthly": 32.0,
+    "monthly_spend": 35.0,
+    "segment": "mid"
+  },
+  {
+    "customer_id": "cust_020",
+    "current_plan_id": "prod_007",
+    "device_model": "Xiaomi Redmi Note 12",
+    "data_usage_gb_monthly": 14.0,
+    "monthly_spend": 18.0,
+    "segment": "budget"
+  }
+]

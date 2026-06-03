@@ -21,33 +21,23 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 from kedro.pipeline import LLMContext
 
-from ...data_models import (
-    AggregateScore,
-    CaseScore,
-    ReflectionOutput,
-    ReflectionSummary,
-)
-from .._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.models.shared import CaseScore, ReflectionOutput, ReflectionSummary
+from kedro_reflection_agent.utils.id_service import dataset_item_id
+from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
 _N_WORST_CASES = 5
-
-# Human-message template preserved verbatim from the current system_prompt.json.
-# Only the system message changes across reflection cycles; the data-provision
-# template (customer / product / skill injection) stays constant.
-#
-# Source of truth: data/campaign/prompts/system_prompt.json (human message),
-# also embedded in scripts/seed_demo.py (SEED_SYSTEM_PROMPT).
-# Keep all three in sync if the human message ever changes.
-_HUMAN_TEMPLATE = (
-    "Write an outreach email to this customer about this product.\n\n"
-    "Customer:\n{customer}\n\nProduct:\n{product}"
-)
+_N_SIGNAL_INDEX = 20
+_N_RUN_HISTORY = 10
+_SIGNAL_INDEX_PATH = Path("data/outputs/signal_index.json")
+_RUN_INDEX_PATH = Path("data/outputs/run_index.json")
+_SIGNALS_PATH_TEMPLATE = "data/{agent_id}/outputs/runs/{run_id}/signals.json"
 
 
 def prepare_reflection_context(
@@ -57,6 +47,8 @@ def prepare_reflection_context(
     aggregate_scores: dict,
     eval_cases: Any,
     passing_threshold: float,
+    run_id: str,
+    agent_id: str,
 ) -> dict[str, str]:
     """Build the context dict for the meta-agent chain.
 
@@ -107,11 +99,19 @@ def prepare_reflection_context(
             "rubric": rubric_by_case_id.get(cs.case_id, {}),
         })
 
+    signals = _load_json_safe(Path(_SIGNALS_PATH_TEMPLATE.format(agent_id=agent_id, run_id=run_id)))
+    signal_index = _load_json_safe(_SIGNAL_INDEX_PATH)
+    run_index = _load_json_safe(_RUN_INDEX_PATH)
+
     logger.info(
-        "reflection context: %d failing / %d total cases; showing %d worst to meta-agent",
+        "reflection context: %d failing / %d total cases; showing %d worst to meta-agent; "
+        "%d current signals; %d signal_index entries; %d run_history entries",
         len(failing),
         len(scores),
         len(worst),
+        len(signals),
+        len(signal_index),
+        len([r for r in run_index if r.get("agent_id") == agent_id]),
     )
 
     return {
@@ -119,14 +119,19 @@ def prepare_reflection_context(
         "skill_text": skill_text,
         "aggregate_scores_json": json.dumps(aggregate_scores, indent=2),
         "failing_cases_json": json.dumps(failing_cases_payload, indent=2),
+        "signals_json": json.dumps(signals, indent=2),
+        "signal_index_json": json.dumps(_recent_cross_agent_signals(signal_index, agent_id), indent=2),
+        "run_history_json": json.dumps(_agent_run_history(run_index, agent_id), indent=2),
     }
 
 
 def reflect(
     meta_agent_context: LLMContext,
     reflection_context: dict[str, str],
+    system_prompt: Any,
     run_id: str,
     reflection_id: str,
+    agent_id: str,
 ) -> tuple[str, list[dict], str, list[dict]]:
     """Invoke the meta-agent and produce the four reflection artifacts.
 
@@ -150,13 +155,17 @@ def reflect(
 
     proposed_prompt = [
         {"role": "system", "content": result.new_prompt_text},
-        {"role": "human", "content": _HUMAN_TEMPLATE},
+        {"role": "human", "content": _extract_human_template(system_prompt)},
     ]
 
     proposed_eval_cases = [
         {
-            "id": ec.case_id,
-            "input": {"customer_id": ec.customer_id, "product_id": ec.product_id},
+            "id": dataset_item_id(agent_id, ec.case_id),
+            "input": {
+                "case_id": ec.case_id,
+                "customer_id": ec.customer_id,
+                "product_id": ec.product_id,
+            },
             "expected_output": {"rubric": ec.rubric.model_dump()},
         }
         for ec in result.new_eval_cases
@@ -179,13 +188,29 @@ def reflect(
 # ---------------------------------------------------------------------------
 
 
-def _extract_prompt_text(prompt: Any) -> str:
-    """Extract the system message template from a ChatPromptTemplate.
+def _load_json_safe(path: Path) -> list:
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
-    Only the system message content is returned — that is what the meta-agent
-    should improve and what ``new_prompt_text`` maps back to. The human
-    template is fixed and is re-attached in ``reflect()`` separately.
-    """
+
+def _recent_cross_agent_signals(signal_index: list[dict], agent_id: str) -> list[dict]:
+    relevant = [
+        s for s in signal_index
+        if s.get("agent_id") == agent_id or s.get("scout") == "cross_unit_pattern"
+    ]
+    return relevant[-_N_SIGNAL_INDEX:]
+
+
+def _agent_run_history(run_index: list[dict], agent_id: str) -> list[dict]:
+    agent_runs = [r for r in run_index if r.get("agent_id") == agent_id]
+    return agent_runs[-_N_RUN_HISTORY:]
+
+
+def _extract_prompt_text(prompt: Any) -> str:
+    """Extract the system message template from a ChatPromptTemplate."""
     for msg in prompt.messages:
         role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()
         if "system" in role:
@@ -199,6 +224,20 @@ def _extract_prompt_text(prompt: Any) -> str:
         template_str = getattr(inner, "template", None) or str(msg)
         parts.append(f"[{role}]\n{template_str}")
     return "\n\n".join(parts)
+
+
+def _extract_human_template(prompt: Any) -> str:
+    """Extract the human message template from a ChatPromptTemplate.
+
+    The human template is fixed per-agent (subscriber vs customer vs issue framing)
+    and must be preserved unchanged across reflection cycles.
+    """
+    for msg in prompt.messages:
+        role = type(msg).__name__.replace("MessagePromptTemplate", "").lower()
+        if "human" in role or "user" in role:
+            inner = getattr(msg, "prompt", None)
+            return getattr(inner, "template", None) or str(msg)
+    return ""
 
 
 def _render_summary_md(

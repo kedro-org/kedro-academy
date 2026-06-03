@@ -38,6 +38,8 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "aggregate_scores",
                     "eval_cases",
                     "params:passing_threshold",
+                    "params:run_id",
+                    "params:agent_id",
                 ],
                 outputs="reflection_context",
                 name="prepare_reflection_context_node",
@@ -47,8 +49,10 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs=[
                     "meta_agent_context",
                     "reflection_context",
+                    "system_prompt",
                     "params:run_id",
                     "params:reflection_id",
+                    "params:agent_id",
                 ],
                 outputs=[
                     "reflection_summary",

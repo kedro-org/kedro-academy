@@ -2,11 +2,10 @@
 from the Kedro defaults. For further information, including these default values, see
 https://docs.kedro.org/en/stable/configure/configuration_basics/#configuration"""
 
-# Instantiated project hooks.
-# For example, after creating a hooks.py and defining a ProjectHooks class there, do
-# from kedro_reflection_agent.hooks import ProjectHooks
-# Hooks are executed in a Last-In-First-Out (LIFO) order.
-# HOOKS = (ProjectHooks(),)
+from kedro_reflection_agent.hooks import RunIndexHook
+
+# Hooks execute in Last-In-First-Out order.
+HOOKS = (RunIndexHook(),)
 
 # Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)

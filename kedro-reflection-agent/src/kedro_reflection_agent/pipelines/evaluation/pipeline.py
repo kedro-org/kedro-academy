@@ -13,9 +13,8 @@ Topology:
                                     -> judge_evaluator  (callable)
     make_campaign_task(run_id)      -> campaign_task  (callable)
     run_experiment(eval_cases, campaign_task, heuristic_evaluators,
-                   judge_evaluator, run_id, model_name,
-                   system_prompt_version, judge_model_name,
-                   judge_prompt_version, passing_threshold)
+                   judge_evaluator, run_id, agent_id, model_name,
+                   judge_model_name, judge_prompt_version, passing_threshold)
                                     -> per_case_scores, aggregate_scores
 """
 
@@ -50,13 +49,13 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=init_judge_evaluator,
-                inputs=["judge_context", "customers", "products"],
+                inputs=["judge_context", "customers", "products", "params:agent_id"],
                 outputs="judge_evaluator",
                 name="init_judge_evaluator_node",
             ),
             node(
                 func=make_campaign_task,
-                inputs="params:run_id",
+                inputs=["params:run_id", "params:agent_id"],
                 outputs="campaign_task",
                 name="make_campaign_task_node",
             ),
@@ -67,9 +66,10 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "campaign_task",
                     "heuristic_evaluators",
                     "judge_evaluator",
+                    "targets",
                     "params:run_id",
+                    "params:agent_id",
                     "params:model_name",
-                    "params:system_prompt_version",
                     "params:judge_model_name",
                     "params:judge_prompt_version",
                     "params:passing_threshold",

@@ -16,7 +16,7 @@ setup: install seed
 
 # ── seed / reset ──────────────────────────────────────────────────────────────
 
-## Restore the v1 prompt, skill file, and eval cases; wipe all run outputs
+## Restore v1 prompts, skills, eval cases and targets; wipe all run outputs (all agents)
 ## Pass N=<number> to seed only the first N cases, e.g. make seed N=3
 seed:
 	$(PYTHON) scripts/seed_demo.py $(if $(N),--cases $(N),)
@@ -32,18 +32,17 @@ app:
 viz:
 	$(KEDRO) viz run
 
-# ── tests ─────────────────────────────────────────────────────────────────────
-
-test:
-	$(PYTHON) -m pytest -q
 
 # ── full demo cycle (headless) ────────────────────────────────────────────────
 
 ## Run the complete three-step pipeline cycle without the UI
+## Pass agent=<agent_id> to target a specific agent, e.g. make run-cycle agent=b2b_sales
+agent ?= b2b_sales
 run-cycle:
-	$(KEDRO) run --pipelines campaign    --params "run_id=run_1"
-	$(KEDRO) run --pipelines evaluation  --params "run_id=run_1"
-	$(KEDRO) run --pipelines reflection  --params "run_id=run_1,reflection_id=refl_1"
-	$(KEDRO) run --pipelines apply       --params "reflection_id=refl_1"
-	$(KEDRO) run --pipelines campaign    --params "run_id=run_2"
-	$(KEDRO) run --pipelines evaluation  --params "run_id=run_2"
+	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines evaluation  --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines scouts      --params=agent_id=$(agent),run_id=run_1
+	$(KEDRO) run --pipelines reflection  --params=agent_id=$(agent),run_id=run_1,reflection_id=refl_1
+	$(KEDRO) run --pipelines apply       --params=agent_id=$(agent),reflection_id=refl_1
+	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_2
+	$(KEDRO) run --pipelines evaluation  --params=agent_id=$(agent),run_id=run_2

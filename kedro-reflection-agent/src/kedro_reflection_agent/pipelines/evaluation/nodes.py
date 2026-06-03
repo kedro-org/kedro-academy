@@ -30,13 +30,18 @@ from kedro.pipeline import LLMContext
 from langfuse import Evaluation
 from langfuse._client.datasets import DatasetClient
 
-from ...data_models import (
-    AggregateScore,
-    CaseScore,
-    EvaluationRecord,
-    JudgeScore,
-)
-from .._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.models import b2b_sales as b2b_models
+from kedro_reflection_agent.models import consumer_mktg as consumer_mktg_models
+from kedro_reflection_agent.models import customer_care as customer_care_models
+from kedro_reflection_agent.models.shared import AggregateScore, CaseScore, EvaluationRecord
+from kedro_reflection_agent.pipelines._common import load_prompt_version
+
+_JUDGE_SCORE_BY_AGENT: dict[str, type] = {
+    "b2b_sales": b2b_models.JudgeScore,
+    "consumer_mktg": consumer_mktg_models.JudgeScore,
+    "customer_care": customer_care_models.JudgeScore,
+}
+from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -48,18 +53,22 @@ _HEURISTIC_NAMES = (
     "no_fake_skus",
     "cta_present",
 )
-_JUDGE_NAMES = (
-    "writing_quality",
-    "personalization",
-    "groundedness",
-)
-_ALL_SCORER_NAMES = _HEURISTIC_NAMES + _JUDGE_NAMES
+def _judge_names(judge_score_cls: type) -> tuple[str, ...]:
+    """Derive scorer names from a JudgeScore model — excludes *_reason fields."""
+    return tuple(f for f in judge_score_cls.model_fields if not f.endswith("_reason"))
 
 
 # Regex patterns used by the heuristic evaluators below.
 _SKU_PATTERN = re.compile(r"\b[A-Z]{2,}-?\d+\b")
 _CTA_PATTERN = re.compile(
-    r"\b(meeting|demo|call|reply|schedule|book(?:ing)?\s+a?\s*time|let'?s\s+(?:talk|chat|connect))\b",
+    r"\b("
+    # B2B CTAs
+    r"meeting|demo|call|reply|schedule|book(?:ing)?\s+a?\s*time|let'?s\s+(?:talk|chat|connect)"
+    r"|"
+    # Consumer / care CTAs
+    r"upgrade|switch|sign\s*up|get\s*started|try|click|tap|visit|explore|find\s*out|learn\s*more"
+    r"|contact\s*us|reach\s*out|get\s*in\s*touch|respond|chat"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -67,19 +76,19 @@ _CTA_PATTERN = re.compile(
 # --- task ---------------------------------------------------------------------
 
 
-def make_campaign_task(run_id: str) -> Callable[..., dict[str, Any]]:
+def make_campaign_task(run_id: str, agent_id: str) -> Callable[..., dict[str, Any]]:
     """Build the experiment task: load the campaign-generated email by case_id.
 
     The Langfuse experiment iterates ``eval_cases``; for each item it calls this
     task. We look up the email that the ``campaign`` pipeline wrote at
-    ``data/outputs/runs/<run_id>/emails/<case_id>.json``.
+    ``data/<agent_id>/outputs/runs/<run_id>/emails/<case_id>.json``.
 
     Returns a dict that downstream evaluators consume via the ``output`` kwarg.
     """
-    emails_dir = Path("data/outputs/runs") / run_id / "emails"
+    emails_dir = Path("data") / agent_id / "outputs" / "runs" / run_id / "emails"
 
     def campaign_task(*, item, **kwargs) -> dict[str, Any]:
-        case_id = getattr(item, "id", None) or item.input.get("case_id")
+        case_id = item.input.get("case_id") or getattr(item, "id", None)
         path = emails_dir / f"{case_id}.json"
         if not path.exists():
             return {
@@ -227,27 +236,23 @@ def init_judge_evaluator(
     judge_context: LLMContext,
     customers: list[dict],
     products: list[dict],
+    agent_id: str,
 ) -> Callable[..., list[Evaluation]]:
-    """Return a single combined evaluator that does one LLM call per email and
-    emits three ``Evaluation`` objects (writing_quality, personalization,
-    groundedness)."""
-    chain = build_structured_chain(judge_context, "judge_prompt", JudgeScore)
+    """Return a combined evaluator that does one LLM call per output and emits
+    one ``Evaluation`` per judge dimension (derived from the agent's JudgeScore)."""
+    judge_score_cls = _JUDGE_SCORE_BY_AGENT[agent_id]
+    names = _judge_names(judge_score_cls)
+    chain = build_structured_chain(judge_context, "judge_prompt", judge_score_cls)
     customer_by_id = {c["customer_id"]: c for c in customers}
     product_by_id = {p["product_id"]: p for p in products}
 
     def judge_evaluator(
         *, input, output, expected_output, **kwargs
     ) -> list[Evaluation]:
-        # Short-circuit on task failure: emit zeros so the per-case mean
-        # reflects the failure without the judge LLM ever being called.
         if output.get("error"):
             return [
-                Evaluation(
-                    name=name,
-                    value=0.0,
-                    comment=f"task error: {output['error']}",
-                )
-                for name in _JUDGE_NAMES
+                Evaluation(name=name, value=0.0, comment=f"task error: {output['error']}")
+                for name in names
             ]
 
         customer = customer_by_id.get((input or {}).get("customer_id"))
@@ -263,34 +268,21 @@ def init_judge_evaluator(
         }
 
         try:
-            result: JudgeScore = chain.invoke(payload)
+            result = chain.invoke(payload)
         except Exception as exc:  # noqa: BLE001
             logger.exception("Judge LLM call failed: %s", exc)
             return [
-                Evaluation(
-                    name=name,
-                    value=0.0,
-                    comment=f"judge error: {exc}",
-                )
-                for name in _JUDGE_NAMES
+                Evaluation(name=name, value=0.0, comment=f"judge error: {exc}")
+                for name in names
             ]
 
         return [
             Evaluation(
-                name="writing_quality",
-                value=float(result.writing_quality),
-                comment=result.writing_quality_reason,
-            ),
-            Evaluation(
-                name="personalization",
-                value=float(result.personalization),
-                comment=result.personalization_reason,
-            ),
-            Evaluation(
-                name="groundedness",
-                value=float(result.groundedness),
-                comment=result.groundedness_reason,
-            ),
+                name=name,
+                value=float(getattr(result, name)),
+                comment=getattr(result, f"{name}_reason", ""),
+            )
+            for name in names
         ]
 
     return judge_evaluator
@@ -304,9 +296,10 @@ def run_experiment(
     campaign_task: Callable[..., dict[str, Any]],
     heuristic_evaluators: list[Callable[..., Evaluation]],
     judge_evaluator: Callable[..., list[Evaluation]],
+    targets: list[dict],
     run_id: str,
+    agent_id: str,
     model_name: str,
-    system_prompt_version: int,
     judge_model_name: str,
     judge_prompt_version: int,
     passing_threshold: float,
@@ -318,8 +311,22 @@ def run_experiment(
     before and after reflection) are easy to compare in the Langfuse UI.
     """
     started_at = utc_now_iso()
-    experiment_name = (
-        f"campaign_{run_id}_prompt_v{system_prompt_version}"
+    system_prompt_version = load_prompt_version(agent_id)
+    experiment_name = f"campaign_{run_id}_prompt_v{system_prompt_version}"
+
+    # Restrict the experiment to items that were seeded in this run.
+    # Langfuse retains all items across resets; targets.json defines the
+    # actual scope (e.g. make seed N=5 → only 5 items should be evaluated).
+    target_case_ids = {t["case_id"] for t in targets}
+    eval_cases.items = [
+        item for item in eval_cases.items
+        if item.input.get("case_id") in target_case_ids
+    ]
+    logger.info(
+        "evaluation %s: restricted to %d/%d eval_cases items matching targets",
+        run_id,
+        len(eval_cases.items),
+        len(target_case_ids),
     )
 
     result = eval_cases.run_experiment(
@@ -337,8 +344,10 @@ def run_experiment(
         },
     )
 
+    all_scorer_names = _HEURISTIC_NAMES + _judge_names(_JUDGE_SCORE_BY_AGENT[agent_id])
+
     per_case: list[CaseScore] = []
-    per_scorer_values: dict[str, list[float]] = {n: [] for n in _ALL_SCORER_NAMES}
+    per_scorer_values: dict[str, list[float]] = {n: [] for n in all_scorer_names}
 
     for item_result in result.item_results:
         case_id = getattr(item_result.item, "id", None) or (
@@ -355,7 +364,7 @@ def run_experiment(
         ]
         values_by_name = {e.name: e.value for e in evals}
         ordered_values = [
-            values_by_name.get(name, 0.0) for name in _ALL_SCORER_NAMES
+            values_by_name.get(name, 0.0) for name in all_scorer_names
         ]
         mean_score = (
             sum(ordered_values) / len(ordered_values) if ordered_values else 0.0
