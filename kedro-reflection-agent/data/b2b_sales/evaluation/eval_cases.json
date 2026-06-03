@@ -2,15 +2,12 @@
   {
     "id": "a17c30cf-88d0-576f-8c93-056d4f4c0965",
     "input": {
-      "case_id": "case_001",
+      "customer_id": "cust_002",
       "product_id": "prod_001",
-      "customer_id": "cust_002"
+      "case_id": "case_001"
     },
     "expected_output": {
       "rubric": {
-        "notes": "Upsell from SD-WAN Basic to Pro. Acknowledge the existing Basic tier and articulate the incremental value of Pro.",
-        "expected_cta": "meeting",
-        "expected_tone": "consultative",
         "required_mentions": [
           "industry: logistics",
           "company_size: mid",
@@ -20,22 +17,22 @@
           "fake SKU",
           "specific discount percentage",
           "made-up metrics"
-        ]
+        ],
+        "expected_cta": "meeting",
+        "expected_tone": "consultative",
+        "notes": "Upsell from SD-WAN Basic to Pro. Acknowledge the existing Basic tier and articulate the incremental value of Pro."
       }
     }
   },
   {
     "id": "2b0b4c68-d8bb-5e96-85da-33699ea312fc",
     "input": {
-      "case_id": "case_002",
+      "customer_id": "cust_001",
       "product_id": "prod_005",
-      "customer_id": "cust_001"
+      "case_id": "case_002"
     },
     "expected_output": {
       "rubric": {
-        "notes": "Upsell from UC Basic to UC Pro for a small retail company. Short, friendly, emphasise contact-centre and video features.",
-        "expected_cta": "demo",
-        "expected_tone": "friendly",
         "required_mentions": [
           "industry: retail",
           "company_size: small",
@@ -45,22 +42,22 @@
           "fake SKU",
           "specific discount percentage",
           "enterprise-only language"
-        ]
+        ],
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "notes": "Upsell from UC Basic to UC Pro for a small retail company. Short, friendly, emphasise contact-centre and video features."
       }
     }
   },
   {
     "id": "8c3e6d72-cfe2-5e2c-9216-6b59882191bf",
     "input": {
-      "case_id": "case_003",
+      "customer_id": "cust_005",
       "product_id": "prod_002",
-      "customer_id": "cust_005"
+      "case_id": "case_003"
     },
     "expected_output": {
       "rubric": {
-        "notes": "Strong fit. Connect 5G Private Network to a concrete manufacturing use case (AGVs, robotics) and reference their existing IoT Fleet investment.",
-        "expected_cta": "meeting",
-        "expected_tone": "consultative",
         "required_mentions": [
           "industry: manufacturing",
           "company_size: enterprise",
@@ -70,22 +67,22 @@
           "fake SKU",
           "specific discount percentage",
           "claims unsupported by the product card"
-        ]
+        ],
+        "expected_cta": "meeting",
+        "expected_tone": "consultative",
+        "notes": "Strong fit. Connect 5G Private Network to a concrete manufacturing use case (AGVs, robotics) and reference their existing IoT Fleet investment."
       }
     }
   },
   {
     "id": "6e2141bb-39a8-510a-8352-778a8ce961f6",
     "input": {
-      "case_id": "case_004",
+      "customer_id": "cust_009",
       "product_id": "prod_002",
-      "customer_id": "cust_009"
+      "case_id": "case_004"
     },
     "expected_output": {
       "rubric": {
-        "notes": "Strong fit for utilities OT. Reference grid/field operations and connect 5G Private Network to deterministic low-latency requirements.",
-        "expected_cta": "meeting",
-        "expected_tone": "formal",
         "required_mentions": [
           "industry: utilities",
           "company_size: enterprise",
@@ -95,22 +92,22 @@
           "fake SKU",
           "specific discount percentage",
           "claims unsupported by product card"
-        ]
+        ],
+        "expected_cta": "meeting",
+        "expected_tone": "formal",
+        "notes": "Strong fit for utilities OT. Reference grid/field operations and connect 5G Private Network to deterministic low-latency requirements."
       }
     }
   },
   {
     "id": "da46917d-bcb8-5380-9994-37abc67dbfd7",
     "input": {
-      "case_id": "case_005",
+      "customer_id": "cust_002",
       "product_id": "prod_003",
-      "customer_id": "cust_002"
+      "case_id": "case_005"
     },
     "expected_output": {
       "rubric": {
-        "notes": "Cross-sell to existing customer with SD-WAN + IoT. Connect Managed Cloud Connect to warehouse management and telemetry ingestion.",
-        "expected_cta": "call",
-        "expected_tone": "consultative",
         "required_mentions": [
           "industry: logistics",
           "current_products: SD-WAN Basic, IoT Fleet (cross-sell context)"
@@ -118,80 +115,10 @@
         "forbidden_mentions": [
           "fake SKU",
           "specific discount percentage"
-        ]
-      }
-    }
-  },
-  {
-    "id": "df55fc3a-f770-5ca0-b3a3-cb4334ba4092",
-    "input": {
-      "case_id": "regression_002",
-      "product_id": "SD-WAN Pro",
-      "customer_id": "NordicLogistics AB"
-    },
-    "expected_output": {
-      "rubric": {
-        "notes": "This case focuses on ensuring groundedness by requiring supported claims and relevant benefits for the logistics industry.",
-        "expected_cta": "meeting",
-        "expected_tone": "consultative",
-        "required_mentions": [
-          "industry: logistics",
-          "company_size: mid",
-          "current_products: SD-WAN Basic (upsell context)"
         ],
-        "forbidden_mentions": [
-          "fake SKU",
-          "specific discount percentage",
-          "made-up metrics"
-        ]
-      }
-    }
-  },
-  {
-    "id": "660f32f6-1921-54de-8bcd-42c3de58ee94",
-    "input": {
-      "case_id": "regression_001",
-      "product_id": "Managed Cloud Connect",
-      "customer_id": "NordicLogistics AB"
-    },
-    "expected_output": {
-      "rubric": {
-        "notes": "This case targets the need for personalization by requiring mentions of current products and tailoring benefits to logistics-specific use cases.",
         "expected_cta": "call",
         "expected_tone": "consultative",
-        "required_mentions": [
-          "industry: logistics",
-          "current_products: SD-WAN Basic, IoT Fleet (cross-sell context)"
-        ],
-        "forbidden_mentions": [
-          "fake SKU",
-          "specific discount percentage"
-        ]
-      }
-    }
-  },
-  {
-    "id": "a613ce91-a6b6-5011-b92d-749a828a124b",
-    "input": {
-      "case_id": "regression_003",
-      "product_id": "UC Suite Pro",
-      "customer_id": "SmallTech Solutions"
-    },
-    "expected_output": {
-      "rubric": {
-        "notes": "This case emphasizes the need for personalization to small retail companies and ensuring the tone is friendly, addressing both personalization and tone issues.",
-        "expected_cta": "demo",
-        "expected_tone": "friendly",
-        "required_mentions": [
-          "industry: retail",
-          "company_size: small",
-          "current_products: UC Suite Basic (upsell context)"
-        ],
-        "forbidden_mentions": [
-          "fake SKU",
-          "specific discount percentage",
-          "enterprise-only language"
-        ]
+        "notes": "Cross-sell to existing customer with SD-WAN + IoT. Connect Managed Cloud Connect to warehouse management and telemetry ingestion."
       }
     }
   }
