@@ -1,8 +1,13 @@
 # Reflection Hub
 
-**Self-improving AI agents for telco — orchestrated with Kedro.**
+[![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
+
+**Enterprise self-improving AI agents, orchestrated with Kedro.** One platform investment, three business units in this demo, governance built in.
+
 
 ![Reflection Hub](docs/assets/images/reflection_hub.png)
+
+---
 
 One platform runs the same governed loop for three business units: generate, evaluate, scout, reflect, approve, apply. This repository is a proof-of-concept with a Streamlit front end and synthetic data.
 
