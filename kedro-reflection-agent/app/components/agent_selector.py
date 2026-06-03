@@ -13,7 +13,7 @@ from app.data_loader import get_latest_score_for_agent
 
 # JS injected into the parent document to wrap the plain-text score in a
 # per-agent coloured badge that matches the campaign.html reference design.
-_SCORE_BADGE_JS = """<script>
+_SCORE_BADGE_JS = r"""<script>
 (function(){
   var C=[
     {bg:'#EEF2FF',fg:'#2251FF'},
@@ -86,11 +86,13 @@ def render_agent_selector(selected_agent: str) -> str:
         score_str = f"  {score:.2f}" if score is not None else "  —"
         return f"{AGENTS[agent_id]['label']}{score_str}"
 
+    if "agent_pills" not in st.session_state:
+        st.session_state["agent_pills"] = selected_agent
+
     result = st.pills(
         "Agent",
         options=list(AGENTS.keys()),
         format_func=_label,
-        default=selected_agent,
         label_visibility="collapsed",
         key="agent_pills",
     )

@@ -46,7 +46,7 @@ class RunIndexEntry(BaseModel):
     prompt_name: str                     # e.g. "b2b_sales-system-prompt"
     prompt_version: Optional[int] = None
     prompt_snapshot: str                 # full system prompt text used
-    skill_version: Optional[int] = None  # integer version, mirrors prompt_version
+    skill_version: Optional[int] = None
     skill_snapshot: str                  # full skill file content used
     judge_model_name: Optional[str] = None
     judge_prompt_version: Optional[int] = None

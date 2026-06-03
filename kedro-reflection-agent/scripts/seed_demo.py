@@ -750,23 +750,16 @@ def main() -> None:
         metavar="N",
         help="Seed only the first N eval cases and targets per agent (default: all).",
     )
-    parser.add_argument(
-        "--agent",
-        choices=AGENTS,
-        default=None,
-        help="Seed a single agent only (default: all agents).",
-    )
     args = parser.parse_args()
 
-    agents = [args.agent] if args.agent else AGENTS
+    agents = AGENTS
 
     max_cases = max(len(EVAL_CASES[a]) for a in agents)
     if args.cases is not None and not (1 <= args.cases <= max_cases):
         parser.error(f"--cases must be between 1 and {max_cases}, got {args.cases}")
 
     label = f"{args.cases} cases" if args.cases else "all cases"
-    scope = args.agent or "all agents"
-    print(f"Resetting demo — {scope}, {label}…")
+    print(f"Resetting demo — all agents, {label}…")
 
     _clear_outputs(agents)
     print(f"  cleared outputs for: {', '.join(agents)}")

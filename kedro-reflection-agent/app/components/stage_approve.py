@@ -72,6 +72,24 @@ def _word_diff_html(before: str, after: str) -> tuple[str, str]:
     return " ".join(a_parts), " ".join(b_parts)
 
 
+def _system_content(messages: list[dict]) -> str:
+    for m in messages:
+        if m.get("role") == "system":
+            return (m.get("content") or "").strip()
+    return ""
+
+
+def _has_changes(
+    proposed_prompt: list[dict],
+    current_prompt: list[dict],
+    proposed_skill: str,
+    current_skill: str,
+) -> bool:
+    prompt_changed = _system_content(proposed_prompt) != _system_content(current_prompt)
+    skill_changed = proposed_skill.strip() != current_skill.strip()
+    return prompt_changed or skill_changed
+
+
 def _score_color(v: float) -> str:
     if v >= 0.85:
         return "#15803D"
@@ -106,6 +124,8 @@ def render_stage_approve(
             proposed_prompt = get_proposed_prompt(agent_id, reflection_id)
             proposed_skill = get_proposed_skill(agent_id, reflection_id)
             current_prompt = get_system_prompt(agent_id)
+            current_skill = get_skill_text(agent_id)
+            changes_exist = _has_changes(proposed_prompt, current_prompt, proposed_skill, current_skill)
 
             prompt_pill = ""
             if proposed_prompt or current_prompt:
@@ -174,14 +194,18 @@ def render_stage_approve(
             _m = re.match(r'^(.+?)(\d+)$', run_id_display)
             next_run_id = f"{_m.group(1)}{int(_m.group(2)) + 1}" if _m else "run_2"
 
-            approve_col, _ = st.columns([2, 4])
+            approve_col, note_col = st.columns([2, 4])
             with approve_col:
                 approve_clicked = st.button(
                     "✓ Approve & Apply",
                     key=f"approve_apply_{agent_id}",
                     type="primary",
                     width="stretch",
+                    disabled=not changes_exist,
                 )
+            with note_col:
+                if not changes_exist:
+                    st.caption("No changes to apply — the proposed prompt and skill are identical to the current version.")
 
             if approve_clicked:
                 from app import runner

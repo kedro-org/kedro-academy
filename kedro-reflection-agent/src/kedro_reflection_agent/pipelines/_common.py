@@ -7,7 +7,20 @@ copy-pasted across multiple pipelines.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
+
+_APPLY_HISTORY_PATH = Path("data/outputs/apply_history.json")
+
+
+def load_prompt_version(agent_id: str) -> int:
+    """Derive prompt version from apply_history: base 1 + number of applies for this agent."""
+    try:
+        history = json.loads(_APPLY_HISTORY_PATH.read_text(encoding="utf-8"))
+        return sum(1 for e in history if e.get("agent_id") == agent_id) + 1
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 1
 
 from kedro.pipeline import LLMContext
 from langchain_core.prompts import ChatPromptTemplate

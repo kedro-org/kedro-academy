@@ -7,7 +7,7 @@ Topology:
     llm_context_node  ->  agent_context (LLMContext)
     prepare_agent_inputs(targets, customers, products) -> agent_inputs
     generate_emails(agent_context, agent_inputs, skill_text,
-                    agent_tracer, run_id, model_name, system_prompt_version)
+                    agent_tracer, run_id, agent_id, model_name)
         -> emails, run_metadata
 """
 
@@ -41,7 +41,6 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "params:run_id",
                     "params:agent_id",
                     "params:model_name",
-                    "params:system_prompt_version",
                 ],
                 outputs=["emails", "run_metadata"],
                 name="generate_emails_node",

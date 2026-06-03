@@ -29,8 +29,6 @@ system_prompt:
   credentials: langfuse_credentials
   sync_policy: local      # local | remote | strict
   mode: langchain         # returns a ChatPromptTemplate directly
-  load_args:
-    version: ${runtime_params:system_prompt_version, 1}
 
 
 # --- Skill file (disk only) --------------------------------------------------

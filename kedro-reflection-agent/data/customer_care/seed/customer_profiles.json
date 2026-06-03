@@ -19,30 +19,30 @@
   },
   {
     "customer_id": "cust_013",
-    "account_type": "postpaid",
-    "service_type": "bundle",
+    "account_type": "prepaid",
+    "service_type": "mobile",
     "issue_type": "billing",
-    "issue_description": "Customer disputes an unexpected roaming charge of £45 on their bill, stating they never enabled roaming and did not travel abroad.",
-    "sentiment": "upset",
-    "previous_contact_attempts": 2
+    "issue_description": "Customer topped up £20 via the app but the credit has not appeared on their account after 3 hours. They are worried the payment was taken but the top-up credit was not applied.",
+    "sentiment": "concerned",
+    "previous_contact_attempts": 0
   },
   {
     "customer_id": "cust_014",
-    "account_type": "prepaid",
+    "account_type": "postpaid",
     "service_type": "mobile",
-    "issue_type": "device",
-    "issue_description": "New SIM card is not activating on the customer's handset. Handset shows 'No Service' after 24 hours.",
-    "sentiment": "neutral",
-    "previous_contact_attempts": 0
+    "issue_type": "roaming",
+    "issue_description": "Customer has received an unexpected roaming charge of £85 on their latest bill. They have the Roaming Plus add-on which they believed covered Spain and are disputing the charge and requesting a refund.",
+    "sentiment": "upset",
+    "previous_contact_attempts": 1
   },
   {
     "customer_id": "cust_015",
     "account_type": "postpaid",
     "service_type": "mobile",
-    "issue_type": "roaming",
-    "issue_description": "Customer is travelling in Spain and cannot access mobile data. Voice calls work but data shows 'Roaming not available' error.",
+    "issue_type": "cancellation",
+    "issue_description": "Customer is threatening to cancel their contract after receiving a notification about a price increase next month. They have been a customer for 5 years and say they can get a better deal with a competitor if the price goes up.",
     "sentiment": "frustrated",
-    "previous_contact_attempts": 1
+    "previous_contact_attempts": 0
   },
   {
     "customer_id": "cust_016",

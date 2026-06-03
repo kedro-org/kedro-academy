@@ -37,6 +37,7 @@ _N_SIGNAL_INDEX = 20
 _N_RUN_HISTORY = 10
 _SIGNAL_INDEX_PATH = Path("data/outputs/signal_index.json")
 _RUN_INDEX_PATH = Path("data/outputs/run_index.json")
+_SIGNALS_PATH_TEMPLATE = "data/{agent_id}/outputs/runs/{run_id}/signals.json"
 
 
 def prepare_reflection_context(
@@ -46,7 +47,7 @@ def prepare_reflection_context(
     aggregate_scores: dict,
     eval_cases: Any,
     passing_threshold: float,
-    signals: list[dict],
+    run_id: str,
     agent_id: str,
 ) -> dict[str, str]:
     """Build the context dict for the meta-agent chain.
@@ -98,6 +99,7 @@ def prepare_reflection_context(
             "rubric": rubric_by_case_id.get(cs.case_id, {}),
         })
 
+    signals = _load_json_safe(Path(_SIGNALS_PATH_TEMPLATE.format(agent_id=agent_id, run_id=run_id)))
     signal_index = _load_json_safe(_SIGNAL_INDEX_PATH)
     run_index = _load_json_safe(_RUN_INDEX_PATH)
 
