@@ -23,30 +23,5 @@
     "case_id": "case_005",
     "customer_id": "cust_015",
     "product_id": "prod_015"
-  },
-  {
-    "case_id": "case_006",
-    "customer_id": "cust_016",
-    "product_id": "prod_006"
-  },
-  {
-    "case_id": "case_007",
-    "customer_id": "cust_017",
-    "product_id": "prod_013"
-  },
-  {
-    "case_id": "case_008",
-    "customer_id": "cust_018",
-    "product_id": "prod_007"
-  },
-  {
-    "case_id": "case_009",
-    "customer_id": "cust_019",
-    "product_id": "prod_011"
-  },
-  {
-    "case_id": "case_010",
-    "customer_id": "cust_020",
-    "product_id": "prod_008"
   }
 ]

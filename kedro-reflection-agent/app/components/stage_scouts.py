@@ -187,43 +187,30 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
                 </tr>
                 """
 
-            st.markdown(
-                f"""
-                <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;
-                            overflow:hidden;">
-                  <table class="signals-table" style="width:100%;border-collapse:collapse;">
-                    <thead style="background:#F8FAFC;">
-                      <tr>
-                        <th style="padding:10px 14px;font-size:11px;font-weight:700;
-                                   color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;
-                                   text-align:left;border-bottom:1px solid #E2E8F0;">
-                          Signal Type
-                        </th>
-                        <th style="padding:10px 14px;font-size:11px;font-weight:700;
-                                   color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;
-                                   text-align:left;border-bottom:1px solid #E2E8F0;">
-                          Confidence
-                        </th>
-                        <th style="padding:10px 14px;font-size:11px;font-weight:700;
-                                   color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;
-                                   text-align:left;border-bottom:1px solid #E2E8F0;">
-                          Evidence
-                        </th>
-                        <th style="padding:10px 14px;font-size:11px;font-weight:700;
-                                   color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;
-                                   text-align:left;border-bottom:1px solid #E2E8F0;">
-                          Rule
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows_html}
-                    </tbody>
-                  </table>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            st.html(f"""
+<div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;
+            font-family:Inter,sans-serif;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead style="background:#F8FAFC;">
+      <tr>
+        <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#94A3B8;
+                   text-transform:uppercase;letter-spacing:0.06em;text-align:left;
+                   border-bottom:1px solid #E2E8F0;">Signal Type</th>
+        <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#94A3B8;
+                   text-transform:uppercase;letter-spacing:0.06em;text-align:left;
+                   border-bottom:1px solid #E2E8F0;">Confidence</th>
+        <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#94A3B8;
+                   text-transform:uppercase;letter-spacing:0.06em;text-align:left;
+                   border-bottom:1px solid #E2E8F0;">Evidence</th>
+        <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#94A3B8;
+                   text-transform:uppercase;letter-spacing:0.06em;text-align:left;
+                   border-bottom:1px solid #E2E8F0;">Rule</th>
+      </tr>
+    </thead>
+    <tbody>{rows_html}</tbody>
+  </table>
+</div>
+""")
 
             # Unfired scouts (all known types not in signals)
             fired_types = {s.get("signal_type") or s.get("type") for s in signals}

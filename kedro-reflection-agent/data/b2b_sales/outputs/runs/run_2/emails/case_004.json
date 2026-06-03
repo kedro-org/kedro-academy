@@ -1,0 +1,13 @@
+{
+  "case_id": "case_004",
+  "customer_id": "cust_009",
+  "product_id": "prod_002",
+  "subject": "Enhance Your IoT Fleet Connectivity with Our 5G Private Network",
+  "body": "Dear Rafael,\n\nI hope this message finds you well. As the Head of OT/IT Integration at CityGrid Energy, I understand that optimizing your operations is a top priority, especially in the utilities sector where efficiency and reliability are crucial.\n\nI wanted to introduce you to our 5G Private Network, a premium solution designed specifically for enterprises like yours. This dedicated 5G coverage is ideal for industrial and high-density sites, providing deterministic low-latency wireless connectivity that can significantly enhance your IoT Fleet Connectivity.\n\nHere are a few key benefits that could directly support your current initiatives:\n- **Deterministic low-latency wireless for OT and AGVs**: This ensures seamless communication between your operational technology and automated guided vehicles, improving overall efficiency.\n- **Edge compute co-located with the radio core**: This feature allows for faster data processing and real-time analytics, which can be vital for decision-making in your operations.\n- **Spectrum and SIM lifecycle fully managed**: This takes the burden off your IT team, allowing them to focus on strategic initiatives rather than network management.\n\nGiven your enterprise size and the complexity of your operations, our 5G Private Network could be a game-changer for enhancing connectivity and automation across your facilities.\n\nI would love to schedule a time to discuss how our solution can specifically benefit CityGrid Energy and integrate with your existing systems. Please let me know your availability for a brief call.\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-06-02T23:52:18.115789+00:00"
+}

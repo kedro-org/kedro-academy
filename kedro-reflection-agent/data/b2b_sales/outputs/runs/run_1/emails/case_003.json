@@ -1,0 +1,13 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_005",
+  "product_id": "prod_002",
+  "subject": "Enhance Your Manufacturing Operations with Our 5G Private Network",
+  "body": "Dear Klara Novak,\n\nI hope this message finds you well. As the Director of Industrial IT at Apex Manufacturing, you understand the importance of reliable and efficient connectivity in the manufacturing sector. \n\nI would like to introduce you to our premium product, the 5G Private Network. This solution offers dedicated 5G coverage specifically designed for industrial and high-density sites, ensuring deterministic low-latency wireless for your operational technology (OT) and automated guided vehicles (AGVs).\n\nKey benefits of our 5G Private Network include:\n- Deterministic low-latency wireless for seamless connectivity of shop-floor AGVs and robotics.\n- Edge compute capabilities co-located with the radio core for enhanced performance.\n- Fully managed spectrum and SIM lifecycle to simplify your operations.\n\nWith your current use of IoT Fleet Connectivity and SD-WAN Pro, our 5G Private Network can further enhance your manufacturing processes, especially in areas like campus-wide secure wireless and logistics yard automation.\n\nI would love to discuss how our 5G Private Network can align with your goals at Apex Manufacturing. Would you be available for a brief call next week?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-06-02T23:49:03.897775+00:00"
+}

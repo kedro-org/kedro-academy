@@ -1,0 +1,13 @@
+{
+  "case_id": "case_001",
+  "customer_id": "cust_011",
+  "product_id": "prod_011",
+  "subject": "Upgrade to the New iPhone 15 Pro, James!",
+  "body": "Hi James,\n\nWe hope you're enjoying your current plan! As a valued premium subscriber with us for over 3 years, we want to offer you an exciting upgrade opportunity.\n\nYou can now upgrade to the iPhone 15 Pro for just \u00a355 a month. This device features the powerful A17 Pro chip, a stunning 48MP main camera with 3x optical zoom, and a ProMotion 120Hz always-on display. With its titanium build and all-day battery life, the iPhone 15 Pro is designed to enhance your experience, especially with your monthly data usage of 45GB.\n\nDon\u2019t miss out on the chance to elevate your mobile experience! Click below to learn more and upgrade today.\n\nBest regards,\n[Your Company Name]",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-06-03T00:01:01.520370+00:00"
+}

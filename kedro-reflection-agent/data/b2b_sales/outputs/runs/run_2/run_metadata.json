@@ -1,0 +1,12 @@
+{
+  "run_id": "run_2",
+  "agent_id": "b2b_sales",
+  "n_cases": 5,
+  "n_emails": 5,
+  "n_errors": 0,
+  "model_name": "gpt-4o-mini",
+  "prompt_version": 1,
+  "skill_version": 1,
+  "started_at": "2026-06-02T23:51:55.777423+00:00",
+  "finished_at": "2026-06-02T23:52:22.619440+00:00"
+}

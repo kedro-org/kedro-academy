@@ -1,0 +1,13 @@
+{
+  "case_id": "case_004",
+  "customer_id": "cust_014",
+  "product_id": "prod_010",
+  "subject": "Assistance with Your SIM Card Activation",
+  "body": "Dear Priya Sharma,\n\nThank you for reaching out regarding the issue with your new SIM card not activating on your handset. I understand how frustrating it can be to see 'No Service' after 24 hours of waiting.\n\nTo resolve this, I recommend checking if the SIM card is the correct size for your handset and trying it in another device if possible. Additionally, resetting your network settings and manually selecting your network may help in activating the SIM.\n\nIf the SIM still does not activate, please let me know, and I can arrange for a free replacement SIM to be dispatched to you.\n\nThank you for your patience, and please feel free to reach out if you have any further questions or concerns. \n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-06-03T00:06:28.607292+00:00"
+}

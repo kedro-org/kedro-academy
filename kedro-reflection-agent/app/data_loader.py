@@ -76,9 +76,10 @@ def get_per_case_scores(agent_id: str, run_id: str) -> list[dict]:
 def get_signals(agent_id: str, run_id: str) -> list[dict]:
     primary = _DATA / agent_id / "outputs" / "runs" / run_id / "signals.json"
     fallback = _DATA / "outputs" / "runs" / run_id / "signals.json"
-    data = _read_json(primary) or _read_json(fallback)
-    if isinstance(data, list):
-        return data
+    for path in (primary, fallback):
+        data = _read_json(path)
+        if isinstance(data, list):
+            return data
     # Also look in the global signal_index, filtered by agent+run
     signal_index = _read_json(_DATA / "outputs" / "signal_index.json")
     if isinstance(signal_index, list):

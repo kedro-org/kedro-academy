@@ -1,0 +1,13 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_013",
+  "product_id": "prod_012",
+  "subject": "Upgrade Your Experience with the New Samsung Galaxy S24!",
+  "body": "Dear Mohammed Al-Rashid,\n\nWe hope this message finds you well! As a valued subscriber for over 5 years, we appreciate your loyalty and want to ensure you have the best possible experience with us.\n\nCurrently, you're on a plan that supports your Samsung Galaxy S24, and we noticed your monthly data usage is around 28GB. To enhance your experience, we\u2019re excited to offer you an upgrade to the premium Samsung Galaxy S24. This device features a powerful Snapdragon 8 Gen 3 processor, a stunning 200MP main camera, and a vibrant 6.8-inch Dynamic AMOLED display, all backed by a robust 5000mAh battery with 45W charging.\n\nWith this upgrade, you\u2019ll enjoy Android's flagship capabilities, including an all-day battery life and the best-in-class camera system, perfect for capturing those special moments.\n\nThis exclusive offer is available for just \u00a348 per month. Don\u2019t miss out on this opportunity to elevate your mobile experience! \n\nTo take advantage of this upgrade, please contact us or visit your nearest store today. Act fast, as this offer is only available for a limited time!\n\nBest regards,\nYour Telco Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-06-03T00:03:42.224950+00:00"
+}

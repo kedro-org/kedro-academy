@@ -1,0 +1,77 @@
+[
+  {
+    "id": "ab4f869f-af55-5de1-a1f2-c27a7977e1d9",
+    "input": {
+      "case_id": "regression_001",
+      "customer_id": "Priya Sharma",
+      "product_id": "SIM Card Activation"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge roaming charges despite add-on",
+          "investigate or refund action",
+          "confirm Roaming Plus coverage"
+        ],
+        "forbidden_mentions": [
+          "deny Roaming Plus covers Spain",
+          "blame customer for not activating",
+          "no concrete action"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case targets the issue of addressing unrelated problems by requiring specific mention of roaming charges and actions related to them."
+      }
+    }
+  },
+  {
+    "id": "1e0e6963-b873-514f-aefe-a396430e032a",
+    "input": {
+      "case_id": "regression_002",
+      "customer_id": "Mohammed Al-Rashid",
+      "product_id": "Billing Dispute"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge missing top-up credit",
+          "check or restore credit action",
+          "24-hour processing context"
+        ],
+        "forbidden_mentions": [
+          "claim top-up was not received",
+          "ask customer to top up again without checking",
+          "fake case numbers"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case tests the system's ability to provide clarity in resolution steps specific to the top-up credit issue."
+      }
+    }
+  },
+  {
+    "id": "78b72a02-712c-5036-bb8c-6a551773ee14",
+    "input": {
+      "case_id": "regression_003",
+      "customer_id": "Tom Bridgewater",
+      "product_id": "Roaming Issue"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge price increase",
+          "retention offer or explanation of value",
+          "no cancellation pressure"
+        ],
+        "forbidden_mentions": [
+          "dismiss the concern",
+          "threaten contract terms",
+          "deny the price increase"
+        ],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "This case targets the system's ability to acknowledge the specific issue of price increase and offer appropriate retention value."
+      }
+    }
+  }
+]

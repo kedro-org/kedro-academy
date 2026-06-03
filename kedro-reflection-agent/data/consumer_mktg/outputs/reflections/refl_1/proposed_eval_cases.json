@@ -1,0 +1,77 @@
+[
+  {
+    "id": "2005496e-b728-5196-9de9-8bce25924436",
+    "input": {
+      "case_id": "regression_001",
+      "customer_id": "43618eaf-cafe-5fbc-be2e-2f212aec0ff5",
+      "product_id": "Samsung Galaxy S24"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "Family Bundle context",
+          "Samsung Galaxy S24 features",
+          "monthly plan option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed delivery dates",
+          "made-up specs"
+        ],
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "notes": "This case targets the need to connect the device upgrade to the Family Bundle usage and create urgency in the CTA."
+      }
+    }
+  },
+  {
+    "id": "6f842297-6681-5723-8444-b1eca143c51c",
+    "input": {
+      "case_id": "regression_002",
+      "customer_id": "0a464622-f229-5ef0-b8b7-1a7176ee0877",
+      "product_id": "Essential 20GB"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "current Prepaid plan",
+          "benefit of Essential 20GB contract",
+          "no-contract or rolling option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "lock-in language",
+          "guaranteed speeds"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case focuses on ensuring the message references the current plan and frames the upgrade as flexible, with an urgent CTA."
+      }
+    }
+  },
+  {
+    "id": "4d295e7f-01c3-5350-bdc7-e738099090c7",
+    "input": {
+      "case_id": "regression_003",
+      "customer_id": "0181522b-ae5c-5dd3-9e1e-0f7a37d5eff8",
+      "product_id": "Apple Watch S9"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "existing Unlimited 5G plan",
+          "Apple Watch health features",
+          "connectivity with iPhone"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "medical claims",
+          "guaranteed battery life"
+        ],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "This case checks for proper integration of health features without medical claims and urgency in the CTA."
+      }
+    }
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "case_id": "case_004",
+  "customer_id": "cust_009",
+  "product_id": "prod_002",
+  "subject": "Enhance Your Operations with Our 5G Private Network",
+  "body": "Dear Rafael Costa,\n\nI hope this message finds you well. As the Head of OT/IT Integration at CityGrid Energy, you understand the importance of reliable and efficient connectivity in the utilities sector. I wanted to introduce you to our premium 5G Private Network, designed specifically for enterprise solutions like yours.\n\nOur 5G Private Network offers dedicated coverage for industrial and high-density sites, ensuring deterministic low-latency wireless for operational technology (OT) and automated guided vehicles (AGVs). With edge compute capabilities co-located with the radio core, you can enhance your shop-floor AGV and robotics connectivity, as well as secure wireless solutions for your campus-wide operations.\n\nAdditionally, we fully manage the spectrum and SIM lifecycle, allowing you to focus on what matters most\u2014optimizing your operations.\n\nI would love to discuss how our 5G Private Network can benefit CityGrid Energy and support your ongoing projects. Would you be available for a brief call next week?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-06-02T23:49:08.983807+00:00"
+}

@@ -1,0 +1,28 @@
+{
+  "run_id": "run_1",
+  "experiment_name": "campaign_run_1_prompt_v1",
+  "dataset_run_url": "http://localhost:3000/project/cmpgmcnsj0006qh02gjdvz0pp/datasets/cmpx2tvki00iaqh02herqig2z/runs/04c2fd7e-b56c-4e07-b207-1949789f226f",
+  "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+  "n_cases": 5,
+  "n_passing": 1,
+  "pass_rate": 0.2,
+  "mean_total": 0.6888888888888889,
+  "mean_per_scorer": {
+    "subject_present": 1.0,
+    "length_in_range": 1.0,
+    "no_fake_skus": 1.0,
+    "cta_present": 1.0,
+    "empathy_opener": 0.4,
+    "resolution_clarity": 0.4,
+    "tone": 0.7,
+    "compliance": 0.4,
+    "escalation_avoidance": 0.3
+  },
+  "passing_threshold": 0.92,
+  "model_name": "gpt-4o-mini",
+  "system_prompt_version": 1,
+  "judge_model_name": "gpt-4o",
+  "judge_prompt_version": 1,
+  "started_at": "2026-06-03T00:06:37.159186+00:00",
+  "finished_at": "2026-06-03T00:06:54.881053+00:00"
+}
