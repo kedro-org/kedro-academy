@@ -69,8 +69,8 @@ Reflection Hub addresses these with a **single loop** and **explicit gates**, no
 
 Kedro treats each step of the agent lifecycle as a **pipeline** with declared inputs and outputs. That gives enterprise teams:
 
-1. **Repeatability** — The same five pipelines run for B2B Sales, Consumer Marketing, and Customer Care; only configuration (`agent_id`, prompts, skills, evals, rubrics, data) changes.
-2. **Auditability** — Every run writes structured outputs under `data/{agent_id}/outputs/`; a cross-run index records what ran and when (using kedro hooks).
+1. **Write-once pipelines** — The same five pipelines run for B2B Sales, Consumer Marketing, and Customer Care. The pipeline code never changes between agents; only `agent_id` and the files under `data/{agent_id}/` differ. This is Kedro's core value here: the governed loop is a reusable asset, not a per-team script.
+2. **Auditability** — Every run writes structured outputs under `data/{agent_id}/outputs/`; a cross-run index records what ran and when (using Kedro hooks).
 3. **Safe improvement** — Reflection **proposes** changes; a human **approves**; only then does the **apply** pipeline commit prompts, skills, and regression cases.
 4. **Inspectable operations** — Kedro-Viz in the UI shows the graph; run logs show exact CLI commands.
 
@@ -87,6 +87,13 @@ flowchart LR
 ```
 
 **Adding a fourth agent** is primarily configuration: new data files under `data/{agent_id}/`, prompts, and eval cases—not a rewrite of pipeline code.
+
+| What you add | What you reuse |
+|---|---|
+| `data/{agent_id}/seed/` — targets, customer profiles, product details | All five Kedro pipelines unchanged |
+| `data/{agent_id}/campaign/prompts/` + `skills/` | Shared customers and products in `data/shared/` |
+| `data/{agent_id}/evaluation/eval_cases.json` + judge prompt | `RunIndexHook`, `signal_index.json`, `apply_history.json` |
+| Per-agent `JudgeScore` model (LLM judge dimensions) | Scouts, reflection meta-agent, apply logic |
 
 ---
 
@@ -144,6 +151,30 @@ The Org Overview page answers leadership questions:
 | **Audit trail** | What was approved and applied? |
 
 With five cases per agent, charts reflect **real pre-run scores** but are not statistically heavy. As teams run more cycles, the same views **light up** with richer history.
+
+---
+
+## How the system gets smarter across runs
+
+Reflection is not a one-shot per-run operation. Each call to the `reflection` pipeline sees a growing body of evidence:
+
+| Input to reflection | What it contains |
+|---|---|
+| `per_case_scores.json` (current run) | Dimension-level scores for every case this run |
+| `aggregate_scores.json` (current run) | Mean, pass rate, trend vs previous run |
+| `signals.json` (current run) | Scout findings: rubric misses, regressions, tone drift, hallucination flags |
+| `signal_index.json` (cross-agent, all runs) | Every scout signal ever fired, across all agents and run IDs |
+| `run_index.json` (all runs) | Full history of every pipeline run — agent, run ID, scores, timestamps |
+| Current system prompt + skill file | What the agent is currently doing |
+| Eval rubric + cases | The standards it is being held to |
+
+**What this means in practice:**
+
+- **Run 1 → Reflection** sees one run's scores and scouts. The meta-agent proposes improvements based on that snapshot.
+- **Run 2 → Reflection** sees two runs of scores, a richer signal history, and whether the run_1 pattern persisted after apply. Proposals become more targeted.
+- **Cross-agent learning** is surfaced through `signal_index.json`. If `tone_drift` fires for both `b2b_sales` and `consumer_mktg` in the same window, the `cross_unit_pattern` scout flags it — and reflection for either agent can see that this is systemic, not isolated.
+
+The system does not retrain a model. It gets smarter the way an analyst does: each cycle, the meta-agent reads the full visible history and writes a more informed proposal. The richer that history, the more specific the prompt improvements it can justify.
 
 ---
 

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 from kedro.pipeline import LLMContext
@@ -32,6 +33,10 @@ from kedro_reflection_agent.pipelines._common import build_structured_chain, utc
 logger = logging.getLogger(__name__)
 
 _N_WORST_CASES = 5
+_N_SIGNAL_INDEX = 20
+_N_RUN_HISTORY = 10
+_SIGNAL_INDEX_PATH = Path("data/outputs/signal_index.json")
+_RUN_INDEX_PATH = Path("data/outputs/run_index.json")
 
 
 def prepare_reflection_context(
@@ -41,6 +46,8 @@ def prepare_reflection_context(
     aggregate_scores: dict,
     eval_cases: Any,
     passing_threshold: float,
+    signals: list[dict],
+    agent_id: str,
 ) -> dict[str, str]:
     """Build the context dict for the meta-agent chain.
 
@@ -91,11 +98,18 @@ def prepare_reflection_context(
             "rubric": rubric_by_case_id.get(cs.case_id, {}),
         })
 
+    signal_index = _load_json_safe(_SIGNAL_INDEX_PATH)
+    run_index = _load_json_safe(_RUN_INDEX_PATH)
+
     logger.info(
-        "reflection context: %d failing / %d total cases; showing %d worst to meta-agent",
+        "reflection context: %d failing / %d total cases; showing %d worst to meta-agent; "
+        "%d current signals; %d signal_index entries; %d run_history entries",
         len(failing),
         len(scores),
         len(worst),
+        len(signals),
+        len(signal_index),
+        len([r for r in run_index if r.get("agent_id") == agent_id]),
     )
 
     return {
@@ -103,6 +117,9 @@ def prepare_reflection_context(
         "skill_text": skill_text,
         "aggregate_scores_json": json.dumps(aggregate_scores, indent=2),
         "failing_cases_json": json.dumps(failing_cases_payload, indent=2),
+        "signals_json": json.dumps(signals, indent=2),
+        "signal_index_json": json.dumps(_recent_cross_agent_signals(signal_index, agent_id), indent=2),
+        "run_history_json": json.dumps(_agent_run_history(run_index, agent_id), indent=2),
     }
 
 
@@ -167,6 +184,27 @@ def reflect(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _load_json_safe(path: Path) -> list:
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def _recent_cross_agent_signals(signal_index: list[dict], agent_id: str) -> list[dict]:
+    relevant = [
+        s for s in signal_index
+        if s.get("agent_id") == agent_id or s.get("scout") == "cross_unit_pattern"
+    ]
+    return relevant[-_N_SIGNAL_INDEX:]
+
+
+def _agent_run_history(run_index: list[dict], agent_id: str) -> list[dict]:
+    agent_runs = [r for r in run_index if r.get("agent_id") == agent_id]
+    return agent_runs[-_N_RUN_HISTORY:]
 
 
 def _extract_prompt_text(prompt: Any) -> str:

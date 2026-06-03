@@ -38,6 +38,23 @@ The invariant cycle:
 
 Adding another agent is primarily **configuration** under `data/{agent_id}/` plus Langfuse prompt/dataset names—not new pipeline code.
 
+### What to add for a new agent
+
+| Step | File / location | Notes |
+| --- | --- | --- |
+| Seed data | `data/{agent_id}/seed/customer_profiles.json` | BU-specific customer enrichment keyed to shared customer IDs |
+| | `data/{agent_id}/seed/product_details.json` | BU-specific product enrichment |
+| | `data/{agent_id}/seed/targets.json` | List of `{case_id, customer_id, product_id}` to run |
+| Campaign | `data/{agent_id}/campaign/prompts/system_prompt.json` | v1 system prompt (deliberately imperfect for demo) |
+| | `data/{agent_id}/campaign/skills/{agent_id}_style.md` | Writing style guide passed into every LLM call |
+| Evaluation | `data/{agent_id}/evaluation/eval_cases.json` | Rubric cases with expected outputs |
+| | `data/{agent_id}/evaluation/prompts/judge_prompt.json` | LLM judge instruction |
+| Per-agent model | `src/kedro_reflection_agent/models/{agent_id}/evaluation.py` | `JudgeScore` Pydantic model with LLM judge dimensions |
+| | `src/kedro_reflection_agent/models/{agent_id}/seed.py` | Pydantic seed models (profiles, targets) |
+| Seed script | `scripts/seed_demo.py` | Register the new `agent_id` in the `AGENTS` list |
+
+Everything else — all five Kedro pipelines, scouts, reflection meta-agent, apply logic, UI, and org overview — works without modification.
+
 ---
 
 ## End-to-end flow
@@ -227,6 +244,22 @@ Thresholds: `conf/base/parameters.yml` (`scout_*` keys).
 ### 4. `reflection`
 
 Meta-agent reads scores, eval rubrics, current prompt/skill, and proposes replacements. **Does not write live artifacts**—only `apply` does.
+
+**Reflection is not per-run in isolation — it reads accumulated history.** Each call to this pipeline feeds the meta-agent:
+
+| Input | Source | Accumulates over time? |
+| --- | --- | --- |
+| `per_case_scores.json` | Current run folder | No — current run only |
+| `aggregate_scores.json` | Current run folder | No — but includes trend delta vs previous |
+| `signals.json` | Current run's scout output | No — current run only |
+| `signal_index.json` | `data/outputs/` (cross-agent) | **Yes** — every scout signal across all runs and agents |
+| `run_index.json` | `data/outputs/` (cross-run) | **Yes** — full history of every run, every agent |
+| Current system prompt + skill | `data/{agent_id}/campaign/` | Reflects latest applied version |
+| Eval rubric + cases | `data/{agent_id}/evaluation/` | Reflects latest applied version |
+
+The more cycles that have run, the richer the meta-agent's context. After two runs it can compare before/after apply. After several runs it can distinguish persistent failure patterns from one-off noise. The `cross_unit_pattern` scout escalates signals appearing in ≥ 2 agents in a time window, so reflection for one agent can be informed by failures in another.
+
+The system does not retrain a model. Intelligence accumulates the same way an analyst gets smarter: more evidence, more specific proposals.
 
 | Outputs | Destination |
 | --- | --- |
