@@ -17,7 +17,7 @@ All detectors follow the same signature:
 The top-level ``run_scouts`` node calls all detectors, merges their signals,
 writes them to the per-run signals file, and updates the cross-agent index.
 
-Design rules (from enterprise-architecture.md):
+Design rules (see DESIGN.md / docs/Architecture.md):
   - Pure and deterministic.  No LLM calls, no network calls.
   - Run fast — O(n) over per_case_scores.
   - Reserve ``high`` confidence for unambiguous cases.
