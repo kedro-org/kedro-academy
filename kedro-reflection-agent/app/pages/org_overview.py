@@ -339,65 +339,82 @@ def _render_leaderboard(run_index: list[dict]) -> None:
 def _render_podium(ranked: list[tuple[str, float, dict]]) -> None:
     medals = ["🏆", "🥈", "🥉"]
     ranks = ["#1", "#2", "#3"]
+    rank_colors = ["#F59E0B", "#94A3B8", "#D97706"]
+    rank_font_sizes = ["13px", "11px", "11px"]
+    min_heights = {0: "124px", 1: "92px", 2: "82px"}
+    widths = {0: "160px", 1: "144px", 2: "144px"}
+    # Display order: 2nd on left, 1st in center, 3rd on right
     order = [1, 0, 2] if len(ranked) >= 3 else list(range(len(ranked)))
 
-    cols = st.columns([1, 1, 1], gap="medium")
-    col_map = {0: cols[1], 1: cols[0], 2: cols[2]}  # center=1st, left=2nd, right=3rd
-
-    for display_pos, source_idx in enumerate(order):
+    items_html = ""
+    for _display_pos, source_idx in enumerate(order):
         if source_idx >= len(ranked):
             continue
         aid, score, latest = ranked[source_idx]
         cfg = AGENTS[aid]
         is_first = source_idx == 0
-        badge = _icon_badge(aid, 36 if is_first else 32)
-        medal = medals[source_idx]
-        rank = ranks[source_idx]
+        icon_size = 40 if is_first else 36
+        inner_size = 20 if is_first else 16
+        icon_svg = _AGENT_ICONS[aid].replace('stroke="currentColor"', f'stroke="{cfg["color"]}"')
+        icon_svg_sized = icon_svg.replace(
+            '<svg width="14" height="14"', f'<svg width="{inner_size}" height="{inner_size}"'
+        )
+        border_extra = 'border:2px solid #C7D2FE;' if is_first else ''
+        icon_html = (
+            f'<div style="width:{icon_size}px;height:{icon_size}px;border-radius:{icon_size // 4}px;'
+            f'background:{cfg["bg"]};{border_extra}display:inline-flex;align-items:center;'
+            f'justify-content:center;margin:0 auto 6px auto;">'
+            + icon_svg_sized
+            + '</div>'
+        )
 
-        # Compute lift vs first run
         run_seq = latest.get("run_seq", 1)
-        delta_str = ""
+        delta_html = ""
         if latest.get("delta_mean_score") is not None and run_seq > 1:
             delta = float(latest["delta_mean_score"])
             sign = "+" if delta >= 0 else ""
             delta_col = "#15803D" if delta >= 0 else "#B91C1C"
-            delta_str = f'<div style="font-size:10px;font-weight:700;color:{delta_col};margin-top:2px;">{sign}{delta:.2f} vs prev run</div>'
+            delta_html = f'<div style="font-size:10px;font-weight:700;color:{delta_col};margin-top:2px;">{sign}{delta:.2f} vs prev</div>'
 
         if is_first:
             card_style = (
-                "border-radius:16px;padding:20px 16px;"
-                "background:linear-gradient(135deg,#EEF2FF,#E0E7FF);"
-                "border:2px solid #2251FF;min-height:130px;"
-                "display:flex;flex-direction:column;justify-content:flex-end;align-items:center;"
+                f"border-radius:16px;padding:20px 16px;"
+                f"background:linear-gradient(135deg,#EEF2FF,#E0E7FF);"
+                f"border:2px solid #2251FF;min-height:{min_heights[0]};"
+                f"display:flex;flex-direction:column;justify-content:flex-end;align-items:center;"
             )
-            rank_style = "font-size:13px;font-weight:800;color:#F59E0B;margin-bottom:6px;text-align:center;"
-            name_style = f"font-size:12px;font-weight:700;color:{cfg['color']};margin-top:6px;"
-            score_style = "font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-0.02em;line-height:1;"
+            name_style = f"font-size:12px;font-weight:700;color:{cfg['color']};margin-top:4px;"
+            score_style = "font-size:30px;font-weight:900;color:#0F172A;letter-spacing:-0.02em;line-height:1;margin-top:2px;"
         else:
             card_style = (
-                "border-radius:16px;padding:16px 12px;"
-                "background:#F8FAFC;border:1px solid #E2E8F0;min-height:100px;"
-                "display:flex;flex-direction:column;justify-content:flex-end;align-items:center;"
+                f"border-radius:16px;padding:16px 12px;"
+                f"background:#F8FAFC;border:1px solid #E2E8F0;min-height:{min_heights[source_idx]};"
+                f"display:flex;flex-direction:column;justify-content:flex-end;align-items:center;"
             )
-            rank_style = "font-size:11px;font-weight:600;color:#94A3B8;margin-bottom:4px;text-align:center;"
-            name_style = f"font-size:11px;font-weight:600;color:#64748B;margin-top:4px;"
-            score_style = "font-size:22px;font-weight:900;color:#1E293B;letter-spacing:-0.02em;line-height:1;"
+            name_style = "font-size:11px;font-weight:600;color:#64748B;margin-top:4px;"
+            score_style = "font-size:22px;font-weight:900;color:#1E293B;letter-spacing:-0.02em;line-height:1;margin-top:2px;"
 
-        with col_map[display_pos]:
-            st.markdown(
-                f"""
-                <div style="text-align:center;">
-                  <div style="{rank_style}">{medal} {rank}</div>
-                  <div style="{card_style}">
-                    {badge}
-                    <div style="{name_style}">{_AGENT_LABEL_SHORT[aid]}</div>
-                    <div style="{score_style}">{score:.2f}</div>
-                    {delta_str}
-                  </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        rank_label_style = (
+            f"font-size:{rank_font_sizes[source_idx]};font-weight:800;"
+            f"color:{rank_colors[source_idx]};margin-bottom:6px;"
+        )
+        items_html += f"""
+<div style="text-align:center;width:{widths[source_idx]};">
+  <div style="{rank_label_style}">{medals[source_idx]} {ranks[source_idx]}</div>
+  <div style="{card_style}">
+    {icon_html}
+    <div style="{name_style}">{_AGENT_LABEL_SHORT[aid]}</div>
+    <div style="{score_style}">{score:.2f}</div>
+    {delta_html}
+  </div>
+</div>
+"""
+
+    st.markdown(
+        f'<div style="display:flex;align-items:flex-end;justify-content:center;gap:20px;'
+        f'margin-bottom:24px;font-family:Inter,sans-serif;">{items_html}</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def _render_leaderboard_table(
@@ -421,7 +438,6 @@ def _render_leaderboard_table(
     rows_html = ""
     for rank_idx, (aid, score, latest) in enumerate(ranked):
         cfg = AGENTS[aid]
-        icon_svg = _AGENT_ICONS[aid].replace('stroke="currentColor"', f'stroke="{cfg["color"]}"')
         mps = latest.get("mean_per_scorer") or {}
         n_runs = sum(1 for r in run_index if r.get("agent_id") == aid)
         status_pill = (
@@ -456,13 +472,15 @@ def _render_leaderboard_table(
         else:
             delta_html = '<span style="color:#CBD5E1;font-size:12px;">—</span>'
 
+        icon_svg = _AGENT_ICONS[aid].replace('stroke="currentColor"', f'stroke="{cfg["color"]}"')
+        icon_svg_12 = icon_svg.replace('<svg width="14" height="14"', '<svg width="12" height="12"')
         rows_html += f"""
         <tr style="border-bottom:1px solid #F8FAFC;">
           <td style="padding:10px 14px;">
             <div style="display:flex;align-items:center;gap:8px;">
               <div style="width:24px;height:24px;border-radius:6px;background:{cfg['bg']};
                           display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                {icon_svg.replace('width="14"', 'width="12"').replace('height="14"', 'height="12"')}
+                {icon_svg_12}
               </div>
               <span style="font-size:13px;font-weight:600;color:{cfg['color']};">
                 {_AGENT_LABEL_SHORT[aid]}
@@ -498,9 +516,7 @@ def _render_leaderboard_table(
                            text-transform:uppercase;letter-spacing:.06em;text-align:right;">Runs</th>
               </tr>
             </thead>
-            <tbody>
-              {rows_html}
-            </tbody>
+            {rows_html}
           </table>
         </div>
         """,
@@ -531,7 +547,7 @@ def _render_charts(run_index: list[dict]) -> None:
             )
             fig = portfolio_trend_chart(run_index)
             if fig:
-                st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
+                st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
             else:
                 st.markdown(
                     '<div style="height:140px;background:#F8FAFC;border:1px solid #E2E8F0;'
@@ -570,7 +586,7 @@ def _render_charts(run_index: list[dict]) -> None:
 
             fig = dimension_radar_chart(agent_dim_scores)
             if fig:
-                st.plotly_chart(fig, config={"displayModeBar": False}, use_container_width=True)
+                st.plotly_chart(fig, config={"displayModeBar": False}, width="stretch")
             else:
                 st.markdown(
                     '<div style="height:140px;background:#F8FAFC;border:1px solid #E2E8F0;'
@@ -814,38 +830,26 @@ def _render_insights(run_index: list[dict], apply_history: list[dict]) -> None:
             '<span style="font-size:11px;font-weight:600;color:#15803D;">✓ Full portfolio active</span>',
         ))
 
-    # Render 3-column grid
+    # Render 3-column grid — use st.html() to bypass markdown processing
+    # (st.markdown SVG polyline tags cause the parser to emit stray </div> text)
     grid_cols = st.columns(3, gap="medium")
     for i, (bg, border, icon_col, title, body, footer) in enumerate(cards):
         with grid_cols[i % 3]:
-            footer_html = f'<div style="margin-top:10px;">{footer}</div>' if footer else ""
-            st.markdown(
-                f"""
-                <div style="background:{bg};border:1px solid {border};border-radius:12px;
-                            padding:16px;margin-bottom:12px;">
-                  <div style="display:flex;gap:12px;align-items:flex-start;">
-                    <div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;
-                                background:rgba(255,255,255,0.6);display:flex;
-                                align-items:center;justify-content:center;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                           stroke="{icon_col}" stroke-width="2.5" stroke-linecap="round"
-                           stroke-linejoin="round">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
-                      </svg>
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                      <div style="font-size:12px;font-weight:700;color:#0F172A;margin-bottom:6px;">
-                        {title}
-                      </div>
-                      <div style="font-size:11px;color:#475569;line-height:1.6;">{body}</div>
-                      {footer_html}
-                    </div>
-                  </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
+            footer_html = (
+                f'<div style="margin-top:10px;font-size:11px;">{footer}</div>'
+                if footer else ""
             )
+            st.html(f"""
+<div style="background:{bg};border-left:3px solid {icon_col};
+            border-top:1px solid {border};border-right:1px solid {border};
+            border-bottom:1px solid {border};border-radius:0 12px 12px 0;
+            padding:14px 16px;margin-bottom:8px;font-family:Inter,sans-serif;">
+  <div style="font-size:12px;font-weight:700;color:#0F172A;margin-bottom:7px;
+              line-height:1.4;">{title}</div>
+  <div style="font-size:11px;color:#475569;line-height:1.65;">{body}</div>
+  {footer_html}
+</div>
+""")
 
 
 # ── Section 5: Issue + Strength Matrices ─────────────────────────────────────
@@ -1054,7 +1058,7 @@ def _render_matrices(run_index: list[dict]) -> None:
                     </div>
                     """
 
-                st.markdown(items_html, unsafe_allow_html=True)
+                st.html(items_html)
 
 
 # ── Main render ───────────────────────────────────────────────────────────────

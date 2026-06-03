@@ -1,0 +1,13 @@
+{
+  "case_id": "case_001",
+  "customer_id": "cust_011",
+  "product_id": "prod_006",
+  "subject": "Regarding Your Billing Concern",
+  "body": "Dear James Whitfield,\n\nThank you for reaching out to us regarding the duplicate charge on your account. I understand how frustrating it can be to see an unexpected billing issue, especially after being a valued customer for three years.\n\nI have reviewed your account and confirmed that you were indeed charged twice for your monthly plan in the same billing cycle. I sincerely apologize for this error and any inconvenience it may have caused you.\n\nTo resolve this, I will initiate a refund for the duplicate charge immediately. You can expect to see this reflected in your account within 3-5 business days.\n\nIf you have any further questions or need assistance with anything else, please feel free to reach out. We appreciate your patience and understanding as we work to resolve this matter.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \nTelco",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-06-03T00:12:58.994812+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "run_1",
+  "agent_id": "customer_care",
+  "n_cases": 5,
+  "n_emails": 5,
+  "n_errors": 0,
+  "model_name": "gpt-4o-mini",
+  "prompt_version": 1,
+  "skill_version": 1,
+  "started_at": "2026-06-03T00:06:09.252206+00:00",
+  "finished_at": "2026-06-03T00:06:33.206370+00:00"
+}

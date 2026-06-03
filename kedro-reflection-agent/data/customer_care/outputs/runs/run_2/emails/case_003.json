@@ -1,0 +1,13 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_013",
+  "product_id": "prod_008",
+  "subject": "Regarding Your Roaming Charge Dispute",
+  "body": "Dear Mohammed Al-Rashid,\n\nThank you for reaching out and sharing your concerns regarding the unexpected roaming charge of \u00a345 on your recent bill. I understand how upsetting this situation must be, especially since you did not enable roaming or travel abroad.\n\nI want to assure you that I am here to help resolve this issue. I will investigate the charge on your account to determine why it was applied and ensure that it is addressed appropriately. \n\nAs a next step, I will review your billing details and reach out to you within the next 48 hours with an update on the findings. In the meantime, if you have any additional information or questions, please feel free to share.\n\nThank you for your patience as we work through this together. I appreciate your loyalty as a customer for the past five years.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-06-03T00:13:12.974711+00:00"
+}

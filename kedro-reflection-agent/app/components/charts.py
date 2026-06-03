@@ -268,10 +268,14 @@ def dimension_radar_chart(agent_scores: dict[str, dict[str, float]]) -> go.Figur
         values_closed = values + [values[0]]
         dims_closed = dims + [dims[0]]
 
+        # Convert hex to rgba for fill — Plotly only accepts 6-digit hex, not 8-digit.
+        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        fill_color = f"rgba({r},{g},{b},0.08)"
+
         fig.add_trace(go.Scatterpolar(
             r=values_closed, theta=dims_closed, fill="toself", name=label,
             line=dict(color=color, width=2),
-            fillcolor=color.replace(")", ",0.07)").replace("rgb", "rgba") if color.startswith("rgb") else color + "12",
+            fillcolor=fill_color,
             marker=dict(size=4),
             hovertemplate="<b>%{theta}</b>: %{r:.2f}<extra></extra>",
         ))

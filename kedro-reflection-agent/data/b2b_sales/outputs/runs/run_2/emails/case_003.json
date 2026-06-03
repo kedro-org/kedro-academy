@@ -1,0 +1,13 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_005",
+  "product_id": "prod_002",
+  "subject": "Enhance Your Manufacturing Operations with Our 5G Private Network",
+  "body": "Dear Klara,\n\nI hope this message finds you well. As the Director of Industrial IT at Apex Manufacturing, I understand that optimizing your operations is crucial, especially in the competitive manufacturing industry.\n\nI wanted to introduce you to our 5G Private Network, a premium solution designed specifically for enterprises like yours. With your current use of IoT Fleet Connectivity and SD-WAN Pro, our 5G Private Network can seamlessly integrate into your existing infrastructure, providing you with dedicated 5G coverage tailored for industrial and high-density sites.\n\nKey benefits of our 5G Private Network include:\n- **Deterministic low-latency wireless** for operational technology (OT) and automated guided vehicles (AGVs), ensuring smooth and efficient operations on your shop floor.\n- **Edge compute co-located with the radio core**, which enhances data processing speeds and reduces latency, critical for real-time decision-making in manufacturing.\n- **Fully managed spectrum and SIM lifecycle**, allowing you to focus on your core business without the hassle of managing connectivity issues.\n\nThis solution is particularly beneficial for use cases such as shop-floor AGV and robotics connectivity, as well as campus-wide secure wireless for regulated industries, which I believe aligns perfectly with your operational needs.\n\nI would love the opportunity to discuss how our 5G Private Network can further enhance your manufacturing capabilities. Are you available for a brief call next week to explore this further?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+  "trace_id": null,
+  "prompt_version": 1,
+  "skill_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-06-02T23:52:12.890305+00:00"
+}

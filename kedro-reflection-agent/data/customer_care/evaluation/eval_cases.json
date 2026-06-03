@@ -2,12 +2,15 @@
   {
     "id": "7f1da4ae-f10b-553b-8cf5-216b88505766",
     "input": {
-      "customer_id": "cust_011",
+      "case_id": "case_001",
       "product_id": "prod_006",
-      "case_id": "case_001"
+      "customer_id": "cust_011"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Billing dispute on Unlimited 5G. Apologise, confirm investigation, offer timeline.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
         "required_mentions": [
           "acknowledge billing error",
           "investigate or credit action",
@@ -17,22 +20,22 @@
           "blame the customer",
           "deny the issue without checking",
           "fake reference numbers"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Billing dispute on Unlimited 5G. Apologise, confirm investigation, offer timeline."
+        ]
       }
     }
   },
   {
     "id": "f1aa1e16-ab4f-524a-902b-0ee491547b94",
     "input": {
-      "customer_id": "cust_012",
+      "case_id": "case_002",
       "product_id": "prod_007",
-      "case_id": "case_002"
+      "customer_id": "cust_012"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Network coverage issue. Offer a concrete next step; do not dismiss.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
         "required_mentions": [
           "acknowledge signal issue",
           "network check or engineer visit",
@@ -42,22 +45,22 @@
           "dismiss as device fault without checking",
           "promise specific fix date",
           "blame customer's location"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Network coverage issue. Offer a concrete next step; do not dismiss."
+        ]
       }
     }
   },
   {
     "id": "b6090a26-42c7-59dc-ad0a-8a6d05ca9a35",
     "input": {
-      "customer_id": "cust_013",
+      "case_id": "case_003",
       "product_id": "prod_008",
-      "case_id": "case_003"
+      "customer_id": "cust_013"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Top-up credit not appearing. Acknowledge, investigate, set expectations.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
         "required_mentions": [
           "acknowledge missing top-up credit",
           "check or restore credit action",
@@ -67,22 +70,22 @@
           "claim top-up was not received",
           "ask customer to top up again without checking",
           "fake case numbers"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Top-up credit not appearing. Acknowledge, investigate, set expectations."
+        ]
       }
     }
   },
   {
     "id": "54cbfb52-9a40-5bcc-8929-b019dfea4d5d",
     "input": {
-      "customer_id": "cust_014",
+      "case_id": "case_004",
       "product_id": "prod_010",
-      "case_id": "case_004"
+      "customer_id": "cust_014"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Roaming charge dispute. Investigate and offer refund if confirmed; no blame shifting.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
         "required_mentions": [
           "acknowledge roaming charges despite add-on",
           "investigate or refund action",
@@ -92,22 +95,22 @@
           "deny Roaming Plus covers Spain",
           "blame customer for not activating",
           "no concrete action"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Roaming charge dispute. Investigate and offer refund if confirmed; no blame shifting."
+        ]
       }
     }
   },
   {
     "id": "e161d01c-c17a-596f-bde9-6b86034eaea3",
     "input": {
-      "customer_id": "cust_015",
+      "case_id": "case_005",
       "product_id": "prod_006",
-      "case_id": "case_005"
+      "customer_id": "cust_015"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Cancellation threat due to price increase. Empathetic; offer retention value without pressure.",
+        "expected_cta": "call",
+        "expected_tone": "friendly",
         "required_mentions": [
           "acknowledge price increase",
           "retention offer or explanation of value",
@@ -117,135 +120,82 @@
           "dismiss the concern",
           "threaten contract terms",
           "deny the price increase"
-        ],
+        ]
+      }
+    }
+  },
+  {
+    "id": "78b72a02-712c-5036-bb8c-6a551773ee14",
+    "input": {
+      "case_id": "regression_003",
+      "product_id": "Roaming Issue",
+      "customer_id": "Tom Bridgewater"
+    },
+    "expected_output": {
+      "rubric": {
+        "notes": "This case targets the system's ability to acknowledge the specific issue of price increase and offer appropriate retention value.",
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Cancellation threat due to price increase. Empathetic; offer retention value without pressure."
+        "required_mentions": [
+          "acknowledge price increase",
+          "retention offer or explanation of value",
+          "no cancellation pressure"
+        ],
+        "forbidden_mentions": [
+          "dismiss the concern",
+          "threaten contract terms",
+          "deny the price increase"
+        ]
       }
     }
   },
   {
-    "id": "35741850-ed75-5cb3-8d97-9ec8128d52e9",
+    "id": "1e0e6963-b873-514f-aefe-a396430e032a",
     "input": {
-      "customer_id": "cust_016",
-      "product_id": "prod_007",
-      "case_id": "case_006"
+      "case_id": "regression_002",
+      "product_id": "Billing Dispute",
+      "customer_id": "Mohammed Al-Rashid"
     },
     "expected_output": {
       "rubric": {
-        "required_mentions": [
-          "acknowledge wrong billing amount",
-          "confirm plan change or refund action",
-          "apologise for error"
-        ],
-        "forbidden_mentions": [
-          "claim plan was not changed",
-          "ask customer to pay the wrong amount",
-          "no concrete resolution"
-        ],
+        "notes": "This case tests the system's ability to provide clarity in resolution steps specific to the top-up credit issue.",
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Wrong plan charged after downgrade. Acknowledge error, confirm correct plan, offer credit."
+        "required_mentions": [
+          "acknowledge missing top-up credit",
+          "check or restore credit action",
+          "24-hour processing context"
+        ],
+        "forbidden_mentions": [
+          "claim top-up was not received",
+          "ask customer to top up again without checking",
+          "fake case numbers"
+        ]
       }
     }
   },
   {
-    "id": "256a7e34-2d68-5c83-a2b0-5bfc7aa25d48",
+    "id": "ab4f869f-af55-5de1-a1f2-c27a7977e1d9",
     "input": {
-      "customer_id": "cust_017",
-      "product_id": "prod_009",
-      "case_id": "case_007"
+      "case_id": "regression_001",
+      "product_id": "SIM Card Activation",
+      "customer_id": "Priya Sharma"
     },
     "expected_output": {
       "rubric": {
-        "required_mentions": [
-          "acknowledge call quality issue",
-          "troubleshooting steps or escalation",
-          "timeline or follow-up"
-        ],
-        "forbidden_mentions": [
-          "blame customer's device",
-          "dismiss EC1 as a known blackspot without checking",
-          "no next step"
-        ],
+        "notes": "This case targets the issue of addressing unrelated problems by requiring specific mention of roaming charges and actions related to them.",
         "expected_cta": "reply",
         "expected_tone": "friendly",
-        "notes": "Location-specific call issue. Acknowledge, offer diagnostics, commit to follow-up."
-      }
-    }
-  },
-  {
-    "id": "cedea269-e3e7-54bb-baae-4bc476b86e00",
-    "input": {
-      "customer_id": "cust_018",
-      "product_id": "prod_010",
-      "case_id": "case_008"
-    },
-    "expected_output": {
-      "rubric": {
         "required_mentions": [
-          "acknowledge unexpected charge",
-          "investigate porting fee legitimacy",
-          "refund if error confirmed"
+          "acknowledge roaming charges despite add-on",
+          "investigate or refund action",
+          "confirm Roaming Plus coverage"
         ],
         "forbidden_mentions": [
-          "insist the charge is valid without checking",
-          "ask customer to prove they did not request port",
-          "no action"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Unexpected porting fee. Investigate and refund if not authorised."
-      }
-    }
-  },
-  {
-    "id": "5f627378-9a8f-5a9d-a1fe-5c176592b0d5",
-    "input": {
-      "customer_id": "cust_019",
-      "product_id": "prod_008",
-      "case_id": "case_009"
-    },
-    "expected_output": {
-      "rubric": {
-        "required_mentions": [
-          "acknowledge checkout error",
-          "alternative way to add line",
-          "escalate if website fault persists"
-        ],
-        "forbidden_mentions": [
-          "blame the customer's browser",
-          "say the product is unavailable",
-          "no workaround offered"
-        ],
-        "expected_cta": "call",
-        "expected_tone": "friendly",
-        "notes": "Website error adding 5th line. Offer alternative (phone, store); do not just say try again."
-      }
-    }
-  },
-  {
-    "id": "514663f5-f636-5033-91dd-e000e71a5a99",
-    "input": {
-      "customer_id": "cust_020",
-      "product_id": "prod_007",
-      "case_id": "case_010"
-    },
-    "expected_output": {
-      "rubric": {
-        "required_mentions": [
-          "acknowledge billing error",
-          "credit or refund action",
-          "confirm no port request was made"
-        ],
-        "forbidden_mentions": [
-          "claim porting fee is standard",
-          "ask customer to pay the charge",
-          "no concrete resolution"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Incorrect porting fee. Take dispute seriously; proactively offer a refund."
+          "deny Roaming Plus covers Spain",
+          "blame customer for not activating",
+          "no concrete action"
+        ]
       }
     }
   }

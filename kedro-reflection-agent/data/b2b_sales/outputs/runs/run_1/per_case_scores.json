@@ -1,0 +1,297 @@
+[
+  {
+    "case_id": "da46917d-bcb8-5380-9994-37abc67dbfd7",
+    "trace_id": "3440b4ff0cb4cdcadb614ffcf954f545",
+    "dataset_run_id": "a709327d-0889-44d2-85cd-77595ea0a3ee",
+    "output": {
+      "case_id": "case_005",
+      "subject": "Enhance Your Cloud Connectivity with Managed Cloud Connect",
+      "body": "Dear Lars Bergman,\n\nI hope this message finds you well. As the Head of Network Operations at NordicLogistics AB, you understand the critical importance of reliable and efficient connectivity in the logistics industry.\n\nI wanted to introduce you to our product, Managed Cloud Connect. This enterprise solution offers a direct private link to major public clouds such as AWS, Azure, and GCP, ensuring that your operations can leverage cloud capabilities without the drawbacks of public internet transit. \n\nWith Managed Cloud Connect, you can benefit from reduced cloud egress costs, along with an end-to-end SLA that guarantees performance across the link and the underlay. This solution is particularly beneficial for use cases like media post-production, financial services workload migration, and healthcare data analytics.\n\nI would love to discuss how Managed Cloud Connect can enhance your existing infrastructure and support your operations at NordicLogistics AB. Are you available for a brief call next week?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 1140 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "writing_quality",
+        "value": 0.8,
+        "comment": "The email is clear, professional, and maintains a consultative tone, but could be more concise in some areas.",
+        "metadata": null
+      },
+      {
+        "name": "personalization",
+        "value": 0.3,
+        "comment": "The email fails to mention the customer's current products (SD-WAN Basic, IoT Fleet) and does not tailor the benefits of Managed Cloud Connect to logistics-specific use cases.",
+        "metadata": null
+      },
+      {
+        "name": "groundedness",
+        "value": 0.7,
+        "comment": "The claims about Managed Cloud Connect are mostly grounded in the product's description, but the mention of use cases like media post-production and healthcare data analytics are not relevant to the logistics industry.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8285714285714285,
+    "passing": false
+  },
+  {
+    "case_id": "6e2141bb-39a8-510a-8352-778a8ce961f6",
+    "trace_id": "1644e3f3e383f8037440608b4ac2018b",
+    "dataset_run_id": "a709327d-0889-44d2-85cd-77595ea0a3ee",
+    "output": {
+      "case_id": "case_004",
+      "subject": "Enhance Your Operations with Our 5G Private Network",
+      "body": "Dear Rafael Costa,\n\nI hope this message finds you well. As the Head of OT/IT Integration at CityGrid Energy, you understand the importance of reliable and efficient connectivity in the utilities sector. I wanted to introduce you to our premium 5G Private Network, designed specifically for enterprise solutions like yours.\n\nOur 5G Private Network offers dedicated coverage for industrial and high-density sites, ensuring deterministic low-latency wireless for operational technology (OT) and automated guided vehicles (AGVs). With edge compute capabilities co-located with the radio core, you can enhance your shop-floor AGV and robotics connectivity, as well as secure wireless solutions for your campus-wide operations.\n\nAdditionally, we fully manage the spectrum and SIM lifecycle, allowing you to focus on what matters most\u2014optimizing your operations.\n\nI would love to discuss how our 5G Private Network can benefit CityGrid Energy and support your ongoing projects. Would you be available for a brief call next week?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 1148 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "writing_quality",
+        "value": 0.9,
+        "comment": "The email is clear, professional, and maintains a formal tone throughout, with only minor room for improvement in flow.",
+        "metadata": null
+      },
+      {
+        "name": "personalization",
+        "value": 0.8,
+        "comment": "The email is well-tailored to CityGrid Energy, mentioning the utilities sector and OT, but lacks specific references to the company's tenure or unique projects.",
+        "metadata": null
+      },
+      {
+        "name": "groundedness",
+        "value": 1.0,
+        "comment": "All claims about the 5G Private Network are supported by the product's description and key benefits, with no unsupported claims or forbidden mentions.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.9571428571428572,
+    "passing": true
+  },
+  {
+    "case_id": "8c3e6d72-cfe2-5e2c-9216-6b59882191bf",
+    "trace_id": "b3feaf2d202c3115e857996e856d9e2a",
+    "dataset_run_id": "a709327d-0889-44d2-85cd-77595ea0a3ee",
+    "output": {
+      "case_id": "case_003",
+      "subject": "Enhance Your Manufacturing Operations with Our 5G Private Network",
+      "body": "Dear Klara Novak,\n\nI hope this message finds you well. As the Director of Industrial IT at Apex Manufacturing, you understand the importance of reliable and efficient connectivity in the manufacturing sector. \n\nI would like to introduce you to our premium product, the 5G Private Network. This solution offers dedicated 5G coverage specifically designed for industrial and high-density sites, ensuring deterministic low-latency wireless for your operational technology (OT) and automated guided vehicles (AGVs).\n\nKey benefits of our 5G Private Network include:\n- Deterministic low-latency wireless for seamless connectivity of shop-floor AGVs and robotics.\n- Edge compute capabilities co-located with the radio core for enhanced performance.\n- Fully managed spectrum and SIM lifecycle to simplify your operations.\n\nWith your current use of IoT Fleet Connectivity and SD-WAN Pro, our 5G Private Network can further enhance your manufacturing processes, especially in areas like campus-wide secure wireless and logistics yard automation.\n\nI would love to discuss how our 5G Private Network can align with your goals at Apex Manufacturing. Would you be available for a brief call next week?\n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 1314 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "writing_quality",
+        "value": 0.9,
+        "comment": "The email is clear, professional, and maintains a consultative tone, though it could slightly improve flow by integrating the CTA more naturally.",
+        "metadata": null
+      },
+      {
+        "name": "personalization",
+        "value": 1.0,
+        "comment": "The email is highly personalized, referencing Apex Manufacturing's industry, enterprise size, and specific use cases like AGV connectivity and existing IoT Fleet investment.",
+        "metadata": null
+      },
+      {
+        "name": "groundedness",
+        "value": 1.0,
+        "comment": "All claims about the 5G Private Network are supported by the product's short description and key benefits, with no unsupported claims or forbidden mentions.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.9857142857142858,
+    "passing": true
+  },
+  {
+    "case_id": "2b0b4c68-d8bb-5e96-85da-33699ea312fc",
+    "trace_id": "4e12e2c453fe5d8e4e36b797c3f0cbb7",
+    "dataset_run_id": "a709327d-0889-44d2-85cd-77595ea0a3ee",
+    "output": {
+      "case_id": "case_002",
+      "subject": "Upgrade to UC Suite Pro for Enhanced Communication",
+      "body": "Dear Maya,\n\nI hope this message finds you well. As the IT Manager at SmallTech Solutions, I wanted to reach out to discuss an opportunity that could significantly enhance your communication capabilities.\n\nWe understand that you are currently using UC Suite Basic, and I would like to introduce you to our upgraded solution, UC Suite Pro. This enterprise solution offers a comprehensive suite of features, including BYOD-friendly softphone and HD video conferencing, contact-centre queues, IVR, and analytics, all in one subscription.\n\nUC Suite Pro is designed to streamline communication for businesses like yours in the retail industry, providing native integrations with major CRMs and helpdesks. It\u2019s perfect for your team of 45 employees, especially if you are looking to improve customer engagement and operational efficiency.\n\nI would love to schedule a brief call to discuss how UC Suite Pro can meet your specific needs and help SmallTech Solutions thrive in the competitive retail landscape. \n\nLooking forward to your response.\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 1128 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "writing_quality",
+        "value": 0.8,
+        "comment": "The email is clear, professional, and maintains a friendly tone, but could be more concise in some areas.",
+        "metadata": null
+      },
+      {
+        "name": "personalization",
+        "value": 0.7,
+        "comment": "The email mentions the current product (UC Suite Basic) and the retail industry, but lacks specific tailoring to the company's small size and tenure.",
+        "metadata": null
+      },
+      {
+        "name": "groundedness",
+        "value": 0.9,
+        "comment": "The features mentioned are supported by the product's description, but the claim about 'native integrations with major CRMs and helpdesks' is not explicitly grounded in the provided product information.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.9142857142857144,
+    "passing": false
+  },
+  {
+    "case_id": "a17c30cf-88d0-576f-8c93-056d4f4c0965",
+    "trace_id": "3cd6e704e233c1f4ac7bae9a3c710a66",
+    "dataset_run_id": "a709327d-0889-44d2-85cd-77595ea0a3ee",
+    "output": {
+      "case_id": "case_001",
+      "subject": "Enhance Your Network Operations with SD-WAN Pro",
+      "body": "Dear Lars,\n\nI hope this message finds you well. As the Head of Network Operations at NordicLogistics AB, I understand that maintaining efficient and reliable connectivity across your logistics operations is crucial.\n\nI wanted to introduce you to our premium product, SD-WAN Pro. This managed multi-site SD-WAN solution offers significant benefits, including a 20-40% reduction in latency compared to legacy MPLS systems, a single policy plane that can manage over 100 sites, and built-in failover capabilities with application-aware traffic shaping. \n\nGiven your current use of SD-WAN Basic and IoT Fleet Connectivity, upgrading to SD-WAN Pro could greatly enhance your network performance and operational efficiency, particularly for multi-branch connectivity and prioritizing critical applications.\n\nI would love to discuss how SD-WAN Pro can specifically benefit NordicLogistics AB. Are you available for a brief call this week?\n\nBest regards,\n\n[Your Name]  \n[Your Position]  \n[Your Company]  \n[Your Contact Information]",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 1023 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "writing_quality",
+        "value": 0.8,
+        "comment": "The email is clear, professional, and maintains a consultative tone, though it could be more concise in some areas.",
+        "metadata": null
+      },
+      {
+        "name": "personalization",
+        "value": 0.7,
+        "comment": "The email mentions the customer's current use of SD-WAN Basic and the logistics industry, but misses the company size and tenure context.",
+        "metadata": null
+      },
+      {
+        "name": "groundedness",
+        "value": 0.6,
+        "comment": "The email includes unsupported claims about latency reduction and site management capabilities not found in the product description.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8714285714285713,
+    "passing": false
+  }
+]

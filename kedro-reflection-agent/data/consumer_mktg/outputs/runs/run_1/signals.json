@@ -1,0 +1,20 @@
+[
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_1",
+    "confidence": "medium",
+    "evidence_text": "Dimension 'personalisation' below floor (0.7) on 3 cases: 0a464622-f229-5ef0-b8b7-1a7176ee0877=0.60, 2eeb6340-bcf0-5f0e-9ae1-24786d179dd4=0.60, 43618eaf-cafe-5fbc-be2e-2f212aec0ff5=0.60",
+    "reason": "'personalisation' < 0.7 on 3 cases (threshold: \u22653 cases below floor).",
+    "created_at": "2026-06-03T00:01:41.858632+00:00"
+  },
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_1",
+    "confidence": "medium",
+    "evidence_text": "Dimension 'urgency_cta' below floor (0.7) on 5 cases: 0181522b-ae5c-5dd3-9e1e-0f7a37d5eff8=0.50, 04a27fbb-bbe7-5c84-b8ea-650302b4f4ee=0.50, 0a464622-f229-5ef0-b8b7-1a7176ee0877=0.40, 2eeb6340-bcf0-5f0e-9ae1-24786d179dd4=0.50, 43618eaf-cafe-5fbc-be2e-2f212aec0ff5=0.30",
+    "reason": "'urgency_cta' < 0.7 on 5 cases (threshold: \u22653 cases below floor).",
+    "created_at": "2026-06-03T00:01:41.859032+00:00"
+  }
+]

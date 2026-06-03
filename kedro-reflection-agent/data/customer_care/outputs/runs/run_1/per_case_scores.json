@@ -1,0 +1,357 @@
+[
+  {
+    "case_id": "e161d01c-c17a-596f-bde9-6b86034eaea3",
+    "trace_id": "abfbc574a2f19b83be1a0499d8f757ef",
+    "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+    "output": {
+      "case_id": "case_005",
+      "subject": "Assistance with Your Roaming Issue in Spain",
+      "body": "Dear Tom Bridgewater,\n\nThank you for reaching out and sharing your experience regarding the roaming issue you are facing while traveling in Spain. I understand how frustrating it can be not to access mobile data, especially when voice calls are working fine.\n\nTo resolve this, I will check if your roaming add-on is enabled in your account settings. This is often the reason for the 'Roaming not available' error you are encountering. \n\nAs a next step, I recommend resetting your APN settings to default, as this can sometimes help with data connectivity issues. You can do this by going to your device settings and selecting the option to reset network settings.\n\nPlease feel free to reach out if you have any further questions or if the issue persists after trying the suggested steps. I\u2019m here to help!\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 854 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 0.0,
+        "comment": "The reply does not acknowledge the customer's specific issue about the price increase, instead addressing an unrelated roaming issue.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.5,
+        "comment": "The reply provides a clear resolution path for the roaming issue, but it does not address the actual concern of the price increase.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 0.5,
+        "comment": "The tone is warm and professional, but it is not relevant to the customer's actual concern about the price increase.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.0,
+        "comment": "The reply fails to mention the required elements such as acknowledging the price increase or offering retention value, and instead addresses an unrelated issue.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 0.0,
+        "comment": "The reply does not address the customer's actual issue, thus failing to progress or resolve the concern about the price increase.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.5555555555555556,
+    "passing": false
+  },
+  {
+    "case_id": "54cbfb52-9a40-5bcc-8929-b019dfea4d5d",
+    "trace_id": "ba327878526c167179750287c53d9610",
+    "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+    "output": {
+      "case_id": "case_004",
+      "subject": "Assistance with Your SIM Card Activation",
+      "body": "Dear Priya Sharma,\n\nThank you for reaching out regarding the issue with your new SIM card not activating on your handset. I understand how frustrating it can be to see 'No Service' after 24 hours of waiting.\n\nTo resolve this, I recommend checking if the SIM card is the correct size for your handset and trying it in another device if possible. Additionally, resetting your network settings and manually selecting your network may help in activating the SIM.\n\nIf the SIM still does not activate, please let me know, and I can arrange for a free replacement SIM to be dispatched to you.\n\nThank you for your patience, and please feel free to reach out if you have any further questions or concerns. \n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 746 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 0.0,
+        "comment": "The reply does not acknowledge the customer's specific issue of roaming charges, instead addressing a SIM card activation problem.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.0,
+        "comment": "The reply provides steps for SIM activation, not addressing the roaming charge dispute or offering a refund investigation.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 0.5,
+        "comment": "The tone is warm and professional, but it is not relevant to the customer's actual issue, which diminishes its effectiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.0,
+        "comment": "The reply fails to mention required elements like roaming charges or Roaming Plus coverage, and does not comply with the rubric's focus.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 0.0,
+        "comment": "The reply does not address the actual issue of roaming charges, thus failing to progress or resolve the customer's concern.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.5,
+    "passing": false
+  },
+  {
+    "case_id": "b6090a26-42c7-59dc-ad0a-8a6d05ca9a35",
+    "trace_id": "1d4149eb1ed897e9cdf9aaaeda402ac5",
+    "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+    "output": {
+      "case_id": "case_003",
+      "subject": "Regarding Your Billing Dispute",
+      "body": "Dear Mohammed Al-Rashid,\n\nThank you for reaching out to us regarding the unexpected roaming charge of \u00a345 on your recent bill. I understand how concerning this situation must be, especially since you mentioned that you never enabled roaming and did not travel abroad.\n\nTo address this issue, I will initiate a thorough review of your account and the specific charge in question. This process may take a little time, but I assure you that we will investigate it carefully to ensure that any discrepancies are resolved.\n\nAs a next step, I will follow up with you within the next 48 hours with an update on our findings. In the meantime, if you have any further questions or concerns, please don't hesitate to reach out.\n\nThank you for your patience and understanding. We value your loyalty as a customer for the past five years.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 875 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 0.0,
+        "comment": "The reply incorrectly addresses a roaming charge issue instead of the missing top-up credit, showing no acknowledgment of the customer's actual problem.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.0,
+        "comment": "The reply does not address the missing top-up credit issue, thus failing to provide any resolution path or next steps for the actual problem.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 0.5,
+        "comment": "While the tone is warm and professional, it is not relevant to the customer's issue, which diminishes its effectiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.0,
+        "comment": "The reply fails to comply with the rubric by not mentioning the missing top-up credit or the required actions, and it addresses an unrelated issue.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 0.0,
+        "comment": "The reply does not progress the actual issue of missing top-up credit, instead addressing an unrelated billing dispute.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.5,
+    "passing": false
+  },
+  {
+    "case_id": "f1aa1e16-ab4f-524a-902b-0ee491547b94",
+    "trace_id": "3ba7144d0cea82e0ca42a960da273714",
+    "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+    "output": {
+      "case_id": "case_002",
+      "subject": "Assistance with Your 5G Network Issue",
+      "body": "Dear Sophie,\n\nThank you for reaching out regarding the 5G signal issue you are experiencing at your home address. I understand how frustrating it can be to expect a service that is not meeting your needs, especially when the coverage checker indicates availability in your area.\n\nTo assist you, I will escalate your issue to our technical team for further investigation into the 5G connectivity at your location. They will look into any potential network issues that may be affecting your service.\n\nIn the meantime, I recommend checking your data usage in the MyAccount app to ensure that your data limit has not been reached, as this can sometimes affect connectivity. \n\nPlease feel free to reach out if you have any further questions or concerns. We appreciate your patience as we work to resolve this matter for you.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 868 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging Sophie's 5G signal issue and expresses understanding of her frustration.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.5,
+        "comment": "The reply mentions escalating the issue to the technical team but lacks a concrete timeline for resolution.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic throughout, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, avoiding false promises and forbidden mentions, and includes required acknowledgments.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 0.5,
+        "comment": "The reply escalates the issue without providing a direct resolution or timeline, partially deflecting the immediate resolution.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8888888888888888,
+    "passing": false
+  },
+  {
+    "case_id": "7f1da4ae-f10b-553b-8cf5-216b88505766",
+    "trace_id": "1f26b03b62fff61877e53cb1db99a513",
+    "dataset_run_id": "04c2fd7e-b56c-4e07-b207-1949789f226f",
+    "output": {
+      "case_id": "case_001",
+      "subject": "Resolution for Your Billing Issue",
+      "body": "Dear James Whitfield,\n\nThank you for reaching out regarding the duplicate charge on your account. I understand how frustrating this situation must be, especially after being a valued customer for three years.\n\nI will initiate a review of your billing statement to confirm the duplicate charge and process a refund for the amount charged in error. This may take a few business days to complete, but I will ensure it is handled promptly.\n\nAs a next step, please keep an eye on your email for updates regarding the status of your refund, which I will provide as soon as possible.\n\nIf you have any further questions or concerns in the meantime, please don\u2019t hesitate to reach out. I\u2019m here to help!\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 1,
+      "skill_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 743 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging the customer's issue with a duplicate charge and expresses understanding of the frustration, which is warm and specific.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 1.0,
+        "comment": "The resolution path is clear, stating a review will be initiated and a refund processed, with a timeline of a few business days provided.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, acknowledging the billing error, promising an investigation, and apologizing without making false promises or forbidden mentions.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 1.0,
+        "comment": "The reply provides a clear resolution path and does not unnecessarily escalate the issue, instead offering direct assistance.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 1.0,
+    "passing": true
+  }
+]
