@@ -2,11 +2,13 @@
 
 **Self-improving AI agents for telco — orchestrated with Kedro.**
 
+![Reflection Hub](docs/assets/images/reflection_hub.png)
+
 One platform runs the same governed loop for three business units: generate, evaluate, scout, reflect, approve, apply. This repository is a proof-of-concept with a Streamlit front end and synthetic data.
 
 | Document | Audience |
 | --- | --- |
-| [`docs/Architecture.md`](docs/Architecture.md) | Technical and Non-technical |
+| [`docs/Architecture.md`](docs/Architecture.md) | Executive |
 | [`DESIGN.md`](DESIGN.md) | Technical |
 | [`docs/ui/`](docs/ui/) | Static HTML mocks |
 
@@ -38,6 +40,11 @@ One platform runs the same governed loop for three business units: generate, eva
 
 Open **http://localhost:8501/** (Org Overview) or **http://localhost:8501/?page=campaigns** (per-agent pipeline stages).
 
+![Reflection Hub Gif](docs/assets/reflection_hub.gif)
+
+
+---
+
 **Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls (for b2b_sales).
 
 **Reset demo data:**
@@ -68,24 +75,6 @@ uv run kedro run --pipelines campaign,evaluation,scouts \
 More commands and parameters: [`DESIGN.md`](DESIGN.md).
 
 **Optional Langfuse** — one dataset and prompts per agent (e.g. `b2b_sales-eval`, `b2b_sales-system-prompt`). Seed files live under `data/{agent_id}/`. Langfuse is a bonus observability layer; Kedro outputs on disk drive the UI.
-
----
-
-## Screenshots
-
-Add captures under `docs/images/` when ready:
-
-| File | Suggested capture |
-| --- | --- |
-| `docs/images/org-overview.png` | Org Overview — three agents, portfolio cards |
-| `docs/images/campaign-stage1.png` | Campaigns — Stage ① scores / KPIs |
-| `docs/images/campaign-stage3.png` | Stage ③ reflection proposal |
-| `docs/images/campaign-stage4.png` | Stage ④ approve / before-after |
-
-<!-- Uncomment after you add images:
-![Org Overview](docs/images/org-overview.png)
-![Campaign Stage 1](docs/images/campaign-stage1.png)
--->
 
 ---
 

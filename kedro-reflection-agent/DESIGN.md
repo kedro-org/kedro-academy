@@ -1,9 +1,9 @@
-# kedro-reflection-agent — design
+# Reflection Hub — Design
 
 Working document for engineers. Captures the agreed shape of the demo and tracks what has been implemented.
 
 **Audience:** implementation detail, catalogs, pipelines, UI wiring.  
-**Partner / executive narrative:** [`docs/Architecture.md`](docs/Architecture.md).
+**Executive narrative:** [`docs/Architecture.md`](docs/Architecture.md).
 
 ---
 
