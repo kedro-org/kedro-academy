@@ -57,9 +57,8 @@ Open **http://localhost:8501/** (Org Overview) or **http://localhost:8501/?page=
 **Reset demo data:**
 
 ```bash
-make seed              # all 3 agents, 20 cases each
-make seed N=3          # fewer cases per agent
-make seed AGENT=b2b_sales # seed only specific agent
+make seed        # all 3 agents, 20 cases each
+make seed N=3    # fewer cases per agent
 ```
 
 ---

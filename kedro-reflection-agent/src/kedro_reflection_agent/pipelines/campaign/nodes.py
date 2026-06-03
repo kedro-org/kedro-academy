@@ -21,7 +21,7 @@ from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 
 from kedro_reflection_agent.models.shared import CampaignTarget, CustomerBase, Email, EmailOutput, ProductBase, RunMetadata
-from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.pipelines._common import build_structured_chain, load_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,6 @@ def generate_emails(
     run_id: str,
     agent_id: str,
     model_name: str,
-    system_prompt_version: int,
 ) -> tuple[dict[str, dict], dict]:
     """Generate one email per prepared agent input.
 
@@ -104,9 +103,7 @@ def generate_emails(
       - run_metadata: dict for the JSON run-summary dataset
     """
     chain = build_structured_chain(agent_context, "system_prompt", EmailOutput)
-    # Skill and prompt are always versioned together via the apply pipeline,
-    # so the integer skill version equals the prompt version.
-    skill_version = system_prompt_version
+    prompt_version = load_prompt_version(agent_id)
     started_at = utc_now_iso()
     run_started = time.perf_counter()
 
@@ -115,12 +112,11 @@ def generate_emails(
     total = len(agent_inputs)
 
     logger.info(
-        "campaign %s: starting %d generations | model=%s prompt_v=%d skill_v=%d",
+        "campaign %s: starting %d generations | model=%s prompt_v=%d",
         run_id,
         total,
         model_name,
-        system_prompt_version,
-        skill_version,
+        prompt_version,
     )
 
     for idx, agent_input in enumerate(agent_inputs, start=1):
@@ -140,16 +136,13 @@ def generate_emails(
         }
         invoke_config: dict[str, Any] = {
             "callbacks": [agent_tracer],
-            # NB: OpenTelemetry baggage propagation requires string values, so
-            # we stringify everything we put on the trace. The structured Email
-            # output below still carries the int `prompt_version`.
             "metadata": {
                 "case_id": case_id,
                 "customer_id": customer["customer_id"],
                 "product_id": product["product_id"],
                 "run_id": run_id,
-                "prompt_version": str(system_prompt_version),
-                "skill_version": str(skill_version),
+                "system_prompt_version": str(prompt_version),
+                "skill_version": str(prompt_version),
             },
             "run_name": f"campaign:{case_id}",
         }
@@ -169,8 +162,8 @@ def generate_emails(
             subject=result.subject,
             body=result.body,
             trace_id=None,
-            prompt_version=system_prompt_version,
-            skill_version=skill_version,
+            prompt_version=prompt_version,
+            skill_version=prompt_version,
             model_name=model_name,
             run_id=run_id,
             generated_at=utc_now_iso(),
@@ -190,8 +183,8 @@ def generate_emails(
         n_emails=len(emails),
         n_errors=n_errors,
         model_name=model_name,
-        prompt_version=system_prompt_version,
-        skill_version=skill_version,
+        prompt_version=prompt_version,
+        skill_version=prompt_version,
         started_at=started_at,
         finished_at=finished_at,
     ).model_dump()
@@ -207,8 +200,8 @@ def generate_emails(
         total_elapsed,
         avg,
         model_name,
-        system_prompt_version,
-        skill_version,
+        prompt_version,
+        prompt_version,
     )
 
     return emails, run_metadata

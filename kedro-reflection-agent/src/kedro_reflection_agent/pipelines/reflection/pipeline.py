@@ -38,7 +38,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "aggregate_scores",
                     "eval_cases",
                     "params:passing_threshold",
-                    "signals",
+                    "params:run_id",
                     "params:agent_id",
                 ],
                 outputs="reflection_context",

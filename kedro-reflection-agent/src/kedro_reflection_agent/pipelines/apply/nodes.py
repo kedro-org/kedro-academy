@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from kedro_reflection_agent.pipelines._common import utc_now_iso
+from kedro_reflection_agent.pipelines._common import load_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -37,26 +37,16 @@ def commit_reflection(
     """
     messages = _extract_messages(proposed_prompt)
 
-    prompts_dir = Path("data") / agent_id / "campaign" / "prompts"
-    skills_dir = Path("data") / agent_id / "campaign" / "skills"
+    # Write the new prompt to disk so the local file is always up-to-date.
+    # The Kedro catalog save (LangfusePromptDataset) pushes to Langfuse but does
+    # not reliably overwrite the local file, which causes sync_policy:local to
+    # push the stale local back to Langfuse on the next campaign load.
+    prompt_path = Path("data") / agent_id / "campaign" / "prompts" / "system_prompt.json"
+    prompt_path.parent.mkdir(parents=True, exist_ok=True)
+    prompt_path.write_text(json.dumps(messages, indent=2), encoding="utf-8")
 
-    # Archive the current active files before overwriting, so each apply cycle
-    # leaves a numbered snapshot: system_prompt_v1.json, system_prompt_v2.json, …
-    # The archive number is the outgoing version (current file before this apply).
-    prompt_version = _archive_file(
-        prompts_dir / "system_prompt.json",
-        json.dumps(messages, indent=2),
-    )
-    skill_version = _archive_file(
-        skills_dir / f"{agent_id}_style.md",
-        proposed_skill,
-    )
-    logger.info(
-        "apply %s: archived prompt → v%d, skill → v%d; wrote new active files",
-        reflection_id,
-        prompt_version - 1,
-        skill_version - 1,
-    )
+    new_version = load_prompt_version(agent_id) + 1
+    logger.info("apply %s: prompt_version %d → %d", reflection_id, new_version - 1, new_version)
 
     new_eval_cases = [
         {
@@ -71,8 +61,8 @@ def commit_reflection(
         "agent_id": agent_id,
         "reflection_id": reflection_id,
         "applied_at": utc_now_iso(),
-        "prompt_version": prompt_version,
-        "skill_version": skill_version,
+        "prompt_version": new_version,
+        "skill_version": new_version,
         "new_prompt_messages": messages,
         "new_skill_text": proposed_skill,
         "new_eval_case_ids": [ec["id"] for ec in new_eval_cases],
@@ -124,28 +114,3 @@ def _load_history() -> list[dict]:
     return []
 
 
-def _archive_file(active_path: Path, new_content: str) -> int:
-    """Archive ``active_path`` as a numbered snapshot, then write ``new_content``.
-
-    Snapshots are named ``<stem>_v{N}<suffix>`` alongside the active file.
-    The function counts existing snapshots to determine the outgoing version
-    number, archives the current content as v{N}, writes the new content as
-    the active file, and returns the *new* version number (N + 1).
-
-    On the very first apply:
-      - v1 was written by seed_demo.py as the active file.
-      - This archives it as ``system_prompt_v1.json`` / ``*_style_v1.md``.
-      - The new proposed content becomes the active file (v2 in Langfuse terms).
-    """
-    active_path.parent.mkdir(parents=True, exist_ok=True)
-    stem, suffix = active_path.stem, active_path.suffix
-
-    existing = list(active_path.parent.glob(f"{stem}_v*{suffix}"))
-    outgoing_version = len(existing) + 1
-
-    if active_path.exists():
-        archive_path = active_path.parent / f"{stem}_v{outgoing_version}{suffix}"
-        archive_path.write_text(active_path.read_text(encoding="utf-8"), encoding="utf-8")
-
-    active_path.write_text(new_content, encoding="utf-8")
-    return outgoing_version + 1  # the version that just became active

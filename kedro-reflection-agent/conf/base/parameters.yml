@@ -9,10 +9,6 @@ run_id: default
 # OpenAI model used by the agent.
 model_name: gpt-4o-mini
 
-# Version of the Langfuse-stored system prompt to load.
-system_prompt_version: 1
-
-
 # --- evaluation -------------------------------------------------------------
 
 # OpenAI model used by the LLM judge. Deliberately bigger than the campaign

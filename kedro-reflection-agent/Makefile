@@ -16,11 +16,10 @@ setup: install seed
 
 # ── seed / reset ──────────────────────────────────────────────────────────────
 
-## Restore v1 prompts, skills, eval cases and targets; wipe all run outputs
+## Restore v1 prompts, skills, eval cases and targets; wipe all run outputs (all agents)
 ## Pass N=<number> to seed only the first N cases, e.g. make seed N=3
-## Pass AGENT=<agent_id> to seed a single agent, e.g. make seed AGENT=b2b_sales
 seed:
-	$(PYTHON) scripts/seed_demo.py $(if $(N),--cases $(N),) $(if $(AGENT),--agent $(AGENT),)
+	$(PYTHON) scripts/seed_demo.py $(if $(N),--cases $(N),)
 
 ## Alias for seed (clearer intent when resetting mid-demo)
 reset: seed
