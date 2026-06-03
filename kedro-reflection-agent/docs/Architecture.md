@@ -92,6 +92,30 @@ flowchart LR
 
 ## Demo
 
+In response to the feedback on the first demo that the next iteration should show how this scales beyond a single use case, surface patterns across the organisation, and present them in a usable UI, the project has been extended into Reflection Hub, powered by Kedro. It runs three customer-facing campaigns on the same self-improving loop: B2B Sales, Consumer Marketing, Customer Care and adds an org-level view on top.
+
+The demo has two layers:
+
+### 1. The campaign loop
+
+Each campaign moves through the same four steps: **campaign & evaluate → scout → reflect & propose → approve & apply**.
+
+- The agent drafts its work, scores it against domain rubrics, scouts its own traces and logs for failure patterns, proposes concrete changes, and waits for human approval.
+- Performance is tracked across every run, so improvement is measurable over time.
+- The same loop from the first demo now powers three campaigns instead of one.
+
+### 2. The org overview
+
+On top of the three campaigns sits a portfolio-level page:
+
+- **Campaign quality ranking** — which campaigns are leading, which are lagging.
+- **Failure patterns across campaigns** — failure modes that show up in more than one campaign are flagged as systemic.
+- **Success path** — fixes that improved one campaign’s quality and are now travelling across the portfolio.
+- **Applied changes log** — every approved prompt or skill change, by campaign, with audit trail.
+- **Portfolio performance** — quality trend across every campaign over time, in one chart.
+
+---
+
 ## Synthetic data (what "customers" mean here)
 
 No real subscriber or account data is used.
@@ -146,15 +170,15 @@ sequenceDiagram
 
 ---
 
-## Benefits of this approach
+## Why it matters
 
-| Benefit | Summary |
-|---------|----------------------------------|
-| **Scale** | One Kedro platform; many BUs; add agents by configuration. |
-| **Governance** | Human gate on every improvement; traceable runs. |
-| **Compounding value** | Failures become regression tests; signals can surface across units. |
+- **Scale.** One platform investment, three campaigns today, N tomorrow. New campaigns (Churn Save, Field Ops, Network Incident Comms) plug into the same loop.
+- **Governance.** Nothing reaches production without human approval. Every change is versioned and auditable.
+- **Compounding value.** Failures caught in one campaign become permanent regression tests there and surface opportunities for the others. The platform gets smarter as the portfolio grows.
 
----
+## Bottom line
+
+Reflection Hub turns three isolated agent projects into a single self-improving portfolio, with one place to see where the telco is improving, where it’s regressing, and which fixes should travel across teams.
 
 ## What this demo is — and is not
 

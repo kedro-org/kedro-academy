@@ -1540,7 +1540,7 @@ requires-dist = [
     { name = "jupyterlab", specifier = ">=3.0" },
     { name = "kedro", specifier = "~=1.3.1" },
     { name = "kedro-datasets", extras = ["json-jsondataset", "langchain-chatopenaidataset", "langfuse", "partitions-partitioneddataset", "text-textdataset", "yaml-yamldataset"], specifier = "~=9.3.0" },
-    { name = "kedro-viz", specifier = ">=12.3.0" },
+    { name = "kedro-viz", specifier = ">=12.4.0" },
     { name = "langfuse", specifier = ">=3.14.0" },
     { name = "notebook" },
     { name = "openai", specifier = ">=1.40" },
@@ -1572,7 +1572,7 @@ wheels = [
 
 [[package]]
 name = "kedro-viz"
-version = "12.3.0"
+version = "12.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -1596,9 +1596,9 @@ dependencies = [
     { name = "watchfiles" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/a6/d6d70323e965a1c4c55161aa9d06b706d3b9ed1c94ff5d8b623fad4c647d/kedro_viz-12.3.0.tar.gz", hash = "sha256:aacd15a5b79c6449f585172c21fd3c326304335f3ecf8b4bed66bebcec05e467", size = 3068706, upload-time = "2026-01-29T17:38:40.765Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/8c/b878a919f07e1851377590dc37d113d3855a72ee915ae2fc9b6ff217162b/kedro_viz-12.4.0.tar.gz", hash = "sha256:c4ccc28b14395aff68fdf55d3c4edf8a2811eed9cd2667fe96c06a8cbcdd824f", size = 3160243, upload-time = "2026-05-27T16:39:37.678Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/f3/73ccccb6929c01084b08b19f824393bba8ba0c8aa74fc966a8325d3310eb/kedro_viz-12.3.0-py3-none-any.whl", hash = "sha256:1a035dfe2145dafd8cef075407a44400dcfe6423384c1c7362ccd71c567fc1c5", size = 3129955, upload-time = "2026-01-29T17:38:38.591Z" },
+    { url = "https://files.pythonhosted.org/packages/13/a0/b57c15e8f981e281dbf17c09535c79c2e5fc2854b40d14b2279ef9aec1a0/kedro_viz-12.4.0-py3-none-any.whl", hash = "sha256:6ba49c5cd40c345666c0859221f13df9babf4e3d6203fcabc071985ed6480d6b", size = 3224450, upload-time = "2026-05-27T16:39:35.781Z" },
 ]
 
 [[package]]
@@ -2540,7 +2540,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "(python_full_version < '3.11' and sys_platform == 'emscripten') or (python_full_version < '3.11' and sys_platform == 'win32') or (sys_platform != 'emscripten' and sys_platform != 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
