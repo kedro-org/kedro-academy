@@ -71,10 +71,12 @@ def load_context(
     """
     Build user context and tracing configuration for LangChain.
 
-    `intent_tracer` is the LangChain callback returned by whichever provider's
-    TraceDataset (mode=langchain) is bound in the active config env — Langfuse's
-    `CallbackHandler` or Opik's `OpikTracer`. The intent flow only needs a
-    LangChain-compatible callback, so this function stays provider-agnostic.
+    Args:
+        user_id: ID of the active user.
+        user_data: DataFrame containing user profile info.
+        session_id: Current session ID.
+        intent_tracer: LangChain callback from the active env's TraceDataset
+            (Langfuse `CallbackHandler` or Opik `OpikTracer`) — duck-typed.
 
     Returns:
         Tuple of (user_context, session_config).

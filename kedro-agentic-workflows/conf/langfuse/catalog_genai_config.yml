@@ -1,45 +1,7 @@
-# Langfuse environment: binds the generic dataset names (intent_prompt,
-# intent_tracer, autogen_tracer, llm/llm_openai/llm_autogen, tool_prompt,
-# response_prompt) to Langfuse-backed implementations. The opik equivalent
-# in conf/opik/ defines the same names backed by Opik. Pipelines reference
-# only the generic names, so switching providers is `--env langfuse|opik`.
-
-# --- LLMs setup ---
-llm:
-  type: langchain.ChatOpenAIDataset
-  kwargs:
-    model: ${runtime_params:model_name, gpt-4o}
-    temperature: 0.0
-  credentials: openai
-
-llm_openai:
-  type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
-  model_name: "gpt-4o"
-  model_settings:
-    temperature: 0.0
-  credentials: openai
-
-llm_autogen:
-  type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
-  kwargs:
-    model: "gpt-4o"
-    temperature: 0.0
-  credentials: openai
-
-# --- Prompts ---
-tool_prompt:
-  type: kedro_datasets_experimental.langchain.PromptDataset
-  filepath: data/response_generation/prompts/tool.txt
-  template: PromptTemplate
-  dataset:
-    type: text.TextDataset
-
-response_prompt:
-  type: kedro_datasets_experimental.langchain.PromptDataset
-  filepath: data/response_generation/prompts/response.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
+# Langfuse environment: binds the provider-specific generic names
+# (intent_prompt, intent_tracer, autogen_tracer) to Langfuse-backed
+# implementations. Shared catalog entries (llm, tool_prompt, response_prompt,
+# etc.) live in conf/base/catalog_genai_config.yml.
 
 intent_prompt:
   type: kedro_datasets_experimental.langfuse.PromptDataset
@@ -53,7 +15,6 @@ intent_prompt:
   load_args:
     version: ${runtime_params:intent_prompt_version, 1}
 
-# --- Tracing ---
 intent_tracer:
   type: kedro_datasets_experimental.langfuse.TraceDataset
   credentials: langfuse_credentials

@@ -1,0 +1,40 @@
+# Shared catalog entries — identical across provider envs.
+# Provider-specific entries (intent_prompt, intent_tracer, autogen_tracer)
+# live in conf/langfuse/ and conf/opik/ and override per-env.
+
+# --- LLMs setup ---
+llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: ${runtime_params:model_name, gpt-4o}
+    temperature: 0.0
+  credentials: openai
+
+llm_openai:
+  type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
+  model_name: "gpt-4o"
+  model_settings:
+    temperature: 0.0
+  credentials: openai
+
+llm_autogen:
+  type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+# --- Prompts (provider-agnostic) ---
+tool_prompt:
+  type: kedro_datasets_experimental.langchain.PromptDataset
+  filepath: data/response_generation/prompts/tool.txt
+  template: PromptTemplate
+  dataset:
+    type: text.TextDataset
+
+response_prompt:
+  type: kedro_datasets_experimental.langchain.PromptDataset
+  filepath: data/response_generation/prompts/response.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset

@@ -32,7 +32,8 @@ CONFIG_LOADER_ARGS = {
     "base_env": "base",
     # Default to the Langfuse env so plain `kedro run` works out of the box.
     # Pass `--env opik` to swap providers. Credentials live in (gitignored)
-    # conf/base/credentials.yml or conf/local/credentials.yml.
+    # conf/base/credentials.yml. `conf/local/` is NOT in the default stack —
+    # pass `--env langfuse,local` (or `--env opik,local`) to layer it on.
     "default_run_env": "langfuse",
     "config_patterns": {
         "catalog": ["catalog*", "catalog*/**", "**/catalog*"],

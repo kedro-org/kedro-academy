@@ -1,26 +1,37 @@
-# What is this for?
+# Configuration
 
-This folder should be used to store configuration files used by Kedro or by separate tools.
+This folder holds Kedro configuration. The project uses three envs:
 
-This file can be used to provide users with instructions for how to reproduce local configuration with their own credentials. You can edit the file however you like, but you may wish to retain the information below and add your own section in the [Instructions](#Instructions) section.
+| Env | Path | Loaded when |
+|---|---|---|
+| `base` | `conf/base/` | Always — shared catalog, parameters, credentials template |
+| `langfuse` | `conf/langfuse/` | Default — provider-specific catalog + eval catalog (Langfuse) |
+| `opik` | `conf/opik/` | When you pass `--env opik` — provider-specific catalog (Opik) |
+| `local` | `conf/local/` | **Only** when explicitly layered, e.g. `--env langfuse,local` |
 
-## Local configuration
+`default_run_env = "langfuse"` (in `src/kedro_agentic_workflows/settings.py`), so a plain `kedro run` loads `conf/base/` + `conf/langfuse/`. Switching providers is `--env opik` (loads `conf/base/` + `conf/opik/`).
 
-The `local` folder should be used for configuration that is either user-specific (e.g. IDE configuration) or protected (e.g. security keys).
+## Credentials
 
-> *Note:* Please do not check in any local configuration to version control.
+Copy [`base/credentials.yml.template`](base/credentials.yml.template) to `base/credentials.yml` and fill in real values. The template is the only credentials file tracked in git; `conf/**/*credentials*` in `.gitignore` keeps everything else out (with a single negation exception for the `.template` file).
 
-## Base configuration
+If you'd rather keep credentials in `conf/local/credentials.yml` (the more conventional Kedro location for secrets), that's fine — but you must stack the env explicitly because `local` is no longer in the default run env:
 
-The `base` folder is for shared configuration, such as non-sensitive and project-related configuration that may be shared across team members.
+```bash
+kedro run --env langfuse,local --params user_id=3
+kedro run --env opik,local     --params user_id=3
+```
 
-WARNING: Please do not put access credentials in the base configuration folder.
+The trade-off: `conf/base/credentials.yml` keeps the command line short (just `kedro run`); `conf/local/credentials.yml` is conventional but requires the `--env …,local` flag every time.
 
-## Instructions
+## Catalog layout
 
-
-
+- `base/catalog.yml` — DB tables and shared datasets.
+- `base/catalog_genai_config.yml` — provider-agnostic entries (`llm`, `tool_prompt`, `response_prompt`, …) shared across both providers.
+- `langfuse/catalog_genai_config.yml` — Langfuse-specific bindings for `intent_prompt`, `intent_tracer`, `autogen_tracer`.
+- `langfuse/catalog_evaluation.yml` — evaluation pipeline catalog (Langfuse-only today; reorg tracked in a follow-up PR).
+- `opik/catalog_genai_config.yml` — Opik-specific bindings for the same three generic names.
 
 ## Need help?
 
-[Find out more about configuration from the Kedro documentation](https://docs.kedro.org/en/stable/kedro_project_setup/configuration.html).
+[Kedro configuration docs](https://docs.kedro.org/en/stable/kedro_project_setup/configuration.html).

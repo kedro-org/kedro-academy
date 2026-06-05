@@ -65,14 +65,15 @@ kedro_agentic_workflows/
   ├── conf
   │   ├── base
   │   │   ├── catalog.yml                      # DB + shared datasets
-  │   │   ├── catalog_evaluation.yml           # Catalog for the evaluation pipeline (Langfuse-only for now)
+  │   │   ├── catalog_genai_config.yml         # Provider-agnostic catalog (llm, tool_prompt, response_prompt)
   │   │   ├── credentials.yml.template         # Template for API + DB credentials (copy to credentials.yml)
   │   │   └── parameters.yml                   # Kedro pipeline parameters
-  │   ├── langfuse                             # --env langfuse: binds generic dataset names to Langfuse
-  │   │   └── catalog_genai_config.yml
-  │   ├── opik                                 # --env opik: same generic names bound to Opik
-  │   │   └── catalog_genai_config.yml
-  │   └── local                                # gitignored; for local-only overrides
+  │   ├── langfuse                             # --env langfuse: provider-specific bindings + eval catalog
+  │   │   ├── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Langfuse)
+  │   │   └── catalog_evaluation.yml           # Evaluation pipeline catalog (Langfuse-only for now)
+  │   ├── opik                                 # --env opik: same provider-specific names bound to Opik
+  │   │   └── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Opik)
+  │   └── local                                # gitignored; only loaded if --env local is explicitly passed
   ├── data
   │   ├── intent_detection
   │   │   ├── prompts                          # Intent detection prompts
@@ -86,10 +87,27 @@ kedro_agentic_workflows/
           │   └── langfuse_evaluation_dataset.py  # Kedro dataset bridging local files ↔ Langfuse datasets
           ├── pipelines
           │   ├── intent_detection                     # Provider-agnostic; uses generic dataset names
+          │   │   ├── agent.py                         # IntentDetectionAgent (LangGraph)
+          │   │   ├── nodes.py                         # Kedro nodes (session, context, intent)
+          │   │   └── pipeline.py                      # Kedro pipeline
           │   ├── response_generation                  # LangGraph response variant (default)
+          │   │   ├── agent.py                         # ResponseGenerationAgent
+          │   │   ├── tools.py                         # Tool definitions (lookup_docs, claims, …)
+          │   │   ├── nodes.py                         # Kedro nodes
+          │   │   └── pipeline.py                      # Kedro pipeline
           │   ├── response_generation_autogen          # AutoGen variant, traced via autogen_tracer
-          │   ├── response_generation_openai           # OpenAI Agents SDK variant
+          │   │   ├── agent.py                         # AutoGen AssistantAgent + structured output
+          │   │   ├── tools.py                         # Tool definitions
+          │   │   ├── nodes.py                         # Kedro nodes (wraps invocation in OTel span)
+          │   │   └── pipeline.py                      # Kedro pipeline
+          │   ├── response_generation_openai           # OpenAI Agents SDK variant (untraced)
+          │   │   ├── agent.py                         # agents.Agent + Runner.run_sync
+          │   │   ├── tools.py                         # @function_tool definitions
+          │   │   ├── nodes.py                         # Kedro nodes
+          │   │   └── pipeline.py                      # Kedro pipeline
           │   └── intent_detection_evaluation          # Langfuse-only; reorg coming in a follow-up PR
+          │       ├── nodes.py                         # Kedro nodes (run experiment, score, log)
+          │       └── pipeline.py                      # Kedro pipeline
           ├── utils.py                         # Shared utilities: KedroAgent, message logging
           └── settings.py                      # Global project settings
 ```
@@ -300,7 +318,9 @@ pip install -r requirements.txt
 
 ### 3. Set Up API Credentials
 
-Copy [`conf/base/credentials.yml.template`](conf/base/credentials.yml.template) to `conf/base/credentials.yml` (or `conf/local/credentials.yml`) and fill in real values. Both paths are matched by `conf/**/*credentials*` in `.gitignore`, so secrets never leave your machine. Include `endpoint` for both providers if you plan to run the AutoGen pipeline (autogen mode uses OTLP).
+Copy [`conf/base/credentials.yml.template`](conf/base/credentials.yml.template) to `conf/base/credentials.yml` and fill in real values. The `conf/**/*credentials*` pattern in `.gitignore` keeps secrets out of git. Include `endpoint` for both providers if you plan to run the AutoGen pipeline (autogen mode uses OTLP).
+
+`conf/base/` is the primary path because `default_run_env = "langfuse"` means a plain `kedro run` loads `conf/base/` + `conf/langfuse/` only. If you prefer to keep credentials in `conf/local/credentials.yml`, stack the env explicitly: `kedro run --env langfuse,local`.
 
 ## ▶️ Running the Project
 
@@ -316,15 +336,17 @@ This creates:
 
 ### 2. Run Kedro Pipeline
 
-The project ships three response variants on top of the shared intent-detection pipeline. Pick the one you want with `--pipeline` and the provider with `--env`. `--env` defaults to `langfuse`.
+The project ships three response variants on top of the shared intent-detection pipeline. Pick the one you want with `--pipelines` and the provider with `--env`. `--env` defaults to `langfuse`.
+
+> **Heads-up:** `default_run_env = "langfuse"` (see `src/kedro_agentic_workflows/settings.py`) means a plain `kedro run` loads `conf/base/` + `conf/langfuse/`, **not** `conf/local/`. Put your real credentials in `conf/base/credentials.yml` (gitignored) for the simplest setup. If you'd rather keep them in `conf/local/credentials.yml`, stack envs explicitly: `kedro run --env langfuse,local` (or `--env opik,local`).
 
 | Scenario | Command |
 |---|---|
 | Default (LangGraph response), Langfuse tracing | `kedro run --params user_id=3` |
 | Default (LangGraph response), Opik tracing | `kedro run --env opik --params user_id=3` |
-| AutoGen response, Langfuse tracing (OTel spans) | `kedro run --pipeline autogen --params user_id=3` |
-| AutoGen response, Opik tracing (OTel spans) | `kedro run --pipeline autogen --env opik --params user_id=3` |
-| OpenAI Agents SDK response (untraced) | `kedro run --pipeline openai --params user_id=3` |
+| AutoGen response, Langfuse tracing (OTel spans) | `kedro run --pipelines autogen --params user_id=3` |
+| AutoGen response, Opik tracing (OTel spans) | `kedro run --pipelines autogen --env opik --params user_id=3` |
+| OpenAI Agents SDK response (untraced) | `kedro run --pipelines openai --params user_id=3` |
 
 Pipeline execution flow:
 
@@ -335,7 +357,7 @@ Pipeline execution flow:
 
 Run the intent detection agent against a labeled evaluation dataset:
 ```bash
-kedro run --pipeline intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+kedro run --pipelines intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
 ```
 
 Results are published as a Langfuse experiment. The eval pipeline is currently Langfuse-only — see the [Evaluation](#-evaluation) section.

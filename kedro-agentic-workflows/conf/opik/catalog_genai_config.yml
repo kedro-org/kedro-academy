@@ -1,42 +1,7 @@
-# Opik environment: binds the same generic dataset names as conf/langfuse/
-# to Opik-backed implementations.
-
-# --- LLMs setup ---
-llm:
-  type: langchain.ChatOpenAIDataset
-  kwargs:
-    model: ${runtime_params:model_name, gpt-4o}
-    temperature: 0.0
-  credentials: openai
-
-llm_openai:
-  type: kedro_agentic_workflows.datasets.openai_model_dataset.OpenAIModelDataset
-  model_name: "gpt-4o"
-  model_settings:
-    temperature: 0.0
-  credentials: openai
-
-llm_autogen:
-  type: kedro_agentic_workflows.datasets.autogen_model_client.OpenAIChatCompletionClientDataset
-  kwargs:
-    model: "gpt-4o"
-    temperature: 0.0
-  credentials: openai
-
-# --- Prompts ---
-tool_prompt:
-  type: kedro_datasets_experimental.langchain.PromptDataset
-  filepath: data/response_generation/prompts/tool.txt
-  template: PromptTemplate
-  dataset:
-    type: text.TextDataset
-
-response_prompt:
-  type: kedro_datasets_experimental.langchain.PromptDataset
-  filepath: data/response_generation/prompts/response.yml
-  template: ChatPromptTemplate
-  dataset:
-    type: yaml.YAMLDataset
+# Opik environment: binds the provider-specific generic names
+# (intent_prompt, intent_tracer, autogen_tracer) to Opik-backed
+# implementations. Shared catalog entries (llm, tool_prompt, response_prompt,
+# etc.) live in conf/base/catalog_genai_config.yml.
 
 intent_prompt:
   type: kedro_datasets_experimental.opik.PromptDataset
@@ -48,7 +13,6 @@ intent_prompt:
   mode: langchain           # Opik's sdk mode does not yet support version loading;
                             # langchain mode returns a ChatPromptTemplate directly
 
-# --- Tracing ---
 intent_tracer:
   type: kedro_datasets_experimental.opik.TraceDataset
   credentials: opik_credentials
@@ -57,7 +21,11 @@ intent_tracer:
   # sets OPIK_PROJECT_NAME, but configure(force=True) overrides it, so the
   # project_name in opik_credentials never reaches OpikTracer in langchain mode.
   # Passing it here as a trace_kwarg is the only path that lands traces in the
-  # right project today.
+  # right project today. Tracked alongside the upstream Opik fixes
+  # (https://github.com/kedro-org/kedro-plugins/pull/1416). Once a kedro-datasets
+  # release ships a _load_langchain_tracer that forwards credentials.project_name
+  # to OpikTracer automatically, delete this line — opik_credentials.project_name
+  # will flow through on its own.
   project_name: kedro-agentic-test
 
 # TEMP uses a separate credentials block as a workaround for an upstream bug.
