@@ -284,7 +284,7 @@ intent_evaluation_data:
 ### Running the evaluation pipeline
 
 ```bash
-kedro run -p intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+kedro run --pipelines intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
 ```
 
 The `intent_prompt_version` and `model_name` parameters are used to name the experiment in Langfuse (e.g., `intent_prompt_v1_model_gpt-4o`), making it easy to compare runs across prompt iterations and models.
