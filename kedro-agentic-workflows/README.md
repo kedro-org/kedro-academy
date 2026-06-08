@@ -241,7 +241,7 @@ AutoGen mode requires the OTLP endpoint URL in credentials (e.g. `https://cloud.
 
 ## 🧪 Evaluation
 
-> **Scope note (this PR):** the evaluation pipeline below currently runs on **Langfuse only** and uses provider-named entries in `conf/base/catalog_evaluation.yml`. Reorganising it to follow the same provider-agnostic shape as the main project (generic dataset names, swap via `--env`) is tracked as a follow-up PR. Class names have been updated to the 9.4.0 names so the catalog keeps loading after the bump, but the eval pipeline itself is untouched in this change.
+> **Scope note (this PR):** the evaluation pipeline below currently runs on **Langfuse only** and uses provider-named entries in `conf/langfuse/catalog_evaluation.yml`. The catalog only loads under the default `--env langfuse` — passing `--env opik` will omit it, and `kedro run --pipelines intent_detection_evaluation --env opik` will fail because the eval datasets won't resolve. Reorganising it to follow the same provider-agnostic shape as the main project (generic dataset names, swap via `--env`) is tracked as a follow-up PR. Class names have been updated to the 9.4.0 names so the catalog keeps loading after the bump, but the eval pipeline itself is untouched in this change.
 
 The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
 
@@ -268,7 +268,7 @@ Lifecycle operations (update, archive, delete) are delegated to the native Langf
 > `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py`.
 > It will be moved to the `kedro-datasets` experimental package in a future release.
 
-Catalog entry (`conf/base/catalog_evaluation.yml`):
+Catalog entry (`conf/langfuse/catalog_evaluation.yml`):
 
 ```yaml
 intent_evaluation_data:
