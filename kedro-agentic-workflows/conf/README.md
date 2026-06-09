@@ -4,25 +4,20 @@ This folder holds Kedro configuration. The project uses three envs:
 
 | Env | Path | Loaded when |
 |---|---|---|
-| `base` | `conf/base/` | Always — shared catalog, parameters, credentials template |
+| `base` | `conf/base/` | Always — shared catalog, parameters, credentials |
 | `langfuse` | `conf/langfuse/` | Default — provider-specific catalog + eval catalog (Langfuse) |
 | `opik` | `conf/opik/` | When you pass `--env opik` — provider-specific catalog (Opik) |
-| `local` | `conf/local/` | **Only** when explicitly layered, e.g. `--env langfuse,local` |
+| `local` | `conf/local/` | Only when `--env local` is passed explicitly (replaces the run env — not layered on top) |
 
 `default_run_env = "langfuse"` (in `src/kedro_agentic_workflows/settings.py`), so a plain `kedro run` loads `conf/base/` + `conf/langfuse/`. Switching providers is `--env opik` (loads `conf/base/` + `conf/opik/`).
+
+The Kedro CLI's `--env <name>` flag takes a single env directory name; it doesn't accept multiple envs or comma-separated stacking. `conf/local/` is therefore not in the default stack — it's only loaded if you pass `--env local`, which would replace `conf/langfuse/` entirely (and then nothing would bind `intent_prompt` / `intent_tracer` / `autogen_tracer`, so most pipelines would fail).
 
 ## Credentials
 
 Copy [`base/credentials.yml.template`](base/credentials.yml.template) to `base/credentials.yml` and fill in real values. The template is the only credentials file tracked in git; `conf/**/*credentials*` in `.gitignore` keeps everything else out (with a single negation exception for the `.template` file).
 
-If you'd rather keep credentials in `conf/local/credentials.yml` (the more conventional Kedro location for secrets), that's fine — but you must stack the env explicitly because `local` is no longer in the default run env:
-
-```bash
-kedro run --env langfuse,local --params user_id=3
-kedro run --env opik,local     --params user_id=3
-```
-
-The trade-off: `conf/base/credentials.yml` keeps the command line short (just `kedro run`); `conf/local/credentials.yml` is conventional but requires the `--env …,local` flag every time.
+`conf/base/credentials.yml` is the right place because it's loaded under every env. Putting credentials in `conf/local/credentials.yml` wouldn't work with the default setup — `conf/local/` isn't loaded by default, and the CLI doesn't support layering it on top of the active env.
 
 ## Catalog layout
 

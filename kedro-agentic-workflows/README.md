@@ -73,7 +73,7 @@ kedro_agentic_workflows/
   │   │   └── catalog_evaluation.yml           # Evaluation pipeline catalog (Langfuse-only for now)
   │   ├── opik                                 # --env opik: same provider-specific names bound to Opik
   │   │   └── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Opik)
-  │   └── local                                # gitignored; only loaded if --env local is explicitly passed
+  │   └── local                                # gitignored; loaded only when --env local is passed explicitly
   ├── data
   │   ├── intent_detection
   │   │   ├── prompts                          # Intent detection prompts
@@ -318,9 +318,9 @@ pip install -r requirements.txt
 
 ### 3. Set Up API Credentials
 
-Copy [`conf/base/credentials.yml.template`](conf/base/credentials.yml.template) to `conf/base/credentials.yml` and fill in real values. The `conf/**/*credentials*` pattern in `.gitignore` keeps secrets out of git. Include `endpoint` for both providers if you plan to run the AutoGen pipeline (autogen mode uses OTLP).
+Copy [`conf/base/credentials.yml.template`](conf/base/credentials.yml.template) to `conf/base/credentials.yml` and fill in real values. The `conf/**/*credentials*` pattern in `.gitignore` keeps secrets out of git (with a single negation exception for the `.template` file). Include `endpoint` for both providers if you plan to run the AutoGen pipeline (autogen mode uses OTLP).
 
-`conf/base/` is the primary path because `default_run_env = "langfuse"` means a plain `kedro run` loads `conf/base/` + `conf/langfuse/` only. If you prefer to keep credentials in `conf/local/credentials.yml`, stack the env explicitly: `kedro run --env langfuse,local`.
+Why `conf/base/` and not `conf/local/`? Because `default_run_env = "langfuse"` (in `settings.py`) means a plain `kedro run` loads `conf/base/` + `conf/langfuse/` — `conf/local/` is not in the default stack. The Kedro CLI's `--env` flag takes a single env name (no layering), so credentials need to live somewhere that's loaded by default. `conf/base/credentials.yml` is the simplest place.
 
 ## ▶️ Running the Project
 
@@ -338,7 +338,7 @@ This creates:
 
 The project ships three response variants on top of the shared intent-detection pipeline. Pick the one you want with `--pipelines` and the provider with `--env`. `--env` defaults to `langfuse`.
 
-> **Heads-up:** `default_run_env = "langfuse"` (see `src/kedro_agentic_workflows/settings.py`) means a plain `kedro run` loads `conf/base/` + `conf/langfuse/`, **not** `conf/local/`. Put your real credentials in `conf/base/credentials.yml` (gitignored) for the simplest setup. If you'd rather keep them in `conf/local/credentials.yml`, stack envs explicitly: `kedro run --env langfuse,local` (or `--env opik,local`).
+> **Heads-up:** `default_run_env = "langfuse"` (see `src/kedro_agentic_workflows/settings.py`) means a plain `kedro run` loads `conf/base/` + `conf/langfuse/`, **not** `conf/local/`. Put your real credentials in `conf/base/credentials.yml` (gitignored — see [Set Up API Credentials](#3-set-up-api-credentials) below). `--env` accepts a single env name, so you can't layer `conf/local/` on top via the CLI; if you must keep credentials in `conf/local/`, you'd need to revert `default_run_env` and rewire the catalog.
 
 | Scenario | Command |
 |---|---|
