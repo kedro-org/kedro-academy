@@ -257,18 +257,20 @@ The pipeline:
    - **Reason quality** — LLM-as-a-judge score (1–5) evaluating the reasoning behind the prediction.
 4. Publishes the experiment to Langfuse with all scores, traces, and metadata.
 
-### `LangfuseEvaluationDataset`
+### `langfuse.EvaluationDataset`
 
-The evaluation dataset is managed by `LangfuseEvaluationDataset`, a custom Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
+The evaluation dataset is managed by the experimental `langfuse.EvaluationDataset`, a Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
 
 - **`local`** — the local file is the source of truth; `load()` upserts all local items to remote (creating new items or updating existing ones matched by `id`). `save()` upserts to remote and merges back into the local file (new data takes precedence).
 - **`remote`** — the remote Langfuse dataset is the source of truth. `load()` fetches remote as-is; `save()` upserts items to remote without writing to any local file. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
 
 Lifecycle operations (update, archive, delete) are delegated to the native Langfuse API — the dataset handles load/save only.
 
-> **Note:** `LangfuseEvaluationDataset` currently lives in this project at
-> `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py`.
-> It will be moved to the `kedro-datasets` experimental package in a future release.
+> **Note:** this class is now published upstream as
+> `kedro_datasets_experimental.langfuse.EvaluationDataset` (kedro-datasets 9.4.0),
+> and the catalog entry below uses the upstream class. A stale local copy at
+> `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py` predates
+> the upstream release and will be deleted in the eval reorg follow-up PR.
 
 Catalog entry (`conf/langfuse/catalog_evaluation.yml`):
 
