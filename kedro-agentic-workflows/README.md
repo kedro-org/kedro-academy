@@ -182,7 +182,7 @@ Unlike intent detection, these are static templates managed via Kedro's experime
 - `tool.txt` – instruction for tool usage (defines how the LLM should decide when and how to call tools).
 - `response.yml` – instruction for response style, tone, and overall reasoning with user-level template, receiving context (intent, claim data, docs) and instructing the model on what to answer.
 
-Example catalog entries (identical across both envs):
+Example catalog entries (shared across providers, so they live once in `conf/base/catalog_genai_config.yml`):
 
 ```yaml
 tool_prompt:
@@ -234,6 +234,8 @@ autogen_tracer:
   credentials: opik_credentials
   mode: autogen
 ```
+
+> **Note:** the Opik snippet above shows the target state. The actual [`conf/opik/catalog_genai_config.yml`](conf/opik/catalog_genai_config.yml) currently carries two `TEMP` workarounds for upstream kedro-datasets bugs — `autogen_tracer` points at a separate `opik_credentials_autogen` block (isolating the OTLP `endpoint`), and `intent_tracer` carries an explicit `project_name:` override.
 
 AutoGen mode requires the OTLP endpoint URL in credentials (e.g. `https://cloud.langfuse.com/api/public/otel/v1/traces`; the Opik equivalent is `https://www.comet.com/opik/api/v1/private/otel/v1/traces`). See [docs for `langfuse.TraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.TraceDataset/) and [`opik.TraceDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.TraceDataset/) for the full mode/credentials matrix.
 
