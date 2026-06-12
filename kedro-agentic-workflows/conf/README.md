@@ -11,13 +11,11 @@ This folder holds Kedro configuration. The project uses three envs:
 
 `default_run_env = "langfuse"` (in `src/kedro_agentic_workflows/settings.py`), so a plain `kedro run` loads `conf/base/` + `conf/langfuse/`. Switching providers is `--env opik` (loads `conf/base/` + `conf/opik/`).
 
-The Kedro CLI's `--env <name>` flag takes a single env directory name; it doesn't accept multiple envs or comma-separated stacking. `conf/local/` is therefore not in the default stack — it's only loaded if you pass `--env local`, which would replace `conf/langfuse/` entirely (and then nothing would bind `intent_prompt` / `intent_tracer` / `autogen_tracer`, so most pipelines would fail).
-
 ## Credentials
 
 Copy [`base/credentials.yml.template`](base/credentials.yml.template) to `base/credentials.yml` and fill in real values. The template is the only credentials file tracked in git; `conf/**/*credentials*` in `.gitignore` keeps everything else out (with a single negation exception for the `.template` file).
 
-`conf/base/credentials.yml` is the right place because it's loaded under every env. Putting credentials in `conf/local/credentials.yml` wouldn't work with the default setup — `conf/local/` isn't loaded by default, and the CLI doesn't support layering it on top of the active env.
+Credentials live in `conf/base/` because it's loaded under every env — see the note in the [project README](../README.md#3-set-up-api-credentials).
 
 ## Catalog layout
 
