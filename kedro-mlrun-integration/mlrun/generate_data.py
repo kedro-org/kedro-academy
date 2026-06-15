@@ -71,7 +71,6 @@ def main(context):
     context.log_dataset(
         key="user_data.csv",
         df=df,
-        artifact_path="v3io:///projects/my-project/artifacts/",
         upload=True,
         format="csv",
     )

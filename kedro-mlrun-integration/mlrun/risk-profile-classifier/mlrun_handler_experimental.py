@@ -160,7 +160,7 @@ def handler(context, event=None):
 
     # Create Kedro session
     context.logger.info(f"Creating Kedro session at {project_path}")
-    with KedroSession.create(project_path=project_path) as session:
+    with KedroSession.create(project_path=project_path, env="mlrun") as session:
         copy_catalog = session.load_context().catalog
 
         # Extract event data if present (for serving pipelines)
