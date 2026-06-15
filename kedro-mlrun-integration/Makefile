@@ -4,10 +4,6 @@ IMAGE_NAME := mlrun-kedro
 TAG ?= latest
 FULL_IMAGE_NAME := $(REGISTRY)/$(IMAGE_NAME):$(TAG)
 
-# Experimental kedro-datasets with MLRun support
-KEDRO_MLRUN_REPO := git+https://github.com/rokatyy/kedro-plugins.git@add-mlrun-dataset
-
-
 # Install kedro requirements
 .PHONY: install-requirements
 install-requirements:
@@ -22,13 +18,11 @@ install-kedro:
 
 
 # Install experimental kedro-datasets with MLRun Dataset support
-# From: https://github.com/rokatyy/kedro-plugins/tree/add-mlrun-dataset
 .PHONY: install-kedro-mlrun-dataset
 install-kedro-mlrun-dataset:
 	@echo "Installing experimental kedro-datasets with MLRun support..."
-	@echo "Source: https://github.com/rokatyy/kedro-plugins (branch: add-mlrun-dataset)"
 	@echo "This may take a few minutes (cloning and building from git)..."
-	pip install "git+https://github.com/rokatyy/kedro-plugins.git@add-mlrun-dataset#subdirectory=kedro-datasets"
+	pip install "kedro-datasets[mlrun]"
 
 # Build the mlrun-kedro Docker image
 .PHONY: build-kedro
