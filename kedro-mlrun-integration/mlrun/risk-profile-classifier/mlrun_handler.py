@@ -2,15 +2,18 @@
 MLRun handler for Risk Profile Classifier Kedro pipelines.
 
 This handler:
-1. Downloads and unpacks the Kedro project tar archive
-2. Downloads the CSV data artifact to data/raw directory
-3. Runs the specified Kedro pipeline
-4. Logs all output artifacts back to MLRun
+1. Downloads and unpacks the zipped Kedro project artifact.
+2. Bootstraps the Kedro project and runs the requested pipeline with the
+   ``mlrun`` Kedro environment (``conf/mlrun``).
+3. Inputs and outputs are read/written through the MLRun-native dataset types
+   declared in ``conf/mlrun/catalog.yml`` (``kedro-datasets[mlrun]``), so the
+   pipeline itself logs models, metrics, and data back to MLRun.
+4. For serving, returns the ``nuclio_response``-tagged dataset as the HTTP
+   response (see ``post_processing``).
 
 Environment variables:
-- KEDRO_PIPELINE_NAME: Pipeline to run (default: "training")
-- KEDRO_PROJECT_ARTIFACT: Name of the tar artifact (default: "kedro-risk-profile-classifier.tar")
-- DATA_ARTIFACT: Name of the CSV data artifact (default: "user_data")
+- KEDRO_PIPELINE_NAME: Pipeline to run (default: "training").
+- KEDRO_PROJECT_ARTIFACT: Name of the zipped project artifact (default: "risk-classifier").
 """
 
 import os
@@ -136,13 +139,17 @@ def handler(context, event=None):
     """MLRun handler for running Kedro pipelines.
 
     Environment variables:
-        KEDRO_PIPELINE_NAME: Pipeline to run (default: training)
-        KEDRO_PROJECT_ARTIFACT: Name of tar artifact (default: risk-classifier)
-        DATA_ARTIFACT: Name of CSV data artifact (default: user_data)
+        KEDRO_PIPELINE_NAME: Pipeline to run (default: training).
+        KEDRO_PROJECT_ARTIFACT: Name of the zipped project artifact (default: risk-classifier).
 
     Args:
         context: MLRun execution context.
-        event: Optional event data (not used).
+        event: Optional serving request. When present, its body is fed to the
+            ``nuclio_event``-tagged dataset and the handler returns an HTTP response.
+
+    Returns:
+        For a serving request, a ``nuclio_sdk.Response`` with the prediction
+        results; otherwise ``None``.
     """
     # Get configuration from environment
     pipeline_name = os.getenv("KEDRO_PIPELINE_NAME", "training")
@@ -225,25 +232,24 @@ def handler(context, event=None):
 
 
 def post_processing(context, project_path: Path, event = None, catalog = None):
-    """Process Kedro catalog and log artifacts to MLRun.
+    """Build the HTTP response for a serving request.
 
-    This function automatically logs all datasets with file paths as MLRun artifacts:
-    - Pickle datasets (models) → log_model()
-    - CSV/Parquet datasets → log_artifact() with appropriate format
-    - JSON datasets → log_artifact() with format="json"
-
-    For serving pipeline with event data, also returns prediction results.
+    Pipeline outputs (models, metrics, data) are logged to MLRun by the
+    MLRun-native dataset types in ``conf/mlrun/catalog.yml`` while the pipeline
+    runs, so this function does not log artifacts itself. It only handles the
+    serving case: when an event is present, it loads every dataset tagged with
+    ``nuclio_response`` metadata and returns it as the HTTP response body
+    (DataFrames are converted to records).
 
     Args:
         context: MLRun execution context.
         project_path: Path to the Kedro project.
-        pipeline_name: Name of the pipeline that was run.
-        event: Event object (if provided, indicates serving request).
-        catalog: Kedro catalog (needed to load results for serving).
+        event: Serving request, if any. Its presence indicates a serving call.
+        catalog: Kedro catalog used to load the response datasets.
 
     Returns:
-        For serving pipeline with event: dict with prediction results
-        Otherwise: None
+        A ``nuclio_sdk.Response`` with the ``nuclio_response`` datasets for a
+        serving request, or ``None`` otherwise.
     """
     context.logger.info("Post-processing: Logging artifacts to MLRun...")
     # If event data provided, check for datasets tagged with nuclio_response
