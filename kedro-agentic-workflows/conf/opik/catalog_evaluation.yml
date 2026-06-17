@@ -1,0 +1,32 @@
+# Opik environment: evaluation pipeline catalog.
+# Mirrors conf/langfuse/catalog_evaluation.yml with Opik-backed datasets, so the
+# intent_detection_evaluation_opik pipeline runs under `--env opik`. The two eval
+# pipelines use the same generic dataset names; only the bindings differ per env.
+
+intent_evaluation_data:
+  type: kedro_datasets_experimental.opik.EvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: opik_credentials
+
+intent_judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: "gpt-4o"
+    temperature: 0.0
+  credentials: openai
+
+intent_judge_prompt:
+  type: kedro_datasets_experimental.opik.PromptDataset
+  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt_opik.json
+  prompt_name: "intent_llm_judge_evaluator_prompt"
+  prompt_type: "chat"
+  credentials: opik_credentials
+  sync_policy: local
+  mode: langchain
+
+opik_client:
+  type: kedro_datasets_experimental.opik.TraceDataset
+  credentials: opik_credentials
+  mode: langchain    # returns an OpikTracer used as a langchain callback in the eval task
