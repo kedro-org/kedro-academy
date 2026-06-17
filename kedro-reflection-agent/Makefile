@@ -30,7 +30,7 @@ app:
 	$(STREAMLIT) run app/main.py
 
 viz:
-	$(KEDRO) viz run
+	$(KEDRO) viz run --params agent_id=$(agent)
 
 
 # ── full demo cycle (headless) ────────────────────────────────────────────────

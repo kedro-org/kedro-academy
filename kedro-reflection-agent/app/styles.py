@@ -11,6 +11,7 @@ import streamlit as st
 
 GLOBAL_CSS = """
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
   /* ── Typography — Inter from link tag above ── */
   html, body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
@@ -46,7 +47,9 @@ GLOBAL_CSS = """
   }
   .block-container {
     max-width: 1280px !important;
-    padding-top: 1rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-top: 0 !important;
     padding-bottom: 4rem !important;
     padding-left: 1.5rem !important;
     padding-right: 1.5rem !important;
@@ -93,129 +96,131 @@ GLOBAL_CSS = """
     letter-spacing: -0.01em;
   }
 
-  /* ── Reset Demo button — fixed into the nav bar's right side ─────────────
-     #rh-nav-reset is a hidden anchor at the end of the nav st.markdown call.
-     The st.button rendered immediately after creates the adjacent sibling
-     element-container which CSS positions fixed at the top-right of the page.
-  ── */
-  .element-container:has(#rh-nav-reset) + .element-container {
-    position: fixed !important;
-    top: 11px !important;
-    right: 24px !important;
-    z-index: 999999 !important;
-    width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .element-container:has(#rh-nav-reset) + .element-container [data-testid="stBaseButton-secondary"],
-  .element-container:has(#rh-nav-reset) + .element-container .stButton button {
-    font-size: 12.5px !important;
-    font-weight: 500 !important;
-    color: #64748B !important;
-    background: #F1F5F9 !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 8px !important;
-    padding: 5px 12px !important;
-    box-shadow: none !important;
-  }
-  .element-container:has(#rh-nav-reset) + .element-container [data-testid="stBaseButton-secondary"]:hover,
-  .element-container:has(#rh-nav-reset) + .element-container .stButton button:hover {
-    background: #E2E8F0 !important;
-    color: #0F172A !important;
-  }
-  .element-container:has(#rh-nav-reset) + .element-container [data-testid="stBaseButton-secondary"] *,
-  .element-container:has(#rh-nav-reset) + .element-container .stButton button * {
-    color: inherit !important;
-  }
-
-  /* ── Nav page-link buttons ────────────────────────────────────────────────
-     The anchor ID itself encodes active/inactive state:
-       #rh-nav-ov-active  / #rh-nav-camp-active  → highlighted (blue on light-blue)
-       #rh-nav-ov         / #rh-nav-camp          → dimmed (grey, transparent)
-     Both buttons are always type="secondary" — no conflict with global primary CSS.
-  ── */
-
-  /* Collapse all four anchor containers */
-  .element-container:has(#rh-nav-ov),
-  .element-container:has(#rh-nav-ov-active),
-  .element-container:has(#rh-nav-camp),
-  .element-container:has(#rh-nav-camp-active) {
+  /* ── Collapse global CSS / JS injection blocks (keeps nav flush to top) ── */
+  [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has(link),
+  [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has(style),
+  [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has(#rh-app-js-hook),
+  [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:has(#rh-app-js-hook) + [data-testid="stElementContainer"] {
+    display: none !important;
     height: 0 !important;
     min-height: 0 !important;
     max-height: 0 !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
+    line-height: 0 !important;
   }
 
-  /* Position — Org Overview (active or inactive) */
-  .element-container:has(#rh-nav-ov) + .element-container,
-  .element-container:has(#rh-nav-ov-active) + .element-container {
-    position: fixed !important;
-    top: 11px !important;
-    left: 500px !important;
-    z-index: 999999 !important;
+  /* ── Top nav row (st.columns + st.button, in-app navigation) ───────────── */
+  [data-testid="stLayoutWrapper"]:has(#rh-nav-brand),
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand),
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 99999 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    margin-top: 0 !important;
+    min-height: 56px !important;
+    padding: 0 !important;
+    background: rgba(255, 255, 255, 0.97) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    box-sizing: border-box !important;
+  }
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stHorizontalBlock"],
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    min-height: 56px !important;
+    gap: 4px !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    max-width: 1280px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 0 1.5rem !important;
+    box-sizing: border-box !important;
+  }
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stHorizontalBlock"]::-webkit-scrollbar,
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stHorizontalBlock"]::-webkit-scrollbar {
+    display: none !important;
+  }
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"],
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"] {
+    min-width: 0 !important;
     width: auto !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"]:nth-child(2),
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"]:nth-child(2) {
+    margin-left: 20px !important;
+  }
+  [data-testid="stElementContainer"]:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"]:nth-child(4),
+  .element-container:has([data-testid="stHorizontalBlock"] #rh-nav-brand) [data-testid="stColumn"]:nth-child(4) {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+  }
+  .rh-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: clamp(4px, 1.5vw, 8px);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .rh-nav-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: #2251FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .rh-nav-title {
+    font-size: clamp(12px, 2.4vw, 14px);
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .rh-nav-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94A3B8;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"] .stButton,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"] [data-testid="stMarkdownContainer"] {
     margin: 0 !important;
     padding: 0 !important;
   }
-
-  /* Position — Campaigns (active or inactive) */
-  .element-container:has(#rh-nav-camp) + .element-container,
-  .element-container:has(#rh-nav-camp-active) + .element-container {
-    position: fixed !important;
-    top: 11px !important;
-    left: 620px !important;
-    z-index: 999999 !important;
-    width: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  @media (max-width: 900px) {
+    .rh-nav-badge { display: none !important; }
   }
-
-  /* Inactive style — grey transparent link */
-  .element-container:has(#rh-nav-ov) + .element-container button,
-  .element-container:has(#rh-nav-camp) + .element-container button {
-    font-size: 13.5px !important;
-    font-weight: 500 !important;
-    color: #64748B !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 6px 12px !important;
-    box-shadow: none !important;
-    white-space: nowrap !important;
+  @media (max-width: 640px) {
+    .rh-nav-title { max-width: 6rem; }
   }
-  .element-container:has(#rh-nav-ov) + .element-container button:hover,
-  .element-container:has(#rh-nav-camp) + .element-container button:hover {
-    background: #F1F5F9 !important;
-    color: #0F172A !important;
-  }
-  .element-container:has(#rh-nav-ov) + .element-container button *,
-  .element-container:has(#rh-nav-camp) + .element-container button * {
-    color: inherit !important;
-  }
-
-  /* Active style — blue text on light-blue bg */
-  .element-container:has(#rh-nav-ov-active) + .element-container button,
-  .element-container:has(#rh-nav-camp-active) + .element-container button {
-    font-size: 13.5px !important;
-    font-weight: 600 !important;
-    color: #2251FF !important;
-    background: #EEF2FF !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 6px 12px !important;
-    box-shadow: none !important;
-    white-space: nowrap !important;
-  }
-  .element-container:has(#rh-nav-ov-active) + .element-container button:hover,
-  .element-container:has(#rh-nav-camp-active) + .element-container button:hover {
-    background: #E0E7FF !important;
-    color: #1A3FCC !important;
-  }
-  .element-container:has(#rh-nav-ov-active) + .element-container button *,
-  .element-container:has(#rh-nav-camp-active) + .element-container button * {
-    color: #2251FF !important;
+  @media (max-width: 480px) {
+    .rh-nav-title { display: none !important; }
   }
 
   /* ── Nav ── */
@@ -859,6 +864,60 @@ GLOBAL_CSS = """
     color: #0F172A !important;
   }
 
+  /* ── Nav bar buttons — override global .stButton primary/secondary rules ── */
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(2) .stButton > button,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(3) .stButton > button,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(2) [data-testid="stBaseButton-secondary"],
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(3) [data-testid="stBaseButton-secondary"] {
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+    width: auto !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(2) .stButton > button:hover,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(3) .stButton > button:hover {
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: none !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(2) .stButton > button *,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(3) .stButton > button * {
+    color: #64748B !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand[data-page="org_overview"]) > [data-testid="stColumn"]:nth-child(2) .stButton > button,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand[data-page="campaigns"]) > [data-testid="stColumn"]:nth-child(3) .stButton > button {
+    font-weight: 600 !important;
+    color: #2251FF !important;
+    background: #EEF2FF !important;
+    border: none !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand[data-page="org_overview"]) > [data-testid="stColumn"]:nth-child(2) .stButton > button *,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand[data-page="campaigns"]) > [data-testid="stColumn"]:nth-child(3) .stButton > button * {
+    color: #2251FF !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(4) .stButton > button,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(4) [data-testid="stBaseButton-secondary"] {
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    background: #F1F5F9 !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(4) .stButton > button *,
+  [data-testid="stHorizontalBlock"]:has(#rh-nav-brand) > [data-testid="stColumn"]:nth-child(4) [data-testid="stBaseButton-secondary"] * {
+    color: #64748B !important;
+  }
+
   /* ── Metrics ── */
   [data-testid="stMetric"] {
     background: #FFFFFF;
@@ -934,13 +993,9 @@ GLOBAL_CSS = """
 
 
 def inject_css() -> None:
-    """Inject Inter font (via link tag) then the global CSS."""
-    # Link tag is more reliable than @import inside <style>
-    st.markdown(
-        '<link rel="preconnect" href="https://fonts.googleapis.com">'
-        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-        '<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;'
-        '0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">',
-        unsafe_allow_html=True,
-    )
+    """Inject global CSS and nav layout overrides (keeps the nav flush to the top)."""
+    from app.components.nav import NAV_STYLE_JS
+
     st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+    st.markdown('<div id="rh-app-js-hook"></div>', unsafe_allow_html=True)
+    st.iframe(NAV_STYLE_JS, height=1)

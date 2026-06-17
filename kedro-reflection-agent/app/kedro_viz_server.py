@@ -38,7 +38,19 @@ def _port_open(host: str, port: int, timeout: float = 0.4) -> bool:
         return False
 
 
+def _read_stderr(proc: subprocess.Popen[str]) -> str:
+    if proc.stderr is None:
+        return "Kedro-Viz exited early."
+    try:
+        return proc.stderr.read().strip() or "Kedro-Viz exited early."
+    except Exception:  # noqa: BLE001
+        return "Kedro-Viz exited early."
+
+
 def _kedro_cmd() -> list[str]:
+    venv_kedro = Path(sys.executable).parent / "kedro"
+    if venv_kedro.exists():
+        return [str(venv_kedro)]
     kedro = shutil.which("kedro")
     if kedro:
         return [kedro]
@@ -68,19 +80,30 @@ def ensure_kedro_viz_running(
 
     proc: subprocess.Popen[str] | None = st.session_state.get("kedro_viz_proc")
 
+    # Previous process exited — capture stderr and allow a fresh spawn below.
+    if proc is not None and proc.poll() is not None:
+        st.session_state.kedro_viz_error = _read_stderr(proc)[:500]
+        st.session_state.kedro_viz_proc = None
+        proc = None
+
     # Process already spawned — poll briefly or return early
     if proc is not None and proc.poll() is None:
         if not wait:
             return "starting"
-        for _ in range(12):
+        for _ in range(40):
             if _port_open(KEDRO_VIZ_HOST, KEDRO_VIZ_PORT):
                 return "ready"
+            if proc.poll() is not None:
+                st.session_state.kedro_viz_error = _read_stderr(proc)[:500]
+                st.session_state.kedro_viz_proc = None
+                break
             time.sleep(0.25)
-        return "starting"
+        else:
+            return "starting"
+        proc = st.session_state.get("kedro_viz_proc")
 
-    # Previous attempt exited non-zero → failed
-    if st.session_state.get("kedro_viz_start_attempted") and proc is not None and proc.poll() is not None:
-        return "failed"
+    if proc is not None and proc.poll() is None:
+        return "starting"
 
     root = Path(project_root)
     cmd = _kedro_cmd() + [
@@ -109,13 +132,13 @@ def ensure_kedro_viz_running(
     if not wait:
         return "starting"
 
-    for _ in range(20):
+    for _ in range(40):
         if proc.poll() is not None:
-            err = (proc.stderr.read() if proc.stderr else "") or "Kedro-Viz exited early."
-            st.session_state.kedro_viz_error = err.strip()[:500]
+            st.session_state.kedro_viz_error = _read_stderr(proc)[:500]
+            st.session_state.kedro_viz_proc = None
             return "failed"
         if _port_open(KEDRO_VIZ_HOST, KEDRO_VIZ_PORT):
             return "ready"
-        time.sleep(0.3)
+        time.sleep(0.25)
 
     return "starting"
