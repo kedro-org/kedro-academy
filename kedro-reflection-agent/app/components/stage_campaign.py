@@ -6,8 +6,9 @@ import re
 
 import streamlit as st
 
-from app.data_loader import get_aggregate_scores
+from app.formatting import pass_rate_explainer_html
 from app.components.charts import dimension_bars_chart
+from app.data_loader import get_aggregate_scores, get_run_index
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
 
@@ -166,8 +167,16 @@ def render_stage_campaign(
             mean_score = float(agg.get("mean_total") or agg.get("mean_score") or 0)
             n_cases = int(agg.get("n_cases") or 0)
             n_passing = int(agg.get("n_passing") or 0)
-            n_errors = n_cases - n_passing
             pass_rate = float(agg.get("pass_rate") or 0)
+            run_meta = next(
+                (
+                    r
+                    for r in get_run_index()
+                    if r.get("agent_id") == agent_id and r.get("run_id") == run_id
+                ),
+                {},
+            )
+            n_errors = int(run_meta.get("n_errors") or 0)
             langfuse_url = agg.get("langfuse_experiment_url") or agg.get("dataset_run_url")
 
             # 4 KPI cards
@@ -179,12 +188,12 @@ def render_stage_campaign(
                 )
             with kpi_cols[1]:
                 st.markdown(
-                    _kpi_card("Pass Rate", f"{pass_rate:.0%}"),
+                    _kpi_card("Pass Rate", f"{n_passing}/{n_cases} ({pass_rate:.0%})"),
                     unsafe_allow_html=True,
                 )
             with kpi_cols[2]:
                 st.markdown(
-                    _kpi_card("Errors", str(n_errors), delta_positive=n_errors == 0),
+                    _kpi_card("Pipeline Errors", str(n_errors), delta_positive=n_errors == 0),
                     unsafe_allow_html=True,
                 )
             with kpi_cols[3]:
@@ -192,6 +201,14 @@ def render_stage_campaign(
                     _kpi_card("Avg Score", f"{mean_score:.1%}"),
                     unsafe_allow_html=True,
                 )
+
+            stored_threshold = agg.get("passing_threshold")
+            if stored_threshold is not None:
+                stored_threshold = float(stored_threshold)
+            st.markdown(
+                pass_rate_explainer_html(agent_id, stored_threshold=stored_threshold),
+                unsafe_allow_html=True,
+            )
 
             st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
 

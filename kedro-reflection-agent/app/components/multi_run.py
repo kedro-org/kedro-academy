@@ -13,6 +13,7 @@ import streamlit as st
 from app.components.charts import score_progression_chart
 from app.components.icons import ic
 from app.data_loader import get_apply_history
+from app.formatting import format_score_delta, pass_rate_explainer_html, score_delta_color
 
 
 def render_multi_run_insights(agent_id: str, run_index: list[dict]) -> None:
@@ -101,6 +102,15 @@ def render_multi_run_insights(agent_id: str, run_index: list[dict]) -> None:
         )
         _render_dimension_delta(agent_runs)
 
+    latest_run = agent_runs[-1] if agent_runs else {}
+    stored_threshold = latest_run.get("passing_threshold")
+    if stored_threshold is not None:
+        stored_threshold = float(stored_threshold)
+    st.markdown(
+        pass_rate_explainer_html(agent_id, stored_threshold=stored_threshold),
+        unsafe_allow_html=True,
+    )
+
     # ── "What drove it" box ───────────────────────────────────────────────────
     apply_history = get_apply_history()
     if apply_history:
@@ -170,11 +180,19 @@ def _render_dimension_delta(agent_runs: list[dict]) -> None:
         _bar_row(dim, v1, v2)
 
     # "What drove it" note under the bars
-    mean1 = run1.get("mean_score") or 0
-    mean2 = run2.get("mean_score") or 0
-    delta = float(mean2) - float(mean1)
-    delta_col = "#15803D" if delta >= 0 else "#B91C1C"
-    sign = "+" if delta >= 0 else ""
+    mean1 = float(run1.get("mean_score") or 0)
+    mean2 = float(run2.get("mean_score") or 0)
+    delta = mean2 - mean1
+    delta_col = score_delta_color(delta)
+    delta_text = format_score_delta(delta)
+    pr1 = run1.get("pass_rate")
+    pr2 = run2.get("pass_rate")
+    pass_rate_note = ""
+    if pr1 is not None and pr2 is not None and float(pr1) != float(pr2):
+        pass_rate_note = (
+            f'<span style="font-size:11px;color:#64748B;margin-left:8px;">'
+            f"pass rate {float(pr1):.0%} → {float(pr2):.0%}</span>"
+        )
     st.markdown(
         f"""
         <div style="margin-top:14px;padding:10px 14px;background:#F8FAFC;
@@ -184,8 +202,9 @@ def _render_dimension_delta(agent_runs: list[dict]) -> None:
           <span style="color:#94A3B8;margin:0 4px;">→</span>
           <span style="font-size:13px;font-weight:800;color:#0F172A;">{mean2:.2f}</span>
           <span style="font-size:13px;font-weight:700;color:{delta_col};margin-left:6px;">
-            {sign}{delta:.2f}
+            {delta_text}
           </span>
+          {pass_rate_note}
         </div>
         """,
         unsafe_allow_html=True,
@@ -203,11 +222,10 @@ def _bar_row(dim: str, v1: float | None, v2: float) -> None:
 
     if v1 is not None:
         delta = v2 - v1
-        sign = "+" if delta >= 0 else ""
-        delta_col = "#15803D" if delta >= 0 else "#B91C1C"
+        delta_col = score_delta_color(delta)
         delta_html = (
             f'<span style="font-size:11px;font-weight:700;color:{delta_col};margin-left:4px;">'
-            f'{sign}{delta:.2f}</span>'
+            f'{format_score_delta(delta)}</span>'
         )
         v1_pct = int(v1 * 100)
         # run_1 grey bar (behind)

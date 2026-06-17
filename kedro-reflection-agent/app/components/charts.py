@@ -10,6 +10,8 @@ from typing import Any
 
 import plotly.graph_objects as go
 
+from app.formatting import score_delta_color
+
 
 # ── Color helpers ─────────────────────────────────────────────────────────────
 
@@ -337,8 +339,12 @@ def dimension_delta_table_html(runs: list[dict]) -> str:
         bar2_w = int(v2 * 100)
         bar1_color = _score_color(v1)
         bar2_color = _score_color(v2)
-        delta_color = "#15803D" if delta >= 0 else "#B91C1C"
-        delta_sign = f"+{delta:.1%}" if delta >= 0 else f"{delta:.1%}"
+        delta_color = score_delta_color(delta)
+        pct_delta = round(delta * 100, 1)
+        if pct_delta == 0:
+            pct_delta = 0.0
+        sign = "+" if pct_delta >= 0 else ""
+        delta_sign = f"{sign}{pct_delta:.1f}%"
 
         rows += f"""
         <tr>
