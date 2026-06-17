@@ -8,6 +8,8 @@ conf/local/**
 
 # ignore potentially sensitive credentials files
 conf/**/*credentials*
+# ...but keep the (no-secrets) credentials.yml.template tracked as documentation
+!conf/**/credentials.yml.template
 
 # except their sub-folders
 !data/**/
