@@ -1,0 +1,61 @@
+# Dependabot configuration for kedro-academy.
+#
+# These are example/learning projects, not production code, so the goal is to
+# stay reasonably current with LOW maintenance overhead, not to chase every
+# release. Strategy:
+#   * Version updates are configured for "Tier A" projects only — those touched
+#     in the last ~12 months (still course/demo facing). Older "Tier B" projects
+#     get no version-update PRs (security updates, enabled in repo Settings,
+#     still apply repo-wide).
+#   * Updates are GROUPED (one PR per project) and run MONTHLY to keep PR noise
+#     manageable across the many sub-projects in this repo.
+#
+# When a project goes stale (>12 months untouched), remove it from the lists
+# below. When a new project is added and actively used, add it here.
+version: 2
+updates:
+  # --- Tier A: projects with a committed uv.lock (uv ecosystem) ---
+  - package-ecosystem: "uv"
+    directories:
+      - "/kedro-beginners"
+      - "/kedro-intermediate/experiment-tracking"
+      - "/kedro-intermediate/extending-kedro"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
+
+  # --- Tier A: projects with requirements.txt / pyproject.toml (pip ecosystem) ---
+  - package-ecosystem: "pip"
+    directories:
+      - "/kedro-agentic-workflows"
+      - "/kedro-batch-agent"
+      - "/kedro-cyberpunk-knowledge-base"
+      - "/kedro-ppt-autogen-workflow"
+      - "/kedro-databricks-bootcamp"
+      - "/kedro-databricks-bootcamp/02_databricks/rocketfuel"
+      - "/kedro-databricks-bootcamp/03_intermediate/rocketfuel"
+      - "/kedro-mlops/kedro-spaceflights-mlops"
+      - "/kedro-mlops/kedro-spaceflights-mlops/airflow-bundle"
+      - "/kedro-refactoring/spaceflights"
+      - "/kedro-refactoring/spaceflights/src"
+      - "/kedro-refactoring/completed-spaceflights"
+      - "/kedro-refactoring/completed-spaceflights/src"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
