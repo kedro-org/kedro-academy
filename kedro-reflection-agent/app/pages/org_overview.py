@@ -14,6 +14,7 @@ from app.data_loader import (
     get_latest_score_for_agent,
     get_run_index,
 )
+from app.formatting import format_score_delta, score_delta_color
 
 
 # ── Agent meta helpers ────────────────────────────────────────────────────────
@@ -372,9 +373,11 @@ def _render_podium(ranked: list[tuple[str, float, dict]]) -> None:
         delta_html = ""
         if latest.get("delta_mean_score") is not None and run_seq > 1:
             delta = float(latest["delta_mean_score"])
-            sign = "+" if delta >= 0 else ""
-            delta_col = "#15803D" if delta >= 0 else "#B91C1C"
-            delta_html = f'<div style="font-size:10px;font-weight:700;color:{delta_col};margin-top:2px;">{sign}{delta:.2f} vs prev</div>'
+            delta_col = score_delta_color(delta)
+            delta_html = (
+                f'<div style="font-size:10px;font-weight:700;color:{delta_col};margin-top:2px;">'
+                f'{format_score_delta(delta)} vs prev</div>'
+            )
 
         if is_first:
             card_style = (
@@ -466,9 +469,11 @@ def _render_leaderboard_table(
         delta_val = latest.get("delta_mean_score")
         delta_html = ""
         if delta_val is not None:
-            delta_col = "#15803D" if float(delta_val) >= 0 else "#B91C1C"
-            sign = "+" if float(delta_val) >= 0 else ""
-            delta_html = f'<span style="font-size:12px;font-weight:700;color:{delta_col};">{sign}{float(delta_val):.2f}</span>'
+            delta_col = score_delta_color(float(delta_val))
+            delta_html = (
+                f'<span style="font-size:12px;font-weight:700;color:{delta_col};">'
+                f'{format_score_delta(float(delta_val))}</span>'
+            )
         else:
             delta_html = '<span style="color:#CBD5E1;font-size:12px;">—</span>'
 
