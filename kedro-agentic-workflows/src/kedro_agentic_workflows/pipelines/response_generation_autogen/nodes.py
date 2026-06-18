@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+from typing import Any
 
 from kedro.pipeline import LLMContext
 from langchain_core.messages import AIMessage
@@ -16,10 +17,15 @@ def generate_response(
     intent_detection_result: dict,
     user_context: dict,
     session_config: dict,
+    autogen_tracer: Any,
 ) -> dict:
     """
     Run the ResponseGenerationAgent to produce a final answer.
     Accepts intent detection result + user context and session config.
+
+    `autogen_tracer` is the OpenTelemetry `Tracer` returned by whichever
+    provider's TraceDataset (mode=autogen) is bound in the active env. The
+    span API is identical across providers, so this node is provider-agnostic.
     """
     if intent_detection_result["intent"] == "clarification_needed":
         message = (
@@ -30,17 +36,33 @@ def generate_response(
         result = {"messages": [AIMessage(content=message)]}
 
     else:
-        agent = ResponseGenerationAgentAutogen(context=response_generation_context)
-        agent.compile()
+        with autogen_tracer.start_as_current_span("response_generation") as span:
+            span.set_attribute("intent", intent_detection_result["intent"])
+            span.set_attribute(
+                "intent_reason", intent_detection_result.get("reason", "")
+            )
+            span.set_attribute(
+                "user_id",
+                user_context.get("profile", {}).get("user_id", "unknown"),
+            )
 
-        context = {
-            "messages": [],
-            "intent": intent_detection_result["intent"],
-            "intent_generator_summary": intent_detection_result["reason"],
-            "user_context": user_context,
-        }
+            agent = ResponseGenerationAgentAutogen(context=response_generation_context)
+            agent.compile()
 
-        result = agent.invoke(context, session_config)
+            context = {
+                "messages": [],
+                "intent": intent_detection_result["intent"],
+                "intent_generator_summary": intent_detection_result["reason"],
+                "user_context": user_context,
+            }
+
+            result = agent.invoke(context, session_config)
+
+            if result.get("messages"):
+                # Truncate to keep span payload bounded.
+                span.set_attribute("response", result["messages"][-1].content[:500])
+            span.set_attribute("claim_created", result.get("claim_created", False))
+            span.set_attribute("escalated", result.get("escalated", False))
 
     for m in result["messages"]:
         try:
