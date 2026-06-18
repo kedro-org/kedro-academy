@@ -1,0 +1,26 @@
+# Langfuse environment: binds the provider-specific generic names
+# (intent_prompt, intent_tracer, autogen_tracer) to Langfuse-backed
+# implementations. Shared catalog entries (llm, tool_prompt, response_prompt,
+# etc.) live in conf/base/catalog_genai_config.yml.
+
+intent_prompt:
+  type: kedro_datasets_experimental.langfuse.PromptDataset
+  filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
+  prompt_name: "intent-classifier"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local        # local | remote | strict
+  mode: sdk                 # sdk preserves Langfuse-side prompt-version tracking;
+                            # the agent duck-types the returned object into a LangChain template
+  load_args:
+    version: ${runtime_params:intent_prompt_version, 1}
+
+intent_tracer:
+  type: kedro_datasets_experimental.langfuse.TraceDataset
+  credentials: langfuse_credentials
+  mode: langchain           # returns a LangChain CallbackHandler used in session_config
+
+autogen_tracer:
+  type: kedro_datasets_experimental.langfuse.TraceDataset
+  credentials: langfuse_credentials
+  mode: autogen             # returns an OpenTelemetry Tracer (start_as_current_span)
