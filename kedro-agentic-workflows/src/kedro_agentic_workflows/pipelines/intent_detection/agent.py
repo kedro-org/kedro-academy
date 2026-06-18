@@ -5,7 +5,6 @@ from kedro.pipeline import LLMContext
 from langchain_core.messages import AnyMessage, AIMessage
 from langchain_core.runnables import Runnable
 from langchain_core.prompts import ChatPromptTemplate
-from langfuse.model import ChatPromptClient
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.state import CompiledStateGraph
@@ -66,13 +65,13 @@ class IntentDetectionAgent(KedroAgent):
         self.compiled_graph: CompiledStateGraph | None = None
         self.memory: MemorySaver | None = None
 
-        # Preserve Langfuse prompt for tracing
-        # But convert to the Langchain prompt for execution
+        # The prompt may arrive either as a LangChain template (PromptDataset
+        # mode=langchain) or as a provider SDK prompt object that still exposes
+        # `get_langchain_prompt()` (mode=sdk, e.g. Langfuse). Duck-type so the
+        # agent doesn't need a provider-specific import.
         prompt = self.context.prompts["intent_prompt"]
-        if isinstance(prompt, ChatPromptClient):
-            prompt = ChatPromptTemplate.from_messages(
-                prompt.get_langchain_prompt()
-            )
+        if hasattr(prompt, "get_langchain_prompt"):
+            prompt = ChatPromptTemplate.from_messages(prompt.get_langchain_prompt())
 
         # LLM bound to structured intent output
         structured_llm = self.context.llm.with_structured_output(IntentOutput)
