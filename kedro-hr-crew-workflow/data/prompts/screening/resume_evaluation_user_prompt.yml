@@ -1,0 +1,39 @@
+# Resume Evaluation Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent, context
+
+messages:
+  - role: user
+    content: |
+      description: Conduct a comprehensive evaluation of the candidate based on the match results from the Requirements Matcher. Use the Scoring Tool to calculate the match score and must-have coverage. Analyze the candidate's qualifications, identify strengths and gaps, assess risk factors, and provide a clear recommendation based on the following STRICT thresholds:
+      
+      CRITICAL: You MUST follow these thresholds exactly. Check conditions in this order:
+      
+      STEP 1 - CHECK FOR "reject" FIRST (HIGHEST PRIORITY):
+      If match_score < 70 OR must_have_coverage < 0.70, you MUST set recommendation = "reject"
+      - This is MANDATORY - do not use "review" if scores are below these thresholds
+      - Example: match_score = 59.89 and must_have_coverage = 0.56 → MUST be "reject" (both below thresholds)
+      - Also reject if critical risk flags (low confidence < 0.5 for multiple must-have requirements)
+      
+      STEP 2 - CHECK FOR "proceed":
+      If match_score >= 80 AND must_have_coverage >= 0.85 AND all must-have requirements have confidence >= 0.6, set recommendation = "proceed"
+      - Confidence >= 0.6 is acceptable for must-have requirements
+      
+      STEP 3 - DEFAULT TO "review":
+      For all other cases (scores meet minimum thresholds but don't meet proceed criteria), set recommendation = "review"
+      - When match_score >= 70 AND must_have_coverage >= 0.70 BUT (match_score < 80 OR must_have_coverage < 0.85)
+      - When there are risk flags (low confidence on must-have requirements < 0.6) but scores meet minimum thresholds
+      
+      Consider all available evidence and provide a detailed, evidence-based assessment.
+      
+      expected_output: A comprehensive ScreeningResult object containing: application_id (from requirements matching task output), candidate_name (from requirements matching task output), job_title (from requirements matching task output), match_score (overall match score 0-100 from Scoring Tool), must_have_coverage (coverage of must-have requirements 0.0-1.0 from Scoring Tool), gaps (list of identified gaps as an array of strings), strengths (list of candidate strengths as an array of strings), risk_flags (list of any risk flags as an array of strings), recommendation (proceed/reject/review - MUST follow the thresholds above exactly), qa_suggestions (suggestions for quality assurance as an array of strings - CRITICAL: must be a list, not a string. IMPORTANT: If recommendation is "reject", set qa_suggestions to an empty array [] since rejected candidates don't need next steps), and match_results (detailed match results from requirements matching task, including requirement_type field for each match). You must include application_id, candidate_name, and job_title from the requirements matching task output. CRITICAL: qa_suggestions must be an array of strings, not a single string. CRITICAL: The recommendation field MUST follow the thresholds in STEP 1, STEP 2, STEP 3 above - if match_score < 70 OR must_have_coverage < 0.70, recommendation MUST be "reject". CRITICAL: If recommendation is "reject", qa_suggestions MUST be an empty array []. Format as valid JSON matching the ScreeningResult schema.
+      
+      agent: resume_evaluator
+      
+      context: requirements_matching_task
+      
+      Match Results from Requirements Matcher:
+      {{match_results}}
+      
+      Output Schema:
+      {{output_schema}}
