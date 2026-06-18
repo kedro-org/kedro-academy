@@ -1,5 +1,11 @@
+# NOTE: the intent_detection_evaluation pipeline still runs on Langfuse only.
+# Reorganising eval to follow the same provider-agnostic shape as the main
+# project (generic names, swappable via --env) is tracked as a follow-up PR.
+# Class names below have been updated to the 9.4.0 names so this catalog
+# keeps loading after the kedro-datasets bump.
+
 intent_evaluation_data:
-  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: evaluations/intent_agent_evaluation
   filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
@@ -15,7 +21,7 @@ intent_judge_llm:
   credentials: openai
 
 intent_judge_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  type: kedro_datasets_experimental.langfuse.PromptDataset
   filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt.json
   prompt_name: "intent_llm_judge_evaluator_prompt"
   prompt_type: "chat"
@@ -24,6 +30,6 @@ intent_judge_prompt:
   mode: langchain          # langchain|sdk
 
 langfuse_client:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  type: kedro_datasets_experimental.langfuse.TraceDataset
   credentials: langfuse_credentials
   mode: sdk    # langchain | openai | sdk
