@@ -6,6 +6,7 @@
 # ===========================
 
 # Raw user data (loaded from CSV)
+# When running for the first time, run mlrun/generate_data.py to generate the data.
 raw_user_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/user_data.csv
