@@ -5,7 +5,7 @@ kedro-viz==11.0.2
 
 ipykernel
 joblib==1.4.0
-mlflow==2.11.2
+mlflow==2.19.0
 pydantic>=2
 
 # Avoid installing pyspark locally, since it conflicts with databricks-connect!
