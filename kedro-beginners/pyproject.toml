@@ -10,7 +10,7 @@ authors = [
 dependencies = [
     "aiohttp>=3.14.1",
     "kedro>=0.19.10",
-    "kedro-datasets[pandas]>=6.0.0",
+    "kedro-datasets[pandas]>=9.4.0",
     "requests>=2.32.3",
 ]
 
