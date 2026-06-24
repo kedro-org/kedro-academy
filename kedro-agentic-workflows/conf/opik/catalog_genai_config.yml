@@ -17,26 +17,16 @@ intent_tracer:
   type: kedro_datasets_experimental.opik.TraceDataset
   credentials: opik_credentials
   mode: langchain           # returns an OpikTracer callback used in session_config
-  # TEMP forces the OpikTracer's project. opik.TraceDataset's _configure_opik
-  # sets OPIK_PROJECT_NAME, but configure(force=True) overrides it, so the
-  # project_name in opik_credentials never reaches OpikTracer in langchain mode.
-  # Passing it here as a trace_kwarg is the only path that lands traces in the
-  # right project today. Tracked alongside the upstream Opik fixes
-  # (https://github.com/kedro-org/kedro-plugins/pull/1416). Once a kedro-datasets
-  # release ships a _load_langchain_tracer that forwards credentials.project_name
-  # to OpikTracer automatically, delete this line — opik_credentials.project_name
-  # will flow through on its own.
+  # TEMP: on 9.4.0, credentials.project_name isn't forwarded to OpikTracer in
+  # langchain mode, so set it here. Fixed by kedro-plugins#1422 drop
+  # this line once a kedro-datasets release > 9.4.0 ships it.
   project_name: kedro-agentic-test
 
-# TEMP uses a separate credentials block as a workaround for an upstream bug.
-# opik.PromptDataset and opik.EvaluationDataset (kedro-datasets 9.4.0) splat
-# the whole credentials dict into Opik(**credentials), which doesn't accept
-# `endpoint`. Isolating `endpoint` here keeps the other Opik datasets working.
-# Upstream fix: https://github.com/kedro-org/kedro-plugins/pull/1416
-# Once that merges and ships in a kedro-datasets release > 9.4.0:
-#   1. point `credentials:` back to `opik_credentials`
-#   2. delete this comment
-#   3. drop the `opik_credentials_autogen` block from credentials.yml.template
+# TEMP: separate creds block so `endpoint` doesn't reach the Opik(**credentials)
+# call in opik.PromptDataset/EvaluationDataset (errors on 9.4.0). Fixed by
+# kedro-plugins#1416 once a kedro-datasets release > 9.4.0 ships it,
+# point `credentials` back to opik_credentials and drop opik_credentials_autogen
+# from credentials.yml.template.
 autogen_tracer:
   type: kedro_datasets_experimental.opik.TraceDataset
   credentials: opik_credentials_autogen

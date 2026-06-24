@@ -1,8 +1,7 @@
-# NOTE: the intent_detection_evaluation pipeline still runs on Langfuse only.
-# Reorganising eval to follow the same provider-agnostic shape as the main
-# project (generic names, swappable via --env) is tracked as a follow-up PR.
-# Class names below have been updated to the 9.4.0 names so this catalog
-# keeps loading after the kedro-datasets bump.
+# Langfuse environment: evaluation pipeline catalog (default env).
+# The intent_detection_evaluation pipeline reads these. The Opik mirror is in
+# conf/opik/catalog_evaluation.yml — both eval pipelines use the same generic
+# dataset names; only the bindings differ per env.
 
 intent_evaluation_data:
   type: kedro_datasets_experimental.langfuse.EvaluationDataset
