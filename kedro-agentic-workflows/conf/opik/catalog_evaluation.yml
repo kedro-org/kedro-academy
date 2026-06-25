@@ -1,7 +1,5 @@
-# Opik environment: evaluation pipeline catalog.
-# Mirrors conf/langfuse/catalog_evaluation.yml with Opik-backed datasets, so the
-# intent_detection_evaluation_opik pipeline runs under `--env opik`. The two eval
-# pipelines use the same generic dataset names; only the bindings differ per env.
+# Opik bindings for the intent_detection_evaluation_opik pipeline (run with --env opik).
+# Mirrors conf/langfuse/catalog_evaluation.yml — same generic names, Opik datasets.
 
 intent_evaluation_data:
   type: kedro_datasets_experimental.opik.EvaluationDataset
@@ -19,7 +17,7 @@ intent_judge_llm:
 
 intent_judge_prompt:
   type: kedro_datasets_experimental.opik.PromptDataset
-  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt_opik.json
+  filepath: data/intent_detection/evaluation/prompts/intent_judge_llm_prompt.json
   prompt_name: "intent_llm_judge_evaluator_prompt"
   prompt_type: "chat"
   credentials: opik_credentials

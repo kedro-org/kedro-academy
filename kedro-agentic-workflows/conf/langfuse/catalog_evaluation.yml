@@ -1,7 +1,5 @@
-# Langfuse environment: evaluation pipeline catalog (default env).
-# The intent_detection_evaluation pipeline reads these. The Opik mirror is in
-# conf/opik/catalog_evaluation.yml — both eval pipelines use the same generic
-# dataset names; only the bindings differ per env.
+# Langfuse bindings for the intent_detection_evaluation pipeline (default env).
+# Mirrored by conf/opik/catalog_evaluation.yml — same generic names, Opik datasets.
 
 intent_evaluation_data:
   type: kedro_datasets_experimental.langfuse.EvaluationDataset
@@ -9,8 +7,6 @@ intent_evaluation_data:
   filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
   credentials: langfuse_credentials
-  metadata:
-    created_by: kedro
 
 intent_judge_llm:
   type: langchain.ChatOpenAIDataset

@@ -33,7 +33,7 @@ This project demonstrates how to build robust agentic workflows using `LangGraph
 * **Structured and reproducible outputs** – Agent responses include message content plus metadata, all logged for auditing and reproducibility.
 * **Session logging** – Conversations, messages, and tool interactions are persisted to a database for auditing and analysis.
 * **Observability and prompt tracking** – Integrates with external tools like `Langfuse` and `Opik` to track prompts, tool usage, and workflow execution.
-* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` for comparison across prompt versions and models.
+* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` or `Opik` for comparison across prompt versions and models.
 
 Together, these elements show how to **combine pipeline orchestration, agentic reasoning, evaluation, and observability** in a modular, maintainable, and reproducible workflow.
 
@@ -295,7 +295,7 @@ intent_evaluation_data:
   credentials: opik_credentials
 ```
 
-The `intent_prompt_version` and `model_name` parameters name the experiment (e.g. `intent_prompt_v1_model_gpt-4o`) in both UIs, making runs comparable across prompt iterations and models. A standalone walkthrough of `OpikEvaluationDataset` sync behaviour lives in [`notebooks/e2e_opik_evaluation_dataset.ipynb`](notebooks/e2e_opik_evaluation_dataset.ipynb).
+The `intent_prompt_version` and `model_name` parameters name the experiment (e.g. `intent_prompt_v1_model_gpt-4o`) in both UIs, making runs comparable across prompt iterations and models. A standalone walkthrough of `opik.EvaluationDataset` sync behaviour lives in [`notebooks/e2e_opik_evaluation_dataset.ipynb`](notebooks/e2e_opik_evaluation_dataset.ipynb).
 
 ### Evaluation data
 

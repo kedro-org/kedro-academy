@@ -146,3 +146,6 @@ def run_experiment(
             "model_name": model_name,
         },
     )
+
+    # evaluate() prints its own score summary; log completion to match Langfuse.
+    logger.info("Experiment '%s' completed. See results in the Opik UI.", experiment_name)
