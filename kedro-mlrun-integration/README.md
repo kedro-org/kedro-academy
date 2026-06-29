@@ -1,0 +1,1 @@
+For running NIM use this demo: https://github.com/mlrun/demo-nim-application

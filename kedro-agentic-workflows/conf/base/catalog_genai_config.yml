@@ -1,3 +1,7 @@
+# Shared catalog entries — identical across provider envs.
+# Provider-specific entries (intent_prompt, intent_tracer, autogen_tracer)
+# live in conf/langfuse/ and conf/opik/ and override per-env.
+
 # --- LLMs setup ---
 llm:
   type: langchain.ChatOpenAIDataset
@@ -20,46 +24,17 @@ llm_autogen:
     temperature: 0.0
   credentials: openai
 
-# --- Prompts ---
+# --- Prompts (provider-agnostic) ---
 tool_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/response_generation/prompts/tool.txt
   template: PromptTemplate
   dataset:
     type: text.TextDataset
 
 response_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/response_generation/prompts/response.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
-
-intent_prompt:
-  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
-  filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
-  prompt_name: "intent-classifier"
-  prompt_type: "chat"
-  credentials: langfuse_credentials
-  sync_policy: local       # local|remote|strict
-  mode: sdk         # langchain|sdk
-  load_args:
-    version: ${runtime_params:intent_prompt_version, 1}
-
-# intent_prompt:
-#   type: kedro_datasets_experimental.opik.OpikPromptDataset
-#   filepath: data/intent_detection/prompts/intent_prompt_opik.json
-#   prompt_name: "intent-classifier"
-#   prompt_type: "chat"
-#   credentials: opik_credentials
-
-# --- Tracing ---
-intent_tracer_langfuse:
-  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
-  credentials: langfuse_credentials
-  mode: langchain    # langchain | openai | sdk
-
-# intent_tracer_opik:
-#  type: kedro_datasets_experimental.opik.OpikTraceDataset
-#  credentials: opik_credentials
-#  mode: openai    # langchain | openai | sdk
