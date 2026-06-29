@@ -5,9 +5,9 @@ from kedro.pipeline import LLMContext
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from opik.api_objects.dataset.dataset import Dataset
+from opik import Dataset
 from opik.evaluation import evaluate
-from opik.evaluation.metrics.score_result import ScoreResult
+from opik.evaluation.metrics.score_result import ScoreResult  # no public re-export
 from pydantic import BaseModel, Field
 
 from ..intent_detection.agent import IntentDetectionAgent
@@ -46,17 +46,21 @@ def init_reason_judge_evaluator(
 
         try:
             result: JudgeScore = structured_judge_llm.invoke(messages)
-            score = result.score
+            score = float(result.score)
             reason = "LLM judge evaluation of reasoning quality"
+            result_metadata = metadata
         except Exception as e:
-            score = 0
-            reason = f"Evaluator failed: {str(e)}"
+            # Judge failed: emit the lowest valid score (1, not 0 which is off
+            # the 1-5 scale) and flag it so downstream analysis can filter it.
+            score = 1.0
+            reason = f"Evaluator failed: {e}"
+            result_metadata = {**(metadata or {}), "evaluation_failed": True}
 
         return ScoreResult(
             name="reason_quality",
-            value=float(score),
+            value=score,
             reason=reason,
-            metadata=metadata,
+            metadata=result_metadata,
         )
 
     return reason_judge_evaluator
@@ -104,13 +108,19 @@ def make_intent_detection_task(
             "user_context": {},
         }
 
-        result = agent.invoke(
-            agent_input,
-            {
-                "configurable": {"thread_id": item_id},
-                "callbacks": [opik_tracer],
-            },
-        )
+        try:
+            result = agent.invoke(
+                agent_input,
+                {
+                    "configurable": {"thread_id": item_id},
+                    "callbacks": [opik_tracer],
+                },
+            )
+        except Exception as e:
+            # Don't let one failing item crash the whole experiment; log it and
+            # return an empty result (scores as a miss) so evaluate() continues.
+            logger.error("Intent detection failed for item %s: %s", item_id, e)
+            return {"intent": "", "reason": ""}
 
         return {
             "intent": result.get("intent", ""),
