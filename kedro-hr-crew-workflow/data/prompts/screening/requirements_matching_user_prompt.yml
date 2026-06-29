@@ -1,0 +1,21 @@
+# Requirements Matching Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent
+
+messages:
+  - role: user
+    content: |
+      description: Match job must-have requirements against candidate evidence snippets. Use the Requirements Matcher tool to perform the matching. The tool will return application_id, candidate_name, job_title, match_results, and metadata. Include ALL of these fields from the tool output in your response - do not omit any fields. For each requirement, identify matching snippet IDs, provide confidence scores (0.0-1.0), and assess evidence quality. Be thorough and precise in your matching analysis.
+      
+      expected_output: A JSON object matching the RequirementsMatchingResult schema. Use the application_id, candidate_name, job_title, match_results, and metadata directly from the Requirements Matcher tool output. CRITICAL: You MUST include ALL fields from the tool output, including the metadata object with total_must_have_requirements and total_nice_to_have_requirements. Format as valid JSON matching the schema below.
+      
+      agent: requirements_matcher
+      
+      Job Must-Have Requirements:
+      {{must_have_requirements}}
+      
+      Candidate Evidence Snippets:
+      {{evidence_snippets}}
+      
+      Output Schema:
+      {{output_schema}}

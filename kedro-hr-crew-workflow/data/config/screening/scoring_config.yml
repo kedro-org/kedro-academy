@@ -1,0 +1,16 @@
+# Scoring Configuration for Match Score Calculation
+# These weights and bounds are used by the scoring_tool to calculate match scores
+
+# Weights for calculating overall match score
+weights:
+  must_have_coverage: 0.7  # Weight for must-have requirements coverage
+  avg_confidence: 0.3      # Weight for average confidence score
+
+# Score bounds
+bounds:
+  match_score:
+    min: 0.0
+    max: 100.0
+  must_have_coverage:
+    min: 0.0
+    max: 1.0

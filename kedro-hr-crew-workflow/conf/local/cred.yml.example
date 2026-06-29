@@ -1,0 +1,6 @@
+# fill in your actual credentials and do not commit this file
+
+# OpenAI Credentials for CrewAI
+openai:
+  api_key: "${oc.env:OPENAI_API_KEY}"
+  base_url: "${oc.env:OPENAI_API_BASE}"
