@@ -27,11 +27,11 @@ from typing import Any
 
 from kedro.framework.hooks import hook_impl
 
+from kedro_reflection_agent.utils.paths import RUN_INDEX_PATH
+
 from .models.shared import RunIndexEntry
 
 logger = logging.getLogger(__name__)
-
-_RUN_INDEX_PATH = Path("data/outputs/run_index.json")
 
 # Maps a sentinel node name (unique per pipeline) to the pipeline identifier.
 _SENTINEL_NODE_TO_PIPELINE: dict[str, str] = {
@@ -55,14 +55,14 @@ def _pipeline_name_from_nodes(node_names: set[str]) -> str:
 # ---------------------------------------------------------------------------
 
 def _load_index() -> list[dict]:
-    if _RUN_INDEX_PATH.exists():
-        return json.loads(_RUN_INDEX_PATH.read_text(encoding="utf-8"))
+    if RUN_INDEX_PATH.exists():
+        return json.loads(RUN_INDEX_PATH.read_text(encoding="utf-8"))
     return []
 
 
 def _save_index(records: list[dict]) -> None:
-    _RUN_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _RUN_INDEX_PATH.write_text(json.dumps(records, indent=2), encoding="utf-8")
+    RUN_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RUN_INDEX_PATH.write_text(json.dumps(records, indent=2), encoding="utf-8")
 
 
 def _upsert(run_id: str, agent_id: str, updates: dict) -> None:

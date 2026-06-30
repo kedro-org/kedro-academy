@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH, RUN_INDEX_PATH, SIGNAL_INDEX_PATH
+
 _ROOT = Path(__file__).parent.parent
 _DATA = _ROOT / "data"
 
@@ -32,8 +34,8 @@ def get_agent_ids() -> list[str]:
 # ── Run index ─────────────────────────────────────────────────────────────────
 
 def get_run_index() -> list[dict]:
-    """Read the global run index (data/outputs/run_index.json)."""
-    data = _read_json(_DATA / "outputs" / "run_index.json")
+    """Read the global run index (``RUN_INDEX_PATH``)."""
+    data = _read_json(_ROOT / RUN_INDEX_PATH)
     if isinstance(data, list):
         return data
     return []
@@ -81,7 +83,7 @@ def get_signals(agent_id: str, run_id: str) -> list[dict]:
         if isinstance(data, list):
             return data
     # Also look in the global signal_index, filtered by agent+run
-    signal_index = _read_json(_DATA / "outputs" / "signal_index.json")
+    signal_index = _read_json(_ROOT / SIGNAL_INDEX_PATH)
     if isinstance(signal_index, list):
         return [s for s in signal_index if s.get("run_id") == run_id and s.get("agent_id") == agent_id]
     return []
@@ -148,7 +150,7 @@ def get_proposed_skill(agent_id: str, reflection_id: str) -> str:
 # ── Apply history ─────────────────────────────────────────────────────────────
 
 def get_apply_history() -> list[dict]:
-    data = _read_json(_DATA / "outputs" / "apply_history.json")
+    data = _read_json(_ROOT / APPLY_HISTORY_PATH)
     if isinstance(data, list):
         return data
     return []

@@ -15,13 +15,15 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
+
 DemoStateName = Literal["idle", "run_1_done", "reflected", "applied", "run_2_done"]
 
 DEFAULT_STATE_PATH = Path("data/demo_state.json")
 
 _RUN_1_SENTINEL = Path("data/outputs/runs/run_1/aggregate_scores.json")
 _REFLECTED_SENTINEL = Path("data/outputs/reflections/refl_1/summary.md")
-_APPLIED_SENTINEL = Path("data/outputs/apply_history.json")
+_APPLIED_SENTINEL = APPLY_HISTORY_PATH
 _RUN_2_SENTINEL = Path("data/outputs/runs/run_2/aggregate_scores.json")
 
 

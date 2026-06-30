@@ -14,11 +14,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
 from kedro_reflection_agent.pipelines._common import load_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
-_HISTORY_PATH = Path("data/outputs/apply_history.json")
 
 def commit_reflection(
     proposed_prompt: Any,
@@ -108,8 +108,8 @@ def _extract_messages(prompt: Any) -> list[dict]:
 
 
 def _load_history() -> list[dict]:
-    if _HISTORY_PATH.exists():
-        return json.loads(_HISTORY_PATH.read_text())
+    if APPLY_HISTORY_PATH.exists():
+        return json.loads(APPLY_HISTORY_PATH.read_text())
     return []
 
 

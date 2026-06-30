@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from typing import Callable
 
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH, RUN_INDEX_PATH, SIGNAL_INDEX_PATH
+
 LogCallback = Callable[[str], None] | None
 
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -149,7 +151,7 @@ def reset_run(run_id: str, agent_id: str) -> None:
         shutil.rmtree(run_dir)
 
     _remove_from_json(
-        _DATA / "outputs" / "run_index.json",
+        PROJECT_ROOT / RUN_INDEX_PATH,
         lambda r: not (r.get("run_id") == run_id and r.get("agent_id") == agent_id),
     )
     reset_scouts(run_id, agent_id)
@@ -162,7 +164,7 @@ def reset_scouts(run_id: str, agent_id: str) -> None:
         signals_file.unlink()
 
     _remove_from_json(
-        _DATA / "outputs" / "signal_index.json",
+        PROJECT_ROOT / SIGNAL_INDEX_PATH,
         lambda e: not (e.get("run_id") == run_id and e.get("agent_id") == agent_id),
     )
 
@@ -177,7 +179,7 @@ def reset_reflection(reflection_id: str, agent_id: str) -> None:
 def reset_apply(reflection_id: str, agent_id: str) -> None:
     """Remove an apply entry so the approval gate becomes active again."""
     _remove_from_json(
-        _DATA / "outputs" / "apply_history.json",
+        PROJECT_ROOT / APPLY_HISTORY_PATH,
         lambda h: not (h.get("reflection_id") == reflection_id and h.get("agent_id") == agent_id),
     )
 

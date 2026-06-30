@@ -32,13 +32,13 @@ from pathlib import Path
 from typing import Any
 
 from kedro_reflection_agent.models.shared import CaseScore, Signal
+from kedro_reflection_agent.utils.paths import SIGNAL_INDEX_PATH
 from kedro_reflection_agent.pipelines._common import utc_now_iso
 
 logger = logging.getLogger(__name__)
 
 # Path for the rolling cross-agent signal index (read + write inside node,
 # same pattern as apply_history.json in the apply pipeline).
-_SIGNAL_INDEX_PATH = Path("data/outputs/signal_index.json")
 
 
 # ---------------------------------------------------------------------------
@@ -146,8 +146,8 @@ def run_scouts(
     signals.extend(cross_unit_signals)
 
     # Persist the updated cross-agent index.
-    _SIGNAL_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _SIGNAL_INDEX_PATH.write_text(json.dumps(updated_index, indent=2), encoding="utf-8")
+    SIGNAL_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SIGNAL_INDEX_PATH.write_text(json.dumps(updated_index, indent=2), encoding="utf-8")
     logger.info(
         "scouts %s (%s): signal_index updated to %d entries",
         run_id,
@@ -605,6 +605,6 @@ def _detect_cross_unit_pattern(
 
 
 def _load_signal_index() -> list[dict]:
-    if _SIGNAL_INDEX_PATH.exists():
-        return json.loads(_SIGNAL_INDEX_PATH.read_text())
+    if SIGNAL_INDEX_PATH.exists():
+        return json.loads(SIGNAL_INDEX_PATH.read_text())
     return []

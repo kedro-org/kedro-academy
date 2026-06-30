@@ -11,11 +11,12 @@
 #   - eval_cases:         catalog_evaluation.yml  (LangfuseEvaluationDataset → appends)
 #
 # New output:
-#   - apply_history:      data/outputs/apply_history.json (append-only, managed in node)
+#   - apply_history:      kedro_reflection_agent.utils.paths.APPLY_HISTORY_PATH (append-only, managed in node)
 
 
 # --- Audit log ---------------------------------------------------------------
 
 apply_history:
   type: json.JSONDataset
+  # Must match kedro_reflection_agent.utils.paths.APPLY_HISTORY_PATH
   filepath: data/outputs/apply_history.json

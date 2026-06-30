@@ -22,6 +22,11 @@ import shutil
 from pathlib import Path
 
 from kedro_reflection_agent.utils.id_service import dataset_item_id
+from kedro_reflection_agent.utils.paths import (
+    APPLY_HISTORY_PATH,
+    RUN_INDEX_PATH,
+    SIGNAL_INDEX_PATH,
+)
 
 ROOT = Path(__file__).parent.parent
 
@@ -655,9 +660,8 @@ def _clear_outputs(agents: list[str]) -> None:
             (p / ".gitkeep").touch()
 
     # Clear cross-run and observability indexes so CLI and UI resets are identical
-    outputs = ROOT / "data" / "outputs"
-    for fname in ("run_index.json", "apply_history.json", "signal_index.json"):
-        f = outputs / fname
+    for path in (RUN_INDEX_PATH, APPLY_HISTORY_PATH, SIGNAL_INDEX_PATH):
+        f = ROOT / path
         if f.exists():
             f.unlink()
 

@@ -9,23 +9,21 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 
-_APPLY_HISTORY_PATH = Path("data/outputs/apply_history.json")
+from kedro.pipeline import LLMContext
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import Runnable
+from pydantic import BaseModel
 
 
 def load_prompt_version(agent_id: str) -> int:
     """Derive prompt version from apply_history: base 1 + number of applies for this agent."""
     try:
-        history = json.loads(_APPLY_HISTORY_PATH.read_text(encoding="utf-8"))
+        history = json.loads(APPLY_HISTORY_PATH.read_text(encoding="utf-8"))
         return sum(1 for e in history if e.get("agent_id") == agent_id) + 1
     except (FileNotFoundError, json.JSONDecodeError):
         return 1
-
-from kedro.pipeline import LLMContext
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import Runnable
-from pydantic import BaseModel
 
 
 def build_structured_chain(

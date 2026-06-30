@@ -28,6 +28,7 @@ from kedro.pipeline import LLMContext
 
 from kedro_reflection_agent.models.shared import CaseScore, ReflectionOutput, ReflectionSummary
 from kedro_reflection_agent.utils.id_service import dataset_item_id
+from kedro_reflection_agent.utils.paths import RUN_INDEX_PATH, SIGNAL_INDEX_PATH
 from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
 
 logger = logging.getLogger(__name__)
@@ -35,8 +36,6 @@ logger = logging.getLogger(__name__)
 _N_WORST_CASES = 5
 _N_SIGNAL_INDEX = 20
 _N_RUN_HISTORY = 10
-_SIGNAL_INDEX_PATH = Path("data/outputs/signal_index.json")
-_RUN_INDEX_PATH = Path("data/outputs/run_index.json")
 _SIGNALS_PATH_TEMPLATE = "data/{agent_id}/outputs/runs/{run_id}/signals.json"
 
 
@@ -100,8 +99,8 @@ def prepare_reflection_context(
         })
 
     signals = _load_json_safe(Path(_SIGNALS_PATH_TEMPLATE.format(agent_id=agent_id, run_id=run_id)))
-    signal_index = _load_json_safe(_SIGNAL_INDEX_PATH)
-    run_index = _load_json_safe(_RUN_INDEX_PATH)
+    signal_index = _load_json_safe(SIGNAL_INDEX_PATH)
+    run_index = _load_json_safe(RUN_INDEX_PATH)
 
     logger.info(
         "reflection context: %d failing / %d total cases; showing %d worst to meta-agent; "
