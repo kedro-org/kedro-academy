@@ -78,6 +78,17 @@ def _upsert(run_id: str, agent_id: str, updates: dict) -> None:
     _save_index(records)
 
 
+def _run_id_for_reflection(agent_id: str, reflection_id: str) -> str | None:
+    """Return run_id for the run whose reflection step produced reflection_id."""
+    for record in reversed(_load_index()):
+        if (
+            record.get("agent_id") == agent_id
+            and record.get("reflection_id") == reflection_id
+        ):
+            return record.get("run_id")
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Hook
 # ---------------------------------------------------------------------------
@@ -97,8 +108,17 @@ class RunIndexHook:
         params: dict = run_params.get("runtime_params") or {}
         run_id: str | None = params.get("run_id")
         agent_id: str | None = params.get("agent_id")
+        reflection_id: str | None = params.get("reflection_id")
 
-        if not run_id or not agent_id:
+        if not agent_id:
+            return
+
+        if pipeline_name == "apply":
+            if not run_id and reflection_id:
+                run_id = _run_id_for_reflection(agent_id, reflection_id)
+            if not run_id:
+                return
+        elif not run_id:
             return  # pipeline run without our params (e.g. kedro viz)
 
         try:
@@ -109,11 +129,10 @@ class RunIndexHook:
             elif pipeline_name == "scouts":
                 self._after_scouts(run_id, agent_id, catalog)
             elif pipeline_name == "reflection":
-                reflection_id = params.get("reflection_id")
                 if reflection_id:
                     _upsert(run_id, agent_id, {"reflection_id": reflection_id})
             elif pipeline_name == "apply":
-                self._after_apply(run_id, agent_id, catalog)
+                self._after_apply(run_id, agent_id, catalog, reflection_id)
         except Exception:
             logger.exception(
                 "RunIndexHook: failed to update run_index for %s/%s — skipping",
@@ -214,11 +233,22 @@ class RunIndexHook:
             "RunIndexHook: scouts upserted for %s/%s (%d signals)", agent_id, run_id, len(signals)
         )
 
-    def _after_apply(self, run_id: str, agent_id: str, catalog: Any) -> None:
+    def _after_apply(
+        self,
+        run_id: str,
+        agent_id: str,
+        catalog: Any,
+        reflection_id: str | None = None,
+    ) -> None:
         history: list[dict] = catalog.load("apply_history")
-        if not history:
+        matching = [
+            row for row in history
+            if row.get("agent_id") == agent_id
+            and (not reflection_id or row.get("reflection_id") == reflection_id)
+        ]
+        if not matching:
             return
-        latest = history[-1]
+        latest = matching[-1]
         _upsert(run_id, agent_id, {
             "reflection_applied": True,
             "applied_at": latest.get("applied_at"),
