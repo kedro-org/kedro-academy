@@ -147,8 +147,6 @@ def reset_run(run_id: str, agent_id: str) -> None:
     run_dir = _DATA / agent_id / "outputs" / "runs" / run_id
     if run_dir.exists():
         shutil.rmtree(run_dir)
-        run_dir.mkdir(parents=True, exist_ok=True)
-        (run_dir / ".gitkeep").touch()
 
     _remove_from_json(
         _DATA / "outputs" / "run_index.json",
@@ -174,8 +172,6 @@ def reset_reflection(reflection_id: str, agent_id: str) -> None:
     refl_dir = _DATA / agent_id / "outputs" / "reflections" / reflection_id
     if refl_dir.exists():
         shutil.rmtree(refl_dir)
-        refl_dir.mkdir(parents=True, exist_ok=True)
-        (refl_dir / ".gitkeep").touch()
 
 
 def reset_apply(reflection_id: str, agent_id: str) -> None:
