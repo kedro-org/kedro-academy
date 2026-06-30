@@ -246,10 +246,10 @@ def _render_kpis(
             <div style="background:#fff;border:1px solid #E2E8F0;border-radius:16px;
                         padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
               <div style="font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;
-                          letter-spacing:.08em;margin-bottom:6px;">Reflections Run</div>
+                          letter-spacing:.08em;margin-bottom:6px;">Reflections Applied</div>
               <div style="font-size:30px;font-weight:900;color:#0F172A;
                           letter-spacing:-0.03em;line-height:1;">{n_reflections}</div>
-              <div style="font-size:11px;color:#94A3B8;margin-top:6px;">{n_reflections} applied</div>
+              <div style="font-size:11px;color:#94A3B8;margin-top:6px;">across all agents</div>
             </div>
             """,
             unsafe_allow_html=True,
