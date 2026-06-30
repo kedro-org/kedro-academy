@@ -62,7 +62,6 @@ def commit_reflection(
         "reflection_id": reflection_id,
         "applied_at": utc_now_iso(),
         "prompt_version": new_version,
-        "skill_version": new_version,
         "new_prompt_messages": messages,
         "new_skill_text": proposed_skill,
         "new_eval_case_ids": [ec["id"] for ec in new_eval_cases],

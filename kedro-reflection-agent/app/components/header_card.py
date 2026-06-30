@@ -48,18 +48,14 @@ def render_header_card(agent_id: str, run_index: list[dict]) -> None:
     n_runs = len(agent_runs)
     n_reflections = len(get_apply_history())
 
-    # Prompt + skill versions from latest run
+    # Prompt version from latest run
     prompt_version = "v1"
-    skill_version = "v1"
     n_eval_cases = "—"
     if agent_runs:
         latest = sorted(agent_runs, key=lambda r: r.get("started_at") or "", reverse=True)[0]
         pv = latest.get("prompt_version")
         if pv is not None:
             prompt_version = f"v{pv}"
-        sv = latest.get("skill_version")
-        if sv is not None:
-            skill_version = f"v{int(sv)}" if isinstance(sv, (int, float)) or (isinstance(sv, str) and sv.isdigit()) else "v1"
         nc = latest.get("n_cases")
         if nc:
             n_eval_cases = str(nc)
@@ -101,7 +97,7 @@ def render_header_card(agent_id: str, run_index: list[dict]) -> None:
               <!-- Metadata row with icons -->
               <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
                 {meta_item(target_icon, f"{n_targets} customer × product targets")}
-                {meta_item(layers_icon, f"Prompt {prompt_version} · Skill {skill_version} · {n_eval_cases} eval cases")}
+                {meta_item(layers_icon, f"Prompt {prompt_version} · {n_eval_cases} eval cases")}
                 {meta_item(refresh_icon, f"{n_runs} run{'s' if n_runs != 1 else ''} · {n_reflections} reflection{'s' if n_reflections != 1 else ''} applied")}
               </div>
             </div>

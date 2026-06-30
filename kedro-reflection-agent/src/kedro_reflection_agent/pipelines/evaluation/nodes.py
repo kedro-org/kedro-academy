@@ -103,7 +103,6 @@ def make_campaign_task(run_id: str, agent_id: str) -> Callable[..., dict[str, An
             "subject": email.get("subject", ""),
             "body": email.get("body", ""),
             "prompt_version": email.get("prompt_version"),
-            "skill_version": email.get("skill_version"),
             "trace_id": email.get("trace_id"),
         }
 

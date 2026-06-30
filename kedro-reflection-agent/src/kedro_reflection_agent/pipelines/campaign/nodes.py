@@ -142,7 +142,6 @@ def generate_emails(
                 "product_id": product["product_id"],
                 "run_id": run_id,
                 "system_prompt_version": str(prompt_version),
-                "skill_version": str(prompt_version),
             },
             "run_name": f"campaign:{case_id}",
         }
@@ -163,7 +162,6 @@ def generate_emails(
             body=result.body,
             trace_id=None,
             prompt_version=prompt_version,
-            skill_version=prompt_version,
             model_name=model_name,
             run_id=run_id,
             generated_at=utc_now_iso(),
@@ -184,7 +182,6 @@ def generate_emails(
         n_errors=n_errors,
         model_name=model_name,
         prompt_version=prompt_version,
-        skill_version=prompt_version,
         started_at=started_at,
         finished_at=finished_at,
     ).model_dump()

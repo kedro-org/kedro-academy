@@ -170,7 +170,6 @@ class RunIndexHook:
             prompt_name=f"{agent_id}-system-prompt",
             prompt_version=run_meta.get("prompt_version"),
             prompt_snapshot=prompt_snapshot,
-            skill_version=run_meta.get("skill_version"),
             skill_snapshot=skill_snapshot,
             n_cases=run_meta.get("n_cases", 0),
             n_outputs=run_meta.get("n_emails", 0),
