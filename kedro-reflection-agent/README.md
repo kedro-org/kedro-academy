@@ -47,7 +47,7 @@ One platform runs the same governed loop for three business units: generate, eva
   # Langfuse traces / prompt registry): langfuse_credentials
   
   make app
-  # This will open the app at `http://localhost:8502/`
+  # This will open the app at `http://localhost:8501/`
   ```
 
 
