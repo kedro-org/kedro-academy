@@ -619,16 +619,6 @@ def _render_insights(run_index: list[dict], apply_history: list[dict]) -> None:
     total_runs = len(run_index)
     n_reflections = len(apply_history)
 
-    avg_lift = None
-    if n_reflections > 0 and len(scores) >= 1:
-        # Estimate avg lift: sum of all positive delta_mean_score across agents
-        total_lift = sum(
-            float(r.get("delta_mean_score") or 0)
-            for r in agent_latest.values()
-            if r.get("delta_mean_score") is not None and float(r.get("delta_mean_score") or 0) > 0
-        )
-        avg_lift = total_lift / max(n_reflections, 1)
-
     portfolio_avg = sum(scores) / len(scores) if scores else None
 
     # Find shared weak dims (< 0.75 in 2+ agents)
@@ -660,7 +650,6 @@ def _render_insights(run_index: list[dict], apply_history: list[dict]) -> None:
 
     # Summary banner
     avg_str = f"{portfolio_avg:.2f}" if portfolio_avg else "—"
-    lift_str = f"+{avg_lift:.3f} per reflection" if avg_lift else "running"
     summary_body = (
         f"Across <strong>{total_runs} campaign run{'s' if total_runs != 1 else ''}</strong> "
         f"and <strong>{n_reflections} reflection{'s' if n_reflections != 1 else ''}</strong>, "
@@ -1086,19 +1075,20 @@ def render() -> None:
     n_reflections = len(apply_history)
     n_eval_cases = sum(len(get_eval_cases(a)) for a in get_agent_ids())
 
-    # Avg lift per reflection across all agents
+    # Avg lift: mean score delta on runs immediately after an approved apply
     avg_lift: float | None = None
-    lifts = []
+    lifts: list[float] = []
     for aid in get_agent_ids():
         agent_runs = sorted(
             [r for r in run_index if r.get("agent_id") == aid],
-            key=lambda r: (r.get("started_at") or "", r.get("run_seq", 0)),
+            key=lambda r: (r.get("run_seq") or 0, r.get("started_at") or ""),
         )
-        if len(agent_runs) >= 2:
-            s1 = float(agent_runs[0].get("mean_score") or 0)
-            s2 = float(agent_runs[-1].get("mean_score") or 0)
-            if s1 > 0:
-                lifts.append(s2 - s1)
+        for i, run in enumerate(agent_runs):
+            if i == 0:
+                continue
+            prev = agent_runs[i - 1]
+            if prev.get("reflection_applied") and run.get("delta_mean_score") is not None:
+                lifts.append(float(run["delta_mean_score"]))
     if lifts:
         avg_lift = sum(lifts) / len(lifts)
 
