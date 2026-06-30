@@ -1,0 +1,64 @@
+# Catalog entries used by the `evaluation` pipeline.
+#
+# This pipeline drives a Langfuse `DatasetClient.run_experiment(...)`:
+#   - `eval_cases.load()` returns a Langfuse DatasetClient whose `run_experiment`
+#     iterates the dataset items, runs the task, then scores outputs with our
+#     evaluators.
+#   - The task is an in-memory lookup of campaign-generated emails for the
+#     given `run_id` (no LLM call inside the task).
+#   - Evaluators: 4 heuristic + 1 combined LLM-judge (returns 3 Evaluations).
+#   - Trace emission inside the experiment is handled by Langfuse itself; no
+#     extra TraceDataset is needed in this catalog.
+#
+
+# --- Eval cases (Langfuse-backed, cached locally) ---------------------------
+# Owned by `evaluation`. Each item carries an `expected_output.rubric` used
+# for scoring. The `campaign` pipeline maintains its own targets list separately
+# (see catalog_campaign.yml); the two share a `case_id` namespace so this
+# pipeline can join emails to rubrics.
+
+eval_cases:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: "${runtime_params:agent_id}-eval"
+  filepath: data/${runtime_params:agent_id}/evaluation/eval_cases.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    created_by: kedro
+
+
+# --- Judge LLM ---------------------------------------------------------------
+# Deliberately bigger / steadier than the campaign LLM (gpt-4o-mini). The judge
+# scores 0-1 on three dimensions; reliability matters more than cost.
+
+judge_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: ${runtime_params:judge_model_name, gpt-4o}
+    temperature: 0.0
+  credentials: openai
+
+
+# --- Judge prompt (Langfuse-backed, cached locally) --------------------------
+
+judge_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/${runtime_params:agent_id}/evaluation/prompts/judge_prompt.json
+  prompt_name: "${runtime_params:agent_id}-judge-prompt"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local      # local | remote | strict
+  mode: langchain         # returns a ChatPromptTemplate directly
+  load_args:
+    version: ${runtime_params:judge_prompt_version, 1}
+
+
+# --- Outputs (partitioned by run_id alongside the run's emails) -------------
+
+per_case_scores:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/per_case_scores.json
+
+aggregate_scores:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/aggregate_scores.json

@@ -1,0 +1,6 @@
+# Catalog entries used by the `scouts` pipeline.
+
+# --- Per-run signal list ------------------------------------------------------
+signals:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/signals.json

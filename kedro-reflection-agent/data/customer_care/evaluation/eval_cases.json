@@ -1,0 +1,127 @@
+[
+  {
+    "id": "7f1da4ae-f10b-553b-8cf5-216b88505766",
+    "input": {
+      "customer_id": "cust_011",
+      "product_id": "prod_006",
+      "case_id": "case_001"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge billing error",
+          "investigate or credit action",
+          "apologise for inconvenience"
+        ],
+        "forbidden_mentions": [
+          "blame the customer",
+          "deny the issue without checking",
+          "fake reference numbers"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Billing dispute on Unlimited 5G. Apologise, confirm investigation, offer timeline."
+      }
+    }
+  },
+  {
+    "id": "f1aa1e16-ab4f-524a-902b-0ee491547b94",
+    "input": {
+      "customer_id": "cust_012",
+      "product_id": "prod_007",
+      "case_id": "case_002"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge signal issue",
+          "network check or engineer visit",
+          "timeline for resolution"
+        ],
+        "forbidden_mentions": [
+          "dismiss as device fault without checking",
+          "promise specific fix date",
+          "blame customer's location"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Network coverage issue. Offer a concrete next step; do not dismiss."
+      }
+    }
+  },
+  {
+    "id": "b6090a26-42c7-59dc-ad0a-8a6d05ca9a35",
+    "input": {
+      "customer_id": "cust_013",
+      "product_id": "prod_008",
+      "case_id": "case_003"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge missing top-up credit",
+          "check or restore credit action",
+          "24-hour processing context"
+        ],
+        "forbidden_mentions": [
+          "claim top-up was not received",
+          "ask customer to top up again without checking",
+          "fake case numbers"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Top-up credit not appearing. Acknowledge, investigate, set expectations."
+      }
+    }
+  },
+  {
+    "id": "54cbfb52-9a40-5bcc-8929-b019dfea4d5d",
+    "input": {
+      "customer_id": "cust_014",
+      "product_id": "prod_010",
+      "case_id": "case_004"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge roaming charges despite add-on",
+          "investigate or refund action",
+          "confirm Roaming Plus coverage"
+        ],
+        "forbidden_mentions": [
+          "deny Roaming Plus covers Spain",
+          "blame customer for not activating",
+          "no concrete action"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "Roaming charge dispute. Investigate and offer refund if confirmed; no blame shifting."
+      }
+    }
+  },
+  {
+    "id": "e161d01c-c17a-596f-bde9-6b86034eaea3",
+    "input": {
+      "customer_id": "cust_015",
+      "product_id": "prod_006",
+      "case_id": "case_005"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge price increase",
+          "retention offer or explanation of value",
+          "no cancellation pressure"
+        ],
+        "forbidden_mentions": [
+          "dismiss the concern",
+          "threaten contract terms",
+          "deny the price increase"
+        ],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "Cancellation threat due to price increase. Empathetic; offer retention value without pressure."
+      }
+    }
+  }
+]

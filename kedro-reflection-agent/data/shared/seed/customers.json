@@ -1,0 +1,142 @@
+[
+  {
+    "customer_id": "cust_001",
+    "name": "SmallTech Solutions",
+    "type": "enterprise",
+    "region": "Nordics",
+    "tenure_years": 2.0
+  },
+  {
+    "customer_id": "cust_002",
+    "name": "NordicLogistics AB",
+    "type": "enterprise",
+    "region": "Nordics",
+    "tenure_years": 5.0
+  },
+  {
+    "customer_id": "cust_003",
+    "name": "MetroBank Group",
+    "type": "enterprise",
+    "region": "EMEA",
+    "tenure_years": 8.0
+  },
+  {
+    "customer_id": "cust_004",
+    "name": "GreenLeaf Retail",
+    "type": "enterprise",
+    "region": "UK & Ireland",
+    "tenure_years": 1.0
+  },
+  {
+    "customer_id": "cust_005",
+    "name": "Apex Manufacturing",
+    "type": "enterprise",
+    "region": "Central Europe",
+    "tenure_years": 11.0
+  },
+  {
+    "customer_id": "cust_006",
+    "name": "Riverside Health Network",
+    "type": "enterprise",
+    "region": "DACH",
+    "tenure_years": 4.0
+  },
+  {
+    "customer_id": "cust_007",
+    "name": "Bayview Media Group",
+    "type": "enterprise",
+    "region": "North America",
+    "tenure_years": 3.0
+  },
+  {
+    "customer_id": "cust_008",
+    "name": "PortHarbor Shipping",
+    "type": "enterprise",
+    "region": "UK & Ireland",
+    "tenure_years": 0.5
+  },
+  {
+    "customer_id": "cust_009",
+    "name": "CityGrid Energy",
+    "type": "enterprise",
+    "region": "Iberia",
+    "tenure_years": 9.0
+  },
+  {
+    "customer_id": "cust_010",
+    "name": "ZenithFinTech",
+    "type": "enterprise",
+    "region": "APAC",
+    "tenure_years": 1.0
+  },
+  {
+    "customer_id": "cust_011",
+    "name": "James Whitfield",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 3.0
+  },
+  {
+    "customer_id": "cust_012",
+    "name": "Sophie Hartley",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 1.5
+  },
+  {
+    "customer_id": "cust_013",
+    "name": "Mohammed Al-Rashid",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 5.0
+  },
+  {
+    "customer_id": "cust_014",
+    "name": "Priya Sharma",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 0.5
+  },
+  {
+    "customer_id": "cust_015",
+    "name": "Tom Bridgewater",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 7.0
+  },
+  {
+    "customer_id": "cust_016",
+    "name": "Chloe Pennington",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 2.0
+  },
+  {
+    "customer_id": "cust_017",
+    "name": "Daniel Okafor",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 4.0
+  },
+  {
+    "customer_id": "cust_018",
+    "name": "Natasha Kowalski",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 0.5
+  },
+  {
+    "customer_id": "cust_019",
+    "name": "Liam Forsythe",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 6.0
+  },
+  {
+    "customer_id": "cust_020",
+    "name": "Amara Diallo",
+    "type": "consumer",
+    "region": "UK",
+    "tenure_years": 1.0
+  }
+]

@@ -1,0 +1,76 @@
+"""Helpers shared by more than one pipeline.
+
+Kept deliberately small. Anything pipeline-specific should live in that
+pipeline's ``nodes.py``; this module is for things that would otherwise be
+copy-pasted across multiple pipelines.
+"""
+
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from typing import Any
+
+from kedro.pipeline import LLMContext
+from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import Runnable
+from pydantic import BaseModel
+
+
+def current_prompt_version(agent_id: str) -> int:
+    """Live config version for this agent: 1 at seed, +1 per apply."""
+    try:
+        history = json.loads(APPLY_HISTORY_PATH.read_text(encoding="utf-8"))
+        return sum(1 for e in history if e.get("agent_id") == agent_id) + 1
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 1
+
+
+def next_prompt_version(agent_id: str) -> int:
+    """Version written to apply_history by the next apply for this agent."""
+    return current_prompt_version(agent_id) + 1
+
+
+def build_structured_chain(
+    context: LLMContext,
+    prompt_key: str,
+    output_schema: type[BaseModel],
+) -> Runnable:
+    """Compose ``ChatPromptTemplate | LLM.with_structured_output(schema)``.
+
+    ``mode: langchain`` on ``LangfusePromptDataset`` should give us a
+    ``ChatPromptTemplate`` directly. We defensively handle ``ChatPromptClient``
+    (Langfuse's raw return type) in case the conversion isn't already applied,
+    matching the pattern used in the source-of-truth ``kedro-agentic-workflows``
+    project.
+    """
+    raw_prompt = context.prompts[prompt_key]
+
+    if isinstance(raw_prompt, ChatPromptTemplate):
+        chat_prompt = raw_prompt
+    elif hasattr(raw_prompt, "get_langchain_prompt"):
+        chat_prompt = ChatPromptTemplate.from_messages(raw_prompt.get_langchain_prompt())
+    else:
+        chat_prompt = ChatPromptTemplate.from_messages(raw_prompt)
+
+    structured_llm = context.llm.with_structured_output(output_schema)
+    return chat_prompt | structured_llm
+
+
+def utc_now_iso() -> str:
+    """Current UTC time as an ISO-8601 string (used for ``started_at`` etc.)."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+def rubric_by_case_id_from_eval_cases(eval_cases: Any) -> dict[str, dict]:
+    """Map logical ``case_id`` → rubric dict from a Langfuse ``DatasetClient``."""
+    result: dict[str, dict] = {}
+    for item in eval_cases.items:
+        inp = getattr(item, "input", None) or {}
+        case_id = inp.get("case_id") or getattr(item, "id", None)
+        if not case_id:
+            continue
+        expected = getattr(item, "expected_output", None) or {}
+        result[str(case_id)] = expected.get("rubric", {})
+    return result

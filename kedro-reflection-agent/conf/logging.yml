@@ -1,0 +1,63 @@
+# To enable this custom logging configuration, set KEDRO_LOGGING_CONFIG to the path of this file.
+# More information available at https://docs.kedro.org/en/stable/develop/logging/#how-to-customise-kedro-logging
+version: 1
+
+disable_existing_loggers: False
+
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+  info_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: simple
+    filename: info.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+    delay: True
+
+  rich:
+    class: kedro.logging.RichHandler
+    rich_tracebacks: True
+    # Advance options for customisation.
+    # See https://docs.kedro.org/en/stable/develop/logging/#advanced-logging
+    # tracebacks_show_locals: False
+
+loggers:
+  kedro:
+    level: INFO
+
+  kedro_reflection_agent:
+    level: INFO
+
+  # Silence two Kedro internal WARNINGs that fire on every run and are noise
+  # for our project. Both are informational, not actionable:
+  #
+  #   * `pipeline_name` is deprecated... use `pipeline_names` instead.
+  #     Emitted by `kedro run -p <name>` (the CLI still uses the singular arg
+  #     internally). We can't change this from project code.
+  #   * Config from the dataset pattern '{default_dataset}' will be used to
+  #     override default dataset creation for '<name>'.
+  #     Fired whenever Kedro auto-creates a MemoryDataset for an in-memory
+  #     node output (judge_context, campaign_task, heuristic_evaluators, etc).
+  #     Expected and harmless for our pipeline shape.
+  #
+  # If Kedro adds new WARNINGs in either module we'd genuinely want to see,
+  # revisit these.
+  kedro.framework.session.session:
+    level: ERROR
+
+  kedro.io.catalog_config_resolver:
+    level: ERROR
+
+root:
+  handlers: [rich, info_file_handler]

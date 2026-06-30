@@ -1,0 +1,88 @@
+# Catalog entries used by the `campaign` pipeline.
+#
+# Conventions:
+#   - agent_id    : runtime param
+#   - run_id      : runtime param, defaults to `default` (see parameters.yml)
+#   - LLM, prompt and tracer follow the kedro-agentic-workflows patterns
+#     (langchain.ChatOpenAIDataset, kedro_datasets_experimental.langfuse.*)
+#   - The `{default_dataset}` pattern that backs in-memory node outputs
+#     (agent_context, agent_inputs, etc.) lives in conf/base/catalog.yml
+#     because it is pipeline-agnostic.
+
+# --- LLM ----------------------------------------------------------------------
+
+llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: ${runtime_params:model_name, gpt-4o-mini}
+    temperature: 0.3
+  credentials: openai
+
+
+# --- System prompt (Langfuse-backed, cached locally) -------------------------
+
+system_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/${runtime_params:agent_id}/campaign/prompts/system_prompt.json
+  prompt_name: "${runtime_params:agent_id}-system-prompt"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local      # local | remote | strict
+  mode: langchain         # returns a ChatPromptTemplate directly
+
+
+# --- Skill file (disk only) --------------------------------------------------
+
+skill_text:
+  type: text.TextDataset
+  filepath: data/${runtime_params:agent_id}/campaign/skills/${runtime_params:agent_id}_style.md
+
+
+# --- Seed data (disk only) ---------------------------------------------------
+
+customers:
+  type: json.JSONDataset
+  filepath: data/shared/seed/customers.json
+
+products:
+  type: json.JSONDataset
+  filepath: data/shared/seed/products.json
+
+# --- agent enriched data  (disk only) ------------------------------------------
+customer_profiles:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/seed/customer_profiles.json
+
+product_details:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/seed/product_details.json
+
+
+# --- Campaign targets (the pairs to run this agent on) ----------------------
+# Shares the `case_id` namespace with eval_cases (catalog_evaluation.yml);
+# evaluation joins outputs to rubrics by case_id.
+
+targets:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/seed/targets.json
+
+
+# --- Tracer (write-only from this pipeline's perspective) --------------------
+
+agent_tracer:
+  type: kedro_datasets_experimental.langfuse.LangfuseTraceDataset
+  credentials: langfuse_credentials
+  mode: langchain         # langchain | openai | sdk
+
+
+# --- Outputs (partitioned by run_id + agent_id) ------------------------------
+
+emails:
+  type: partitions.PartitionedDataset
+  path: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/emails/
+  dataset: json.JSONDataset
+  filename_suffix: .json
+
+run_metadata:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/outputs/runs/${runtime_params:run_id,default}/run_metadata.json
