@@ -154,6 +154,7 @@ def reset_run(run_id: str, agent_id: str) -> None:
         _DATA / "outputs" / "run_index.json",
         lambda r: not (r.get("run_id") == run_id and r.get("agent_id") == agent_id),
     )
+    reset_scouts(run_id, agent_id)
 
 
 def reset_scouts(run_id: str, agent_id: str) -> None:
