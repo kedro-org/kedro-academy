@@ -45,7 +45,11 @@ One platform runs the same governed loop for three business units: generate, eva
   cp conf/local/credentials.yml.example conf/local/credentials.yml
   # Required: openai.api_key
   # Langfuse traces / prompt registry): langfuse_credentials
-  
+
+  # (recommended) pre-populate the UI so the live demo doesn't wait on LLM calls
+  # defaults to b2b_sales; pass agent=<id> for another agent (b2b_sales, consumer_mktg, customer_care)
+  make run-cycle
+
   make app
   # This will open the app at `http://localhost:8501/`
   ```
@@ -55,8 +59,6 @@ One platform runs the same governed loop for three business units: generate, eva
 
 
 ---
-
-**Pre-run:** use `make run-cycle` so the UI shows scores and proposals without live LLM calls during demo (defaults to `b2b_sales`; pass `agent=<id>` to target another agent. **Valid agent IDs:** `b2b_sales`, `consumer_mktg`, `customer_care`).
 
 **Reset demo data:**
 
