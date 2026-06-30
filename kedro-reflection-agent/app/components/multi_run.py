@@ -112,9 +112,9 @@ def render_multi_run_insights(agent_id: str, run_index: list[dict]) -> None:
     )
 
     # ── "What drove it" box ───────────────────────────────────────────────────
-    apply_history = get_apply_history()
-    if apply_history:
-        latest = apply_history[-1]
+    agent_apply_history = [h for h in get_apply_history() if h.get("agent_id") == agent_id]
+    if agent_apply_history:
+        latest = agent_apply_history[-1]
         refl_id = latest.get("reflection_id") or "—"
         applied_at = (latest.get("applied_at") or "")[:10]
         new_skill = latest.get("new_skill_text") or ""

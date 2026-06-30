@@ -602,14 +602,21 @@ _META_AGENT_SYSTEM = (
     "- The current system prompt, which contains a skill-injection placeholder where the style guide is inserted at runtime\n"
     "- The current skill file (markdown style guide)\n"
     "- Aggregate evaluation scores across all generated outputs\n"
-    "- The worst-scoring cases: the outputs produced, per-scorer evaluator feedback, and the rubric that defined what the output should achieve\n\n"
+    "- The worst-scoring cases: the outputs produced, per-scorer evaluator feedback, and the rubric that defined what the output should achieve\n"
+    "- Scout signals from the current run: deterministic pattern detectors that flagged specific failure types "
+    "(rubric misses, score regressions, tone drift, hallucinations, cross-unit patterns) — treat these as pre-diagnosed failure evidence\n"
+    "- Historical signal patterns (cross-run and cross-agent): use to distinguish persistent systemic failures from one-off noise; "
+    "cross-unit signals indicate issues shared with other business units\n"
+    "- Run history for this agent: aggregate scores over past runs — use to judge whether a failure is new or has persisted across multiple cycles\n\n"
     "Your task:\n"
     "1. Identify the dominant failure patterns across the worst cases — be specific and cite evaluator comments as evidence.\n"
     "2. Write a complete improved system prompt that directly addresses those failures. IMPORTANT: the current system prompt you receive contains a skill-injection placeholder; you must carry it over into your improved prompt exactly as written — do not rename, remove, or relocate it.\n"
     "3. Write a complete improved skill file (markdown) that reinforces the new prompt.\n"
     "4. Propose 2–3 new evaluation cases that target the exact failure modes you identified. Each new case must:\n"
     "   - Reuse a real customer_id and product_id from the worst-scoring cases you were shown.\n"
-    "   - Include a precise rubric: required_mentions (list of strings), forbidden_mentions (list of strings), expected_cta (one of: meeting, demo, call, reply, trial), expected_tone (one of: formal, consultative, friendly), and notes explaining why this case specifically targets the failure mode.\n"
+    "   - Include a precise rubric: required_mentions (list of strings), forbidden_mentions (list of strings), "
+    "expected_cta (one of: meeting, demo, call, reply, trial), expected_tone (one of: formal, consultative, friendly), "
+    "and notes explaining why this case specifically targets the failure mode.\n"
     "   - Use a case_id of the form 'regression_NNN' (e.g. regression_001).\n\n"
     "Every change must be traceable to a specific failure pattern in the data. Do not make changes unsupported by the evidence.\n\n"
     "Critical constraint — do NOT regress passing dimensions:\n"
@@ -626,7 +633,10 @@ _META_AGENT_HUMAN = (
     "Current system prompt:\n{current_prompt}\n\n"
     "Current skill file:\n{skill_text}\n\n"
     "Aggregate scores:\n{aggregate_scores_json}\n\n"
-    "Worst-scoring cases (outputs, evaluator feedback, rubrics):\n{failing_cases_json}"
+    "Worst-scoring cases (outputs, evaluator feedback, rubrics):\n{failing_cases_json}\n\n"
+    "Scout signals (current run — pre-diagnosed failure patterns):\n{signals_json}\n\n"
+    "Historical signal patterns (cross-run, cross-agent):\n{signal_index_json}\n\n"
+    "Run history for this agent:\n{run_history_json}"
 )
 
 _AGENT_LABELS = {
@@ -634,6 +644,7 @@ _AGENT_LABELS = {
     "consumer_mktg": "consumer marketing message",
     "customer_care": "customer care support reply",
 }
+
 
 META_AGENT_PROMPTS: dict[str, list[dict]] = {
     agent: [

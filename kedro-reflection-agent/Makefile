@@ -46,3 +46,4 @@ run-cycle:
 	$(KEDRO) run --pipelines apply       --params=agent_id=$(agent),reflection_id=refl_1
 	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_2
 	$(KEDRO) run --pipelines evaluation  --params=agent_id=$(agent),run_id=run_2
+	$(KEDRO) run --pipelines scouts      --params=agent_id=$(agent),run_id=run_2

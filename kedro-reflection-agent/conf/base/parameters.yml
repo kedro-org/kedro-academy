@@ -33,6 +33,9 @@ body_length_max: 2000
 
 # --- scouts -----------------------------------------------------------------
 
+# low_pass_rate: fires when aggregate pass_rate falls below this floor.
+scout_pass_rate_floor: 0.80
+
 # score_regression: fires when any scored dimension drops more than this many
 # points (0-1 scale) vs the rolling average of the last N runs.
 scout_regression_delta_medium: 0.10   # delta > 0.10 → medium confidence

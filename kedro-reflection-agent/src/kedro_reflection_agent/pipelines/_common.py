@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from typing import Any
 
 from kedro.pipeline import LLMContext
 from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
@@ -60,3 +61,16 @@ def build_structured_chain(
 def utc_now_iso() -> str:
     """Current UTC time as an ISO-8601 string (used for ``started_at`` etc.)."""
     return datetime.now(timezone.utc).isoformat()
+
+
+def rubric_by_case_id_from_eval_cases(eval_cases: Any) -> dict[str, dict]:
+    """Map logical ``case_id`` → rubric dict from a Langfuse ``DatasetClient``."""
+    result: dict[str, dict] = {}
+    for item in eval_cases.items:
+        inp = getattr(item, "input", None) or {}
+        case_id = inp.get("case_id") or getattr(item, "id", None)
+        if not case_id:
+            continue
+        expected = getattr(item, "expected_output", None) or {}
+        result[str(case_id)] = expected.get("rubric", {})
+    return result

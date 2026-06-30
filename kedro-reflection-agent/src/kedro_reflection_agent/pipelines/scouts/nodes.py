@@ -33,7 +33,7 @@ from typing import Any
 
 from kedro_reflection_agent.models.shared import CaseScore, Signal
 from kedro_reflection_agent.utils.paths import SIGNAL_INDEX_PATH
-from kedro_reflection_agent.pipelines._common import utc_now_iso
+from kedro_reflection_agent.pipelines._common import rubric_by_case_id_from_eval_cases, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,8 @@ def run_scouts(
     eval_cases: Any,
     run_id: str,
     agent_id: str,
+    # low_pass_rate threshold
+    scout_pass_rate_floor: float,
     # score_regression thresholds
     scout_regression_delta_medium: float,
     scout_regression_delta_high: float,
@@ -83,12 +85,20 @@ def run_scouts(
             run_id, agent_id, n_skipped,
         )
 
-    # Build rubric lookup from the DatasetClient — same pattern as reflection pipeline.
-    rubric_by_case_id: dict[str, dict] = {}
-    for item in eval_cases.items:
-        rubric_by_case_id[item.id] = (item.expected_output or {}).get("rubric", {})
+    # Build rubric lookup from the DatasetClient — keyed by logical case_id.
+    rubric_by_case_id = rubric_by_case_id_from_eval_cases(eval_cases)
 
     signals: list[Signal] = []
+
+    # 0. low_pass_rate
+    signals.extend(
+        _detect_low_pass_rate(
+            aggregate_scores=aggregate_scores,
+            run_id=run_id,
+            agent_id=agent_id,
+            floor=scout_pass_rate_floor,
+        )
+    )
 
     # 1. score_regression
     signals.extend(
@@ -168,6 +178,50 @@ def run_scouts(
     )
 
     return [s.model_dump() for s in signals]
+
+
+# ---------------------------------------------------------------------------
+# 0. low_pass_rate
+# ---------------------------------------------------------------------------
+
+
+def _detect_low_pass_rate(
+    aggregate_scores: dict,
+    run_id: str,
+    agent_id: str,
+    floor: float,
+) -> list[Signal]:
+    """Fire when the run's aggregate pass rate falls below the configured floor."""
+    pass_rate = aggregate_scores.get("pass_rate")
+    if pass_rate is None or pass_rate >= floor:
+        return []
+
+    n_passing = aggregate_scores.get("n_passing", "?")
+    n_cases = aggregate_scores.get("n_cases", "?")
+    confidence = "high" if pass_rate < floor - 0.15 else "medium"
+
+    logger.info(
+        "low_pass_rate [%s] %s: pass_rate=%.2f below floor %.2f → %s",
+        agent_id,
+        run_id,
+        pass_rate,
+        floor,
+        confidence,
+    )
+    return [
+        Signal(
+            signal_type="low_pass_rate",
+            agent_id=agent_id,
+            run_id=run_id,
+            confidence=confidence,
+            evidence_text=(
+                f"Pass rate {pass_rate:.0%} ({n_passing}/{n_cases} cases passing) "
+                f"is below floor {floor:.0%}."
+            ),
+            reason=f"pass_rate ({pass_rate:.3f}) < floor ({floor:.2f}).",
+            created_at=utc_now_iso(),
+        )
+    ]
 
 
 # ---------------------------------------------------------------------------

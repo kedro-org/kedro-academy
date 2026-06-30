@@ -46,6 +46,14 @@ from kedro_reflection_agent.pipelines._common import build_structured_chain, utc
 logger = logging.getLogger(__name__)
 
 
+def _langfuse_client_for_dataset(eval_cases: DatasetClient):
+    """Return the Langfuse client for a dataset without mutating ``eval_cases.items``."""
+    client = getattr(eval_cases, "_langfuse_client", None)
+    if client is None and hasattr(eval_cases, "_get_langfuse_client"):
+        client = eval_cases._get_langfuse_client()
+    return client
+
+
 # Scorer name groups, used for aggregation.
 _HEURISTIC_NAMES = (
     "subject_present",
@@ -328,7 +336,7 @@ def run_experiment(
         len(target_case_ids),
     )
 
-    langfuse_client = eval_cases._get_langfuse_client()
+    langfuse_client = _langfuse_client_for_dataset(eval_cases)
     if not langfuse_client:
         raise ValueError("No Langfuse client available on eval_cases.")
 
@@ -346,6 +354,7 @@ def run_experiment(
             "judge_prompt_version": str(judge_prompt_version),
             "passing_threshold": str(passing_threshold),
         },
+        _dataset_version=getattr(eval_cases, "version", None),
     )
 
     all_scorer_names = _HEURISTIC_NAMES + _judge_names(_JUDGE_SCORE_BY_AGENT[agent_id])

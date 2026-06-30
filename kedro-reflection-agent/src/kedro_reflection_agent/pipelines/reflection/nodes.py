@@ -29,7 +29,11 @@ from kedro.pipeline import LLMContext
 from kedro_reflection_agent.models.shared import CaseScore, ReflectionOutput, ReflectionSummary
 from kedro_reflection_agent.utils.id_service import dataset_item_id
 from kedro_reflection_agent.utils.paths import RUN_INDEX_PATH, SIGNAL_INDEX_PATH
-from kedro_reflection_agent.pipelines._common import build_structured_chain, utc_now_iso
+from kedro_reflection_agent.pipelines._common import (
+    build_structured_chain,
+    rubric_by_case_id_from_eval_cases,
+    utc_now_iso,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +61,7 @@ def prepare_reflection_context(
     """
     current_prompt = _extract_prompt_text(system_prompt)
 
-    rubric_by_case_id: dict[str, dict] = {}
-    for item in eval_cases.items:
-        rubric_by_case_id[item.id] = (item.expected_output or {}).get("rubric", {})
+    rubric_by_case_id = rubric_by_case_id_from_eval_cases(eval_cases)
 
     scores = [CaseScore.model_validate(s) for s in per_case_scores]
     # Drop cases that errored in the Langfuse experiment (no local email was

@@ -8,12 +8,15 @@ import re
 
 import streamlit as st
 
+from app.command_strip import caption_active_run
 from app.data_loader import (
+    get_apply_entry,
     get_proposed_prompt,
     get_proposed_skill,
     get_reflection_summary,
-    get_skill_text,
-    get_system_prompt,
+    list_reflections_for_agent,
+    next_reflection_id,
+    snapshots_before_reflection,
 )
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
@@ -131,10 +134,14 @@ def render_stage_reflect(
     """Render Stage 3: Reflect & Propose."""
 
     run_id_display = run_id or "run_1"
-    refl_id_display = reflection_id or "refl_1"
+    refl_id_display = reflection_id or next_reflection_id(agent_id)
     cmd = (
         f"kedro run --pipelines reflection "
-        f"--params run_id={run_id_display},reflection_id={refl_id_display}"
+        f"--params agent_id={agent_id},run_id={run_id_display},reflection_id={refl_id_display}"
+    )
+    strip_caption = caption_active_run(
+        run_id=run_id,
+        action=f"meta-agent proposes improvements ({refl_id_display})",
     )
 
     # ── Command strip ─────────────────────────────────────────────────────────
@@ -143,9 +150,18 @@ def render_stage_reflect(
         st.markdown(
             f"""
             <div class="command-strip">
-              <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
-              <span class="command-text">{cmd}</span>
-              <span class="command-pill">meta-agent: gpt-4o</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
+                  {strip_caption}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
+                  <span class="command-text">{cmd}</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+                  <span class="command-pill">meta-agent: gpt-4o</span>
+                </div>
+              </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -247,9 +263,11 @@ def render_stage_reflect(
 
     # ── Langfuse tab ─────────────────────────────────────────────────────────
     with tab_langfuse:
-        if not reflection_id:
+        history = list_reflections_for_agent(agent_id)
+        if not history:
             st.info("Run the reflection pipeline to see Langfuse analytics.")
         else:
+            view_id = history[0]["reflection_id"]
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 st.metric("Reflection Traces", "—")
@@ -258,44 +276,94 @@ def render_stage_reflect(
             with col3:
                 st.metric("Input tokens", "—")
             with col4:
-                st.metric("Proposals", "1" if get_reflection_summary(agent_id, reflection_id) else "—")
+                st.metric(
+                    "Proposals",
+                    "1" if get_reflection_summary(agent_id, view_id) else "—",
+                )
 
     # ── Proposal tab ─────────────────────────────────────────────────────────
     with tab_proposal:
-        if not reflection_id:
+        reflections = list_reflections_for_agent(agent_id)
+        if not reflections:
             st.info("Run the reflection pipeline first to see the proposal.")
             return
 
-        summary_md = get_reflection_summary(agent_id, reflection_id)
-        proposed_prompt = get_proposed_prompt(agent_id, reflection_id)
-        proposed_skill = get_proposed_skill(agent_id, reflection_id)
-        current_prompt = get_system_prompt(agent_id)
-        current_skill = get_skill_text(agent_id)
+        default_idx = 0
+        if reflection_id:
+            for idx, row in enumerate(reflections):
+                if row["reflection_id"] == reflection_id:
+                    default_idx = idx
+                    break
+
+        labels = [
+            f"{row['reflection_id']} · eval {row['run_id'] or '?'}"
+            + (" · applied" if row["applied"] else " · pending")
+            for row in reflections
+        ]
+        selected_idx = st.selectbox(
+            "View proposal",
+            options=list(range(len(reflections))),
+            format_func=lambda i: labels[i],
+            index=default_idx,
+            key=f"reflect_proposal_select_{agent_id}",
+        )
+        selected = reflections[selected_idx]
+        view_refl_id = selected["reflection_id"]
+        source_run_id = selected.get("run_id") or "?"
+        is_applied = selected["applied"]
+
+        summary_md = get_reflection_summary(agent_id, view_refl_id)
+        proposed_prompt = get_proposed_prompt(agent_id, view_refl_id)
+        proposed_skill = get_proposed_skill(agent_id, view_refl_id)
+        before_prompt, before_skill = snapshots_before_reflection(agent_id, view_refl_id)
 
         if not summary_md and not proposed_prompt:
-            st.info("No proposal found. Run the reflection pipeline to generate one.")
+            st.info("No proposal found for this reflection.")
             return
 
-        # Completion banner
-        st.markdown(
-            """
-            <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;
-                        padding:14px 18px;margin-bottom:20px;display:flex;
-                        align-items:center;gap:10px;">
-              <span style="font-size:18px;">✅</span>
-              <div>
-                <div style="font-size:14px;font-weight:700;color:#15803D;">
-                  Meta-agent reflection complete
+        if is_applied:
+            apply_row = get_apply_entry(agent_id, view_refl_id) or {}
+            applied_at = (apply_row.get("applied_at") or "")[:10]
+            st.markdown(
+                f"""
+                <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;
+                            padding:14px 18px;margin-bottom:20px;display:flex;
+                            align-items:center;gap:10px;">
+                  <span style="font-size:18px;">📋</span>
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:#1D4ED8;">
+                      Applied proposal — {view_refl_id} (from {source_run_id})
+                    </div>
+                    <div style="font-size:13px;color:#1E40AF;margin-top:2px;">
+                      This reflection was approved and applied
+                      {f" on {applied_at}" if applied_at else ""}.
+                      Diff below shows what changed from the pre-apply config.
+                    </div>
+                  </div>
                 </div>
-                <div style="font-size:13px;color:#166534;margin-top:2px;">
-                  The meta-agent has analysed run outputs and proposed prompt + skill changes.
-                  Review the proposal below before approving.
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                """
+                <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;
+                            padding:14px 18px;margin-bottom:20px;display:flex;
+                            align-items:center;gap:10px;">
+                  <span style="font-size:18px;">✅</span>
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:#15803D;">
+                      Meta-agent reflection complete
+                    </div>
+                    <div style="font-size:13px;color:#166534;margin-top:2px;">
+                      The meta-agent has analysed run outputs and proposed prompt + skill changes.
+                      Review the proposal below before approving.
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
         # 3-column summary cards
         if summary_md:
@@ -365,13 +433,13 @@ def render_stage_reflect(
         st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
 
         # Prompt diff section
-        if proposed_prompt or current_prompt:
+        if proposed_prompt or before_prompt:
             st.markdown(
                 '<div style="font-size:14px;font-weight:700;color:#0F172A;margin-bottom:8px;">'
                 "Prompt Diff</div>",
                 unsafe_allow_html=True,
             )
-            before_text = _msg_text(current_prompt) if current_prompt else "(no current prompt)"
+            before_text = _msg_text(before_prompt) if before_prompt else "(no prior prompt)"
             after_text = _msg_text(proposed_prompt) if proposed_prompt else "(no proposed prompt)"
             before_html, after_html = _diff_html(before_text, after_text)
 
@@ -381,7 +449,7 @@ def render_stage_reflect(
                     f"""
                     <div style="font-size:11px;font-weight:700;color:#94A3B8;
                                 text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">
-                      Current Prompt
+                      Before Apply
                     </div>
                     <div class="diff-panel before"
                          style="font-size:12.5px;white-space:pre-wrap;
@@ -408,14 +476,14 @@ def render_stage_reflect(
                 )
 
         # Skill diff section
-        if proposed_skill or current_skill:
+        if proposed_skill or before_skill:
             st.markdown(
                 '<div style="font-size:14px;font-weight:700;color:#0F172A;'
                 'margin-top:20px;margin-bottom:8px;">Skill Diff</div>',
                 unsafe_allow_html=True,
             )
             skill_before, skill_after = _diff_html(
-                current_skill or "(no current skill)",
+                before_skill or "(no prior skill)",
                 proposed_skill or "(no proposed skill)",
             )
             skill_cols = st.columns(2)
@@ -424,7 +492,7 @@ def render_stage_reflect(
                     f"""
                     <div style="font-size:11px;font-weight:700;color:#94A3B8;
                                 text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">
-                      Current Skill
+                      Before Apply
                     </div>
                     <div class="diff-panel before"
                          style="font-size:12.5px;white-space:pre-wrap;
@@ -450,15 +518,16 @@ def render_stage_reflect(
                     unsafe_allow_html=True,
                 )
 
-        # Review & Approve button
-        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
-        _, btn_col = st.columns([6, 1])
-        with btn_col:
-            if st.button(
-                "Review & Approve →",
-                key=f"goto_approve_btn_{agent_id}",
-                type="primary",
-                width="stretch",
-            ):
-                st.session_state[f"goto_approve_{agent_id}"] = True
-                st.rerun()
+        # Review & Approve button (pending proposals only)
+        if not is_applied:
+            st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+            _, btn_col = st.columns([6, 1])
+            with btn_col:
+                if st.button(
+                    "Review & Approve →",
+                    key=f"goto_approve_btn_{agent_id}",
+                    type="primary",
+                    width="stretch",
+                ):
+                    st.session_state[f"goto_approve_{agent_id}"] = True
+                    st.rerun()

@@ -6,9 +6,10 @@ import re
 
 import streamlit as st
 
+from app.command_strip import caption_next_run
 from app.formatting import pass_rate_explainer_html
 from app.components.charts import dimension_bars_chart
-from app.data_loader import get_aggregate_scores, get_run_index
+from app.data_loader import get_aggregate_scores, get_run_index, next_campaign_run_id
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
 
@@ -59,11 +60,17 @@ def render_stage_campaign(
 ) -> None:
     """Render Stage 1: Campaign & Evaluate."""
 
-    # ── Command strip ─────────────────────────────────────────────────────────
-    run_id_display = run_id or "run_1"
+    # Latest completed run (scores/Langfuse); command targets the next run id.
+    latest_run_id = run_id
+    run_id_for_run = next_campaign_run_id(agent_id, latest_run_id)
     cmd = (
         f"kedro run --pipelines campaign,evaluation "
-        f"--params agent_id={agent_id},run_id={run_id_display}"
+        f"--params agent_id={agent_id},run_id={run_id_for_run}"
+    )
+    strip_caption = caption_next_run(
+        run_id=run_id_for_run,
+        action="campaign + evaluate",
+        latest_run_id=latest_run_id,
     )
 
     col_cmd, col_btn = st.columns([5, 1])
@@ -72,6 +79,9 @@ def render_stage_campaign(
             f"""
             <div class="command-strip">
               <div style="flex:1;min-width:0;">
+                <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
+                  {strip_caption}
+                </div>
                 <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
                   Generate outreach emails → evaluate on writing quality, personalisation,
                   groundedness, CTA
@@ -126,8 +136,8 @@ def render_stage_campaign(
                 clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
                 log_placeholder.code(clean, language="log")
 
-            with st.spinner("Running campaign + evaluation pipeline…"):
-                ok, _ = runner.run_campaign(run_id_display, agent_id, on_log=on_log)
+            with st.spinner(f"Running campaign + evaluation ({run_id_for_run})…"):
+                ok, _ = runner.run_campaign(run_id_for_run, agent_id, on_log=on_log)
 
             if ok:
                 st.success("Campaign + evaluation completed successfully.")
@@ -159,7 +169,7 @@ def render_stage_campaign(
 
     # ── Langfuse tab ─────────────────────────────────────────────────────────
     with tab_langfuse:
-        agg = get_aggregate_scores(agent_id, run_id or "") if run_id else None
+        agg = get_aggregate_scores(agent_id, latest_run_id or "") if latest_run_id else None
 
         if agg is None:
             st.info("Run the campaign pipeline to see Langfuse analytics here.")
@@ -172,7 +182,7 @@ def render_stage_campaign(
                 (
                     r
                     for r in get_run_index()
-                    if r.get("agent_id") == agent_id and r.get("run_id") == run_id
+                    if r.get("agent_id") == agent_id and r.get("run_id") == latest_run_id
                 ),
                 {},
             )

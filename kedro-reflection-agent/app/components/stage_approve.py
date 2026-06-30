@@ -8,16 +8,23 @@ import re
 
 import streamlit as st
 
+from app.command_strip import caption_apply, caption_next_run
 from app.data_loader import (
     get_aggregate_scores,
-    get_apply_history,
     get_emails,
+    get_latest_run_entry,
     get_per_case_scores,
     get_proposed_prompt,
     get_proposed_skill,
     get_run_index,
     get_skill_text,
     get_system_prompt,
+    is_reflection_applied,
+    next_campaign_run_id,
+    reflection_id_for_run,
+    run_has_evaluation,
+    verification_run_after_last_apply,
+    next_run_id as increment_run_id,
 )
 from app.components.charts import dimension_delta_table_html
 
@@ -98,6 +105,37 @@ def _score_color(v: float) -> str:
     return "#B91C1C"
 
 
+def _render_reflect_first_banner(run_id: str | None) -> None:
+    """Prompt the user to run Reflect before Approve can proceed."""
+    run_note = (
+        f" for <strong>{run_id}</strong>"
+        if run_id
+        else ""
+    )
+    st.markdown(
+        f"""
+        <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;
+                    padding:20px 24px;margin-bottom:16px;
+                    display:flex;align-items:flex-start;gap:16px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FDE68A;
+                       display:flex;align-items:center;justify-content:center;
+                       flex-shrink:0;font-size:20px;">✋</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;color:#92400E;font-size:15px;margin-bottom:6px;">
+              Human Approval Required
+            </div>
+            <div style="font-size:13px;color:#78350F;line-height:1.6;">
+              Run the <strong>Reflect &amp; Propose</strong> stage first{run_note} to generate
+              proposals. Once the meta-agent has produced its reflection, you will be
+              able to review and approve the changes here.
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def render_stage_approve(
     agent_id: str,
     run_id: str | None,
@@ -106,160 +144,186 @@ def render_stage_approve(
 ) -> None:
     """Render Stage 4: Approve & Apply."""
 
-    refl_id_display = reflection_id or "refl_1"
-    run_id_display = run_id or "run_1"
-    _logs_key = f"show_run_logs_{agent_id}"
-
-    # Check if already applied
-    apply_history = get_apply_history()
-    already_applied = any(
-        h.get("reflection_id") == refl_id_display
-        and h.get("agent_id", agent_id) == agent_id  # backward-compat: old entries lack agent_id
-        for h in apply_history
+    latest_entry = get_latest_run_entry(agent_id) or {}
+    latest_run_id = run_id or latest_entry.get("run_id")
+    run_id_display = latest_run_id or "run_1"
+    reflection_on_latest = (
+        reflection_id_for_run(agent_id, latest_run_id) if latest_run_id else None
+    )
+    has_eval = bool(
+        run_has_evaluation(latest_entry)
+        or (latest_run_id and get_aggregate_scores(agent_id, latest_run_id))
+    )
+    verification_run = verification_run_after_last_apply(agent_id)
+    pending_reflection = (
+        reflection_on_latest
+        and not is_reflection_applied(agent_id, reflection_on_latest)
+    )
+    needs_reflection_first = (
+        has_eval
+        and not reflection_on_latest
+        and latest_run_id != verification_run
     )
 
-    # ── Approval gate ─────────────────────────────────────────────────────────
-    if not already_applied:
-        if reflection_id:
-            proposed_prompt = get_proposed_prompt(agent_id, reflection_id)
-            proposed_skill = get_proposed_skill(agent_id, reflection_id)
-            current_prompt = get_system_prompt(agent_id)
-            current_skill = get_skill_text(agent_id)
-            changes_exist = _has_changes(proposed_prompt, current_prompt, proposed_skill, current_skill)
+    _logs_key = f"show_run_logs_{agent_id}"
 
-            prompt_pill = ""
-            if proposed_prompt or current_prompt:
-                pv_before = 1
-                pv_after = pv_before + 1
-                prompt_pill = (
-                    f'<span style="background:#EEF2FF;color:#2251FF;font-size:11px;'
-                    f'font-weight:600;padding:3px 10px;border-radius:100px;'
-                    f'border:1px solid #BFDBFE;">'
-                    f'Prompt v{pv_before}→v{pv_after}</span>'
-                )
+    # ── Pending approval (reflection exists on latest run, not yet applied) ───
+    if pending_reflection:
+        refl_id_display = reflection_on_latest or "refl_1"
+        proposed_prompt = get_proposed_prompt(agent_id, refl_id_display)
+        proposed_skill = get_proposed_skill(agent_id, refl_id_display)
+        current_prompt = get_system_prompt(agent_id)
+        current_skill = get_skill_text(agent_id)
+        changes_exist = _has_changes(proposed_prompt, current_prompt, proposed_skill, current_skill)
 
-            skill_pill = ""
-            if proposed_skill:
-                skill_pill = (
-                    '<span style="background:#F0FDFA;color:#0F766E;font-size:11px;'
-                    'font-weight:600;padding:3px 10px;border-radius:100px;'
-                    'border:1px solid #99F6E4;">'
-                    'Skill updated</span>'
-                )
+        apply_cmd = (
+            f"kedro run --pipelines apply "
+            f"--params agent_id={agent_id},reflection_id={refl_id_display}"
+        )
+        apply_caption = caption_apply(run_id=latest_run_id, reflection_id=refl_id_display)
 
-            run_index = get_run_index()
-            agent_runs = [r for r in run_index if r.get("agent_id") == agent_id]
-            latest_run = (
-                sorted(agent_runs, key=lambda r: (r.get("started_at") or ""), reverse=True)[0]
-                if agent_runs
-                else {}
-            )
-            n_eval_cases = latest_run.get("n_cases") or 0
-            cases_pill = (
-                f'<span style="background:#F3E8FF;color:#7C3AED;font-size:11px;'
+        st.markdown(
+            f"""
+            <div class="command-strip" style="margin-bottom:16px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
+                  {apply_caption}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
+                  <span class="command-text">{apply_cmd}</span>
+                </div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        prompt_pill = ""
+        if proposed_prompt or current_prompt:
+            pv_before = 1
+            pv_after = pv_before + 1
+            prompt_pill = (
+                f'<span style="background:#EEF2FF;color:#2251FF;font-size:11px;'
                 f'font-weight:600;padding:3px 10px;border-radius:100px;'
-                f'border:1px solid #DDD6FE;">'
-                f'+{n_eval_cases} eval cases</span>'
-                if n_eval_cases
-                else ""
+                f'border:1px solid #BFDBFE;">'
+                f'Prompt v{pv_before}→v{pv_after}</span>'
             )
 
-            st.markdown(
-                f"""
-                <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;
-                            padding:20px 24px;margin-bottom:16px;
-                            display:flex;align-items:flex-start;gap:16px;">
-                  <div style="width:36px;height:36px;border-radius:10px;background:#FDE68A;
-                               display:flex;align-items:center;justify-content:center;
-                               flex-shrink:0;font-size:20px;">👋</div>
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-weight:700;color:#92400E;font-size:15px;margin-bottom:6px;">
-                      ✋ Human Approval Required
-                    </div>
-                    <div style="font-size:13px;color:#78350F;margin-bottom:12px;line-height:1.6;">
-                      3 proposals ready to apply. Approving will trigger
-                      <code style="background:#FEF3C7;padding:1px 5px;border-radius:3px;
-                                   font-size:11px;">kedro run --pipelines apply</code>,
-                      then re-run campaign + evaluation to produce the next run.
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                      {prompt_pill}{skill_pill}{cases_pill}
-                    </div>
-                  </div>
+        skill_pill = ""
+        if proposed_skill:
+            skill_pill = (
+                '<span style="background:#F0FDFA;color:#0F766E;font-size:11px;'
+                'font-weight:600;padding:3px 10px;border-radius:100px;'
+                'border:1px solid #99F6E4;">'
+                'Skill updated</span>'
+            )
+
+        run_index = get_run_index()
+        agent_runs = [r for r in run_index if r.get("agent_id") == agent_id]
+        latest_run = (
+            sorted(agent_runs, key=lambda r: (r.get("started_at") or ""), reverse=True)[0]
+            if agent_runs
+            else {}
+        )
+        n_eval_cases = latest_run.get("n_cases") or 0
+        cases_pill = (
+            f'<span style="background:#F3E8FF;color:#7C3AED;font-size:11px;'
+            f'font-weight:600;padding:3px 10px;border-radius:100px;'
+            f'border:1px solid #DDD6FE;">'
+            f'+{n_eval_cases} eval cases</span>'
+            if n_eval_cases
+            else ""
+        )
+
+        st.markdown(
+            f"""
+            <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;
+                        padding:20px 24px;margin-bottom:16px;
+                        display:flex;align-items:flex-start;gap:16px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#FDE68A;
+                           display:flex;align-items:center;justify-content:center;
+                           flex-shrink:0;font-size:20px;">👋</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;color:#92400E;font-size:15px;margin-bottom:6px;">
+                  ✋ Human Approval Required
                 </div>
-                """,
-                unsafe_allow_html=True,
+                <div style="font-size:13px;color:#78350F;margin-bottom:12px;line-height:1.6;">
+                  3 proposals ready to apply. Approving will trigger
+                  <code style="background:#FEF3C7;padding:1px 5px;border-radius:3px;
+                               font-size:11px;">kedro run --pipelines apply</code>,
+                  then re-run campaign + evaluation to produce the next run.
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  {prompt_pill}{skill_pill}{cases_pill}
+                </div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        next_run_after_apply = increment_run_id(run_id_display, default="run_2")
+
+        approve_col, note_col = st.columns([2, 4])
+        with approve_col:
+            approve_clicked = st.button(
+                "✓ Approve & Apply",
+                key=f"approve_apply_{agent_id}",
+                type="primary",
+                width="stretch",
+                disabled=not changes_exist,
             )
-
-            _m = re.match(r'^(.+?)(\d+)$', run_id_display)
-            next_run_id = f"{_m.group(1)}{int(_m.group(2)) + 1}" if _m else "run_2"
-
-            approve_col, note_col = st.columns([2, 4])
-            with approve_col:
-                approve_clicked = st.button(
-                    "✓ Approve & Apply",
-                    key=f"approve_apply_{agent_id}",
-                    type="primary",
-                    width="stretch",
-                    disabled=not changes_exist,
+        with note_col:
+            if not changes_exist:
+                st.caption(
+                    "No changes to apply — the proposed prompt and skill are "
+                    "identical to the current version."
                 )
-            with note_col:
-                if not changes_exist:
-                    st.caption("No changes to apply — the proposed prompt and skill are identical to the current version.")
 
-            if approve_clicked:
-                from app import runner
-                log_placeholder = st.empty()
-                log_lines: list[str] = []
+        if approve_clicked:
+            from app import runner
+            log_placeholder = st.empty()
+            log_lines: list[str] = []
 
-                def on_log(line: str) -> None:
-                    log_lines.append(line)
-                    st.session_state[f"apply_logs_{agent_id}"] = log_lines.copy()
-                    clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
-                    log_placeholder.code(clean, language="log")
+            def on_log(line: str) -> None:
+                log_lines.append(line)
+                st.session_state[f"apply_logs_{agent_id}"] = log_lines.copy()
+                clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
+                log_placeholder.code(clean, language="log")
 
-                with st.spinner("Applying changes…"):
-                    ok, _ = runner.run_apply(refl_id_display, agent_id, on_log=on_log)
+            with st.spinner("Applying changes…"):
+                ok, _ = runner.run_apply(refl_id_display, agent_id, on_log=on_log)
 
-                if ok:
-                    st.success(f"Apply complete — running campaign + evaluation for {next_run_id}…")
-                    with st.spinner(f"Running campaign + evaluation ({next_run_id})…"):
-                        ok2, _ = runner.run_campaign(next_run_id, agent_id, on_log=on_log)
-                    if ok2:
-                        st.success(f"Run {next_run_id} complete.")
-                    else:
-                        st.error(f"Campaign pipeline failed for {next_run_id} — check logs.")
+            if ok:
+                st.success(
+                    f"Apply complete — running campaign, evaluation, and scouts for "
+                    f"{next_run_after_apply}…"
+                )
+                with st.spinner(
+                    f"Running campaign + evaluation + scouts ({next_run_after_apply})…"
+                ):
+                    ok2, _ = runner.run_campaign_eval_scouts(
+                        next_run_after_apply, agent_id, on_log=on_log
+                    )
+                if ok2:
+                    st.success(f"Run {next_run_after_apply} complete.")
                 else:
-                    st.error("Apply pipeline failed — check logs below.")
-                st.session_state[_logs_key] = True
-                st.rerun()
-
-        else:
-            st.markdown(
-                """
-                <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;
-                            padding:20px 24px;margin-bottom:16px;
-                            display:flex;align-items:flex-start;gap:16px;">
-                  <div style="width:36px;height:36px;border-radius:10px;background:#FDE68A;
-                               display:flex;align-items:center;justify-content:center;
-                               flex-shrink:0;font-size:20px;">✋</div>
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-weight:700;color:#92400E;font-size:15px;margin-bottom:6px;">
-                      Human Approval Required
-                    </div>
-                    <div style="font-size:13px;color:#78350F;line-height:1.6;">
-                      Run the <strong>Reflect &amp; Propose</strong> stage first to generate
-                      proposals. Once the meta-agent has produced its reflection, you will be
-                      able to review and approve the changes here.
-                    </div>
-                  </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    st.error(
+                        f"Campaign pipeline failed for {next_run_after_apply} — check logs."
+                    )
+            else:
+                st.error("Apply pipeline failed — check logs below.")
+            st.session_state[_logs_key] = True
+            st.rerun()
         return
 
-    # ── Post-approval: tabs + banner + re-run strip ───────────────────────────
+    # ── Awaiting reflection on the latest eval run ────────────────────────────
+    if needs_reflection_first or not has_eval:
+        _render_reflect_first_banner(latest_run_id if has_eval else None)
+        return
+
+    # ── Post-apply verification (latest run is the run right after an apply) ──
     st.markdown(
         """
         <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;
@@ -275,18 +339,32 @@ def render_stage_approve(
     )
 
     # ── Re-run campaign strip ─────────────────────────────────────────────────
-    _m = re.match(r'^(.+?)(\d+)$', run_id_display)
-    _default_next = f"{_m.group(1)}{int(_m.group(2)) + 1}" if _m else "run_2"
+    _default_next = next_campaign_run_id(agent_id, run_id_display)
     next_run_id = st.session_state.get(f"next_run_id_post_{agent_id}", _default_next)
+    rerun_cmd = (
+        f"kedro run --pipelines campaign,evaluation,scouts "
+        f"--params agent_id={agent_id},run_id={next_run_id}"
+    )
+    rerun_caption = caption_next_run(
+        run_id=next_run_id,
+        action="campaign + evaluate + scouts",
+        latest_run_id=run_id_display,
+    )
 
     col_cmd, col_btn = st.columns([5, 1])
     with col_cmd:
         st.markdown(
             f"""
             <div class="command-strip">
-              <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
-              <span class="command-text">kedro run --pipelines campaign,evaluation,scouts
-                --params agent_id={agent_id},run_id={next_run_id}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
+                  {rerun_caption}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
+                  <span class="command-text">{rerun_cmd}</span>
+                </div>
+              </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -326,14 +404,13 @@ def render_stage_approve(
                 clean = _ANSI_ESCAPE.sub("", "".join(log_lines[-80:]))
                 log_placeholder.code(clean, language="log")
 
-            with st.spinner(f"Running campaign + evaluation ({next_run_id})…"):
-                ok, _ = runner.run_campaign(next_run_id, agent_id, on_log=on_log)
+            with st.spinner(f"Running campaign + evaluation + scouts ({next_run_id})…"):
+                ok, _ = runner.run_campaign_eval_scouts(next_run_id, agent_id, on_log=on_log)
 
             if ok:
                 st.success(f"Run {next_run_id} complete.")
-                _n = re.match(r'^(.+?)(\d+)$', next_run_id)
-                st.session_state[f"next_run_id_post_{agent_id}"] = (
-                    f"{_n.group(1)}{int(_n.group(2)) + 1}" if _n else next_run_id
+                st.session_state[f"next_run_id_post_{agent_id}"] = increment_run_id(
+                    next_run_id, default=next_run_id
                 )
             else:
                 st.error(f"Pipeline failed for {next_run_id} — check logs above.")

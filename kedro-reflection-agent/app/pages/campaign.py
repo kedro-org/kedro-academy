@@ -12,29 +12,16 @@ from app.components.stage_approve import render_stage_approve
 from app.components.stage_campaign import render_stage_campaign
 from app.components.stage_reflect import render_stage_reflect
 from app.components.stage_scouts import render_stage_scouts
-from app.data_loader import get_apply_history, get_run_index
+from app.data_loader import get_latest_run_entry, get_run_index, reflection_id_for_run
 from app.state import load_demo_state
 
 
 def _resolve_run_ids(agent_id: str, run_index: list[dict]) -> tuple[str | None, str | None]:
-    """Return (latest_run_id, reflection_id) for the current agent."""
-    agent_runs = sorted(
-        [r for r in run_index if r.get("agent_id") == agent_id],
-        key=lambda r: (r.get("started_at") or "", r.get("run_seq", 0)),
-    )
-    run_id: str | None = agent_runs[-1].get("run_id") if agent_runs else None
-
-    reflection_id: str | None = None
-    for r in reversed(agent_runs):
-        if r.get("reflection_id"):
-            reflection_id = r["reflection_id"]
-            break
-    if not reflection_id:
-        history = get_apply_history()
-        agent_history = [h for h in history if h.get("agent_id") == agent_id]
-        if agent_history:
-            reflection_id = agent_history[-1].get("reflection_id")
-
+    """Return (latest_run_id, reflection_id on that run only)."""
+    del run_index  # kept for call-site compatibility; index is read from disk
+    latest = get_latest_run_entry(agent_id)
+    run_id: str | None = latest.get("run_id") if latest else None
+    reflection_id = reflection_id_for_run(agent_id, run_id) if run_id else None
     return run_id, reflection_id
 
 

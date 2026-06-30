@@ -84,6 +84,19 @@ def run_campaign(
     return r.returncode == 0, "".join(logs)
 
 
+def run_campaign_eval_scouts(
+    run_id: str,
+    agent_id: str,
+    on_log: LogCallback = None,
+) -> tuple[bool, str]:
+    """Run campaign, evaluation, then scouts — matches the Approve tab command strip."""
+    ok, logs = run_campaign(run_id, agent_id, on_log=on_log)
+    if not ok:
+        return False, logs
+    ok, scout_logs = run_scouts(run_id, agent_id, on_log=on_log)
+    return ok, logs + scout_logs
+
+
 def run_scouts(
     run_id: str,
     agent_id: str,

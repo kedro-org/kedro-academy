@@ -6,6 +6,7 @@ import re
 
 import streamlit as st
 
+from app.command_strip import caption_active_run
 from app.data_loader import get_signals
 
 _ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[mK]")
@@ -25,21 +26,21 @@ _SELECT_RUN_LOGS_JS = (
 )
 
 _SIGNAL_DESCRIPTIONS = {
-    "rubric_miss": "One or more eval cases scored below the rubric threshold.",
     "low_pass_rate": "Pass rate fell below the configured minimum.",
-    "high_error_rate": "Error rate exceeded acceptable bounds.",
-    "score_regression": "Mean score regressed compared to the previous run.",
-    "cta_miss": "CTA scorer fired below threshold on multiple cases.",
-    "personalization_miss": "Personalisation scorer below threshold on multiple cases.",
+    "score_regression": "Mean score regressed compared to prior runs.",
+    "rubric_miss": "Rubric-derived checks failed on multiple cases.",
+    "hallucination_flag": "Forbidden mentions or fabricated details detected.",
+    "tone_drift": "Tone/quality dimension below floor on multiple cases.",
+    "cross_unit_pattern": "Same signal type appeared across multiple agents.",
 }
 
 _SCOUT_RULES = {
-    "rubric_miss": "mean_per_scorer[dim] < threshold for ≥ 2 dims",
-    "low_pass_rate": "pass_rate < 0.80",
-    "high_error_rate": "n_errors / n_cases > 0.10",
-    "score_regression": "mean_score < prev_run.mean_score - 0.02",
-    "cta_miss": "mean_per_scorer['cta_present'] < 0.85",
-    "personalization_miss": "mean_per_scorer['personalization'] < 0.80",
+    "low_pass_rate": "pass_rate < scout_pass_rate_floor (default 0.80)",
+    "score_regression": "mean_per_scorer[dim] drops vs rolling window",
+    "rubric_miss": "heuristic or required_mention miss on ≥ N cases",
+    "hallucination_flag": "no_fake_skus == 0 or forbidden_mention present",
+    "tone_drift": "quality dim < scout_tone_floor on ≥ N cases",
+    "cross_unit_pattern": "same signal_type in ≥ N agents (window)",
 }
 
 
@@ -66,6 +67,10 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
         f"kedro run --pipelines scouts "
         f"--params agent_id={agent_id},run_id={run_id_display}"
     )
+    strip_caption = caption_active_run(
+        run_id=run_id,
+        action="deterministic scout checks on eval scores (no new run)",
+    )
 
     # ── Command strip ─────────────────────────────────────────────────────────
     col_cmd, col_btn = st.columns([5, 1])
@@ -87,7 +92,7 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
             <div class="command-strip">
               <div style="flex:1;min-width:0;">
                 <div style="font-size:10.5px;color:#94A3B8;margin-bottom:6px;">
-                  Pure Python, deterministic, no LLM — fires signals when eval thresholds are breached
+                  {strip_caption}
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                   <span style="color:#4ADE80;font-family:monospace;font-size:13px;">$</span>
@@ -167,8 +172,12 @@ def render_stage_scouts(agent_id: str, run_id: str | None) -> None:
             for sig in signals:
                 sig_type = sig.get("signal_type") or sig.get("type") or "unknown"
                 confidence = sig.get("confidence") or "high"
-                evidence = sig.get("evidence") or _SIGNAL_DESCRIPTIONS.get(sig_type, "—")
-                rule = sig.get("rule") or _SCOUT_RULES.get(sig_type, "—")
+                evidence = (
+                    sig.get("evidence_text")
+                    or sig.get("evidence")
+                    or _SIGNAL_DESCRIPTIONS.get(sig_type, "—")
+                )
+                rule = sig.get("reason") or sig.get("rule") or _SCOUT_RULES.get(sig_type, "—")
 
                 rows_html += f"""
                 <tr>

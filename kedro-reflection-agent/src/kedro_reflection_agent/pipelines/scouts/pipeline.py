@@ -32,6 +32,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "eval_cases",
                     "params:run_id",
                     "params:agent_id",
+                    "params:scout_pass_rate_floor",
                     "params:scout_regression_delta_medium",
                     "params:scout_regression_delta_high",
                     "params:scout_regression_window",

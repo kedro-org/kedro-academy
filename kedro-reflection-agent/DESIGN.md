@@ -34,7 +34,7 @@ Three telco business-unit agents share one **five-pipeline Kedro loop**. Each ag
 
 The invariant cycle:
 
-`campaign + evaluation + scouts (run_1) → reflection → apply → campaign + evaluation (run_2)`.
+`campaign + evaluation + scouts (run_1) → reflection → apply → campaign + evaluation + scouts (run_2)`.
 
 Adding another agent is primarily **configuration** under `data/{agent_id}/` plus Langfuse prompt/dataset names—not new pipeline code.
 
@@ -356,7 +356,7 @@ Shared heuristics (all agents): `subject_present`, `length_in_range`, `no_fake_s
 ## Headless demo cycle
 
 ```bash
-make run-cycle   # b2b_sales: campaign → evaluation → scouts → reflection → apply → campaign → evaluation
+make run-cycle   # b2b_sales: campaign → evaluation → scouts → reflection → apply → campaign → evaluation → scouts
 ```
 
 Or per pipeline — see README.md.
