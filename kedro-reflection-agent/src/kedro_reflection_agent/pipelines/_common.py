@@ -17,13 +17,18 @@ from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
 
-def load_prompt_version(agent_id: str) -> int:
-    """Derive prompt version from apply_history: base 1 + number of applies for this agent."""
+def current_prompt_version(agent_id: str) -> int:
+    """Live config version for this agent: 1 at seed, +1 per apply."""
     try:
         history = json.loads(APPLY_HISTORY_PATH.read_text(encoding="utf-8"))
         return sum(1 for e in history if e.get("agent_id") == agent_id) + 1
     except (FileNotFoundError, json.JSONDecodeError):
         return 1
+
+
+def next_prompt_version(agent_id: str) -> int:
+    """Version written to apply_history by the next apply for this agent."""
+    return current_prompt_version(agent_id) + 1
 
 
 def build_structured_chain(

@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from kedro_reflection_agent.utils.paths import APPLY_HISTORY_PATH
-from kedro_reflection_agent.pipelines._common import load_prompt_version, utc_now_iso
+from kedro_reflection_agent.pipelines._common import next_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def commit_reflection(
     prompt_path.parent.mkdir(parents=True, exist_ok=True)
     prompt_path.write_text(json.dumps(messages, indent=2), encoding="utf-8")
 
-    new_version = load_prompt_version(agent_id) + 1
+    new_version = next_prompt_version(agent_id)
     logger.info("apply %s: prompt_version %d → %d", reflection_id, new_version - 1, new_version)
 
     new_eval_cases = [

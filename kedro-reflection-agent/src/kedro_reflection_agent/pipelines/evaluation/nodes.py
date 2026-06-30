@@ -34,7 +34,7 @@ from kedro_reflection_agent.models import b2b_sales as b2b_models
 from kedro_reflection_agent.models import consumer_mktg as consumer_mktg_models
 from kedro_reflection_agent.models import customer_care as customer_care_models
 from kedro_reflection_agent.models.shared import AggregateScore, CaseScore, EvaluationRecord
-from kedro_reflection_agent.pipelines._common import load_prompt_version
+from kedro_reflection_agent.pipelines._common import current_prompt_version
 
 _JUDGE_SCORE_BY_AGENT: dict[str, type] = {
     "b2b_sales": b2b_models.JudgeScore,
@@ -310,7 +310,7 @@ def run_experiment(
     before and after reflection) are easy to compare in the Langfuse UI.
     """
     started_at = utc_now_iso()
-    system_prompt_version = load_prompt_version(agent_id)
+    system_prompt_version = current_prompt_version(agent_id)
     experiment_name = f"campaign_{run_id}_prompt_v{system_prompt_version}"
 
     # Restrict the experiment to items that were seeded in this run.

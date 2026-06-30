@@ -21,7 +21,7 @@ from kedro.pipeline import LLMContext
 from langfuse.langchain import CallbackHandler
 
 from kedro_reflection_agent.models.shared import CampaignTarget, CustomerBase, Email, EmailOutput, ProductBase, RunMetadata
-from kedro_reflection_agent.pipelines._common import build_structured_chain, load_prompt_version, utc_now_iso
+from kedro_reflection_agent.pipelines._common import build_structured_chain, current_prompt_version, utc_now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ def generate_emails(
       - run_metadata: dict for the JSON run-summary dataset
     """
     chain = build_structured_chain(agent_context, "system_prompt", EmailOutput)
-    prompt_version = load_prompt_version(agent_id)
+    prompt_version = current_prompt_version(agent_id)
     started_at = utc_now_iso()
     run_started = time.perf_counter()
 
