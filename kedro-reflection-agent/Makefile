@@ -36,7 +36,7 @@ viz:
 # ── full demo cycle (headless) ────────────────────────────────────────────────
 
 ## Run the complete three-step pipeline cycle without the UI
-## Pass agent=<agent_id> to target a specific agent, e.g. make run-cycle agent=b2b_sales
+## Pass agent=<agent_id> to target a specific agent, e.g. make run-cycle agent=b2b_sales/consumer_mktg/customer_care
 agent ?= b2b_sales
 run-cycle:
 	$(KEDRO) run --pipelines campaign    --params=agent_id=$(agent),run_id=run_1
