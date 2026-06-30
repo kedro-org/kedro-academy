@@ -350,9 +350,9 @@ def run_experiment(
     per_scorer_values: dict[str, list[float]] = {n: [] for n in all_scorer_names}
 
     for item_result in result.item_results:
-        case_id = getattr(item_result.item, "id", None) or (
-            item_result.item.get("id") if isinstance(item_result.item, dict) else None
-        )
+        case_id = (
+            getattr(item_result.item, "input", {}) or {}
+        ).get("case_id") or getattr(item_result.item, "id", None)
         evals = [
             EvaluationRecord(
                 name=e.name,
