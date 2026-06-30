@@ -317,21 +317,26 @@ def run_experiment(
     # Langfuse retains all items across resets; targets.json defines the
     # actual scope (e.g. make seed N=5 → only 5 items should be evaluated).
     target_case_ids = {t["case_id"] for t in targets}
-    eval_cases.items = [
+    experiment_items = [
         item for item in eval_cases.items
         if item.input.get("case_id") in target_case_ids
     ]
     logger.info(
         "evaluation %s: restricted to %d/%d eval_cases items matching targets",
         run_id,
-        len(eval_cases.items),
+        len(experiment_items),
         len(target_case_ids),
     )
 
-    result = eval_cases.run_experiment(
+    langfuse_client = eval_cases._get_langfuse_client()
+    if not langfuse_client:
+        raise ValueError("No Langfuse client available on eval_cases.")
+
+    result = langfuse_client.run_experiment(
         name=experiment_name,
         task=campaign_task,
         evaluators=[*heuristic_evaluators, judge_evaluator],
+        data=experiment_items,
         metadata={
             "run_id": run_id,
             "model_name": model_name,
