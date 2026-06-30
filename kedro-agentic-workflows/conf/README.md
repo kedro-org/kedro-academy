@@ -22,8 +22,9 @@ Credentials live in `conf/base/` because it's loaded under every env — see the
 - `base/catalog.yml` — DB tables and shared datasets.
 - `base/catalog_genai_config.yml` — provider-agnostic entries (`llm`, `tool_prompt`, `response_prompt`, …) shared across both providers.
 - `langfuse/catalog_genai_config.yml` — Langfuse-specific bindings for `intent_prompt`, `intent_tracer`, `autogen_tracer`.
-- `langfuse/catalog_evaluation.yml` — evaluation pipeline catalog (Langfuse-only today; reorg tracked in a follow-up PR).
+- `langfuse/catalog_evaluation.yml` — Langfuse bindings for the `intent_detection_evaluation` pipeline.
 - `opik/catalog_genai_config.yml` — Opik-specific bindings for the same three generic names.
+- `opik/catalog_evaluation.yml` — Opik bindings for the `intent_detection_evaluation_opik` pipeline (same generic names).
 
 ## Need help?
 

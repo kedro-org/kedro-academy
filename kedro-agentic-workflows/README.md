@@ -33,7 +33,7 @@ This project demonstrates how to build robust agentic workflows using `LangGraph
 * **Structured and reproducible outputs** – Agent responses include message content plus metadata, all logged for auditing and reproducibility.
 * **Session logging** – Conversations, messages, and tool interactions are persisted to a database for auditing and analysis.
 * **Observability and prompt tracking** – Integrates with external tools like `Langfuse` and `Opik` to track prompts, tool usage, and workflow execution.
-* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` for comparison across prompt versions and models.
+* **Dataset-based evaluation** – Runs the agent against a labeled dataset, scores results with automated evaluators, and publishes experiments to `Langfuse` or `Opik` for comparison across prompt versions and models.
 
 Together, these elements show how to **combine pipeline orchestration, agentic reasoning, evaluation, and observability** in a modular, maintainable, and reproducible workflow.
 
@@ -70,9 +70,10 @@ kedro_agentic_workflows/
   │   │   └── parameters.yml                   # Kedro pipeline parameters
   │   ├── langfuse                             # --env langfuse: provider-specific bindings + eval catalog
   │   │   ├── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Langfuse)
-  │   │   └── catalog_evaluation.yml           # Evaluation pipeline catalog (Langfuse-only for now)
+  │   │   └── catalog_evaluation.yml           # Evaluation pipeline catalog (Langfuse)
   │   ├── opik                                 # --env opik: same provider-specific names bound to Opik
-  │   │   └── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Opik)
+  │   │   ├── catalog_genai_config.yml         # intent_prompt, intent_tracer, autogen_tracer (Opik)
+  │   │   └── catalog_evaluation.yml           # Evaluation pipeline catalog (Opik)
   │   └── local                                # gitignored; loaded only when --env local is passed explicitly
   ├── data
   │   ├── intent_detection
@@ -84,7 +85,8 @@ kedro_agentic_workflows/
       └── kedro_agentic_workflows
           ├── datasets
           │   ├── sqlalchemy_dataset.py        # Custom Kedro dataset for SQLAlchemy engines
-          │   └── langfuse_evaluation_dataset.py  # Kedro dataset bridging local files ↔ Langfuse datasets
+          │   ├── autogen_model_client.py      # AutoGen OpenAIChatCompletionClient dataset
+          │   └── openai_model_dataset.py      # OpenAI Agents SDK model dataset
           ├── pipelines
           │   ├── intent_detection                     # Provider-agnostic; uses generic dataset names
           │   │   ├── agent.py                         # IntentDetectionAgent (LangGraph)
@@ -105,9 +107,12 @@ kedro_agentic_workflows/
           │   │   ├── tools.py                         # @function_tool definitions
           │   │   ├── nodes.py                         # Kedro nodes
           │   │   └── pipeline.py                      # Kedro pipeline
-          │   └── intent_detection_evaluation          # Langfuse-only; reorg coming in a follow-up PR
-          │       ├── nodes.py                         # Kedro nodes (run experiment, score, log)
-          │       └── pipeline.py                      # Kedro pipeline
+          │   ├── intent_detection_evaluation          # Eval pipeline (Langfuse); run under default env
+          │   │   ├── nodes.py                         # Evaluators + Langfuse run_experiment
+          │   │   └── pipeline.py                      # Kedro pipeline
+          │   └── intent_detection_evaluation_opik     # Eval pipeline (Opik); run with --env opik
+          │       ├── nodes.py                         # Evaluators + opik.evaluation.evaluate
+          │       └── pipeline.py                      # Kedro pipeline (mirrors the Langfuse one)
           ├── utils.py                         # Shared utilities: KedroAgent, message logging
           └── settings.py                      # Global project settings
 ```
@@ -243,55 +248,54 @@ AutoGen mode requires the OTLP endpoint URL in credentials (e.g. `https://cloud.
 
 ## 🧪 Evaluation
 
-> **Scope note (this PR):** the evaluation pipeline below currently runs on **Langfuse only** and uses provider-named entries in `conf/langfuse/catalog_evaluation.yml`. The catalog only loads under the default `--env langfuse` — passing `--env opik` will omit it, and `kedro run --pipelines intent_detection_evaluation --env opik` will fail because the eval datasets won't resolve. Reorganising it to follow the same provider-agnostic shape as the main project (generic dataset names, swap via `--env`) is tracked as a follow-up PR. Class names have been updated to the 9.4.0 names so the catalog keeps loading after the bump, but the eval pipeline itself is untouched in this change.
+The project runs the intent classification agent against a labeled dataset and scores results with two evaluators. Like the rest of the project, the observability provider is a `--env` switch — there are two parallel pipelines, one per provider:
 
-The project includes an **intent detection evaluation pipeline** that runs the intent classification agent against a labeled dataset and scores results using two evaluators. It integrates with [Langfuse](https://langfuse.com/) so results, traces, and scores are visible in the Langfuse UI.
+| Pipeline | Provider | Command |
+|---|---|---|
+| `intent_detection_evaluation` | Langfuse (default env) | `kedro run --pipelines intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o` |
+| `intent_detection_evaluation_opik` | Opik (`--env opik`) | `kedro run --pipelines intent_detection_evaluation_opik --env opik --params intent_prompt_version=1,model_name=gpt-4o` |
+
+Both use the same generic dataset names (`intent_evaluation_data`, `intent_judge_llm`, `intent_judge_prompt`, …), bound to provider-specific classes in `conf/langfuse/catalog_evaluation.yml` and `conf/opik/catalog_evaluation.yml`. Each pipeline must run under its matching env (the Opik pipeline needs `--env opik`).
+
+> **Why two pipelines and not one `--env` switch?** Unlike tracing and prompts — where both providers expose the same LangChain/OTel interfaces — the experiment runners are structurally different: Langfuse uses `dataset.run_experiment(task=…, evaluators=[…])` returning `Evaluation`s, while Opik uses the free function `opik.evaluation.evaluate(dataset=…, task=…, scoring_functions=[…])` returning `ScoreResult`s, with different task/scorer signatures and tracing hooks. There's no shared interface to write one set of node functions against, so each provider gets its own pipeline. They're kept deliberately symmetric (same dataset names, node structure, and `intent_prompt_v{version}_model_{model}` experiment naming).
 
 ### How it works
 
-The pipeline:
-1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to Langfuse.
-2. Runs the **Intent Detection Agent** on each item, recording traces as Langfuse observations linked to the prompt and model.
+Each pipeline:
+1. Loads the **evaluation dataset** (labeled question/intent pairs) from a local JSON file and syncs it to the active provider (a Langfuse / Opik dataset).
+2. Runs the **Intent Detection Agent** on each item, recording traces in that provider.
 3. Scores each result with two evaluators:
    - **Intent accuracy** — binary match between predicted and expected intent.
    - **Reason quality** — LLM-as-a-judge score (1–5) evaluating the reasoning behind the prediction.
-4. Publishes the experiment to Langfuse with all scores, traces, and metadata.
+4. Publishes the experiment (named `intent_prompt_v{version}_model_{model}`) with all scores, traces, and metadata to the provider's UI.
 
-### `langfuse.EvaluationDataset`
+### Evaluation datasets
 
-The evaluation dataset is managed by the experimental `langfuse.EvaluationDataset`, a Kedro dataset that bridges a local JSON/YAML file with a remote Langfuse dataset. It supports two sync policies:
+The eval datasets are managed by the experimental `langfuse.EvaluationDataset` / `opik.EvaluationDataset` (both published in `kedro-datasets` 9.4.0), which bridge a local JSON/YAML file with a remote provider dataset via a `sync_policy` — `local` keeps the file as source of truth; `remote` treats the platform as source of truth. Lifecycle operations (update, delete) are delegated to each provider's native API.
 
-- **`local`** — the local file is the source of truth; `load()` upserts all local items to remote (creating new items or updating existing ones matched by `id`). `save()` upserts to remote and merges back into the local file (new data takes precedence).
-- **`remote`** — the remote Langfuse dataset is the source of truth. `load()` fetches remote as-is; `save()` upserts items to remote without writing to any local file. Supports versioned snapshots via the `version` parameter (`langfuse>=3.14.0`).
-
-Lifecycle operations (update, archive, delete) are delegated to the native Langfuse API — the dataset handles load/save only.
-
-> **Note:** this class is now published upstream as
-> `kedro_datasets_experimental.langfuse.EvaluationDataset` (kedro-datasets 9.4.0),
-> and the catalog entry below uses the upstream class. A stale local copy at
-> `src/kedro_agentic_workflows/datasets/langfuse_evaluation_dataset.py` predates
-> the upstream release and will be deleted in the eval reorg follow-up PR.
-
-Catalog entry (`conf/langfuse/catalog_evaluation.yml`):
+Catalog entries (`conf/langfuse/catalog_evaluation.yml` and `conf/opik/catalog_evaluation.yml`):
 
 ```yaml
+# conf/langfuse/catalog_evaluation.yml
 intent_evaluation_data:
   type: kedro_datasets_experimental.langfuse.EvaluationDataset
   dataset_name: evaluations/intent_agent_evaluation
   filepath: data/intent_detection/evaluation/intent_evaluation.json
   sync_policy: local
   credentials: langfuse_credentials
-  metadata:
-    created_by: kedro
 ```
 
-### Running the evaluation pipeline
-
-```bash
-kedro run --pipelines intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+```yaml
+# conf/opik/catalog_evaluation.yml
+intent_evaluation_data:
+  type: kedro_datasets_experimental.opik.EvaluationDataset
+  dataset_name: evaluations/intent_agent_evaluation
+  filepath: data/intent_detection/evaluation/intent_evaluation.json
+  sync_policy: local
+  credentials: opik_credentials
 ```
 
-The `intent_prompt_version` and `model_name` parameters are used to name the experiment in Langfuse (e.g., `intent_prompt_v1_model_gpt-4o`), making it easy to compare runs across prompt iterations and models.
+The `intent_prompt_version` and `model_name` parameters name the experiment (e.g. `intent_prompt_v1_model_gpt-4o`) in both UIs, making runs comparable across prompt iterations and models. A standalone walkthrough of `opik.EvaluationDataset` sync behaviour lives in [`notebooks/e2e_opik_evaluation_dataset.ipynb`](notebooks/e2e_opik_evaluation_dataset.ipynb).
 
 ### Evaluation data
 
@@ -359,12 +363,16 @@ Pipeline execution flow:
 
 ### 3. Run Evaluation Pipeline
 
-Run the intent detection agent against a labeled evaluation dataset:
+Run the intent detection agent against a labeled evaluation dataset, with either provider:
 ```bash
+# Langfuse (default env)
 kedro run --pipelines intent_detection_evaluation --params intent_prompt_version=1,model_name=gpt-4o
+
+# Opik
+kedro run --pipelines intent_detection_evaluation_opik --env opik --params intent_prompt_version=1,model_name=gpt-4o
 ```
 
-Results are published as a Langfuse experiment. The eval pipeline is currently Langfuse-only — see the [Evaluation](#-evaluation) section.
+Results are published as an experiment in the active provider's UI — see the [Evaluation](#-evaluation) section.
 
 ## 💬 Conversation Example
 

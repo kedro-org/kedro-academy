@@ -17,4 +17,6 @@ def register_pipelines() -> dict[str, Pipeline]:
     pipelines["__default__"] = pipelines["intent_detection"] + pipelines["response_generation"]
     pipelines["openai"] = pipelines["intent_detection"] + pipelines["response_generation_openai"]
     pipelines["autogen"] = pipelines["intent_detection"] + pipelines["response_generation_autogen"]
+    # The two eval pipelines (intent_detection_evaluation,
+    # intent_detection_evaluation_opik) are auto-discovered by find_pipelines().
     return pipelines
