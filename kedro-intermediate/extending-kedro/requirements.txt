@@ -1,7 +1,7 @@
 ipython>=8.10
 jupyterlab>=4.5.9
 kedro~=0.19.9
-kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=3.0; python_version >= "3.9"
+kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset]>=9.5.0; python_version >= "3.9"
 kedro-datasets[pandas.CSVDataset, pandas.ExcelDataset, pandas.ParquetDataset]>=1.0; python_version < "3.9"
 kedro-viz>=6.7.0
 kedro[jupyter]
