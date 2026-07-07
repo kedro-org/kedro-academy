@@ -1,0 +1,77 @@
+[
+  {
+    "product_id": "prod_001",
+    "target_segment": "enterprise",
+    "key_benefits": [
+      "20-40% latency reduction compared to legacy MPLS",
+      "Single policy plane across 100+ sites",
+      "Built-in failover and application-aware traffic shaping"
+    ],
+    "short_description": "Managed multi-site SD-WAN with policy-based routing and centralized control.",
+    "use_cases": [
+      "Multi-branch retail store-to-HQ connectivity",
+      "Financial services application prioritisation",
+      "Manufacturing site interconnect with OT/IT segmentation"
+    ]
+  },
+  {
+    "product_id": "prod_002",
+    "target_segment": "enterprise",
+    "key_benefits": [
+      "Deterministic low-latency wireless for OT and AGVs",
+      "Edge compute co-located with the radio core",
+      "Spectrum and SIM lifecycle fully managed"
+    ],
+    "short_description": "Dedicated 5G coverage for industrial and high-density sites.",
+    "use_cases": [
+      "Shop-floor AGV and robotics connectivity",
+      "Campus-wide secure wireless for regulated industries",
+      "Port and logistics yard automation"
+    ]
+  },
+  {
+    "product_id": "prod_003",
+    "target_segment": "mid",
+    "key_benefits": [
+      "Private connectivity to AWS, Azure and GCP",
+      "Reduced cloud egress costs vs public internet transit",
+      "End-to-end SLA across the link and the underlay"
+    ],
+    "short_description": "Direct private link to major public clouds with managed routing and egress.",
+    "use_cases": [
+      "Media post-production and cloud rendering pipelines",
+      "Financial services workload migration to cloud",
+      "Healthcare data lake ingestion and analytics"
+    ]
+  },
+  {
+    "product_id": "prod_004",
+    "target_segment": "mid",
+    "key_benefits": [
+      "Single pane for SIM provisioning, billing and policy",
+      "Global roaming with deterministic per-region rates",
+      "Firmware-over-the-air (FOTA) and remote diagnostics"
+    ],
+    "short_description": "Multi-region SIM management and connectivity for IoT and vehicle fleets.",
+    "use_cases": [
+      "Delivery fleet real-time tracking",
+      "Industrial equipment remote monitoring",
+      "Retail inventory and cold-chain sensor telemetry"
+    ]
+  },
+  {
+    "product_id": "prod_005",
+    "target_segment": "any",
+    "key_benefits": [
+      "BYOD-friendly softphone and HD video conferencing",
+      "Contact-centre queues, IVR and analytics",
+      "Native integrations with major CRMs and helpdesks"
+    ],
+    "short_description": "Cloud telephony, video and contact-centre features in one subscription.",
+    "use_cases": [
+      "SMB replacing legacy PBX with cloud telephony",
+      "Field-force dispatch and mobile workforce",
+      "Customer-facing contact centre for utilities or retail"
+    ]
+  }
+]

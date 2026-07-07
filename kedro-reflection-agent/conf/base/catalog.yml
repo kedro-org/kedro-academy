@@ -1,0 +1,8 @@
+# Pipeline-agnostic catalog entries.
+#
+# Override copy_mode so non-picklable objects (LangChain Runnables, Langfuse
+# tracers, etc.) are passed by reference between nodes instead of deep-copied.
+
+"{default_dataset}":
+  type: MemoryDataset
+  copy_mode: "assign"

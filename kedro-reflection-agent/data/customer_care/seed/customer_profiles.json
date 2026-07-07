@@ -1,0 +1,92 @@
+[
+  {
+    "customer_id": "cust_011",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "billing",
+    "issue_description": "Customer was charged twice for their monthly plan in the same billing cycle and is requesting a refund of the duplicate charge.",
+    "sentiment": "frustrated",
+    "previous_contact_attempts": 1
+  },
+  {
+    "customer_id": "cust_012",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "network",
+    "issue_description": "Customer is experiencing no 5G signal at their home address despite the coverage checker showing 5G availability in their area.",
+    "sentiment": "frustrated",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_013",
+    "account_type": "prepaid",
+    "service_type": "mobile",
+    "issue_type": "billing",
+    "issue_description": "Customer topped up £20 via the app but the credit has not appeared on their account after 3 hours. They are worried the payment was taken but the top-up credit was not applied.",
+    "sentiment": "concerned",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_014",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "roaming",
+    "issue_description": "Customer has received an unexpected roaming charge of £85 on their latest bill. They have the Roaming Plus add-on which they believed covered Spain and are disputing the charge and requesting a refund.",
+    "sentiment": "upset",
+    "previous_contact_attempts": 1
+  },
+  {
+    "customer_id": "cust_015",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "cancellation",
+    "issue_description": "Customer is threatening to cancel their contract after receiving a notification about a price increase next month. They have been a customer for 5 years and say they can get a better deal with a competitor if the price goes up.",
+    "sentiment": "frustrated",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_016",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "cancellation",
+    "issue_description": "Customer wants to cancel their contract and switch to a competitor citing better pricing. They have 4 months remaining on their contract.",
+    "sentiment": "neutral",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_017",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "network",
+    "issue_description": "Customer reports intermittent call drops during commute. Issue has been happening for two weeks in the same locations.",
+    "sentiment": "frustrated",
+    "previous_contact_attempts": 1
+  },
+  {
+    "customer_id": "cust_018",
+    "account_type": "prepaid",
+    "service_type": "mobile",
+    "issue_type": "billing",
+    "issue_description": "Customer topped up £20 via the app but balance has not updated after 2 hours. Worried the payment was taken but credit not applied.",
+    "sentiment": "neutral",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_019",
+    "account_type": "postpaid",
+    "service_type": "bundle",
+    "issue_type": "device",
+    "issue_description": "Customer's handset display cracked after a minor drop. Queries whether their plan includes device insurance and how to claim.",
+    "sentiment": "neutral",
+    "previous_contact_attempts": 0
+  },
+  {
+    "customer_id": "cust_020",
+    "account_type": "postpaid",
+    "service_type": "mobile",
+    "issue_type": "billing",
+    "issue_description": "Customer is confused about their first bill being higher than expected. They were on a promotion and expected a lower first-month charge.",
+    "sentiment": "frustrated",
+    "previous_contact_attempts": 1
+  }
+]

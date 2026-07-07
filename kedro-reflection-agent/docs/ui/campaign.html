@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campaign — Reflection Hub</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251FF'/%3E%3Cpolyline points='4,22 11,14 17,18 24,10' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='21,10 24,10 24,13' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif']},colors:{brand:{50:'#EEF2FF',100:'#E0E7FF',200:'#C7D2FE',500:'#2251FF',600:'#1A3FCC'},teal:{50:'#F0FDFA',500:'#00C4B4'}}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
+    .card{background:#fff;border-radius:16px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgb(0 0 0/.06);}
+    .nav-link{font-size:13.5px;font-weight:500;color:#64748B;text-decoration:none;padding:6px 14px;border-radius:8px;transition:all .15s;}
+    .nav-link:hover{color:#1E293B;background:#F1F5F9;}
+    .nav-link.active{color:#2251FF;background:#EEF2FF;font-weight:600;}
+    .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+    .agent-tab{padding:8px 18px;border-radius:10px;font-size:13px;font-weight:500;color:#64748B;cursor:pointer;border:none;background:transparent;transition:all .15s;display:flex;align-items:center;gap:8px;}
+    .agent-tab:hover{background:#F1F5F9;color:#1E293B;}
+    .agent-tab.active{background:#fff;color:#1E293B;font-weight:600;box-shadow:0 1px 4px rgb(0 0 0/.1);}
+
+    /* Kedro pipeline steps */
+    .pipe-step{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;}
+    .pipe-step-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;position:relative;z-index:1;transition:all .3s;}
+    .pipe-connector{position:absolute;top:24px;left:50%;width:100%;height:2px;z-index:0;}
+    .pipe-step.done .pipe-step-icon{background:#DCFCE7;border:2px solid #86EFAC;}
+    .pipe-step.running .pipe-step-icon{background:#EEF2FF;border:2px solid #2251FF;animation:pulse-border 1.5s ease-in-out infinite;}
+    .pipe-step.pending .pipe-step-icon{background:#F8FAFC;border:2px dashed #CBD5E1;}
+    .pipe-step.approval .pipe-step-icon{background:#FFFBEB;border:2px solid #FCD34D;}
+    @keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(34,81,255,.3)}50%{box-shadow:0 0 0 6px rgba(34,81,255,.0)}}
+
+    /* Review cards */
+    .review-card{background:#fff;border-radius:12px;border:1px solid #E2E8F0;padding:16px;transition:box-shadow .15s;}
+    .review-card:hover{box-shadow:0 4px 12px rgb(0 0 0/.08);}
+
+    /* Stage tabs (Campaign → Scouts → Reflect → Approve) */
+    .stage-tab{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;font-size:13px;font-weight:500;color:#64748B;border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+    .stage-tab:hover{color:#1E293B;}
+    .stage-tab.active{color:#2251FF;border-bottom-color:#2251FF;font-weight:600;}
+    .stage-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;background:#E2E8F0;color:#64748B;transition:all .15s;}
+    .stage-tab.active .stage-num{background:#2251FF;color:#fff;}
+    .stage-num.done{background:#DCFCE7;color:#15803D;}
+    .stage-panel{animation:fadeIn .25s ease both;}
+    .stage-panel.hidden{display:none!important;}
+    /* Sub-tabs (Kedro-Viz / Run Logs / Langfuse within a stage) */
+    .sub-tab{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;font-size:12px;font-weight:500;color:#64748B;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+    .sub-tab:hover{color:#1E293B;}
+    .sub-tab.active{color:#2251FF;border-bottom-color:#2251FF;font-weight:600;}
+    .sub-panel{animation:fadeIn .2s ease both;}
+    .sub-panel.hidden{display:none!important;}
+
+    /* Kedro-Viz pipeline picker buttons */
+    .viz-pip-btn{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:500;color:#64748B;border:none;background:transparent;cursor:pointer;transition:all .15s;}
+    .viz-pip-btn:hover{color:#1E293B;}
+    .viz-pip-btn.active{background:#fff;color:#1E293B;font-weight:600;box-shadow:0 1px 3px rgb(0 0 0/.1);}
+
+    /* Log terminal */
+    .log-line{padding:1px 0;color:#94A3B8;}
+    .log-line.log-INFO{color:#94A3B8;}
+    .log-line.log-ERROR{color:#F87171;}
+    .log-line.log-RUNNING{color:#FCD34D;}
+    .log-line.hidden{display:none;}
+
+    /* Log filter buttons */
+    .log-filter-btn{padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:500;color:#64748B;border:none;background:transparent;cursor:pointer;transition:all .15s;}
+    .log-filter-btn:hover{color:#1E293B;}
+    .log-filter-btn.active{background:#fff;color:#1E293B;font-weight:600;box-shadow:0 1px 3px rgb(0 0 0/.1);}
+
+    /* Case selector buttons */
+    .case-btn{padding:4px 11px;border-radius:7px;font-size:11.5px;font-weight:500;color:#64748B;border:none;background:transparent;cursor:pointer;font-family:monospace;transition:all .15s;}
+    .case-btn:hover{color:#1E293B;}
+    .case-btn.active{background:#fff;color:#1E293B;font-weight:700;box-shadow:0 1px 3px rgb(0 0 0/.1);}
+
+    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
+    .fade-in{animation:fadeIn .35s ease both;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+
+<!-- TOP NAV -->
+<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center gap-6">
+    <a href="index.html" class="flex items-center gap-2.5 shrink-0">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#2251FF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <span class="text-sm font-bold text-slate-900">Reflection Hub</span>
+      <span class="text-[10px] font-semibold text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">Powered by Kedro</span>
+    </a>
+    <div class="flex items-center gap-1 ml-4">
+      <a href="index.html" class="nav-link">Org Overview</a>
+      <a href="campaign.html" class="nav-link active">Campaigns</a>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-6 fade-in">
+
+  <!-- AGENT SELECTOR -->
+  <div class="bg-slate-100 rounded-xl p-1.5 inline-flex gap-1">
+    <button id="tab-sales" class="agent-tab active" onclick="switchAgent('sales')">
+      <div class="w-4 h-4 rounded flex items-center justify-center bg-blue-100"><i data-lucide="briefcase" class="w-3 h-3 text-blue-600"></i></div>
+      B2B Sales
+      <span class="pill bg-emerald-100 text-emerald-700" style="font-size:10px;padding:1px 6px">0.94</span>
+    </button>
+    <button id="tab-marketing" class="agent-tab" onclick="switchAgent('marketing')">
+      <div class="w-4 h-4 rounded flex items-center justify-center bg-purple-100"><i data-lucide="bar-chart-2" class="w-3 h-3 text-purple-600"></i></div>
+      Consumer Marketing
+      <span class="pill bg-purple-100 text-purple-700" style="font-size:10px;padding:1px 6px">0.85</span>
+    </button>
+    <button id="tab-care" class="agent-tab" onclick="switchAgent('care')">
+      <div class="w-4 h-4 rounded flex items-center justify-center bg-teal-100"><i data-lucide="headphones" class="w-3 h-3 text-teal-600"></i></div>
+      Customer Care
+      <span class="pill bg-teal-100 text-teal-700" style="font-size:10px;padding:1px 6px">0.83</span>
+    </button>
+  </div>
+
+  <!-- CAMPAIGN HEADER -->
+  <div class="card p-6">
+    <div class="flex items-start justify-between gap-6">
+      <div class="flex items-start gap-4">
+        <div id="agent-icon" class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style="background:#EEF2FF">
+          <i data-lucide="briefcase" class="w-6 h-6" style="color:#2251FF"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <h2 id="agent-title" class="text-lg font-bold text-slate-900">B2B Sales — Enterprise Outreach Agent</h2>
+          </div>
+          <p id="agent-desc" class="text-sm text-slate-500 leading-relaxed max-w-2xl">Generates personalised B2B outreach emails for enterprise telco customers. The agent is evaluated against a rubric covering writing quality, personalisation depth, groundedness, and CTA clarity — then reflects on its own failures to propose prompt and skill improvements.</p>
+          <div class="flex items-center gap-4 mt-3 text-xs text-slate-400">
+            <span class="flex items-center gap-1.5"><i data-lucide="target" class="w-3.5 h-3.5"></i><span id="agent-targets">10 customer × product targets</span></span>
+            <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5"></i><span id="agent-versions">Prompt v1 · Skill v1 · 20 eval cases</span></span>
+            <span class="flex items-center gap-1.5"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span id="agent-reflections">2 runs · 1 reflection applied</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE OBSERVABILITY — stage-per-pipeline with sub-tabs -->
+  <div class="card overflow-hidden">
+
+    <!-- Card header -->
+    <div class="px-6 pt-5 pb-0 flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Observability</div>
+          <div class="text-base font-bold text-slate-900">Pipeline Runs</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Kedro-Viz · live logs · Langfuse traces — one panel per pipeline stage.</div>
+        </div>
+        <div id="pipeline-status-badge" class="pill bg-amber-50 text-amber-700" style="border:1px solid #FDE68A">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block animate-pulse"></span>run_1 · Evaluating
+        </div>
+      </div>
+      <!-- Stage selector -->
+      <div class="flex items-center overflow-x-auto border-b border-slate-100 -mx-6 px-6" id="stageTabBar">
+        <button onclick="switchStage('campaign')" data-stage="campaign" class="stage-tab active">
+          <span class="stage-num" id="stageNum-campaign">1</span> Campaign &amp; Evaluate
+        </button>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 mx-0.5 shrink-0"></i>
+        <button onclick="switchStage('scouts')" data-stage="scouts" class="stage-tab">
+          <span class="stage-num" id="stageNum-scouts">2</span> Scouts
+        </button>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 mx-0.5 shrink-0"></i>
+        <button onclick="switchStage('reflect')" data-stage="reflect" class="stage-tab">
+          <span class="stage-num" id="stageNum-reflect">3</span> Reflect &amp; Propose
+        </button>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 mx-0.5 shrink-0"></i>
+        <button onclick="switchStage('approve')" data-stage="approve" class="stage-tab">
+          <span class="stage-num" id="stageNum-approve">4</span> Approve &amp; Apply
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ STAGE 1: Campaign & Evaluate ══════════════════════════════════ -->
+    <div id="stage-campaign" class="stage-panel">
+      <!-- Command strip — updates when agent changes -->
+      <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10.5px] text-slate-500 mb-1.5" id="stage1-pipeline-what">Generate B2B outreach emails → evaluate on writing quality, personalisation, groundedness, CTA → run scouts</div>
+          <code class="text-[10.5px] font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded" id="stage1-pipeline-cmd">kedro run --pipelines campaign,evaluation --params=run_id=run_1,agent=b2b_sales</code>
+          <div class="flex items-center gap-1.5 mt-2 flex-wrap" id="stage1-eval-meta">
+            <span class="pill bg-slate-100 text-slate-600" style="font-size:10px">dataset: b2b_sales_eval</span>
+            <span class="pill bg-slate-100 text-slate-600" style="font-size:10px">skill: b2b_email_style.md</span>
+            <span class="pill bg-slate-100 text-slate-600" style="font-size:10px">judge: b2b_sales_judge_v2</span>
+          </div>
+        </div>
+        <button onclick="runPipeline()" id="runPipelineBtn"
+                class="flex items-center gap-2 text-xs font-bold text-white rounded-lg px-4 py-2 transition-all hover:opacity-90 active:scale-95 shrink-0"
+                style="background:#2251FF">
+          <i data-lucide="play" class="w-3.5 h-3.5"></i> Run
+        </button>
+      </div>
+      <!-- Sub-tab bar -->
+      <div class="flex items-center gap-1 border-b border-slate-100 px-6 pt-2" id="subTabBar-campaign">
+        <button onclick="switchStageSub('campaign','viz')" data-sub="viz" class="sub-tab active">
+          <i data-lucide="layout-dashboard" class="w-3 h-3"></i> Kedro-Viz
+        </button>
+        <button onclick="switchStageSub('campaign','logs')" data-sub="logs" class="sub-tab">
+          <i data-lucide="terminal" class="w-3 h-3"></i> Run Logs
+        </button>
+        <button onclick="switchStageSub('campaign','langfuse')" data-sub="langfuse" class="sub-tab">
+          <i data-lucide="activity" class="w-3 h-3"></i> Langfuse
+        </button>
+      </div>
+      <!-- Sub-panel: Kedro-Viz -->
+      <div id="sub-campaign-viz" class="sub-panel px-6 py-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xs font-semibold text-slate-500">Pipeline</span>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <button onclick="selectVizPipeline('campaign','campaign')" id="vizPip-campaign-campaign" class="viz-pip-btn active">Campaign</button>
+            <button onclick="selectVizPipeline('campaign','evaluation')" id="vizPip-campaign-evaluation" class="viz-pip-btn">Evaluation</button>
+          </div>
+          <a id="vizOpenLink-campaign" href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank"
+             class="ml-auto text-[11px] font-semibold flex items-center gap-1 hover:underline" style="color:#2251FF">
+            Open in new tab <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative" style="height:500px;">
+          <iframe id="vizFrame-campaign" src="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true"
+                  class="w-full h-full border-0" title="Kedro-Viz — Campaign"></iframe>
+          <div id="vizFallback-campaign" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 text-center px-8">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center">
+              <i data-lucide="layout-dashboard" class="w-6 h-6 text-slate-500"></i>
+            </div>
+            <div class="text-sm font-bold text-slate-300 mb-1">Kedro-Viz not running</div>
+            <div class="text-xs text-slate-500 max-w-xs">Start it from the project root, then refresh.</div>
+            <pre class="rounded-xl bg-slate-800 px-5 py-3 text-[12px] text-emerald-400 font-mono">kedro viz run</pre>
+            <a href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
+          </div>
+        </div>
+      </div>
+      <!-- Sub-panel: Run Logs -->
+      <div id="sub-campaign-logs" class="sub-panel px-6 py-5 hidden">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span class="text-xs font-semibold text-slate-500 shrink-0">Filter</span>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <button onclick="filterLogs('campaign','all')" id="logFilter-campaign-all" class="log-filter-btn active">All</button>
+            <button onclick="filterLogs('campaign','INFO')" id="logFilter-campaign-INFO" class="log-filter-btn">INFO</button>
+            <button onclick="filterLogs('campaign','ERROR')" id="logFilter-campaign-ERROR" class="log-filter-btn">ERROR</button>
+            <button onclick="filterLogs('campaign','kedro')" id="logFilter-campaign-kedro" class="log-filter-btn">kedro.* nodes</button>
+          </div>
+          <button onclick="copyLogs('campaignLogTerminal')" class="ml-auto flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-700 transition-colors">
+            <i data-lucide="copy" class="w-3 h-3"></i> Copy
+          </button>
+        </div>
+        <div class="rounded-xl bg-slate-950 p-4 overflow-y-auto font-mono text-[11px] leading-relaxed" style="height:460px;" id="campaignLogTerminal">
+          <div class="text-slate-500 text-[10px]">— Press Run to start the pipeline —</div>
+        </div>
+        <div class="mt-2 flex items-center gap-4 text-[10px] flex-wrap">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span class="text-slate-500">INFO</span></span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400"></span><span class="text-slate-500">ERROR</span></span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span><span class="text-slate-500">WARN / low score</span></span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span><span class="text-slate-500">Scout</span></span>
+        </div>
+      </div>
+      <!-- Sub-panel: Langfuse -->
+      <div id="sub-campaign-langfuse" class="sub-panel px-6 py-5 hidden">
+        <div class="flex items-center gap-2 mb-5 flex-wrap">
+          <a href="https://cloud.langfuse.com" target="_blank" class="flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open Langfuse ↗
+          </a>
+          <a href="https://cloud.langfuse.com/traces" target="_blank" class="flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors">
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i> All traces ↗
+          </a>
+          <span class="ml-auto text-[11px] text-slate-400 flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Auto-refreshes 60 s</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center" id="lf-traces">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Total Traces</div>
+            <div class="text-2xl font-black text-slate-900 lf-kpi-val">247</div>
+            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5 lf-kpi-sub">+18 this run</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center" id="lf-cost">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">LLM Cost (today)</div>
+            <div class="text-2xl font-black text-slate-900 lf-kpi-val">$0.031</div>
+            <div class="text-[10px] text-slate-400 mt-0.5 lf-kpi-sub">~$0.0003 / case</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center" id="lf-obs">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Observations</div>
+            <div class="text-2xl font-black text-slate-900 lf-kpi-val">384</div>
+            <div class="text-[10px] text-slate-400 mt-0.5 lf-kpi-sub">generation + scoring</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center" id="lf-score">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Avg Score (judge)</div>
+            <div class="text-2xl font-black text-emerald-600 lf-kpi-val">0.82</div>
+            <div class="text-[10px] text-slate-400 mt-0.5 lf-kpi-sub">run_1 · 5 dims</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-400"></i> Score Averages — run_1 <span class="text-[10px] font-normal text-slate-400 ml-1">(per eval dimension, this agent)</span></div>
+            <div class="space-y-3" id="lf-eval-dims">
+              <div><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">writing_quality</span><span class="font-bold">0.84</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full" style="width:84%;background:#2251FF"></div></div></div>
+              <div><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">personalization</span><span class="font-bold text-amber-600">0.67</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full" style="width:67%;background:#F59E0B"></div></div></div>
+              <div><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">groundedness</span><span class="font-bold">0.91</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full" style="width:91%;background:#2251FF"></div></div></div>
+              <div><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">cta_present</span><span class="font-bold text-amber-600">0.78</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full" style="width:78%;background:#F59E0B"></div></div></div>
+              <div><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">length_in_range</span><span class="font-bold">0.80</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full" style="width:80%;background:#2251FF"></div></div></div>
+            </div>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5"><i data-lucide="cpu" class="w-3.5 h-3.5 text-slate-400"></i> Token Usage by Model</div>
+            <canvas id="tokenChart" height="145"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-slate-400"></i> Daily Traces</div>
+            <canvas id="dailyTracesChart" height="120"></canvas>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5"><i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-slate-400"></i> Daily Cost</div>
+            <canvas id="dailyCostChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 overflow-hidden">
+          <button onclick="toggleTraces()" class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5"><i data-lucide="list" class="w-3.5 h-3.5 text-slate-400"></i> Recent traces (run_1)</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="tracesChevron"></i>
+          </button>
+          <div id="tracesBody" class="hidden divide-y divide-slate-100">
+            <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50"><div class="flex-1 min-w-0"><div class="text-xs font-semibold truncate">generate_email · case_005</div><div class="text-[10px] text-slate-400">2025-05-26 14:32:08</div></div><a href="https://cloud.langfuse.com/traces/t001" target="_blank" class="text-[11px] font-semibold px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0">Open ↗</a></div>
+            <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50"><div class="flex-1 min-w-0"><div class="text-xs font-semibold truncate">evaluate_email · case_002 (low score)</div><div class="text-[10px] text-slate-400">2025-05-26 14:32:07</div></div><a href="https://cloud.langfuse.com/traces/t002" target="_blank" class="text-[11px] font-semibold px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0">Open ↗</a></div>
+            <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50"><div class="flex-1 min-w-0"><div class="text-xs font-semibold truncate">evaluate_email · case_003 (low score)</div><div class="text-[10px] text-slate-400">2025-05-26 14:32:07</div></div><a href="https://cloud.langfuse.com/traces/t003" target="_blank" class="text-[11px] font-semibold px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0">Open ↗</a></div>
+            <div class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50"><div class="flex-1 min-w-0"><div class="text-xs font-semibold truncate">generate_email · case_001</div><div class="text-[10px] text-slate-400">2025-05-26 14:32:06</div></div><a href="https://cloud.langfuse.com/traces/t004" target="_blank" class="text-[11px] font-semibold px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0">Open ↗</a></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /stage-campaign -->
+
+    <!-- ═══ STAGE 2: Scouts ════════════════════════════════════════════════ -->
+    <div id="stage-scouts" class="stage-panel hidden">
+      <!-- Command strip -->
+      <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10.5px] text-slate-500 mb-1">Runs automatically after evaluation — pure Python, deterministic, no LLM, no network</div>
+          <code class="text-[10.5px] font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded">scouts.detect(outputs, params) → list[Signal]</code>
+        </div>
+        <span class="pill bg-amber-100 text-amber-800 shrink-0" style="border:1px solid #FCD34D;font-size:10px">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span> 2 high signals · threshold met
+        </span>
+      </div>
+      <!-- Sub-tab bar -->
+      <div class="flex items-center gap-1 border-b border-slate-100 px-6 pt-2" id="subTabBar-scouts">
+        <button onclick="switchStageSub('scouts','signals')" data-sub="signals" class="sub-tab active">
+          <i data-lucide="radar" class="w-3 h-3"></i> Signals
+        </button>
+        <button onclick="switchStageSub('scouts','logs')" data-sub="logs" class="sub-tab">
+          <i data-lucide="terminal" class="w-3 h-3"></i> Run Logs
+        </button>
+      </div>
+      <!-- Sub-panel: Signals -->
+      <div id="sub-scouts-signals" class="sub-panel px-6 py-5">
+        <div class="rounded-xl bg-slate-50 border border-slate-200 px-5 py-3 mb-5 flex items-start gap-3">
+          <i data-lucide="radar" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+          <p class="text-[11.5px] text-slate-600 leading-relaxed"><strong class="text-slate-800">Pattern Scouts</strong> are deterministic rule-based detectors. Each scout watches for one failure class and emits a <strong class="text-slate-800">Signal</strong>. Signals accumulate; when the configured threshold is crossed, the Reflect stage is triggered — the meta-agent never runs on a clean run.</p>
+        </div>
+        <div class="rounded-xl border-2 border-amber-300 bg-amber-50 px-5 py-3 mb-5 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-amber-200 flex items-center justify-center shrink-0"><i data-lucide="alert-triangle" class="w-4 h-4 text-amber-700"></i></div>
+          <div class="flex-1">
+            <div class="text-xs font-bold text-amber-900">Threshold met — Reflect triggered for run_1</div>
+            <div class="text-[11px] text-amber-700 mt-0.5">2 high-confidence signals fired (<code class="bg-amber-100 px-0.5 rounded">score_regression</code> + <code class="bg-amber-100 px-0.5 rounded">rubric_miss</code>) · configured threshold: ≥ 1 high signal</div>
+          </div>
+          <span class="pill bg-amber-100 text-amber-800 shrink-0" style="border:1px solid #FCD34D;font-size:10px">run_1 · 2 signals</span>
+        </div>
+        <div class="rounded-xl border border-slate-200 overflow-hidden mb-5">
+          <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <div class="text-xs font-bold text-slate-700 flex items-center gap-1.5"><i data-lucide="list" class="w-3.5 h-3.5 text-slate-400"></i> Signals emitted — run_1</div>
+            <span class="text-[10px] text-slate-400">Deterministic · no LLM · O(n) over outputs</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th class="text-left px-4 py-2.5 font-semibold text-slate-500 uppercase tracking-wide text-[10px]">Signal Type</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-slate-500 uppercase tracking-wide text-[10px]">Confidence</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-slate-500 uppercase tracking-wide text-[10px]">Evidence</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-slate-500 uppercase tracking-wide text-[10px]">Rule fired</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3"><span class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;font-size:10px">score_regression</span></td>
+                  <td class="px-4 py-3"><span class="pill bg-red-100 text-red-800 font-bold" style="font-size:10px">high</span></td>
+                  <td class="px-4 py-3 text-slate-600 max-w-xs">personalisation dropped from 0.88 (5-run avg) to 0.67 on run_1 — delta −0.21, exceeds >0.20 threshold</td>
+                  <td class="px-4 py-3 text-slate-400 font-mono text-[10px]">dim_delta > 0.20 · rolling_5</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3"><span class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;font-size:10px">rubric_miss</span></td>
+                  <td class="px-4 py-3"><span class="pill bg-red-100 text-red-800 font-bold" style="font-size:10px">high</span></td>
+                  <td class="px-4 py-3 text-slate-600 max-w-xs">required_mention "uptime SLA" absent in 7/10 cases · expected_cta "demo" missing in 4 cases</td>
+                  <td class="px-4 py-3 text-slate-400 font-mono text-[10px]">rubric.required_mentions not met ≥ 2 cases</td>
+                </tr>
+                <tr class="hover:bg-slate-50 opacity-50">
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600" style="border:1px solid #E2E8F0;font-size:10px">tone_drift</span></td>
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600 font-bold" style="font-size:10px">—</span></td>
+                  <td class="px-4 py-3 text-slate-400 italic text-[11px]">Not triggered — tone avg 0.81, above floor 0.75</td>
+                  <td class="px-4 py-3 text-slate-400 font-mono text-[10px]">tone_floor = 0.75 · consec = 3</td>
+                </tr>
+                <tr class="hover:bg-slate-50 opacity-50">
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600" style="border:1px solid #E2E8F0;font-size:10px">hallucination_flag</span></td>
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600 font-bold" style="font-size:10px">—</span></td>
+                  <td class="px-4 py-3 text-slate-400 italic text-[11px]">Not triggered — no forbidden mentions or fabricated SKUs</td>
+                  <td class="px-4 py-3 text-slate-400 font-mono text-[10px]">forbidden_mentions · fake_sku_pattern</td>
+                </tr>
+                <tr class="hover:bg-slate-50 opacity-50">
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600" style="border:1px solid #E2E8F0;font-size:10px">cross_unit_pattern</span></td>
+                  <td class="px-4 py-3"><span class="pill bg-slate-100 text-slate-600 font-bold" style="font-size:10px">—</span></td>
+                  <td class="px-4 py-3 text-slate-400 italic text-[11px]">Not triggered — score_regression in B2B only, not ≥ 2 agents</td>
+                  <td class="px-4 py-3 text-slate-400 font-mono text-[10px]">same signal_type in ≥ 2 agents · window_size</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 text-[11.5px] text-slate-600 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3">
+          <i data-lucide="arrow-right-circle" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5"></i>
+          <span>2 high-confidence signals → meta-agent reads signal cluster + 5 worst cases. The <strong class="text-slate-800">Reflect &amp; Propose</strong> stage generates targeted proposals — it does not read all 120 outputs.</span>
+          <button onclick="switchStage('reflect')" class="ml-auto shrink-0 text-[11px] font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 whitespace-nowrap">
+            Reflect &amp; Propose <i data-lucide="arrow-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Sub-panel: Run Logs -->
+      <div id="sub-scouts-logs" class="sub-panel px-6 py-5 hidden">
+        <div class="rounded-xl bg-slate-950 p-4 font-mono text-[11px] leading-relaxed" style="height:320px;">
+          <div class="text-emerald-300 font-semibold">→ Running Pattern Scouts…</div>
+          <div class="text-cyan-400 mt-1">[SCOUT] score_regression: personalisation 0.67 vs rolling avg 0.88 — delta −0.21 (threshold >0.20) → HIGH confidence</div>
+          <div class="text-cyan-400">[SCOUT] rubric_miss: required_mention "uptime SLA" absent in 7/10 cases · expected_cta "demo" missing 4/10 → HIGH confidence</div>
+          <div class="text-slate-500">[SCOUT] tone_drift: tone avg 0.81 above floor 0.75 → not triggered</div>
+          <div class="text-slate-500">[SCOUT] hallucination_flag: 0 forbidden mentions, 0 fabricated SKUs → not triggered</div>
+          <div class="text-slate-500">[SCOUT] cross_unit_pattern: score_regression in 1/3 agents (threshold: ≥2) → not triggered</div>
+          <div class="text-emerald-400 font-semibold mt-1">✅ Scouts complete — 2/5 fired · signals written to data/outputs/runs/run_1/signals.json</div>
+          <div class="text-amber-400 font-semibold">⚡ Threshold met (≥1 high signal) — Reflect stage triggered</div>
+        </div>
+      </div>
+    </div><!-- /stage-scouts -->
+
+    <!-- ═══ STAGE 3: Reflect & Propose ════════════════════════════════════ -->
+    <div id="stage-reflect" class="stage-panel hidden">
+      <!-- Command strip -->
+      <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-0">
+          <div class="text-[10.5px] text-slate-500 mb-1">Meta-agent reads signal cluster + worst cases → proposes prompt / skill / eval improvements</div>
+          <code class="text-[10.5px] font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded">kedro run --pipelines reflection --params=run_id=run_1,reflection_id=refl_1</code>
+        </div>
+        <button onclick="runReflection()" id="runReflectionBtn"
+                class="flex items-center gap-2 text-xs font-bold text-white rounded-lg px-4 py-2 transition-all hover:opacity-90 active:scale-95 shrink-0"
+                style="background:#2251FF">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Run Reflection
+        </button>
+      </div>
+      <!-- Sub-tab bar -->
+      <div class="flex items-center gap-1 border-b border-slate-100 px-6 pt-2" id="subTabBar-reflect">
+        <button onclick="switchStageSub('reflect','viz')" data-sub="viz" class="sub-tab active">
+          <i data-lucide="layout-dashboard" class="w-3 h-3"></i> Kedro-Viz
+        </button>
+        <button onclick="switchStageSub('reflect','logs')" data-sub="logs" class="sub-tab">
+          <i data-lucide="terminal" class="w-3 h-3"></i> Run Logs
+        </button>
+        <button onclick="switchStageSub('reflect','langfuse')" data-sub="langfuse" class="sub-tab">
+          <i data-lucide="activity" class="w-3 h-3"></i> Langfuse
+        </button>
+        <button onclick="switchStageSub('reflect','proposal')" data-sub="proposal" class="sub-tab">
+          <i data-lucide="edit-3" class="w-3 h-3"></i> Proposal
+        </button>
+      </div>
+      <!-- Sub-panel: Kedro-Viz -->
+      <div id="sub-reflect-viz" class="sub-panel px-6 py-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xs font-semibold text-slate-500">Pipeline</span>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <button onclick="selectVizPipeline('reflect','reflection')" id="vizPip-reflect-reflection" class="viz-pip-btn active">Reflection</button>
+            <button onclick="selectVizPipeline('reflect','apply')" id="vizPip-reflect-apply" class="viz-pip-btn">Apply</button>
+          </div>
+          <a id="vizOpenLink-reflect" href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank"
+             class="ml-auto text-[11px] font-semibold flex items-center gap-1 hover:underline" style="color:#2251FF">
+            Open in new tab <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative" style="height:500px;">
+          <iframe id="vizFrame-reflect" src="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true"
+                  class="w-full h-full border-0" title="Kedro-Viz — Reflection"></iframe>
+          <div id="vizFallback-reflect" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900 text-center px-8">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-slate-500"></i></div>
+            <div class="text-sm font-bold text-slate-300 mb-1">Kedro-Viz not running</div>
+            <pre class="rounded-xl bg-slate-800 px-5 py-3 text-[12px] text-emerald-400 font-mono">kedro viz run</pre>
+            <a href="https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true" target="_blank" class="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style="background:#2251FF">Try connecting ↗</a>
+          </div>
+        </div>
+      </div>
+      <!-- Sub-panel: Run Logs -->
+      <div id="sub-reflect-logs" class="sub-panel px-6 py-5 hidden">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span class="text-xs font-semibold text-slate-500 shrink-0">Filter</span>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <button onclick="filterLogs('reflect','all')" id="logFilter-reflect-all" class="log-filter-btn active">All</button>
+            <button onclick="filterLogs('reflect','INFO')" id="logFilter-reflect-INFO" class="log-filter-btn">INFO</button>
+            <button onclick="filterLogs('reflect','ERROR')" id="logFilter-reflect-ERROR" class="log-filter-btn">ERROR</button>
+          </div>
+          <button onclick="copyLogs('reflectLogTerminal')" class="ml-auto flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-700 transition-colors">
+            <i data-lucide="copy" class="w-3 h-3"></i> Copy
+          </button>
+        </div>
+        <div class="rounded-xl bg-slate-950 p-4 overflow-y-auto font-mono text-[11px] leading-relaxed" style="height:400px;" id="reflectLogTerminal">
+          <div class="text-slate-500 text-[10px]">— Press Run Reflection to start —</div>
+        </div>
+      </div>
+      <!-- Sub-panel: Langfuse -->
+      <div id="sub-reflect-langfuse" class="sub-panel px-6 py-5 hidden">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Reflection Traces</div>
+            <div class="text-2xl font-black text-slate-900">3</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">run_meta_agent</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">LLM Cost</div>
+            <div class="text-2xl font-black text-slate-900">$0.009</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">claude-3-5-sonnet</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Input tokens</div>
+            <div class="text-2xl font-black text-slate-900">4,820</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">signals + worst cases</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Proposals</div>
+            <div class="text-2xl font-black text-emerald-600">3</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">prompt · skill · eval</div>
+          </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-4">
+          <div class="text-xs font-bold text-slate-700 mb-3">Recent reflection traces</div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50"><div class="flex-1"><div class="text-xs font-semibold">run_meta_agent · refl_1</div><div class="text-[10px] text-slate-400">2025-05-17 · 4820 in · 1240 out · $0.009</div></div><a href="https://cloud.langfuse.com" target="_blank" class="text-[11px] font-semibold px-3 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">Open ↗</a></div>
+          </div>
+        </div>
+      </div>
+      <!-- Sub-panel: Proposal -->
+      <div id="sub-reflect-proposal" class="sub-panel px-6 py-5 hidden">
+        <div class="rounded-xl p-4 mb-5 flex items-start gap-3" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1px solid #C7D2FE">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style="background:#2251FF">
+            <i data-lucide="cpu" class="w-4 h-4 text-white"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-bold text-slate-900 mb-0.5">Meta-agent reflection complete — refl_1</div>
+            <div class="text-[11px] text-slate-600">Analysed 5 worst-scoring cases (avg 0.61). Fired on: <strong>score_regression</strong> (−0.21 personalisation) · <strong>rubric_miss</strong> (ROI framing absent 7/10). Generated 3 proposals.</div>
+          </div>
+          <span class="pill bg-white text-slate-600 shrink-0" style="border:1px solid #C7D2FE;font-size:10px">2025-05-17 · run_meta_agent</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="rounded-xl bg-red-50 border border-red-200 p-4">
+            <div class="text-xs font-bold text-red-800 mb-3 flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>Issues Found</div>
+            <ul class="space-y-2 text-[11px] text-red-700">
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold">•</span>7/10 worst cases lacked ROI framing in opener (avg personalisation 0.61)</li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold">•</span>Feature-list language in 5 cases. <code class="bg-red-100 px-0.5 rounded">rubric_miss</code> fired.</li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold">•</span>3 emails exceeded 250 words</li>
+            </ul>
+          </div>
+          <div class="rounded-xl bg-blue-50 border border-blue-200 p-4">
+            <div class="text-xs font-bold text-blue-800 mb-3 flex items-center gap-1.5"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i>Changes Proposed</div>
+            <ul class="space-y-2 text-[11px] text-blue-700">
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold text-blue-500">P</span><span><strong>Prompt:</strong> "Open with ROI, not product feature"</span></li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold text-blue-500">S</span><span><strong>Skill:</strong> Added §Tone — prefer "achieve X" over "our product does Y"</span></li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0 font-bold text-blue-500">E</span><span><strong>Eval:</strong> 2 new regression cases</span></li>
+            </ul>
+          </div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+            <div class="text-xs font-bold text-emerald-800 mb-3 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i>Expected Gains</div>
+            <ul class="space-y-2 text-[11px] text-emerald-700">
+              <li class="flex items-start gap-1.5"><span class="shrink-0">↑</span>Personalisation: ~+0.17</li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0">↑</span>Writing quality: ~+0.12</li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0">↑</span>CTA present: ~+0.17</li>
+              <li class="flex items-start gap-1.5"><span class="shrink-0">↑</span>Eval coverage: 20 → 23 cases</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i data-lucide="file-diff" class="w-3.5 h-3.5 text-slate-400"></i> Proposal 1 — Prompt diff <span class="pill bg-red-50 text-red-700 ml-1" style="border:1px solid #FCA5A5;font-size:10px">High · +0.11 est.</span></div>
+          <div class="rounded-xl bg-slate-900 p-4 font-mono text-[11.5px] leading-6">
+            <div class="text-slate-500 mb-2 text-[10px] uppercase tracking-widest">conf/base/system_prompt_b2b_sales.txt</div>
+            <div class="text-red-400"><span class="select-none text-slate-600 mr-2">-</span>You are a B2B sales email writer. Generate professional outreach emails highlighting product features and capabilities.</div>
+            <div class="text-emerald-400 mt-1"><span class="select-none text-slate-600 mr-2">+</span>You are a strategic B2B advisor writing ROI-first outreach. Open every email with a specific business value — not a product feature. Use the customer's industry, role, and tenure to personalise the framing.</div>
+          </div>
+        </div>
+        <div class="mb-5">
+          <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i> Proposal 2 — Skill file diff <span class="pill bg-amber-50 text-amber-700 ml-1" style="border:1px solid #FDE68A;font-size:10px">Medium · +0.07 est.</span></div>
+          <div class="rounded-xl bg-slate-900 p-4 font-mono text-[11.5px] leading-6">
+            <div class="text-slate-500 mb-2 text-[10px] uppercase tracking-widest">skills/b2b_sales.md — §Tone (new section)</div>
+            <div class="text-emerald-400"><span class="select-none text-slate-600 mr-2">+</span>## Tone</div>
+            <div class="text-emerald-400"><span class="select-none text-slate-600 mr-2">+</span>- Prefer "we can help you achieve X" over "our product does Y"</div>
+            <div class="text-emerald-400"><span class="select-none text-slate-600 mr-2">+</span>- Lead with outcomes and cost savings, not feature lists</div>
+            <div class="text-emerald-400"><span class="select-none text-slate-600 mr-2">+</span>- Keep emails under 200 words; every sentence must earn its place</div>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button onclick="switchStage('approve')" class="flex items-center gap-1.5 text-xs font-semibold text-white rounded-lg px-5 py-2 transition-all hover:opacity-90" style="background:#2251FF">
+            <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Review &amp; Approve →
+          </button>
+        </div>
+      </div>
+    </div><!-- /stage-reflect -->
+
+    <!-- ═══ STAGE 4: Approve & Apply ══════════════════════════════════════ -->
+    <div id="stage-approve" class="stage-panel hidden">
+      <!-- Approval gate -->
+      <div id="approvalGate" class="mx-6 my-5 rounded-xl border-2 border-amber-300 bg-amber-50 p-5 flex items-start gap-4">
+        <div class="w-9 h-9 rounded-xl bg-amber-200 flex items-center justify-center shrink-0">
+          <i data-lucide="user-check" class="w-5 h-5 text-amber-700"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-amber-900 text-sm mb-1">✋ Human Approval Required</div>
+          <div class="text-[11px] text-amber-700 leading-relaxed">3 proposals ready to apply. Approving will trigger <code class="bg-amber-100 px-1 rounded">kedro run --pipelines apply</code>, then re-run campaign + evaluation to produce run_2.</div>
+          <div class="mt-3 flex items-center gap-2 flex-wrap">
+            <span class="pill bg-blue-100 text-blue-700" style="font-size:10px;border:1px solid #BFDBFE">Prompt v3 → v4</span>
+            <span class="pill bg-teal-100 text-teal-700" style="font-size:10px;border:1px solid #99F6E4">Skill v2 → v3</span>
+            <span class="pill bg-purple-100 text-purple-700" style="font-size:10px;border:1px solid #DDD6FE">+2 eval cases</span>
+          </div>
+        </div>
+        <div class="shrink-0">
+          <button onclick="approveAndApply()" id="approveBtn"
+                  class="flex items-center gap-2 text-sm font-bold text-white rounded-xl px-5 py-2.5 transition-all hover:opacity-90 active:scale-95"
+                  style="background:#2251FF">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Approve &amp; Apply
+          </button>
+        </div>
+      </div>
+      <!-- Sub-tabs + panels (revealed after approval) -->
+      <div id="approveSubTabs" class="hidden">
+        <div class="flex items-center gap-1 border-b border-slate-100 px-6 pt-0" id="subTabBar-approve">
+          <button onclick="switchStageSub('approve','logs')" data-sub="logs" class="sub-tab active">
+            <i data-lucide="terminal" class="w-3 h-3"></i> Run Logs
+          </button>
+          <button onclick="switchStageSub('approve','langfuse')" data-sub="langfuse" class="sub-tab">
+            <i data-lucide="activity" class="w-3 h-3"></i> Langfuse
+          </button>
+          <button onclick="switchStageSub('approve','compare')" data-sub="compare" class="sub-tab">
+            <i data-lucide="columns" class="w-3 h-3"></i> Compare Responses
+          </button>
+        </div>
+        <!-- Sub-panel: Run Logs -->
+        <div id="sub-approve-logs" class="sub-panel px-6 py-5">
+          <div class="rounded-xl bg-slate-950 p-4 overflow-y-auto font-mono text-[11px] leading-relaxed" style="height:380px;" id="approveLogTerminal"></div>
+        </div>
+        <!-- Sub-panel: Langfuse (apply run) -->
+        <div id="sub-approve-langfuse" class="sub-panel px-6 py-5 hidden">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Apply Traces</div>
+              <div class="text-2xl font-black text-slate-900">4</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">apply_pipeline nodes</div>
+            </div>
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">run_2 Score</div>
+              <div class="text-2xl font-black text-emerald-600">0.94</div>
+              <div class="text-[10px] text-emerald-600 mt-0.5">↑ +0.12 from run_1</div>
+            </div>
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Prompt Version</div>
+              <div class="text-2xl font-black text-slate-900">v4</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Langfuse versioned</div>
+            </div>
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Eval Cases</div>
+              <div class="text-2xl font-black text-slate-900">23</div>
+              <div class="text-[10px] text-emerald-600 mt-0.5">+2 regression cases</div>
+            </div>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-4 text-xs text-slate-500">
+            <div class="font-bold text-slate-700 mb-2">Apply run traces</div>
+            <div class="space-y-1 font-mono">
+              <div>commit_reflection · prompt/b2b_sales_v4 · 2025-05-17 14:41:02</div>
+              <div>write_skill_file · skills/b2b_sales_v3.md · 2025-05-17 14:41:03</div>
+              <div>add_eval_cases · b2b_sales_eval +2 · 2025-05-17 14:41:04</div>
+              <div>append_audit_log · refl_1 approved Ravi K. · 2025-05-17 14:41:04</div>
+            </div>
+          </div>
+        </div>
+        <!-- Sub-panel: Compare Responses -->
+        <div id="sub-approve-compare" class="sub-panel px-6 py-5 hidden">
+          <!-- Score improvement banner -->
+          <div class="rounded-xl p-4 mb-5 flex items-center gap-4" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1px solid #6EE7B7">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0"><i data-lucide="trending-up" class="w-5 h-5 text-white"></i></div>
+            <div class="flex-1">
+              <div class="font-bold text-emerald-900 text-sm">Apply complete — run_2 results</div>
+              <div class="text-[11px] text-emerald-700 mt-0.5">Prompt v4 · Skill v3 · 23 eval cases active</div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-3xl font-black text-emerald-700">0.94</div>
+              <div class="text-[11px] text-emerald-600 font-semibold">↑ +0.12 from run_1</div>
+            </div>
+          </div>
+          <!-- Dimension table -->
+          <div class="rounded-xl border border-slate-200 overflow-hidden mb-5">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-400"></i> Score change by dimension
+            </div>
+            <table class="w-full text-xs">
+              <thead class="bg-slate-50 border-b border-slate-100"><tr>
+                <th class="text-left px-4 py-2 font-semibold text-slate-500">Dimension</th>
+                <th class="text-right px-4 py-2 font-semibold text-slate-500">run_1</th>
+                <th class="text-right px-4 py-2 font-semibold text-slate-500">run_2</th>
+                <th class="text-right px-4 py-2 font-semibold text-slate-500">Δ</th>
+              </tr></thead>
+              <tbody class="divide-y divide-slate-50">
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2">Writing Quality</td><td class="px-4 py-2 text-right text-slate-500">0.84</td><td class="px-4 py-2 text-right font-bold">0.96</td><td class="px-4 py-2 text-right font-bold text-emerald-600">+0.12</td></tr>
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2">Personalisation</td><td class="px-4 py-2 text-right text-slate-500">0.74</td><td class="px-4 py-2 text-right font-bold">0.91</td><td class="px-4 py-2 text-right font-bold text-emerald-600">+0.17</td></tr>
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2">Groundedness</td><td class="px-4 py-2 text-right text-slate-500">0.91</td><td class="px-4 py-2 text-right font-bold">0.94</td><td class="px-4 py-2 text-right font-bold text-emerald-600">+0.03</td></tr>
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2">CTA Present</td><td class="px-4 py-2 text-right text-slate-500">0.78</td><td class="px-4 py-2 text-right font-bold">0.95</td><td class="px-4 py-2 text-right font-bold text-emerald-600">+0.17</td></tr>
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2">Length in Range</td><td class="px-4 py-2 text-right text-slate-500">0.80</td><td class="px-4 py-2 text-right font-bold">0.93</td><td class="px-4 py-2 text-right font-bold text-emerald-600">+0.13</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Case selector -->
+          <div class="flex items-center gap-3 mb-4 flex-wrap">
+            <span class="text-xs font-semibold text-slate-500 shrink-0">Case</span>
+            <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1 flex-wrap" id="caseSelector">
+              <button onclick="selectCase(0)" id="caseBtn-0" class="case-btn active">case_001</button>
+              <button onclick="selectCase(1)" id="caseBtn-1" class="case-btn">case_002</button>
+              <button onclick="selectCase(2)" id="caseBtn-2" class="case-btn">case_003</button>
+              <button onclick="selectCase(3)" id="caseBtn-3" class="case-btn">case_004</button>
+              <button onclick="selectCase(4)" id="caseBtn-4" class="case-btn">case_005</button>
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+              <span id="caseScoreBefore" class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;font-size:10px">run_1: 0.88</span>
+              <span class="text-slate-300 text-xs">→</span>
+              <span id="caseScoreAfter" class="pill bg-emerald-50 text-emerald-700" style="border:1px solid #A7F3D0;font-size:10px">run_2: 0.96</span>
+              <span id="caseScoreDelta" class="pill bg-emerald-100 text-emerald-800 font-black" style="font-size:11px">+0.08</span>
+            </div>
+          </div>
+          <!-- Dimension mini-bars -->
+          <div id="caseDimBars" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5"></div>
+          <!-- Side-by-side emails -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="comparePanel">
+            <div class="rounded-xl border-2 border-red-200 overflow-hidden flex flex-col">
+              <div class="px-4 py-2.5 bg-red-50 border-b border-red-200 flex items-center justify-between shrink-0">
+                <span class="text-xs font-bold text-red-800 flex items-center gap-1.5"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i> run_1 · <span id="beforeScore">0.88</span></span>
+                <span class="pill bg-red-100 text-red-700" style="font-size:10px;border:1px solid #FCA5A5">prompt v3 · skill v2</span>
+              </div>
+              <div class="p-4 bg-white text-[11px] text-slate-600 leading-relaxed flex-1" id="beforeEmail"></div>
+              <div class="px-4 pb-3 flex flex-wrap gap-1" id="beforeTags"></div>
+            </div>
+            <div class="rounded-xl border-2 border-emerald-200 overflow-hidden flex flex-col">
+              <div class="px-4 py-2.5 bg-emerald-50 border-b border-emerald-200 flex items-center justify-between shrink-0">
+                <span class="text-xs font-bold text-emerald-800 flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> run_2 · <span id="afterScore">0.96</span></span>
+                <span class="pill bg-emerald-100 text-emerald-700" style="font-size:10px;border:1px solid #A7F3D0">prompt v4 · skill v3</span>
+              </div>
+              <div class="p-4 bg-white text-[11px] text-slate-600 leading-relaxed flex-1" id="afterEmail"></div>
+              <div class="px-4 pb-3 flex flex-wrap gap-1" id="afterTags"></div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i> Showing 5 of 120 cases. Worst-scoring cases from run_1 surfaced first.
+          </div>
+        </div><!-- /sub-approve-compare -->
+      </div><!-- /approveSubTabs -->
+    </div><!-- /stage-approve -->
+
+  </div>
+
+  <!-- MULTI-RUN INSIGHTS -->
+  <div class="card p-6">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Cross-run</div>
+        <div class="text-base font-bold text-slate-900">Multi-run Insights</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Score progression and dimension improvement across all runs for this agent.</div>
+      </div>
+      <div class="flex items-center gap-2 text-[11px] text-slate-500">
+        <span class="w-2 h-2 rounded-full bg-slate-300 inline-block"></span>run_1 baseline
+        <span class="w-2 h-2 rounded-full inline-block" style="background:#2251FF"></span>run_2 (after refl_1)
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <!-- Score progression chart — wider -->
+      <div class="lg:col-span-3">
+        <div class="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5 text-slate-400"></i> Score progression · with reflection events
+        </div>
+        <canvas id="scoreChart" height="165"></canvas>
+      </div>
+      <!-- Dimension delta table -->
+      <div class="lg:col-span-2">
+        <div class="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-1.5">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-400"></i> Dimension change · run_1 → run_2
+        </div>
+        <div class="space-y-2.5">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">Writing Quality</span><span class="text-slate-400">0.84 → <strong class="text-emerald-600">0.96</strong> <span class="text-emerald-500 font-bold">+0.12</span></span></div>
+            <div class="relative h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:84%"></div>
+              <div class="absolute inset-y-0 left-0 rounded-full" style="width:96%;background:#2251FF;opacity:.75"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">Personalisation</span><span class="text-slate-400">0.74 → <strong class="text-emerald-600">0.91</strong> <span class="text-emerald-500 font-bold">+0.17</span></span></div>
+            <div class="relative h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:74%"></div>
+              <div class="absolute inset-y-0 left-0 rounded-full" style="width:91%;background:#2251FF;opacity:.75"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">Groundedness</span><span class="text-slate-400">0.91 → <strong class="text-emerald-600">0.94</strong> <span class="text-emerald-500 font-bold">+0.03</span></span></div>
+            <div class="relative h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:91%"></div>
+              <div class="absolute inset-y-0 left-0 rounded-full" style="width:94%;background:#2251FF;opacity:.75"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">CTA Present</span><span class="text-slate-400">0.78 → <strong class="text-emerald-600">0.95</strong> <span class="text-emerald-500 font-bold">+0.17</span></span></div>
+            <div class="relative h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:78%"></div>
+              <div class="absolute inset-y-0 left-0 rounded-full" style="width:95%;background:#2251FF;opacity:.75"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-600">Length in Range</span><span class="text-slate-400">0.80 → <strong class="text-emerald-600">0.93</strong> <span class="text-emerald-500 font-bold">+0.13</span></span></div>
+            <div class="relative h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:80%"></div>
+              <div class="absolute inset-y-0 left-0 rounded-full" style="width:93%;background:#2251FF;opacity:.75"></div>
+            </div>
+          </div>
+        </div>
+        <!-- What drove the improvement -->
+        <div class="mt-4 rounded-lg bg-slate-50 border border-slate-200 p-3 text-[10.5px] text-slate-500 leading-relaxed">
+          <span class="font-bold text-slate-700">What drove it:</span> Prompt v4 added ROI-first opener instruction (+personalisation, +writing); Skill v3 added §Tone with outcome-framing rules (+CTA, +length). 2 regression cases prevent re-introduction of feature-list language.
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+lucide.createIcons();
+
+// Agent data — pipeline shape is IDENTICAL for all agents (invariant 7-step loop).
+// What changes: what gets generated, how many targets, judge dimensions, eval dataset, skill file.
+const agents = {
+  sales: {
+    title: 'B2B Sales — Enterprise Outreach Agent',
+    desc: 'Generates personalised B2B outreach emails for enterprise telco customers. Evaluated against writing quality, personalisation depth, groundedness, and CTA clarity — then reflects on its own failures.',
+    icon: 'briefcase', iconBg: '#EEF2FF', iconColor: '#2251FF',
+    targets: '120 customer × product targets',
+    versions: 'Prompt v4 · Skill v3 · 23 eval cases',
+    reflections: '2 runs · 1 reflection applied',
+    color: '#2251FF',
+    scores: [0.82, null, null, null, 0.94],
+    // Stage 1 command strip — what gets generated and how
+    pipelineWhat: 'Generate B2B outreach emails</strong> (customer × product pairs) → evaluate on writing quality, personalisation, groundedness, CTA → run scouts',
+    runCmd: 'kedro run --pipelines campaign,evaluation --params=run_id=run_1,agent=b2b_sales',
+    evalDataset: 'b2b_sales_eval',
+    skillFile: 'skills/b2b_email_style.md',
+    judgePrompt: 'b2b_sales_judge',
+    // Langfuse metrics for run_1
+    lf: { traces: 247, cost: '$0.031', obs: 384, avgScore: 0.82, avgLabel: 'run_1 · 5 dims' },
+    evalDims: [
+      { key: 'writing_quality', val: 0.84, color: '#2251FF' },
+      { key: 'personalization',  val: 0.67, color: '#F59E0B', warn: true },
+      { key: 'groundedness',     val: 0.91, color: '#2251FF' },
+      { key: 'cta_present',      val: 0.78, color: '#F59E0B', warn: true },
+      { key: 'length_in_range',  val: 0.80, color: '#2251FF' },
+    ]
+  },
+  marketing: {
+    title: 'Consumer Marketing — Plan & Device Offers Agent',
+    desc: 'Generates personalised plan and device upgrade offers for consumer telco subscribers. Evaluated on offer relevance, personalisation, urgency/CTA, tone, and compliance.',
+    icon: 'bar-chart-2', iconBg: '#F5F3FF', iconColor: '#8B5CF6',
+    targets: '200 subscriber targets',
+    versions: 'Prompt v3 · Skill v2 · 14 eval cases',
+    reflections: '2 runs · 1 reflection applied',
+    color: '#8B5CF6',
+    scores: [0.77, null, null, null, 0.85],
+    pipelineWhat: 'Generate personalised plan & device offers</strong> (subscriber profiles) → evaluate on offer relevance, personalisation, urgency/CTA, tone, compliance → run scouts',
+    runCmd: 'kedro run --pipelines campaign,evaluation --params=run_id=run_1,agent=consumer_marketing',
+    evalDataset: 'consumer_mktg_eval',
+    skillFile: 'skills/marketing_offers.md',
+    judgePrompt: 'consumer_marketing_judge',
+    lf: { traces: 312, cost: '$0.028', obs: 487, avgScore: 0.77, avgLabel: 'run_1 · 5 dims' },
+    evalDims: [
+      { key: 'offer_relevance',  val: 0.78, color: '#8B5CF6', warn: true },
+      { key: 'personalization',  val: 0.81, color: '#8B5CF6' },
+      { key: 'urgency_cta',      val: 0.72, color: '#F59E0B', warn: true },
+      { key: 'tone',             val: 0.88, color: '#8B5CF6' },
+      { key: 'compliance',       val: 0.90, color: '#8B5CF6' },
+    ]
+  },
+  care: {
+    title: 'Customer Care — Support Reply Agent',
+    desc: 'Suggests empathetic, compliant support replies for common telco issues. Evaluated on empathy opener, resolution clarity, tone, compliance, and escalation avoidance.',
+    icon: 'headphones', iconBg: '#F0FDFA', iconColor: '#00C4B4',
+    targets: '320 support ticket targets',
+    versions: 'Prompt v4 · Skill v2 · 18 eval cases',
+    reflections: '2 runs · 2 reflections (1 rollback)',
+    color: '#00C4B4',
+    scores: [0.71, null, 0.71, null, 0.83],
+    pipelineWhat: 'Generate support reply suggestions</strong> (support tickets) → evaluate on empathy opener, resolution clarity, tone, compliance, escalation avoidance → run scouts',
+    runCmd: 'kedro run --pipelines campaign,evaluation --params=run_id=run_1,agent=customer_care',
+    evalDataset: 'customer_care_eval',
+    skillFile: 'skills/care_reply_style.md',
+    judgePrompt: 'customer_care_judge',
+    lf: { traces: 196, cost: '$0.019', obs: 321, avgScore: 0.71, avgLabel: 'run_1 · 5 dims' },
+    evalDims: [
+      { key: 'empathy_opener',        val: 0.65, color: '#F59E0B', warn: true },
+      { key: 'resolution_clarity',    val: 0.79, color: '#00C4B4' },
+      { key: 'tone',                  val: 0.85, color: '#00C4B4' },
+      { key: 'compliance',            val: 0.91, color: '#00C4B4' },
+      { key: 'escalation_avoidance',  val: 0.74, color: '#F59E0B', warn: true },
+    ]
+  }
+};
+
+let currentAgent = 'sales';
+let scoreChart;
+
+function switchAgent(id) {
+  currentAgent = id;
+  const a = agents[id];
+  document.querySelectorAll('.agent-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+
+  // Campaign header
+  document.getElementById('agent-title').textContent = a.title;
+  document.getElementById('agent-desc').textContent = a.desc;
+  document.getElementById('agent-targets').textContent = a.targets;
+  document.getElementById('agent-versions').textContent = a.versions;
+  document.getElementById('agent-reflections').textContent = a.reflections;
+
+  const iconEl = document.getElementById('agent-icon');
+  iconEl.style.background = a.iconBg;
+  iconEl.innerHTML = `<i data-lucide="${a.icon}" style="color:${a.iconColor};width:24px;height:24px"></i>`;
+
+  // ── Stage 1: update command strip to reflect what THIS agent generates ────
+  const descEl = document.getElementById('stage1-pipeline-what');
+  if (descEl) descEl.innerHTML = a.pipelineWhat;
+  const cmdEl = document.getElementById('stage1-pipeline-cmd');
+  if (cmdEl) cmdEl.textContent = a.runCmd;
+
+  // Stage 1 metadata badges (eval dataset + skill file + judge)
+  const metaEl = document.getElementById('stage1-eval-meta');
+  if (metaEl) metaEl.innerHTML =
+    `<span class="pill bg-slate-100 text-slate-600" style="font-size:10px">dataset: ${a.evalDataset}</span>` +
+    `<span class="pill bg-slate-100 text-slate-600" style="font-size:10px">skill: ${a.skillFile.replace('skills/','')}</span>` +
+    `<span class="pill bg-slate-100 text-slate-600" style="font-size:10px">judge: ${a.judgePrompt}</span>`;
+
+  // ── Langfuse sub-panel: update KPIs + dimension bars ─────────────────────
+  const lfKpis = [
+    { id: 'lf-traces', val: a.lf.traces, sub: '+18 this run' },
+    { id: 'lf-cost',   val: a.lf.cost,   sub: '~$0.0003 / case' },
+    { id: 'lf-obs',    val: a.lf.obs,    sub: 'generation + scoring' },
+    { id: 'lf-score',  val: a.lf.avgScore, sub: a.lf.avgLabel },
+  ];
+  lfKpis.forEach(k => {
+    const el = document.getElementById(k.id);
+    if (el) { el.querySelector('.lf-kpi-val').textContent = k.val; el.querySelector('.lf-kpi-sub').textContent = k.sub; }
+  });
+
+  const dimsEl = document.getElementById('lf-eval-dims');
+  if (dimsEl) dimsEl.innerHTML = a.evalDims.map(d => `
+    <div>
+      <div class="flex justify-between text-[11px] mb-1">
+        <span class="text-slate-600">${d.key}</span>
+        <span class="font-bold ${d.warn ? 'text-amber-600' : ''}">${d.val.toFixed(2)}</span>
+      </div>
+      <div class="h-2 bg-slate-100 rounded-full">
+        <div class="h-2 rounded-full" style="width:${Math.round(d.val*100)}%;background:${d.color}"></div>
+      </div>
+    </div>`).join('');
+
+  // Update multi-run chart colour
+  scoreChart.data.datasets[0].borderColor = a.color;
+  scoreChart.data.datasets[0].backgroundColor = a.color + '11';
+  scoreChart.data.datasets[0].data = a.scores;
+  scoreChart.update();
+
+  // Reset pipeline status badge
+  document.getElementById('pipeline-status-badge').innerHTML =
+    `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block animate-pulse"></span>${id === 'sales' ? 'run_1 · Evaluating' : 'Not started'}`;
+  document.getElementById('pipeline-status-badge').className = 'pill bg-amber-50 text-amber-700';
+  document.getElementById('pipeline-status-badge').style.border = '1px solid #FDE68A';
+
+  // Reset stages back to Stage 1
+  switchStage('campaign');
+  switchStageSub('campaign', 'viz');
+  // Reset stage number badges
+  ['campaign','scouts','reflect','approve'].forEach(s => {
+    const el = document.getElementById('stageNum-' + s);
+    if (el) el.classList.remove('done');
+  });
+
+  lucide.createIcons();
+}
+
+// Score chart
+const sCtx = document.getElementById('scoreChart').getContext('2d');
+scoreChart = new Chart(sCtx, {
+  type: 'line',
+  data: {
+    labels: ['run_1', 'refl_1 proposed', 'refl_1 approved', 'refl_1 applied', 'run_2'],
+    datasets: [{
+      label: 'Score',
+      data: [0.82, null, null, null, 0.94],
+      borderColor: '#2251FF', backgroundColor: '#2251FF11',
+      tension: 0.3, fill: true, borderWidth: 2,
+      pointBackgroundColor: ['#2251FF','#F59E0B','#F59E0B','#F59E0B','#2251FF'],
+      pointRadius: [5, 4, 4, 4, 5],
+      spanGaps: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      annotation: {}
+    },
+    scales: {
+      y: { min: 0.6, max: 1.0, ticks: { font: { size: 11 }, callback: v => v.toFixed(2) }, grid: { color: '#F1F5F9' } },
+      x: { ticks: { font: { size: 10 } }, grid: { color: '#F1F5F9' } }
+    }
+  }
+});
+
+// ─── Stage navigation ────────────────────────────────────────────────────────
+function switchStage(id) {
+  document.querySelectorAll('.stage-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.stage === id));
+  document.querySelectorAll('.stage-panel').forEach(p =>
+    p.classList.toggle('hidden', p.id !== 'stage-' + id));
+  lucide.createIcons();
+}
+
+// ─── Sub-tab navigation within a stage ───────────────────────────────────────
+function switchStageSub(stageId, subId) {
+  const bar = document.getElementById('subTabBar-' + stageId);
+  if (bar) bar.querySelectorAll('.sub-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.sub === subId));
+  document.querySelectorAll('[id^="sub-' + stageId + '-"]').forEach(p =>
+    p.classList.add('hidden'));
+  const target = document.getElementById('sub-' + stageId + '-' + subId);
+  if (target) target.classList.remove('hidden');
+  if (stageId === 'campaign' && subId === 'langfuse') initLangfuseCharts();
+  lucide.createIcons();
+}
+
+// ─── Kedro-Viz pipeline picker ────────────────────────────────────────────────
+function selectVizPipeline(stageId, pid) {
+  document.querySelectorAll(`[id^="vizPip-${stageId}-"]`).forEach(b =>
+    b.classList.toggle('active', b.id === `vizPip-${stageId}-${pid}`));
+  const url = `https://demo.kedro.org/?types=nodes,datasets&pid=__default__&expandAllPipelines=true`;
+  document.getElementById('vizFrame-' + stageId).src = url;
+  document.getElementById('vizOpenLink-' + stageId).href = url;
+}
+
+// ─── Run Log filter ───────────────────────────────────────────────────────────
+function filterLogs(stageId, level) {
+  document.querySelectorAll(`[id^="logFilter-${stageId}-"]`).forEach(b =>
+    b.classList.toggle('active', b.id === `logFilter-${stageId}-${level}`));
+  const terminal = document.getElementById(stageId + 'LogTerminal');
+  if (!terminal) return;
+  terminal.querySelectorAll('.log-line').forEach(line => {
+    if (level === 'all') line.classList.remove('hidden');
+    else if (level === 'kedro') line.classList.toggle('hidden',
+      !line.textContent.includes('kedro.runner') && !line.textContent.includes('kedro.io'));
+    else line.classList.toggle('hidden', !line.classList.contains('log-' + level));
+  });
+}
+
+function copyLogs(terminalId) {
+  const t = document.getElementById(terminalId);
+  if (!t) return;
+  const text = [...t.querySelectorAll('.log-line:not(.hidden)')].map(l => l.textContent).join('\n');
+  navigator.clipboard.writeText(text).catch(() => {});
+}
+
+// ─── Recent traces expander ───────────────────────────────────────────────────
+function toggleTraces() {
+  const body = document.getElementById('tracesBody');
+  const chevron = document.getElementById('tracesChevron');
+  const open = body.classList.toggle('hidden');
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+// ─── Run Pipeline (Stage 1) — streams Campaign + Eval + Scouts, then goes to Scouts stage ──
+let _running = false;
+function runPipeline() {
+  if (_running) return;
+  _running = true;
+
+  const btn = document.getElementById('runPipelineBtn');
+  btn.innerHTML = '<span class="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin inline-block"></span> Running…';
+  btn.disabled = true;
+
+  switchStage('campaign');
+  switchStageSub('campaign', 'logs');
+
+  const terminal = document.getElementById('campaignLogTerminal');
+  terminal.innerHTML = '';
+
+  const steps = [
+    { t: 'kedro run --pipelines campaign --params=run_id=run_1', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] kedro.runner.sequential_runner - SequentialRunner for pipeline "campaign"', c: 'text-slate-400' },
+    { t: '[INFO] kedro.io.data_catalog - Loading params:run_id', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Running node: load_customers → [customers]', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Running node: generate_emails → [emails]', c: 'text-slate-400' },
+    { t: '[INFO] kedro_reflection_agent.campaign - Generated 120 emails for run_1', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Completed 3/3 nodes [ campaign ] in 3.91s', c: 'text-slate-400' },
+    { t: ' ', c: '' },
+    { t: 'kedro run --pipelines evaluation --params=run_id=run_1', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] kedro.runner.sequential_runner - SequentialRunner for pipeline "evaluation"', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Running node: init_judge_evaluator → [judge_evaluator]', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Running node: run_experiment → [per_case_scores,aggregate_scores]', c: 'text-slate-400' },
+    { t: '[INFO] evaluation - case_001: writing_quality=0.87 personalization=0.84 groundedness=0.94', c: 'text-slate-400' },
+    { t: '[WARN] evaluation - case_002: personalization=0.52 — below threshold (0.60)', c: 'text-amber-400' },
+    { t: '[WARN] evaluation - case_003: personalization=0.65 cta_present=0.70 — below threshold', c: 'text-amber-400' },
+    { t: '[INFO] evaluation - case_004: writing_quality=0.79 personalization=0.70 groundedness=0.91', c: 'text-slate-400' },
+    { t: '[INFO] evaluation - mean_score=0.82 · 7/10 passing · personalisation below rolling avg', c: 'text-amber-400' },
+    { t: '[INFO] kedro.runner.sequential_runner - Completed 3/3 nodes [ evaluation ] in 7.23s', c: 'text-slate-400' },
+    { t: ' ', c: '' },
+    { t: '→ Running Pattern Scouts on run_1 outputs…', c: 'text-cyan-400 font-semibold' },
+    { t: '[SCOUT] score_regression: personalisation 0.67 vs rolling_5 avg 0.88 → delta −0.21 → HIGH', c: 'text-cyan-400' },
+    { t: '[SCOUT] rubric_miss: "uptime SLA" absent 7/10 · "demo" CTA missing 4/10 → HIGH', c: 'text-cyan-400' },
+    { t: '[SCOUT] tone_drift: avg 0.81 above floor 0.75 → not triggered', c: 'text-slate-500' },
+    { t: '[SCOUT] hallucination_flag: 0 forbidden mentions → not triggered', c: 'text-slate-500' },
+    { t: '[SCOUT] cross_unit_pattern: 1/3 agents (threshold ≥2) → not triggered', c: 'text-slate-500' },
+    { t: '✅ Scouts complete — 2 high-confidence signals · threshold met · Reflect triggered', c: 'text-emerald-400 font-semibold' },
+  ];
+
+  let i = 0;
+  function addLine() {
+    if (i >= steps.length) {
+      setTimeout(() => {
+        _running = false;
+        btn.innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5"></i> Run';
+        btn.disabled = false;
+        lucide.createIcons();
+        document.getElementById('pipeline-status-badge').innerHTML =
+          '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span> run_1 · Scouts · 2 signals';
+        document.getElementById('pipeline-status-badge').className = 'pill bg-amber-50 text-amber-700';
+        document.getElementById('pipeline-status-badge').style.border = '1px solid #FDE68A';
+        document.getElementById('stageNum-campaign').classList.add('done');
+        switchStage('scouts');
+      }, 600);
+      return;
+    }
+    const s = steps[i];
+    if (s.t.trim()) {
+      const div = document.createElement('div');
+      div.className = 'log-line ' + s.c;
+      div.textContent = s.t;
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+    i++;
+    setTimeout(addLine, i < 5 ? 380 : i < 12 ? 220 : i < 18 ? 160 : 110);
+  }
+  setTimeout(addLine, 300);
+}
+
+// ─── Run Reflection (Stage 3) ─────────────────────────────────────────────────
+let _reflecting = false;
+function runReflection() {
+  if (_reflecting) return;
+  _reflecting = true;
+
+  const btn = document.getElementById('runReflectionBtn');
+  btn.innerHTML = '<span class="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin inline-block"></span> Reflecting…';
+  btn.disabled = true;
+
+  switchStageSub('reflect', 'logs');
+
+  const terminal = document.getElementById('reflectLogTerminal');
+  terminal.innerHTML = '';
+
+  const steps = [
+    { t: 'kedro run --pipelines reflection --params=run_id=run_1,reflection_id=refl_1', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] kedro.runner - SequentialRunner for pipeline "reflection"', c: 'text-slate-400' },
+    { t: '[INFO] reflection.load_signals - Loading 2 high-confidence signals', c: 'text-slate-400' },
+    { t: '[INFO] reflection.load_worst_cases - 5 worst-scoring cases loaded (avg 0.61)', c: 'text-slate-400' },
+    { t: '[INFO] reflection.run_meta_agent - Calling claude-3-5-sonnet (reflection mode)…', c: 'text-slate-400' },
+    { t: '[INFO] reflection.run_meta_agent - Issues identified: 3 · Proposals generated: 3', c: 'text-slate-400' },
+    { t: '[INFO] reflection.write_proposal - proposed_prompt.json written', c: 'text-slate-400' },
+    { t: '[INFO] reflection.write_proposal - proposed_skill.md written', c: 'text-slate-400' },
+    { t: '[INFO] reflection.write_proposal - 2 eval cases proposed', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner - Completed 5/5 nodes [ reflection ] in 12.4s', c: 'text-slate-400' },
+    { t: '✅ Reflection complete — 3 proposals ready for review.', c: 'text-emerald-400 font-semibold' },
+  ];
+
+  let i = 0;
+  function addLine() {
+    if (i >= steps.length) {
+      setTimeout(() => {
+        _reflecting = false;
+        btn.innerHTML = '<i data-lucide="cpu" class="w-3.5 h-3.5"></i> Run Reflection';
+        btn.disabled = false;
+        lucide.createIcons();
+        document.getElementById('stageNum-reflect').classList.add('done');
+        switchStageSub('reflect', 'proposal');
+      }, 500);
+      return;
+    }
+    const div = document.createElement('div');
+    div.className = 'log-line ' + steps[i].c;
+    div.textContent = steps[i].t;
+    terminal.appendChild(div);
+    terminal.scrollTop = terminal.scrollHeight;
+    i++;
+    setTimeout(addLine, i < 3 ? 400 : 280);
+  }
+  setTimeout(addLine, 300);
+}
+
+// ─── Approve & Apply (Stage 4) ────────────────────────────────────────────────
+function approveAndApply() {
+  const btn = document.getElementById('approveBtn');
+  const gate = document.getElementById('approvalGate');
+  const subTabs = document.getElementById('approveSubTabs');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin inline-block"></span> Applying…';
+  gate.classList.add('opacity-50');
+
+  subTabs.classList.remove('hidden');
+  switchStageSub('approve', 'logs');
+
+  const terminal = document.getElementById('approveLogTerminal');
+  terminal.innerHTML = '';
+
+  const steps = [
+    { t: 'kedro run --pipelines apply --params=reflection_id=refl_1', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] apply.commit_reflection - writing prompt v4 to Langfuse…', c: 'text-slate-400' },
+    { t: '[INFO] apply.commit_reflection - Langfuse version created: prompt/b2b_sales_v4', c: 'text-slate-400' },
+    { t: '[INFO] apply.write_skill_file - writing skills/b2b_sales.md (v3)…', c: 'text-slate-400' },
+    { t: '[INFO] apply.add_eval_cases - appending 2 regression cases to b2b_sales_eval', c: 'text-slate-400' },
+    { t: '[INFO] apply.append_audit_log - refl_1 · approved by Ravi K.', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner - Completed 4/4 nodes [ apply ] in 2.31s', c: 'text-slate-400' },
+    { t: ' ', c: '' },
+    { t: 'kedro run --pipelines campaign --params=run_id=run_2', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] campaign.generate_emails - generating 120 emails with prompt v4…', c: 'text-slate-400' },
+    { t: '[INFO] campaign.generate_emails - 120 emails written to data/outputs/runs/run_2/', c: 'text-slate-400' },
+    { t: '[INFO] kedro.runner - Completed 3/3 nodes [ campaign ] in 4.1s', c: 'text-slate-400' },
+    { t: ' ', c: '' },
+    { t: 'kedro run --pipelines evaluation --params=run_id=run_2', c: 'text-emerald-300 font-semibold' },
+    { t: '[INFO] evaluation.run_experiment - mean_score=0.94 · 120/120 passing · 5 dims improved', c: 'text-emerald-400' },
+    { t: '[INFO] kedro.runner - Completed 3/3 nodes [ evaluation ] in 6.8s', c: 'text-slate-400' },
+    { t: '✅ Pipeline complete — run_2 results ready.', c: 'text-emerald-400 font-semibold' },
+  ];
+
+  let i = 0;
+  function addLine() {
+    if (i >= steps.length) {
+      setTimeout(() => {
+        gate.classList.add('hidden');
+        document.getElementById('pipeline-status-badge').innerHTML =
+          '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>run_2 · Complete · 0.94';
+        document.getElementById('pipeline-status-badge').className = 'pill bg-emerald-50 text-emerald-700';
+        document.getElementById('pipeline-status-badge').style.border = '1px solid #A7F3D0';
+        document.getElementById('stageNum-approve').classList.add('done');
+        switchStageSub('approve', 'compare');
+        selectCase(0);
+        lucide.createIcons();
+      }, 600);
+      return;
+    }
+    if (steps[i].t.trim()) {
+      const div = document.createElement('div');
+      div.className = 'log-line ' + steps[i].c;
+      div.textContent = steps[i].t;
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+    i++;
+    setTimeout(addLine, i < 4 ? 450 : i < 9 ? 300 : 200);
+  }
+  setTimeout(addLine, 400);
+}
+
+// ─── Langfuse charts (lazy) ───────────────────────────────────────────────────
+let _langfuseChartsBuilt = false;
+function initLangfuseCharts() {
+  if (_langfuseChartsBuilt) return;
+  _langfuseChartsBuilt = true;
+
+  new Chart(document.getElementById('tokenChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['claude-3-5-sonnet', 'claude-3-haiku', 'gpt-4o-mini'],
+      datasets: [
+        { label: 'Input tokens', data: [42300, 8100, 3200], backgroundColor: '#2251FF99', borderRadius: 4 },
+        { label: 'Output tokens', data: [12400, 2800, 950], backgroundColor: '#00C4B499', borderRadius: 4 },
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive: true,
+      plugins: { legend: { labels: { font: { size: 10 }, boxWidth: 10 } } },
+      scales: {
+        x: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } },
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  const days = ['May 20','May 21','May 22','May 23','May 24','May 25','May 26'];
+  new Chart(document.getElementById('dailyTracesChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels: days, datasets: [{ label: 'Traces', data: [18,24,31,14,42,37,81], backgroundColor: '#2251FF88', borderRadius: 4 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } } } }
+  });
+
+  new Chart(document.getElementById('dailyCostChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: days, datasets: [{ label: 'Cost ($)', data: [0.004,0.006,0.009,0.003,0.012,0.010,0.031], borderColor: '#00C4B4', backgroundColor: '#00C4B411', borderWidth: 2, pointRadius: 3, tension: 0.35, fill: true }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 }, callback: v => '$' + v.toFixed(3) } } } }
+  });
+}
+
+
+// ─── Compare Responses — case data & renderer ──────────────────────────────
+let _activeCase = 0;
+
+const _cases = [
+  {
+    id: 'case_001', customer: 'cust_003 · Apex Logistics', product: 'Fleet IoT Connect',
+    run1: { score: 0.88, wq: 0.87, pers: 0.84, gnd: 0.94, cta: 0.90, len: 0.85,
+      subject: 'IoT Connectivity for Fleet Management',
+      body: `<p>Dear Customer,</p><p>We wanted to reach out about Fleet IoT Connect, our enterprise connectivity solution that offers real-time tracking and fleet management capabilities.</p><p>Our platform features 99.9% uptime, seamless integration, and scalable pricing. We'd be happy to arrange a demonstration at your convenience.</p><p>Best regards,<br/>TelcoConnect Sales</p>`,
+      tags: [['No ROI opener','red'],['Generic salutation','red'],['Feature list','red']] },
+    run2: { score: 0.96, wq: 0.97, pers: 0.95, gnd: 0.96, cta: 0.98, len: 0.94,
+      subject: 'How Apex Logistics Peers Cut Fleet Downtime by 23%',
+      body: `<p>Hi Sarah,</p><p>Logistics enterprises your size typically lose 3–4% of revenue to unplanned downtime. Since similar fleets adopted Fleet IoT Connect, they've reduced that to under 1% — often within the first quarter.</p><p>Given your 3-year relationship with us and your expanding logistics footprint, I'd love to show you the same real-time dashboard in a 20-minute call. Are you free Thursday?</p><p>Best,<br/>Jamie · TelcoConnect Enterprise</p>`,
+      tags: [['ROI-first opener','green'],['Role-aware personalisation','green'],['Clear CTA','green']] }
+  },
+  {
+    id: 'case_002', customer: 'cust_018 · NovaTech Industrial', product: 'Fleet IoT Connect',
+    run1: { score: 0.61, wq: 0.68, pers: 0.52, gnd: 0.89, cta: 0.55, len: 0.62,
+      subject: 'IoT Connectivity Solutions for Your Business',
+      body: `<p>Dear Customer,</p><p>I wanted to reach out about our Fleet IoT Connect solution. It offers advanced connectivity, real-time tracking, and comprehensive management features for your fleet.</p><p>Our solution includes seamless integration, 99.9% uptime, and scalable pricing for businesses of all sizes. We'd love to schedule a demo.</p><p>Best regards,<br/>TelcoConnect Sales</p>`,
+      tags: [['No ROI framing','red'],['Generic opener','red'],['Feature-list language','red'],['No personalisation','red']] },
+    run2: { score: 0.91, wq: 0.93, pers: 0.90, gnd: 0.94, cta: 0.92, len: 0.88,
+      subject: 'Cut Fleet Downtime by 23% — How Logistics Leaders Are Using IoT',
+      body: `<p>Hi Marcus,</p><p>Logistics enterprises with 500+ vehicles typically lose 3–4% of revenue to unplanned downtime. Since Apex Logistics upgraded to Fleet IoT Connect last year, they've cut that figure to under 1%.</p><p>Given your current 2-year relationship with us and your growing fleet footprint, I'd welcome a 20-minute call to show you the same dashboard. Can we find time next week?</p><p>Best,<br/>Jamie · TelcoConnect Enterprise</p>`,
+      tags: [['ROI-first opener','green'],['Personalised (tenure + role)','green'],['Clear CTA','green']] }
+  },
+  {
+    id: 'case_003', customer: 'cust_027 · Meridian Retail', product: 'SmartConnect Pro',
+    run1: { score: 0.72, wq: 0.74, pers: 0.65, gnd: 0.88, cta: 0.70, len: 0.64,
+      subject: 'SmartConnect Pro for Your Business Needs',
+      body: `<p>Dear Sir/Madam,</p><p>We are pleased to introduce SmartConnect Pro, our comprehensive business connectivity solution. It comes with high-speed data, priority support, and advanced analytics.</p><p>We believe this product would be a great fit for your organisation. Please let us know if you would like more information.</p><p>Kind regards,<br/>TelcoConnect</p>`,
+      tags: [['Generic salutation','red'],['No industry context','red'],['Weak CTA','red']] },
+    run2: { score: 0.93, wq: 0.94, pers: 0.92, gnd: 0.95, cta: 0.93, len: 0.90,
+      subject: 'Reduce Checkout Downtime — How Retail Leaders Use SmartConnect Pro',
+      body: `<p>Hi Priya,</p><p>Retail outages during peak hours cost mid-sized chains an average of £12k per incident. SmartConnect Pro's priority failover has helped comparable retailers cut checkout downtime by 80% — one client recovered ROI in under 6 months.</p><p>You've been with us for 18 months and your store count is growing — would a 15-minute walk-through make sense this week?</p><p>Best,<br/>Alex · TelcoConnect Enterprise</p>`,
+      tags: [['Industry-specific ROI','green'],['Tenure-aware tone','green'],['Specific CTA','green']] }
+  },
+  {
+    id: 'case_004', customer: 'cust_041 · Hartley Manufacturing', product: 'Industrial IoT Bundle',
+    run1: { score: 0.78, wq: 0.79, pers: 0.70, gnd: 0.91, cta: 0.76, len: 0.73,
+      subject: 'Industrial IoT Solutions to Optimise Your Operations',
+      body: `<p>Dear Customer,</p><p>We're reaching out to share information about our Industrial IoT Bundle, designed to help manufacturing businesses improve operational efficiency.</p><p>Features include predictive maintenance alerts, real-time sensor data, and integration with existing ERP systems. We'd welcome a conversation to explore how this could help your team.</p><p>Best,<br/>TelcoConnect Sales</p>`,
+      tags: [['Vague opener','red'],['No personalisation','red'],['Feature-forward','red']] },
+    run2: { score: 0.95, wq: 0.96, pers: 0.94, gnd: 0.96, cta: 0.95, len: 0.93,
+      subject: 'Hartley Manufacturing: Stop Unplanned Line Stoppages Before They Happen',
+      body: `<p>Hi David,</p><p>Manufacturers with aging machinery typically face 6–8 unplanned line stoppages per quarter, each costing £8k–£25k. Our Industrial IoT Bundle's predictive maintenance layer has helped firms in your sector reduce that to under 1 per quarter on average.</p><p>Based on your 4-year relationship with us and your recent capacity expansion, I think there's a strong fit. Can I book 20 minutes with your ops team this week?</p><p>Best,<br/>Sam · TelcoConnect Enterprise</p>`,
+      tags: [['Cost-quantified opener','green'],['Expansion context used','green'],['Team-specific CTA','green']] }
+  },
+  {
+    id: 'case_005', customer: 'cust_058 · BlueSky Financial', product: 'SecureConnect Enterprise',
+    run1: { score: 0.81, wq: 0.83, pers: 0.74, gnd: 0.92, cta: 0.80, len: 0.77,
+      subject: 'SecureConnect Enterprise — Enhanced Security for Financial Institutions',
+      body: `<p>Dear Customer,</p><p>Financial institutions face increasing cybersecurity challenges. SecureConnect Enterprise provides advanced network security, compliance-ready infrastructure, and 24/7 monitoring to protect your operations.</p><p>We'd be glad to discuss how this solution could address your security requirements. Please don't hesitate to get in touch.</p><p>Kind regards,<br/>TelcoConnect</p>`,
+      tags: [['Generic compliance framing','red'],['No tenure reference','red'],['Passive CTA','red']] },
+    run2: { score: 0.94, wq: 0.95, pers: 0.93, gnd: 0.95, cta: 0.94, len: 0.91,
+      subject: 'Ahead of FCA Deadline: How BlueSky Peers Are Using SecureConnect',
+      body: `<p>Hi Claire,</p><p>With the FCA's new operational resilience rules taking effect in March, financial firms of your size are under pressure to demonstrate end-to-end network auditability. Several BlueSky-size institutions are using SecureConnect Enterprise to produce the audit trail automatically — saving 40+ hours per compliance cycle.</p><p>Given your 5-year relationship with us, I'd like to offer a compliance-readiness review at no cost. Available Thursday or Friday this week?</p><p>Best,<br/>Jordan · TelcoConnect Enterprise</p>`,
+      tags: [['Regulatory deadline trigger','green'],['Tenure + free offer','green'],['Specific deadline CTA','green']] }
+  }
+];
+
+const _dimKeys  = ['wq','pers','gnd','cta','len'];
+const _dimLabels = ['Writing Quality','Personalisation','Groundedness','CTA Present','Length'];
+
+function selectCase(idx) {
+  _activeCase = idx;
+  document.querySelectorAll('.case-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
+
+  const c = _cases[idx];
+  const r1 = c.run1, r2 = c.run2;
+  const delta = (r2.score - r1.score).toFixed(2);
+
+  // Score badges
+  document.getElementById('caseScoreBefore').textContent = 'run_1: ' + r1.score.toFixed(2);
+  document.getElementById('caseScoreAfter').textContent  = 'run_2: ' + r2.score.toFixed(2);
+  const deltaBadge = document.getElementById('caseScoreDelta');
+  deltaBadge.textContent = (delta > 0 ? '+' : '') + delta;
+  deltaBadge.className = 'pill font-black ' + (delta > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700');
+  deltaBadge.style.fontSize = '11px';
+
+  // Dimension mini-bars
+  const barContainer = document.getElementById('caseDimBars');
+  barContainer.innerHTML = _dimKeys.map((k, i) => {
+    const v1 = r1[k], v2 = r2[k];
+    const d = (v2 - v1).toFixed(2);
+    const col = d > 0 ? '#059669' : '#DC2626';
+    return `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+      <div class="text-[10px] font-semibold text-slate-500 mb-1">${_dimLabels[i]}</div>
+      <div class="flex items-end gap-1.5 mb-1">
+        <div class="text-lg font-black text-slate-900">${v2.toFixed(2)}</div>
+        <div class="text-[10px] font-bold mb-0.5" style="color:${col}">${d > 0 ? '+' : ''}${d}</div>
+      </div>
+      <div class="relative h-1.5 bg-slate-200 rounded-full overflow-hidden">
+        <div class="absolute inset-y-0 left-0 rounded-full bg-slate-300" style="width:${v1*100}%"></div>
+        <div class="absolute inset-y-0 left-0 rounded-full" style="width:${v2*100}%;background:#2251FF;opacity:.8"></div>
+      </div>
+      <div class="text-[9px] text-slate-400 mt-1">${v1.toFixed(2)} → ${v2.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  // Before/after scores in headers
+  document.getElementById('beforeScore').textContent = r1.score.toFixed(2);
+  document.getElementById('afterScore').textContent  = r2.score.toFixed(2);
+
+  // Email bodies
+  document.getElementById('beforeEmail').innerHTML =
+    `<div class="font-semibold text-slate-800 text-xs mb-2">Subject: ${r1.subject}</div>${r1.body}`;
+  document.getElementById('afterEmail').innerHTML =
+    `<div class="font-semibold text-slate-800 text-xs mb-2">Subject: ${r2.subject}</div>${r2.body}`;
+
+  // Tags
+  function renderTags(id, tags, run) {
+    document.getElementById(id).innerHTML = tags.map(([label, col]) => {
+      const styles = col === 'red'
+        ? 'background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA'
+        : 'background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0';
+      return `<span class="pill" style="${styles};font-size:10px">${label}</span>`;
+    }).join('');
+  }
+  renderTags('beforeTags', r1.tags, 'run1');
+  renderTags('afterTags',  r2.tags, 'run2');
+}
+
+// (approveAndApply defined above in Stage 4 section)
+</script>
+</body>
+</html>

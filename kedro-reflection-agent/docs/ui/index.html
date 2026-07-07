@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reflection Hub — Org Overview</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232251FF'/%3E%3Cpolyline points='4,22 11,14 17,18 24,10' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='21,10 24,10 24,13' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif']},colors:{brand:{50:'#EEF2FF',100:'#E0E7FF',200:'#C7D2FE',500:'#2251FF',600:'#1A3FCC'},teal:{50:'#F0FDFA',500:'#00C4B4'}}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:#F8FAFC;color:#0F172A;}
+    .card{background:#fff;border-radius:16px;border:1px solid #E2E8F0;box-shadow:0 1px 4px rgb(0 0 0/.06);}
+    .card-hover{transition:box-shadow .16s,transform .16s;}
+    .card-hover:hover{box-shadow:0 6px 20px rgb(0 0 0/.09);transform:translateY(-1px);}
+    .nav-link{font-size:13.5px;font-weight:500;color:#64748B;text-decoration:none;padding:6px 14px;border-radius:8px;transition:all .15s;}
+    .nav-link:hover{color:#1E293B;background:#F1F5F9;}
+    .nav-link.active{color:#2251FF;background:#EEF2FF;font-weight:600;}
+    .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+    .section-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94A3B8;margin-bottom:6px;}
+    .delta-up{color:#059669;font-weight:700;}
+    .heat-cell{height:10px;border-radius:5px;transition:width .4s;}
+    .insight-card{border-radius:12px;padding:16px;border-width:1px;border-style:solid;}
+    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
+    .fade-in{animation:fadeIn .4s ease both;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+
+<!-- TOP NAV -->
+<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center gap-6">
+    <a href="index.html" class="flex items-center gap-2.5 shrink-0">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#2251FF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <span class="text-sm font-bold text-slate-900">Reflection Hub</span>
+      <span class="text-[10px] font-semibold text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">Powered by Kedro</span>
+    </a>
+    <div class="flex items-center gap-1 ml-4">
+      <a href="index.html" class="nav-link active">Org Overview</a>
+      <a href="campaign.html" class="nav-link">Campaigns</a>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-8 fade-in">
+
+  <!-- ═══════════════════════════════════════════
+       0. PAGE HERO — what is this page
+  ═══════════════════════════════════════════ -->
+  <div class="rounded-2xl overflow-hidden" style="background:linear-gradient(135deg,#051C2C 0%,#0D2D4A 55%,#0E3460 100%);">
+    <div class="px-8 py-7 flex flex-col md:flex-row md:items-center gap-6">
+      <!-- Left: title + description -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="pill bg-brand-500 text-white text-[10px]" style="background:#2251FF">Platform Intelligence</span>
+          <span class="pill bg-white/10 text-white/70 text-[10px]">Kedro · Langfuse · LLM-Judge</span>
+        </div>
+        <h1 class="text-2xl font-black text-white leading-tight mb-2">Org Overview</h1>
+        <p class="text-sm text-slate-300 leading-relaxed max-w-2xl">
+          A single view across every AI agent the platform runs. Each agent generates outputs (emails, offers, support replies), evaluates them automatically, and then reflects — proposing targeted improvements to its own prompt, skill files, and evaluation cases. This page tracks how those agents are performing <span class="text-white font-semibold">right now</span>, how they've improved over time, and what the platform has learned <span class="text-white font-semibold">across all of them at once</span>.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-4">
+          <div class="flex items-center gap-2 text-[11px] text-slate-300">
+            <span class="w-5 h-5 rounded-md flex items-center justify-center bg-white/10"><i data-lucide="refresh-cw" class="w-3 h-3 text-white"></i></span>
+            <span><strong class="text-white">Automated reflection loop</strong> — agent improves itself, no manual prompt tuning</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-300">
+            <span class="w-5 h-5 rounded-md flex items-center justify-center bg-white/10"><i data-lucide="shield-check" class="w-3 h-3 text-white"></i></span>
+            <span><strong class="text-white">Human approval gate</strong> — every change reviewed before it goes live</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-300">
+            <span class="w-5 h-5 rounded-md flex items-center justify-center bg-white/10"><i data-lucide="share-2" class="w-3 h-3 text-white"></i></span>
+            <span><strong class="text-white">Cross-agent learning</strong> — a fix in one unit surfaces as a suggestion in another</span>
+          </div>
+        </div>
+      </div>
+      <!-- Right: agent loop diagram (compact) -->
+      <div class="shrink-0 hidden md:flex flex-col gap-1.5 text-[11px] font-semibold select-none">
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-white/10 text-white/80">Generate</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-white/10 text-white/80">Evaluate</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-white/10 text-white/80">Scout</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-white/10 text-white/80">Reflect</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-white/10 text-white/80">Propose</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center font-bold text-amber-300 border border-amber-400/40 bg-amber-400/10">✋ Approve</div>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-white/30"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-28 py-1.5 rounded-lg text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Apply</div>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom strip: agents at a glance -->
+    <div class="border-t border-white/10 px-8 py-3 flex flex-wrap gap-6">
+      <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-widest self-center">Agents in scope</span>
+      <div class="flex items-center gap-2 text-[12px] text-slate-200 font-medium">
+        <i data-lucide="briefcase" class="w-3.5 h-3.5 text-brand-200" style="color:#818CF8"></i> B2B Sales
+      </div>
+      <div class="flex items-center gap-2 text-[12px] text-slate-200 font-medium">
+        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5" style="color:#A78BFA"></i> Consumer Marketing
+      </div>
+      <div class="flex items-center gap-2 text-[12px] text-slate-200 font-medium">
+        <i data-lucide="headphones" class="w-3.5 h-3.5 text-teal-400"></i> Customer Care
+      </div>
+      <div class="flex-1"></div>
+      <a href="campaign.html" class="text-[11px] font-semibold text-brand-200 hover:text-white flex items-center gap-1 transition-colors" style="color:#93C5FD">
+        Drill into a campaign <i data-lucide="arrow-right" class="w-3 h-3"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       1. HEADER KPIs
+  ═══════════════════════════════════════════ -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="card p-5">
+      <div class="section-label">Portfolio Avg Score</div>
+      <div class="text-3xl font-black text-slate-900">0.87</div>
+      <div class="text-xs text-emerald-600 font-semibold mt-1">↑ +0.074 avg per reflection</div>
+    </div>
+    <div class="card p-5">
+      <div class="section-label">Active Agents</div>
+      <div class="text-3xl font-black text-slate-900">3</div>
+    </div>
+    <div class="card p-5">
+      <div class="section-label">Reflections Run</div>
+      <div class="text-3xl font-black text-slate-900">18</div>
+      <div class="text-xs text-slate-400 mt-1">14 applied · 2 rolled back</div>
+    </div>
+    <div class="card p-5">
+      <div class="section-label">Regression Cases</div>
+      <div class="text-3xl font-black text-slate-900">42</div>
+      <div class="text-xs text-emerald-600 font-semibold mt-1">↑ 3.6× from seed · 0 regressions</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       2. LEADERBOARD  (most important)
+  ═══════════════════════════════════════════ -->
+  <div class="card p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <div class="section-label">Leaderboard</div>
+        <div class="text-lg font-bold text-slate-900">Agent Quality Ranking</div>
+        <div class="text-xs text-slate-400 mt-0.5">Score = mean across all evaluation dimensions for the latest run. Each agent improves through its own Generate → Evaluate → Reflect → Apply loop.</div>
+      </div>
+      <a href="campaign.html" class="text-xs font-semibold flex items-center gap-1 hover:underline" style="color:#2251FF">View Campaigns <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+    </div>
+
+    <!-- Podium -->
+    <div class="flex items-end justify-center gap-5 mb-8">
+      <!-- 2nd: Customer Care -->
+      <div class="text-center w-40">
+        <div class="text-slate-400 text-xs font-semibold mb-1">🥈 #2</div>
+        <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200" style="min-height:90px;display:flex;flex-direction:column;justify-content:flex-end">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 bg-teal-100"><i data-lucide="headphones" class="w-4 h-4 text-teal-600"></i></div>
+          <div class="text-xs font-semibold text-slate-600">Customer Care</div>
+          <div class="text-2xl font-black text-slate-800 mt-0.5">0.83</div>
+          <div class="text-[10px] text-teal-600 font-semibold">+0.12 lift</div>
+        </div>
+      </div>
+      <!-- 1st: B2B Sales -->
+      <div class="text-center w-44">
+        <div class="text-amber-500 text-sm font-bold mb-1">🏆 #1</div>
+        <div class="rounded-2xl p-5 border-2" style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border-color:#2251FF;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2" style="background:#EEF2FF;border:2px solid #C7D2FE"><i data-lucide="briefcase" class="w-5 h-5" style="color:#2251FF"></i></div>
+          <div class="text-xs font-bold" style="color:#2251FF">B2B Sales</div>
+          <div class="text-3xl font-black text-slate-900 mt-0.5">0.94</div>
+          <div class="text-[10px] text-emerald-600 font-bold">+0.12 lift · 1 reflection</div>
+        </div>
+      </div>
+      <!-- 3rd: Consumer Marketing -->
+      <div class="text-center w-40">
+        <div class="text-amber-600 text-xs font-semibold mb-1">🥉 #3</div>
+        <div class="rounded-2xl p-4 bg-slate-50 border border-slate-200" style="min-height:80px;display:flex;flex-direction:column;justify-content:flex-end">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 bg-purple-100"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i></div>
+          <div class="text-xs font-semibold text-slate-600">Cons. Marketing</div>
+          <div class="text-2xl font-black text-slate-800 mt-0.5">0.85</div>
+          <div class="text-[10px] text-purple-600 font-semibold">+0.08 lift</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dimension breakdown table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="border-b border-slate-100">
+            <th class="text-left pb-2.5 pr-6 font-semibold text-slate-500">Agent</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Overall</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Writing / Tone</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Personalisation</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">CTA / Resolution</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Groundedness</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Compliance</th>
+            <th class="text-center pb-2.5 px-4 font-semibold text-slate-500">Best Δ</th>
+            <th class="text-right pb-2.5 pl-4 font-semibold text-slate-500">Runs</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr>
+            <td class="py-3 pr-6">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:#EEF2FF"><i data-lucide="briefcase" class="w-3 h-3" style="color:#2251FF"></i></div>
+                <a href="campaign.html" class="font-semibold hover:underline" style="color:#2251FF">B2B Sales</a>
+                <span class="pill bg-emerald-50 text-emerald-700" style="border:1px solid #A7F3D0;font-size:10px;padding:1px 6px">Live</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center font-black text-slate-900 text-sm">0.94</td>
+            <td class="py-3 px-4 text-center"><span class="font-semibold text-emerald-600">0.96</span></td>
+            <td class="py-3 px-4 text-center"><span class="font-semibold text-emerald-600">0.91</span></td>
+            <td class="py-3 px-4 text-center"><span class="font-semibold text-emerald-600">0.95</span></td>
+            <td class="py-3 px-4 text-center"><span class="font-semibold text-emerald-600">0.94</span></td>
+            <td class="py-3 px-4 text-center"><span class="font-semibold text-emerald-600">0.92</span></td>
+            <td class="py-3 px-4 text-center font-bold text-emerald-600">+0.12</td>
+            <td class="py-3 pl-4 text-right text-slate-500">2</td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-6">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-purple-100"><i data-lucide="bar-chart-2" class="w-3 h-3 text-purple-600"></i></div>
+                <a href="campaign.html" class="font-semibold text-purple-700 hover:underline">Cons. Marketing</a>
+                <span class="pill bg-amber-50 text-amber-700" style="border:1px solid #FDE68A;font-size:10px;padding:1px 6px">Planning</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center font-black text-slate-900 text-sm">0.85</td>
+            <td class="py-3 px-4 text-center text-amber-500 font-semibold">0.82</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.88</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.84</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.87</td>
+            <td class="py-3 px-4 text-center text-emerald-600 font-semibold">0.91</td>
+            <td class="py-3 px-4 text-center font-bold text-purple-600">+0.08</td>
+            <td class="py-3 pl-4 text-right text-slate-500">2</td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-6">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-teal-100"><i data-lucide="headphones" class="w-3 h-3 text-teal-600"></i></div>
+                <a href="campaign.html" class="font-semibold text-teal-700 hover:underline">Customer Care</a>
+                <span class="pill bg-amber-50 text-amber-700" style="border:1px solid #FDE68A;font-size:10px;padding:1px 6px">Planning</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center font-black text-slate-900 text-sm">0.83</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.88</td>
+            <td class="py-3 px-4 text-center text-amber-500 font-semibold">0.79</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.85</td>
+            <td class="py-3 px-4 text-center text-slate-600 font-semibold">0.82</td>
+            <td class="py-3 px-4 text-center text-emerald-600 font-semibold">0.90</td>
+            <td class="py-3 px-4 text-center font-bold text-teal-600">+0.12</td>
+            <td class="py-3 pl-4 text-right text-slate-500">2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3 text-[11px] text-slate-400 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+      <strong class="text-slate-600">How scores are computed:</strong> Each agent runs a Langfuse experiment against its eval dataset. An LLM judge scores every output on domain dimensions (e.g. writing quality, personalisation, groundedness for B2B Sales); 4 deterministic heuristics run in parallel. The mean across all scorers is the row's overall score. Dimensions differ per agent — Customer Care uses empathy and resolution clarity instead of personalisation.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       3. PORTFOLIO TREND + RADAR
+  ═══════════════════════════════════════════ -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card p-5">
+      <div class="section-label">Score Trend Over Time</div>
+      <div class="font-semibold text-slate-900 mb-1">All Agents — Per Reflection Cycle</div>
+      <div class="text-[11px] text-slate-400 mb-4">Each data point is a completed campaign run. Gaps between points = a reflection was applied in between.</div>
+      <canvas id="trendChart" height="175"></canvas>
+    </div>
+    <div class="card p-5">
+      <div class="section-label">Dimension Radar</div>
+      <div class="font-semibold text-slate-900 mb-1">Strength vs. Gap — Latest Run</div>
+      <div class="text-[11px] text-slate-400 mb-4">How each agent scores across shared evaluation dimensions. Gaps pointing inward = areas targeted by the next reflection.</div>
+      <canvas id="radarChart" height="175"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       4. AI INSIGHTS
+  ═══════════════════════════════════════════ -->
+  <div>
+    <div class="section-label mb-1">Platform Insights</div>
+    <div class="font-semibold text-slate-900 mb-1">What the system learned across all agents</div>
+    <div class="text-[11px] text-slate-400 mb-4">Insights are generated after each reflection cycle by aggregating eval scores, failure patterns, and applied changes across all agents. They surface patterns that no single agent can see on its own.</div>
+
+    <!-- Summary banner -->
+    <div class="rounded-2xl p-5 mb-4 flex gap-4" style="background:linear-gradient(135deg,#EEF2FF 0%,#F0FDFA 100%);border:1px solid #C7D2FE">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#2251FF">
+        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="font-semibold text-slate-900 text-sm mb-1">Intelligence Summary · May 2025</div>
+        <p class="text-xs text-slate-600 leading-relaxed">Across <strong>7 campaign runs</strong> and <strong>18 reflections</strong>, the portfolio improved by an average of <strong>+0.074 score points per reflection cycle</strong>. B2B Sales leads the portfolio at <strong>0.94</strong> after a single reflection that fixed opener framing and tone. A systemic <strong>"generic opener"</strong> pattern is active across all 3 agents — a shared prompt fix could accelerate the entire portfolio without individual reflection cycles. Customer Care shows the fastest recovery velocity after a rollback event (+0.12 in refl_cc_2). No previously-fixed failure has regressed across any agent in the last 3 runs.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+
+      <div class="insight-card bg-amber-50 border-amber-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-100 shrink-0"><i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i></div>
+          <div>
+            <div class="text-xs font-bold text-amber-900 mb-1">Systemic: Generic Opener</div>
+            <div class="text-[11px] text-amber-800 leading-relaxed mb-2">All 3 agents score below 0.70 on opener framing. This is the single highest-leverage fix available — a shared prompt change could lift all three without individual reflection cycles.</div>
+            <div class="flex gap-1 flex-wrap">
+              <span class="pill bg-blue-100 text-blue-700" style="font-size:10px;padding:1px 6px">B2B Sales</span>
+              <span class="pill bg-purple-100 text-purple-700" style="font-size:10px;padding:1px 6px">Cons. Mktg</span>
+              <span class="pill bg-teal-100 text-teal-700" style="font-size:10px;padding:1px 6px">Cust. Care</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card bg-blue-50 border-blue-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100 shrink-0"><i data-lucide="share-2" class="w-4 h-4 text-blue-600"></i></div>
+          <div>
+            <div class="text-xs font-bold text-blue-900 mb-1">Transfer Opportunity: ROI Framing</div>
+            <div class="text-[11px] text-blue-800 leading-relaxed mb-2">B2B Sales' ROI-framing fix (+0.11 on tone) maps directly to an open low-score dimension in Consumer Marketing (0.82). Applying it avoids running a full reflection cycle on that agent.</div>
+            <a href="campaign.html" class="text-[11px] font-semibold text-blue-700 hover:underline flex items-center gap-1">Review transfer <i data-lucide="arrow-right" class="w-3 h-3"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card bg-emerald-50 border-emerald-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-100 shrink-0"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i></div>
+          <div>
+            <div class="text-xs font-bold text-emerald-900 mb-1">0 Regressions — 7 Runs</div>
+            <div class="text-[11px] text-emerald-800 leading-relaxed">No previously-fixed failure has re-appeared across any agent. The regression test bank has grown 3.6× from seed (12 → 42 cases) and is providing compounding protection with each cycle.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card bg-red-50 border-red-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-red-100 shrink-0"><i data-lucide="rotate-ccw" class="w-4 h-4 text-red-500"></i></div>
+          <div>
+            <div class="text-xs font-bold text-red-900 mb-1">Rollback Recovery — Care refl_1</div>
+            <div class="text-[11px] text-red-800 leading-relaxed">Customer Care refl_1 was applied but rolled back — overall score improved but empathy opener degraded 12%. Successor refl_2 targeted empathy specifically and achieved a clean +0.12 lift. Resolved.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card bg-purple-50 border-purple-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-purple-100 shrink-0"><i data-lucide="layers" class="w-4 h-4 text-purple-600"></i></div>
+          <div>
+            <div class="text-xs font-bold text-purple-900 mb-1">Skill Files Diverging</div>
+            <div class="text-[11px] text-purple-800 leading-relaxed">B2B Sales and Customer Care skill files now differ significantly in §Tone guidance. Platform team should align the overlapping sections to prevent inconsistency across agents.</div>
+            <span class="text-[11px] font-semibold text-amber-600">Action recommended</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card bg-slate-50 border-slate-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-200 shrink-0"><i data-lucide="trending-up" class="w-4 h-4 text-slate-600"></i></div>
+          <div>
+            <div class="text-xs font-bold text-slate-800 mb-1">Compliance: Shared Strength</div>
+            <div class="text-[11px] text-slate-600 leading-relaxed">All 3 agents consistently score ≥ 0.90 on regulatory compliance dimensions. Zero forbidden mentions in any run. This pattern is stable and can be treated as a baseline floor for the portfolio.</div>
+            <span class="text-[11px] font-semibold text-emerald-600">✓ No action needed</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       5. ISSUE + STRENGTH MATRICES
+  ═══════════════════════════════════════════ -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+    <!-- Issue Matrix -->
+    <div class="card p-6">
+      <div class="section-label mb-1">Issue Matrix</div>
+      <div class="font-semibold text-slate-900 mb-1">Failure Patterns — Where Each Agent Struggles</div>
+      <div class="text-[11px] text-slate-400 mb-4 leading-relaxed">
+        Each cell is the avg score for that dimension across all eval cases for that agent's latest run.
+        Red = below 0.70 (reflection triggers). Amber = 0.70–0.79 (watch). Green = ≥ 0.80 (healthy).
+        <strong class="text-slate-600"> Systemic</strong> = at least 2 agents in red/amber on the same dimension.
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+              <th class="text-left pb-2.5 pr-4">Dimension</th>
+              <th class="pb-2.5 px-3 text-center">Sales</th>
+              <th class="pb-2.5 px-3 text-center">Mktg</th>
+              <th class="pb-2.5 px-3 text-center">Care</th>
+              <th class="pb-2.5 pl-3 text-center">Scope</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            <tr>
+              <td class="py-2.5 pr-4 font-medium text-slate-700">Generic opener / no context</td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell w-full" style="background:#FCA5A5;width:61%"></div><span class="text-red-600 font-bold">0.61</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell w-full" style="background:#FCA5A5;width:59%"></div><span class="text-red-600 font-bold">0.59</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell w-full" style="background:#FCD34D;width:68%"></div><span class="text-amber-600 font-bold">0.68</span></div></td>
+              <td class="py-2.5 pl-3"><span class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;white-space:nowrap">⚠ Systemic</span></td>
+            </tr>
+            <tr>
+              <td class="py-2.5 pr-4 font-medium text-slate-700">Feature-heavy / no ROI</td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:58%"></div><span class="text-red-600 font-bold">0.58</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:62%"></div><span class="text-red-600 font-bold">0.62</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#86EFAC;width:88%"></div><span class="text-emerald-600 font-bold">0.88</span></div></td>
+              <td class="py-2.5 pl-3"><span class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;white-space:nowrap">⚠ Systemic</span></td>
+            </tr>
+            <tr>
+              <td class="py-2.5 pr-4 font-medium text-slate-700">Weak / missing CTA</td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCD34D;width:71%"></div><span class="text-amber-600 font-bold">0.71</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:63%"></div><span class="text-red-600 font-bold">0.63</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#86EFAC;width:85%"></div><span class="text-emerald-600 font-bold">0.85</span></div></td>
+              <td class="py-2.5 pl-3"><span class="pill bg-amber-50 text-amber-700" style="border:1px solid #FDE68A;white-space:nowrap">Partial</span></td>
+            </tr>
+            <tr>
+              <td class="py-2.5 pr-4 font-medium text-slate-700">Over-length output</td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:67%"></div><span class="text-red-600 font-bold">0.67</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCD34D;width:73%"></div><span class="text-amber-600 font-bold">0.73</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:61%"></div><span class="text-red-600 font-bold">0.61</span></div></td>
+              <td class="py-2.5 pl-3"><span class="pill bg-red-50 text-red-700" style="border:1px solid #FCA5A5;white-space:nowrap">⚠ Systemic</span></td>
+            </tr>
+            <tr>
+              <td class="py-2.5 pr-4 font-medium text-slate-700">Missing empathy opener</td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#86EFAC;width:91%"></div><span class="text-emerald-600 font-bold">0.91</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#86EFAC;width:87%"></div><span class="text-emerald-600 font-bold">0.87</span></div></td>
+              <td class="py-2.5 px-3"><div class="flex flex-col items-center gap-0.5"><div class="heat-cell" style="background:#FCA5A5;width:54%"></div><span class="text-red-600 font-bold">0.54</span></div></td>
+              <td class="py-2.5 pl-3"><span class="pill bg-slate-100 text-slate-600" style="white-space:nowrap">Unit-only</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Strength Matrix -->
+    <div class="card p-6">
+      <div class="section-label mb-1">Strength Matrix</div>
+      <div class="font-semibold text-slate-900 mb-1">What's Working — Protect These</div>
+      <div class="text-[11px] text-slate-400 mb-4 leading-relaxed">
+        Dimensions where agents consistently score ≥ 0.85. These are patterns the reflection loop has either fixed and locked in via regression tests, or that have been stable since seed.
+        <strong class="text-slate-600"> Shared</strong> = all 3 agents strong; worth protecting in shared skill files.
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-semibold text-slate-700">Compliance language</div>
+            <span class="pill bg-emerald-50 text-emerald-700" style="border:1px solid #A7F3D0;font-size:10px">✓ Shared</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div><div class="text-[10px] text-slate-400 mb-1">B2B Sales</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:92%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.92</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cons. Mktg</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:91%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.91</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cust. Care</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:90%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.90</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-semibold text-slate-700">Product accuracy / groundedness</div>
+            <span class="pill bg-emerald-50 text-emerald-700" style="border:1px solid #A7F3D0;font-size:10px">✓ Shared</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div><div class="text-[10px] text-slate-400 mb-1">B2B Sales</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:94%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.94</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cons. Mktg</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:88%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.88</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cust. Care</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:89%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.89</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-semibold text-slate-700">Forbidden mention avoidance</div>
+            <span class="pill bg-emerald-50 text-emerald-700" style="border:1px solid #A7F3D0;font-size:10px">✓ Shared</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div><div class="text-[10px] text-slate-400 mb-1">B2B Sales</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:97%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.97</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cons. Mktg</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:95%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.95</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cust. Care</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:96%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.96</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-semibold text-slate-700">ROI framing (post refl_1)</div>
+            <span class="pill bg-blue-50 text-blue-700" style="border:1px solid #BFDBFE;font-size:10px">→ Transfer to others</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div><div class="text-[10px] text-slate-400 mb-1">B2B Sales</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:96%;background:#34D399"></div></div><div class="text-[10px] text-emerald-600 font-bold mt-0.5">0.96 ✓</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cons. Mktg</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:62%;background:#FCA5A5"></div></div><div class="text-[10px] text-red-500 font-bold mt-0.5">0.62 ✗</div></div>
+            <div><div class="text-[10px] text-slate-400 mb-1">Cust. Care</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:50%;background:#E2E8F0"></div></div><div class="text-[10px] text-slate-400 font-bold mt-0.5">n/a</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+lucide.createIcons();
+
+// Trend chart
+new Chart(document.getElementById('trendChart').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: ['Seed', 'After refl_1', 'After refl_2', 'After refl_3', 'Latest'],
+    datasets: [
+      { label: 'B2B Sales', data: [0.82, 0.94, null, null, 0.94], borderColor: '#2251FF', backgroundColor: 'rgba(34,81,255,.07)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#2251FF', borderWidth: 2, spanGaps: true },
+      { label: 'Cons. Mktg', data: [0.77, null, 0.85, null, 0.85], borderColor: '#8B5CF6', tension: 0.4, fill: false, pointRadius: 4, pointBackgroundColor: '#8B5CF6', borderWidth: 2, spanGaps: true },
+      { label: 'Customer Care', data: [0.71, null, 0.79, 0.83, 0.83], borderColor: '#00C4B4', tension: 0.4, fill: false, pointRadius: 4, pointBackgroundColor: '#00C4B4', borderWidth: 2, spanGaps: true }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { font: { size: 10 }, boxWidth: 8, usePointStyle: true } } },
+    scales: {
+      y: { min: 0.6, max: 1.0, ticks: { font: { size: 10 }, callback: v => v.toFixed(2) }, grid: { color: '#F1F5F9' } },
+      x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+    }
+  }
+});
+
+// Radar chart
+new Chart(document.getElementById('radarChart').getContext('2d'), {
+  type: 'radar',
+  data: {
+    labels: ['Writing / Tone', 'Personalisation', 'CTA / Resolution', 'Groundedness', 'Compliance', 'Conciseness'],
+    datasets: [
+      { label: 'B2B Sales', data: [0.96, 0.91, 0.95, 0.94, 0.92, 0.93], borderColor: '#2251FF', backgroundColor: 'rgba(34,81,255,.1)', pointBackgroundColor: '#2251FF', borderWidth: 2, pointRadius: 3 },
+      { label: 'Cons. Mktg', data: [0.82, 0.88, 0.84, 0.87, 0.91, 0.80], borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,.07)', pointBackgroundColor: '#8B5CF6', borderWidth: 2, pointRadius: 3 },
+      { label: 'Cust. Care', data: [0.88, 0.79, 0.85, 0.82, 0.90, 0.74], borderColor: '#00C4B4', backgroundColor: 'rgba(0,196,180,.07)', pointBackgroundColor: '#00C4B4', borderWidth: 2, pointRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { font: { size: 10 }, boxWidth: 8, usePointStyle: true } } },
+    scales: { r: { min: 0.5, max: 1.0, ticks: { font: { size: 9 }, stepSize: 0.1, backdropColor: 'transparent' }, grid: { color: '#F1F5F9' }, pointLabels: { font: { size: 10 } } } }
+  }
+});
+</script>
+</body>
+</html>

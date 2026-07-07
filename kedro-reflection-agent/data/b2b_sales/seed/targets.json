@@ -1,0 +1,27 @@
+[
+  {
+    "case_id": "case_001",
+    "customer_id": "cust_002",
+    "product_id": "prod_001"
+  },
+  {
+    "case_id": "case_002",
+    "customer_id": "cust_001",
+    "product_id": "prod_005"
+  },
+  {
+    "case_id": "case_003",
+    "customer_id": "cust_005",
+    "product_id": "prod_002"
+  },
+  {
+    "case_id": "case_004",
+    "customer_id": "cust_009",
+    "product_id": "prod_002"
+  },
+  {
+    "case_id": "case_005",
+    "customer_id": "cust_002",
+    "product_id": "prod_003"
+  }
+]

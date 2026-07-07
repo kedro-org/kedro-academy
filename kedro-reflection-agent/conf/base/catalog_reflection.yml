@@ -1,0 +1,50 @@
+# Catalog entries used by the `reflection` pipeline.
+
+# --- Meta-agent LLM -----------------------------------------------------------
+
+meta_agent_llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: ${runtime_params:meta_agent_model_name, gpt-4o}
+    temperature: 0.3
+  credentials: openai
+
+
+# --- Meta-agent prompt (Langfuse-backed, cached locally) ----------------------
+
+meta_agent_prompt:
+  type: kedro_datasets_experimental.langfuse.LangfusePromptDataset
+  filepath: data/${runtime_params:agent_id}/reflection/prompts/meta_agent_prompt.json
+  prompt_name: "${runtime_params:agent_id}-meta-agent-prompt"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local    # local | remote | strict
+  mode: langchain       # returns a ChatPromptTemplate directly
+  load_args:
+    version: ${runtime_params:meta_agent_prompt_version, 1}
+
+
+# --- Outputs (per reflection_id) ----------------------------------------------
+
+# The ,refl_1 fallback in each filepath mirrors parameters.yml → reflection_id.
+# If you change the default there, update the four fallbacks below to match.
+reflection_summary:
+  type: text.TextDataset
+  filepath: data/${runtime_params:agent_id}/outputs/reflections/${runtime_params:reflection_id,refl_1}/summary.md
+
+proposed_prompt:
+  type: json.JSONDataset
+  filepath: data/${runtime_params:agent_id}/outputs/reflections/${runtime_params:reflection_id,refl_1}/proposed_prompt.json
+
+proposed_skill:
+  type: text.TextDataset
+  filepath: data/${runtime_params:agent_id}/outputs/reflections/${runtime_params:reflection_id,refl_1}/proposed_skill.md
+
+proposed_eval_cases:
+  type: kedro_datasets_experimental.langfuse.LangfuseEvaluationDataset
+  dataset_name: "${runtime_params:agent_id}-eval"
+  filepath: data/${runtime_params:agent_id}/outputs/reflections/${runtime_params:reflection_id,refl_1}/proposed_eval_cases.json
+  sync_policy: local
+  credentials: langfuse_credentials
+  metadata:
+    created_by: kedro

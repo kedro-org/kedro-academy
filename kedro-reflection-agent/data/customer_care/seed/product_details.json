@@ -1,0 +1,107 @@
+[
+  {
+    "product_id": "prod_006",
+    "service_type": "mobile",
+    "known_issues": [
+      "5G signal not available in all areas despite coverage map showing availability",
+      "EU roaming data throttled after 10GB fair use policy",
+      "Priority access may not activate immediately after plan switch"
+    ],
+    "resolution_steps": [
+      "Verify 5G-compatible handset and SIM generation (must be 5G SIM)",
+      "Check coverage map with exact postcode at network.telco.com/coverage",
+      "Reset APN settings to default for 5G activation",
+      "If roaming issue, confirm roaming add-on is enabled in account settings"
+    ],
+    "compensation_policy": "Credit of up to one month's plan cost for verified outages exceeding 24 hours. Roaming disputes resolved within 5 working days.",
+    "escalation_triggers": [
+      "Outage exceeds 72 hours with no resolution",
+      "Customer reports 3+ contacts for same issue",
+      "Billing dispute over £50"
+    ]
+  },
+  {
+    "product_id": "prod_007",
+    "service_type": "mobile",
+    "known_issues": [
+      "Data limit reached faster than expected (background app refresh)",
+      "4G fallback may occur in areas with patchy 5G",
+      "EU roaming limited to 3GB — overage charged at standard rates"
+    ],
+    "resolution_steps": [
+      "Check data usage breakdown in MyAccount app",
+      "Advise customer to enable data saver mode or set data alerts",
+      "Confirm EU roaming allowance and advise on roaming add-on options",
+      "Offer upgrade to higher-tier plan if data needs regularly exceed 20GB"
+    ],
+    "compensation_policy": "No automatic credit for data overuse. One-time goodwill gesture of 5GB for first-time overage on account less than 12 months old.",
+    "escalation_triggers": [
+      "Disputed charges exceeding £30",
+      "Network outage in customer's postcode area",
+      "Customer threatening churn"
+    ]
+  },
+  {
+    "product_id": "prod_008",
+    "service_type": "mobile",
+    "known_issues": [
+      "Shared data pool can be exhausted by a single heavy user",
+      "Family Safety controls require app install on each device",
+      "Adding a new line may take up to 24 hours to activate"
+    ],
+    "resolution_steps": [
+      "Check per-line data usage in MyAccount family dashboard",
+      "Set per-line data caps to prevent single-user exhaustion",
+      "For new line activation delays, confirm SIM swap completed and restart device",
+      "Family Safety control issues: reinstall app and re-link account"
+    ],
+    "compensation_policy": "Pro-rated credit for lines that fail to activate within 48 hours. Credit up to £10 per affected line per month of disruption.",
+    "escalation_triggers": [
+      "Multiple lines affected simultaneously",
+      "Activation failure beyond 48 hours",
+      "Billing anomaly across more than one line"
+    ]
+  },
+  {
+    "product_id": "prod_009",
+    "service_type": "mobile",
+    "known_issues": [
+      "Data roaming may not auto-activate in some non-EU destinations",
+      "Roaming allowance resets on billing date, not calendar month",
+      "Voice calls to UK from abroad billed separately to data allowance"
+    ],
+    "resolution_steps": [
+      "Confirm destination is in the 70+ covered countries list",
+      "Enable roaming manually in device settings before travelling",
+      "Check roaming data remaining in MyAccount app",
+      "For non-activation abroad: cycle airplane mode or reselect network manually"
+    ],
+    "compensation_policy": "Disputed roaming charges investigated within 5 working days. Credit issued for charges resulting from network errors or misconfigured roaming flags.",
+    "escalation_triggers": [
+      "Roaming charge dispute exceeding £50",
+      "Complete loss of service abroad for 24+ hours",
+      "Customer unable to reach emergency services while abroad"
+    ]
+  },
+  {
+    "product_id": "prod_010",
+    "service_type": "mobile",
+    "known_issues": [
+      "Top-up credit can take up to 4 hours to appear on account",
+      "SIM activation can take up to 24 hours after first use",
+      "200-minute call allowance does not include premium rate numbers"
+    ],
+    "resolution_steps": [
+      "For top-up delays: confirm payment processed in bank, check MyAccount credit balance",
+      "For SIM activation: ensure correct SIM size, try in another handset",
+      "Reset network settings and try manual network selection",
+      "If call balance incorrect: check call log for premium rate numbers excluded from bundle"
+    ],
+    "compensation_policy": "Top-up credit confirmed as received but not applied: full credit restored within 1 business day. SIM activation failure beyond 24 hours: free replacement SIM dispatched.",
+    "escalation_triggers": [
+      "Top-up payment taken but credit not applied after 24 hours",
+      "SIM fails to activate after replacement",
+      "Customer unable to make emergency calls"
+    ]
+  }
+]
