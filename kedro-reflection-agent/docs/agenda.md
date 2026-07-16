@@ -20,7 +20,6 @@
 | **`llm_context_node` + `LLMContext`** | Standard way to wire LLM + prompts into pipeline nodes |
 | **`LangfusePromptDataset`** | Versioned prompts in Langfuse with local disk cache |
 | **`LangfuseTraceDataset`** | One observability trace per agent generation |
-| **`ChatOpenAIDataset`** | LLM configuration and credentials via the catalog |
 | **`RunIndexHook`** | Cross-run audit index powering the Org Overview |
 | **Runtime parameters** | `agent_id`, `run_id` — same pipelines, multiple agents and runs |
 | **Pipeline modularity** | Five independent pipelines with clear boundaries |
