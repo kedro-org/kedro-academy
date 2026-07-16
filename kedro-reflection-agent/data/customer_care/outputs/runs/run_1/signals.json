@@ -1,0 +1,20 @@
+[
+  {
+    "signal_type": "low_pass_rate",
+    "agent_id": "customer_care",
+    "run_id": "run_1",
+    "confidence": "high",
+    "evidence_text": "Pass rate 60% (3/5 cases passing) is below floor 80%.",
+    "reason": "pass_rate (0.600) < floor (0.80).",
+    "created_at": "2026-07-16T22:40:57.978413+00:00"
+  },
+  {
+    "signal_type": "cross_unit_pattern",
+    "agent_id": "customer_care",
+    "run_id": "run_1",
+    "confidence": "high",
+    "evidence_text": "Signal type 'low_pass_rate' detected across 2 agents: consumer_mktg, customer_care \u2014 within last 10 index entries.",
+    "reason": "'low_pass_rate' appears in 2 agents (threshold: \u22652).",
+    "created_at": "2026-07-16T22:40:57.980128+00:00"
+  }
+]

@@ -1,0 +1,352 @@
+[
+  {
+    "case_id": "case_005",
+    "trace_id": "41c4ba739f8fd97ca5f4241c7bb15a3d",
+    "dataset_run_id": "27245d38-ac81-4b59-be5c-0c4164569fce",
+    "output": {
+      "case_id": "case_005",
+      "subject": "Your Concerns About Price Increase",
+      "body": "Dear Tom Bridgewater,\n\nThank you for reaching out and sharing your concerns regarding the upcoming price increase for your Unlimited 5G plan. I understand how frustrating this situation can be, especially after being a loyal customer for 7 years.\n\nI want to assure you that I am here to help. I will review your account and explore any available options that may help alleviate your concerns about the price increase. This may include discussing potential loyalty offers or alternative plans that could better suit your needs.\n\nI will follow up with you within the next 48 hours with an update on the options available. In the meantime, if you have any further questions or if there\u2019s anything else I can assist you with, please don\u2019t hesitate to reach out.\n\nThank you for your patience, and I look forward to resolving this for you.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 2,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 882 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging the customer's concern about the price increase and their long-term loyalty, showing genuine empathy.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.8,
+        "comment": "The agent promises to review the account and follow up within 48 hours, but does not provide a specific retention offer or alternative plan yet.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, acknowledging the price increase and offering to explore retention options without making false promises or forbidden mentions.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 0.9,
+        "comment": "The reply progresses the issue by promising a follow-up with options, but lacks immediate resolution or specific retention offer.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.9666666666666666,
+    "passing": true
+  },
+  {
+    "case_id": "case_004",
+    "trace_id": "69c52051e635f588dc8622ca13a24031",
+    "dataset_run_id": "27245d38-ac81-4b59-be5c-0c4164569fce",
+    "output": {
+      "case_id": "case_004",
+      "subject": "Regarding Your Roaming Charge Dispute",
+      "body": "Dear Priya Sharma,\n\nThank you for reaching out and sharing your concerns regarding the unexpected roaming charge of \u00a385 on your latest bill. I understand how upsetting this situation can be, especially since you have the Roaming Plus add-on, which you believed would cover your usage in Spain.\n\nI want to assure you that I am looking into this matter right away. I will review your account and the details of the roaming charges to determine why this charge was applied despite your add-on. \n\nYou can expect to hear back from me within the next 2 business days with an update on the status of your dispute and any potential refund. \n\nIf you have any further questions or need assistance in the meantime, please feel free to reach out. I\u2019m here to help.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \n[Your Company]",
+      "prompt_version": 2,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 818 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging Priya's issue with the unexpected roaming charge and expresses understanding of her situation.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 0.8,
+        "comment": "The agent clearly states they will investigate the issue and promises a follow-up within 2 business days, but does not explicitly mention a refund action if confirmed.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, acknowledging the roaming charge issue and promising an investigation without making unsupported claims or forbidden mentions.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 1.0,
+        "comment": "The reply provides a clear path forward with a timeline for follow-up, avoiding unnecessary escalation.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.9777777777777779,
+    "passing": true
+  },
+  {
+    "case_id": "case_003",
+    "trace_id": "ea841fe08ed2ca6a3d80836229f68fe9",
+    "dataset_run_id": "27245d38-ac81-4b59-be5c-0c4164569fce",
+    "output": {
+      "case_id": "case_003",
+      "subject": "Assistance with Your Recent Top-Up Issue",
+      "body": "Dear Mohammed Al-Rashid,\n\nThank you for reaching out regarding your recent top-up of \u00a320 via the app. I understand your concern about the credit not appearing on your account after three hours, and I appreciate your patience as we work to resolve this issue.\n\nI am currently investigating the status of your top-up to ensure that the payment was processed correctly and that the credit is applied to your account. This may take a little time, but I will keep you updated on the progress.\n\nYou can expect to hear back from me within the next 24 hours with an update on your account. If the credit has not been applied, we will ensure that it is rectified promptly.\n\nThank you for being a valued customer for the past five years. If you have any further questions or concerns in the meantime, please feel free to reach out.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \n[Your Company Name]  \n[Your Contact Information]",
+      "prompt_version": 2,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 921 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging Mohammed's issue with the missing top-up credit, showing understanding and appreciation for his patience.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 1.0,
+        "comment": "The agent clearly states that they are investigating the issue and promises an update within 24 hours, providing a concrete next step.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, thanking Mohammed for his patience and acknowledging his tenure as a valued customer.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, avoiding any false promises or forbidden mentions, and includes all required mentions.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 1.0,
+        "comment": "The reply provides a clear resolution path without unnecessary escalation, promising to rectify the issue if the credit is not applied.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 1.0,
+    "passing": true
+  },
+  {
+    "case_id": "case_002",
+    "trace_id": "d305ae10b812057ffc47e37c0489691d",
+    "dataset_run_id": "27245d38-ac81-4b59-be5c-0c4164569fce",
+    "output": {
+      "case_id": "case_002",
+      "subject": "Assistance with Your 5G Network Issue",
+      "body": "Dear Sophie Hartley,\n\nThank you for reaching out regarding the 5G signal issue you are experiencing at your home address. I understand how frustrating it can be to expect coverage based on our checker and not receive it.\n\nTo resolve this, I will escalate your case to our technical team for further investigation into the 5G availability in your area. They will look into any potential network issues that may be affecting your service. You can expect to hear back from us within the next 48 hours with an update on the situation.\n\nIn the meantime, please ensure that your device is updated to the latest software version, as this can sometimes help with connectivity issues. \n\nThank you for your patience as we work to resolve this matter. If you have any further questions or concerns, please feel free to reach out.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+      "prompt_version": 2,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 867 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging the customer's 5G signal issue and expresses understanding of the frustration.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 1.0,
+        "comment": "The reply clearly states that the case will be escalated to the technical team and provides a 48-hour timeline for an update.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, avoiding forbidden mentions and making no false promises.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 1.0,
+        "comment": "The reply provides a clear resolution path by escalating to the technical team and does not unnecessarily escalate the issue.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 1.0,
+    "passing": true
+  },
+  {
+    "case_id": "case_001",
+    "trace_id": "0e064e3124aa04cd3f774bc0224477fc",
+    "dataset_run_id": "27245d38-ac81-4b59-be5c-0c4164569fce",
+    "output": {
+      "case_id": "case_001",
+      "subject": "Resolution for Your Billing Issue",
+      "body": "Dear James Whitfield,\n\nThank you for reaching out regarding the duplicate charge on your account. I understand how frustrating this situation must be for you, especially after being a valued customer for three years.\n\nI am currently reviewing your billing records to confirm the duplicate charge and will initiate the refund process for the extra amount charged. You can expect to see this resolved within the next 3-5 business days.\n\nIf you have any further questions or need assistance in the meantime, please feel free to reach out. We appreciate your patience as we work to resolve this issue.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \n[Telco Company]  \n[Contact Information]",
+      "prompt_version": 2,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 688 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "empathy_opener",
+        "value": 1.0,
+        "comment": "The reply opens by specifically acknowledging the duplicate charge issue and empathizes with the customer's frustration.",
+        "metadata": null
+      },
+      {
+        "name": "resolution_clarity",
+        "value": 1.0,
+        "comment": "The resolution path is clear, stating that the billing records are being reviewed and a refund will be processed within 3-5 business days.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is warm, professional, and empathetic, avoiding any blame or defensiveness.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 1.0,
+        "comment": "The reply is fully compliant, acknowledging the billing error, promising an investigation, and apologizing for the inconvenience without any forbidden mentions.",
+        "metadata": null
+      },
+      {
+        "name": "escalation_avoidance",
+        "value": 1.0,
+        "comment": "The issue is being resolved with a clear action plan and timeline, avoiding unnecessary escalation.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 1.0,
+    "passing": true
+  }
+]

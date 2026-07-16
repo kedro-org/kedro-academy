@@ -1,0 +1,20 @@
+[
+  {
+    "signal_type": "low_pass_rate",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_2",
+    "confidence": "high",
+    "evidence_text": "Pass rate 0% (0/5 cases passing) is below floor 80%.",
+    "reason": "pass_rate (0.000) < floor (0.80).",
+    "created_at": "2026-07-16T22:39:01.567939+00:00"
+  },
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_2",
+    "confidence": "medium",
+    "evidence_text": "Dimension 'urgency_cta' below floor (0.7) on 5 cases: case_001=0.50, case_002=0.50, case_003=0.50, case_004=0.50, case_005=0.50",
+    "reason": "'urgency_cta' < 0.7 on 5 cases (threshold: \u22653 cases below floor).",
+    "created_at": "2026-07-16T22:39:01.569336+00:00"
+  }
+]

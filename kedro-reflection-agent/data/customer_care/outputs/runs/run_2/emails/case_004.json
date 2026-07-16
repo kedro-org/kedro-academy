@@ -1,0 +1,12 @@
+{
+  "case_id": "case_004",
+  "customer_id": "cust_014",
+  "product_id": "prod_010",
+  "subject": "Regarding Your Roaming Charge Dispute",
+  "body": "Dear Priya Sharma,\n\nThank you for reaching out and sharing your concerns regarding the unexpected roaming charge of \u00a385 on your latest bill. I understand how upsetting this situation can be, especially since you have the Roaming Plus add-on, which you believed would cover your usage in Spain.\n\nI want to assure you that I am looking into this matter right away. I will review your account and the details of the roaming charges to determine why this charge was applied despite your add-on. \n\nYou can expect to hear back from me within the next 2 business days with an update on the status of your dispute and any potential refund. \n\nIf you have any further questions or need assistance in the meantime, please feel free to reach out. I\u2019m here to help.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \n[Your Company]",
+  "trace_id": null,
+  "prompt_version": 2,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-07-16T22:41:47.569052+00:00"
+}

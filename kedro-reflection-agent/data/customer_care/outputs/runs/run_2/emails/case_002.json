@@ -1,0 +1,12 @@
+{
+  "case_id": "case_002",
+  "customer_id": "cust_012",
+  "product_id": "prod_007",
+  "subject": "Assistance with Your 5G Network Issue",
+  "body": "Dear Sophie Hartley,\n\nThank you for reaching out regarding the 5G signal issue you are experiencing at your home address. I understand how frustrating it can be to expect coverage based on our checker and not receive it.\n\nTo resolve this, I will escalate your case to our technical team for further investigation into the 5G availability in your area. They will look into any potential network issues that may be affecting your service. You can expect to hear back from us within the next 48 hours with an update on the situation.\n\nIn the meantime, please ensure that your device is updated to the latest software version, as this can sometimes help with connectivity issues. \n\nThank you for your patience as we work to resolve this matter. If you have any further questions or concerns, please feel free to reach out.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+  "trace_id": null,
+  "prompt_version": 2,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-07-16T22:41:41.565923+00:00"
+}

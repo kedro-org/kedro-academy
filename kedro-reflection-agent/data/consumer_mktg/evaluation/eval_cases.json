@@ -2,12 +2,15 @@
   {
     "id": "04a27fbb-bbe7-5c84-b8ea-650302b4f4ee",
     "input": {
-      "customer_id": "cust_011",
+      "case_id": "case_001",
       "product_id": "prod_011",
-      "case_id": "case_001"
+      "customer_id": "cust_011"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Premium subscriber already on Unlimited \u2014 pitch iPhone 15 Pro on device plan. Must reference their existing plan and offer upgrade path, not sell them data.",
+        "expected_cta": "trial",
+        "expected_tone": "friendly",
         "required_mentions": [
           "current usage near data limit",
           "iPhone upgrade benefit",
@@ -17,22 +20,22 @@
           "fake pricing",
           "guaranteed coverage claims",
           "made-up specs"
-        ],
-        "expected_cta": "trial",
-        "expected_tone": "friendly",
-        "notes": "Premium subscriber already on Unlimited \u2014 pitch iPhone 15 Pro on device plan. Must reference their existing plan and offer upgrade path, not sell them data."
+        ]
       }
     }
   },
   {
     "id": "2eeb6340-bcf0-5f0e-9ae1-24786d179dd4",
     "input": {
-      "customer_id": "cust_012",
+      "case_id": "case_002",
       "product_id": "prod_006",
-      "case_id": "case_002"
+      "customer_id": "cust_012"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Budget subscriber on Essential 20GB \u2014 upgrade to Unlimited 5G. Reference current plan and explain benefit of removing the cap.",
+        "expected_cta": "call",
+        "expected_tone": "friendly",
         "required_mentions": [
           "current Essential 20GB plan",
           "data usage approaching limit",
@@ -42,22 +45,22 @@
           "fake pricing",
           "guaranteed 5G everywhere",
           "unnecessary urgency"
-        ],
-        "expected_cta": "call",
-        "expected_tone": "friendly",
-        "notes": "Budget subscriber on Essential 20GB \u2014 upgrade to Unlimited 5G. Reference current plan and explain benefit of removing the cap."
+        ]
       }
     }
   },
   {
     "id": "43618eaf-cafe-5fbc-be2e-2f212aec0ff5",
     "input": {
-      "customer_id": "cust_013",
+      "case_id": "case_003",
       "product_id": "prod_012",
-      "case_id": "case_003"
+      "customer_id": "cust_013"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Mid segment Family Bundle subscriber \u2014 pitch Samsung Galaxy S24. Connect family usage to device upgrade.",
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
         "required_mentions": [
           "Family Bundle context",
           "Samsung Galaxy S24 features",
@@ -67,22 +70,22 @@
           "fake pricing",
           "guaranteed delivery dates",
           "made-up specs"
-        ],
-        "expected_cta": "demo",
-        "expected_tone": "friendly",
-        "notes": "Mid segment Family Bundle subscriber \u2014 pitch Samsung Galaxy S24. Connect family usage to device upgrade."
+        ]
       }
     }
   },
   {
     "id": "0a464622-f229-5ef0-b8b7-1a7176ee0877",
     "input": {
-      "customer_id": "cust_014",
+      "case_id": "case_004",
       "product_id": "prod_007",
-      "case_id": "case_004"
+      "customer_id": "cust_014"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Budget Prepaid subscriber \u2014 step-up to Essential 20GB. Frame upgrade as flexible, not a lock-in.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
         "required_mentions": [
           "current Prepaid plan",
           "benefit of Essential 20GB contract",
@@ -92,22 +95,22 @@
           "fake pricing",
           "lock-in language",
           "guaranteed speeds"
-        ],
-        "expected_cta": "reply",
-        "expected_tone": "friendly",
-        "notes": "Budget Prepaid subscriber \u2014 step-up to Essential 20GB. Frame upgrade as flexible, not a lock-in."
+        ]
       }
     }
   },
   {
     "id": "0181522b-ae5c-5dd3-9e1e-0f7a37d5eff8",
     "input": {
-      "customer_id": "cust_015",
+      "case_id": "case_005",
       "product_id": "prod_015",
-      "case_id": "case_005"
+      "customer_id": "cust_015"
     },
     "expected_output": {
       "rubric": {
+        "notes": "Premium Unlimited subscriber \u2014 cross-sell Apple Watch. Connect to health/lifestyle benefits and iPhone ecosystem.",
+        "expected_cta": "call",
+        "expected_tone": "friendly",
         "required_mentions": [
           "existing Unlimited 5G plan",
           "Apple Watch health features",
@@ -117,10 +120,82 @@
           "fake pricing",
           "medical claims",
           "guaranteed battery life"
-        ],
+        ]
+      }
+    }
+  },
+  {
+    "id": "4d295e7f-01c3-5350-bdc7-e738099090c7",
+    "input": {
+      "case_id": "regression_003",
+      "product_id": "Unlimited 5G",
+      "customer_id": "Sophie"
+    },
+    "expected_output": {
+      "rubric": {
+        "notes": "This case aims to improve personalization by accurately referencing the subscriber's current plan and data usage patterns.",
         "expected_cta": "call",
         "expected_tone": "friendly",
-        "notes": "Premium Unlimited subscriber \u2014 cross-sell Apple Watch. Connect to health/lifestyle benefits and iPhone ecosystem."
+        "required_mentions": [
+          "current Essential 20GB plan",
+          "data usage approaching limit",
+          "Unlimited 5G benefit"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed 5G everywhere",
+          "unnecessary urgency"
+        ]
+      }
+    }
+  },
+  {
+    "id": "6f842297-6681-5723-8444-b1eca143c51c",
+    "input": {
+      "case_id": "regression_002",
+      "product_id": "Essential 20GB",
+      "customer_id": "Priya"
+    },
+    "expected_output": {
+      "rubric": {
+        "notes": "This case focuses on ensuring the CTA matches the expected action and incorporates urgency, addressing the lack of urgency in previous messages.",
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "required_mentions": [
+          "current Prepaid plan",
+          "benefit of Essential 20GB contract",
+          "no-contract or rolling option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "lock-in language",
+          "guaranteed speeds"
+        ]
+      }
+    }
+  },
+  {
+    "id": "2005496e-b728-5196-9de9-8bce25924436",
+    "input": {
+      "case_id": "regression_001",
+      "product_id": "Samsung Galaxy S24",
+      "customer_id": "Mohammed Al-Rashid"
+    },
+    "expected_output": {
+      "rubric": {
+        "notes": "This case targets the issue of incorrect personalization and offer relevance by ensuring the message accurately reflects the subscriber's current device and plan.",
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "required_mentions": [
+          "Family Bundle context",
+          "Samsung Galaxy S24 features",
+          "monthly plan option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed delivery dates",
+          "made-up specs"
+        ]
       }
     }
   }

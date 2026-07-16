@@ -1,0 +1,12 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_013",
+  "product_id": "prod_012",
+  "subject": "Upgrade Your Device for an Enhanced Experience, Mohammed!",
+  "body": "Hello Mohammed Al-Rashid,\n\nWe hope you\u2019re enjoying your Samsung Galaxy S24 on your current plan! As a valued customer for over 5 years, we want to offer you an exclusive opportunity to upgrade to the latest Samsung Galaxy S24 model.\n\nWith its Snapdragon 8 Gen 3 processor, stunning 6.8-inch Dynamic AMOLED display, and a remarkable 200MP main camera, this premium device is designed to elevate your mobile experience. Plus, the all-day battery life with 45W charging ensures you stay connected without interruptions.\n\nGiven your monthly data usage of 28GB, this upgrade not only enhances your device but also aligns perfectly with your lifestyle.\n\nReady to take your mobile experience to the next level? Click here to explore your upgrade options today!\n\nBest regards,\n[Your Company Name] Customer Care Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:36:31.383424+00:00"
+}

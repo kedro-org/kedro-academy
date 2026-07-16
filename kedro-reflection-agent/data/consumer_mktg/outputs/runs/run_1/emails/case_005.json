@@ -1,0 +1,12 @@
+{
+  "case_id": "case_005",
+  "customer_id": "cust_015",
+  "product_id": "prod_015",
+  "subject": "Exclusive Upgrade Offer Just for You, Tom!",
+  "body": "Hi Tom,\n\nAs a valued subscriber for over 7 years, we appreciate your loyalty and want to offer you an exciting upgrade opportunity! \n\nWith your current plan and your iPhone 14, you can enhance your experience with the Apple Watch S9 for just \u00a322 a month. This smartwatch is designed to keep you connected and informed, featuring advanced health and fitness tracking, ECG and blood oxygen monitoring, and even Crash Detection and Emergency SOS. It's the perfect companion to help you stay on top of your health and safety.\n\nDon\u2019t miss out on this chance to elevate your tech game! \n\nReady to upgrade? Click here to learn more and secure your Apple Watch S9 today!\n\nBest regards,\nYour Telco Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:36:38.835953+00:00"
+}

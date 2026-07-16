@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Demo Summary — Reflection Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: #F8FAFC; color: #0F172A;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(34,81,255,0.07); }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1);          opacity: 0.07; }
+      40%      { transform: translate(14px,-20px) scale(1.3); opacity: 0.18; }
+      70%      { transform: translate(-8px,-14px) scale(0.8); opacity: 0.10; }
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      padding: 1.4vh 2.6vw 1.4vh;
+      gap: 1vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar { flex-shrink: 0; }
+    .logo-text { font-size: clamp(12px, 0.85vw, 15px); font-weight: 600; color: #475569; letter-spacing: 0.02em; }
+    .logo-text span { font-weight: 400; color: #94A3B8; }
+
+    /* ── Page header ── */
+    .page-header { flex-shrink: 0; }
+    .page-eyebrow { font-size: clamp(10px, 0.68vw, 12px); font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.2vh; }
+    .page-title { font-size: clamp(20px, 1.7vw, 28px); font-weight: 900; color: #0F172A; letter-spacing: -0.03em; line-height: 1.1; }
+    .page-sub { font-size: clamp(12px, 0.82vw, 14px); color: #64748B; margin-top: 0.25vh; }
+
+    /* ── Three-column layout ── */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.2vw;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .col-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 1.3vh 1.2vw;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8vh;
+      overflow: hidden;
+    }
+
+    .col-heading {
+      font-size: clamp(10px, 0.72vw, 12px);
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
+      padding-bottom: 0.5vh;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    /* ════ Column 1: Loop steps ════ */
+    .loop-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6vw;
+      flex: 1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .loop-item.visible { opacity: 1; }
+
+    .step-dot {
+      width: clamp(24px, 1.7vw, 30px);
+      height: clamp(24px, 1.7vw, 30px);
+      border-radius: 8px;
+      background: #EEF2FF;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 0.1vh;
+    }
+    .step-dot svg { width: clamp(11px, 0.82vw, 14px); height: clamp(11px, 0.82vw, 14px); stroke: #2251FF; }
+
+    .step-body { flex: 1; }
+    .step-name { font-size: clamp(12px, 0.88vw, 14px); font-weight: 800; color: #0F172A; }
+    .step-detail { font-size: clamp(10px, 0.7vw, 12px); color: #64748B; line-height: 1.5; margin-top: 0.15vh; }
+
+    .loop-divider { height: 1px; background: #F1F5F9; flex-shrink: 0; }
+
+    /* ════ Column 2: Takeaways ════ */
+    .takeaway-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4vh;
+      padding: 0.9vh 0.9vw;
+      background: #F8FAFC;
+      border-radius: 10px;
+      border: 1px solid #F1F5F9;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .takeaway-item.visible { opacity: 1; transform: translateY(0); }
+
+    .ta-title { font-size: clamp(12px, 0.88vw, 14px); font-weight: 800; color: #0F172A; }
+    .ta-body { font-size: clamp(10px, 0.7vw, 12px); color: #475569; line-height: 1.55; flex: 1; }
+    .ta-tag { font-size: clamp(10px, 0.65vw, 11px); font-weight: 700; color: #2251FF; margin-top: 0.2vh; }
+
+    /* ════ Column 3: What Kedro brings ════ */
+    .kedro-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3vh;
+      padding: 0.7vh 0.8vw;
+      border-radius: 10px;
+      border-left: 2px solid #2251FF;
+      background: #F8FAFF;
+      opacity: 0;
+      transform: translateX(6px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .kedro-item.visible { opacity: 1; transform: translateX(0); }
+
+    .ki-title { font-size: clamp(12px, 0.88vw, 14px); font-weight: 800; color: #2251FF; }
+    .ki-body { font-size: clamp(10px, 0.68vw, 12px); color: #475569; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div class="page">
+
+  <div class="topbar">
+    <span class="logo-text">Reflection Hub <span>with Kedro</span></span>
+  </div>
+
+  <div class="page-header">
+    <div class="page-eyebrow">Demo recap</div>
+    <div class="page-title">What you just saw</div>
+    <div class="page-sub">A self-improving AI agent system — from quality signal to approved improvement, fully auditable</div>
+  </div>
+
+  <div class="columns">
+
+    <!-- COL 1: The loop in action -->
+    <div class="col-card">
+      <div class="col-heading">The loop in action</div>
+
+      <div class="loop-item" id="li0">
+        <div class="step-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-name">Campaign</div>
+          <div class="step-detail">B2B Sales agent generated personalised outreach emails for each customer case</div>
+        </div>
+      </div>
+
+      <div class="loop-divider"></div>
+
+      <div class="loop-item" id="li1">
+        <div class="step-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-name">Evaluation</div>
+          <div class="step-detail">Scored across 7 dimensions — 4 deterministic + 3 LLM-judged, including personalisation and groundedness</div>
+        </div>
+      </div>
+
+      <div class="loop-divider"></div>
+
+      <div class="loop-item" id="li2">
+        <div class="step-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-name">Scouts</div>
+          <div class="step-detail">Flagged a personalisation gap and missing call-to-action — no LLM calls, pure deterministic logic</div>
+        </div>
+      </div>
+
+      <div class="loop-divider"></div>
+
+      <div class="loop-item" id="li3">
+        <div class="step-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-name">Reflection</div>
+          <div class="step-detail">Meta-agent proposed a targeted prompt update backed by failing cases and run history</div>
+        </div>
+      </div>
+
+      <div class="loop-divider"></div>
+
+      <div class="loop-item" id="li4">
+        <div class="step-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-name">Approve &amp; Apply</div>
+          <div class="step-detail">Human approved — improved prompt committed, audit trail updated, next cycle queued</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Key takeaways -->
+    <div class="col-card">
+      <div class="col-heading">Key takeaways</div>
+
+      <div class="takeaway-item" id="t0">
+        <div class="ta-title">Agents that get better over time</div>
+        <div class="ta-body">Each cycle builds on the last. Failures become evidence. New regression tests ensure the same failure cannot recur unnoticed in future runs.</div>
+        <div class="ta-tag">↻ Reproducible improvement loop</div>
+      </div>
+
+      <div class="takeaway-item" id="t1">
+        <div class="ta-title">Fast, deterministic pattern detection</div>
+        <div class="ta-body">Scouts identify quality regressions without a single LLM call. Signals are stored in a cross-agent index so one team's finding benefits all three agents.</div>
+        <div class="ta-tag">⚡ Cross-agent intelligence</div>
+      </div>
+
+      <div class="takeaway-item" id="t2">
+        <div class="ta-title">Human oversight without friction</div>
+        <div class="ta-body">Nothing changes without a human decision. Every proposal is evidence-backed, reviewable, and fully logged — transparent to engineers and executives alike.</div>
+        <div class="ta-tag">🛡 Governance built in</div>
+      </div>
+    </div>
+
+    <!-- COL 3: What Kedro brings -->
+    <div class="col-card">
+      <div class="col-heading">What Kedro brings</div>
+
+      <div class="kedro-item" id="k0">
+        <div class="ki-title">Standardization</div>
+        <div class="ki-body">One consistent improvement framework for every use case, so evaluation patterns and approved improvements can be shared across teams.</div>
+      </div>
+
+      <div class="kedro-item" id="k1">
+        <div class="ki-title">Modularity</div>
+        <div class="ki-body">Separate pipelines for execution, evaluation, signal detection, reflection, and application.</div>
+      </div>
+
+      <div class="kedro-item" id="k2">
+        <div class="ki-title">Reproducibility</div>
+        <div class="ki-body">Traceable runs that make it possible to audit how improvements were generated and applied.</div>
+      </div>
+
+      <div class="kedro-item" id="k3">
+        <div class="ki-title">Visibility</div>
+        <div class="ki-body">Workflow, dependency, and data-flow views through Kedro-Viz.</div>
+      </div>
+
+      <div class="kedro-item" id="k4">
+        <div class="ki-title">Governance</div>
+        <div class="ki-body">Explicit approval steps, versioned changes, and reviewable I/O contracts.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Particles
+  const pc = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const d = document.createElement('div');
+    d.className = 'particle';
+    const sz = Math.random() * 4 + 2;
+    Object.assign(d.style, {
+      left: Math.random() * 100 + '%', top: Math.random() * 100 + '%',
+      width: sz + 'px', height: sz + 'px',
+      animation: `drift ${(Math.random()*10+8).toFixed(1)}s ${(Math.random()*8).toFixed(1)}s ease-in-out infinite`,
+    });
+    pc.appendChild(d);
+  }
+
+  // Loop steps fade in sequentially
+  ['li0','li1','li2','li3','li4'].forEach((id, i) => {
+    setTimeout(() => document.getElementById(id).classList.add('visible'), 100 + i * 120);
+  });
+
+  // Takeaway items slide up
+  ['t0','t1','t2'].forEach((id, i) => {
+    setTimeout(() => document.getElementById(id).classList.add('visible'), 200 + i * 160);
+  });
+
+  // Kedro items slide in
+  ['k0','k1','k2','k3','k4'].forEach((id, i) => {
+    setTimeout(() => document.getElementById(id).classList.add('visible'), 300 + i * 100);
+  });
+</script>
+</body>
+</html>

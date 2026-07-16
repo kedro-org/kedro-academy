@@ -1,0 +1,12 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_013",
+  "product_id": "prod_012",
+  "subject": "Upgrade to the Premium Samsung Galaxy S24 Today!",
+  "body": "Dear Mohammed Al-Rashid,\n\nThank you for being a valued customer with us for 5 years! We appreciate your loyalty and want to make sure you\u2019re getting the most out of your mobile experience.\n\nWe noticed that you\u2019re currently using the Samsung Galaxy S24 on your plan. We have an exciting upgrade opportunity for you! You can elevate your experience with the premium Samsung Galaxy S24, featuring:\n\n- Snapdragon 8 Gen 3 processor for lightning-fast performance\n- A stunning 200MP main camera to capture every moment in incredible detail\n- A vibrant 6.8-inch Dynamic AMOLED display for immersive viewing\n- A powerful 5000mAh battery with 45W charging to keep you powered all day\n\nThis upgrade is perfect for your data usage of 28GB per month, ensuring you have the best device to match your needs. For just \u00a348 a month, you can enjoy all these premium features and take your mobile experience to the next level.\n\nDon\u2019t miss out on this opportunity! Upgrade today to enjoy the best-in-class performance and features that the Samsung Galaxy S24 has to offer.\n\nClick here to upgrade now and enhance your mobile experience!\n\nBest regards,\n[Your Company Name]",
+  "trace_id": null,
+  "prompt_version": 2,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-07-16T22:38:33.055060+00:00"
+}

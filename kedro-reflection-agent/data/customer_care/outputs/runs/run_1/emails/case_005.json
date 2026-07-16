@@ -1,0 +1,12 @@
+{
+  "case_id": "case_005",
+  "customer_id": "cust_015",
+  "product_id": "prod_006",
+  "subject": "Your Concerns About the Price Increase",
+  "body": "Dear Tom Bridgewater,\n\nThank you for reaching out and sharing your concerns regarding the upcoming price increase on your mobile plan. I understand how frustrating it can be to receive such notifications, especially as a valued customer for the past 7 years.\n\nI want to assure you that I am here to help. I will review your account and see if there are any options available that could better suit your needs and potentially keep you with us. \n\nAs a next step, I will reach out to you within the next 48 hours with more information on any possible alternatives or adjustments we can offer. \n\nThank you for your patience, and please feel free to reach out if you have any further questions or concerns in the meantime.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:40:19.066594+00:00"
+}

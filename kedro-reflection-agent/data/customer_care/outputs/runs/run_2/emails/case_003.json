@@ -1,0 +1,12 @@
+{
+  "case_id": "case_003",
+  "customer_id": "cust_013",
+  "product_id": "prod_008",
+  "subject": "Assistance with Your Recent Top-Up Issue",
+  "body": "Dear Mohammed Al-Rashid,\n\nThank you for reaching out regarding your recent top-up of \u00a320 via the app. I understand your concern about the credit not appearing on your account after three hours, and I appreciate your patience as we work to resolve this issue.\n\nI am currently investigating the status of your top-up to ensure that the payment was processed correctly and that the credit is applied to your account. This may take a little time, but I will keep you updated on the progress.\n\nYou can expect to hear back from me within the next 24 hours with an update on your account. If the credit has not been applied, we will ensure that it is rectified promptly.\n\nThank you for being a valued customer for the past five years. If you have any further questions or concerns in the meantime, please feel free to reach out.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team  \n[Your Company Name]  \n[Your Contact Information]",
+  "trace_id": null,
+  "prompt_version": 2,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-07-16T22:41:44.804972+00:00"
+}

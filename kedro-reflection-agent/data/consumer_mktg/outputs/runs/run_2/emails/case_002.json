@@ -1,0 +1,12 @@
+{
+  "case_id": "case_002",
+  "customer_id": "cust_012",
+  "product_id": "prod_006",
+  "subject": "Upgrade to Unlimited 5G for a Seamless Experience!",
+  "body": "Dear Sophie Hartley,\n\nThank you for being a valued customer with us for over a year and a half! We appreciate your loyalty and want to ensure you have the best experience possible with your Samsung Galaxy A54.\n\nWe noticed that you currently enjoy a monthly data usage of 12GB on your plan. To enhance your experience, we\u2019re excited to offer you an upgrade to our Unlimited 5G plan for just \u00a355 a month. With this premium plan, you\u2019ll benefit from:\n\n- Unlimited 5G data, so you can stream, game, and work from anywhere without worrying about data limits.\n- Unlimited calls and texts to stay connected with friends and family.\n- 10GB of EU roaming included, perfect for your travels.\n- Priority network access for a smoother experience during peak times.\n\nThis upgrade is tailored to meet your needs and ensure you get the most out of your device. Don\u2019t miss out on this opportunity to elevate your mobile experience!\n\nReady to upgrade? Click here to secure your Unlimited 5G plan today! \n\nBest regards,\n\n[Your Company Name] Customer Care Team",
+  "trace_id": null,
+  "prompt_version": 2,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_2",
+  "generated_at": "2026-07-16T22:38:29.222814+00:00"
+}

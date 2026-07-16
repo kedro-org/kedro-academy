@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reflection Hub with Kedro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #F8FAFC;
+      color: #0F172A;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    /* ── Particles ── */
+    #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(34, 81, 255, 0.08);
+    }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1);        opacity: 0.08; }
+      40%      { transform: translate(16px,-24px) scale(1.4); opacity: 0.22; }
+      70%      { transform: translate(-10px,-16px) scale(0.8); opacity: 0.12; }
+    }
+
+    /* ── Page shell ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 2vh 3vw 1.5vh;
+      gap: 1.6vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .logo-text {
+      font-size: clamp(11px, 0.75vw, 14px);
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.02em;
+    }
+    .logo-text span { font-weight: 400; color: #94A3B8; }
+
+    /* ── Content row ── */
+    .content {
+      display: flex;
+      gap: 2vw;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ════════════════════════
+       LEFT COLUMN
+       ════════════════════════ */
+    .left {
+      width: 38%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8vh;
+    }
+
+    .title-block h1 {
+      font-size: clamp(22px, 2.1vw, 38px);
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.8vh;
+    }
+    .title-block p {
+      font-size: clamp(12px, 0.82vw, 15px);
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    /* Scenario card */
+    .scenario-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 1.6vh 1.4vw;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      display: flex;
+      flex-direction: column;
+      gap: 1.4vh;
+      flex: 1;
+    }
+
+    .eyebrow {
+      font-size: clamp(9px, 0.6vw, 11px);
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .scenario-card > .eyebrow { margin-bottom: 0.2vh; }
+    .scenario-title {
+      font-size: clamp(13px, 0.95vw, 17px);
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4vh;
+    }
+    .scenario-desc {
+      font-size: clamp(11px, 0.72vw, 13px);
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    /* Agent rows */
+    .agent-rows { display: flex; flex-direction: column; gap: 0.7vh; }
+    .agent-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7vw;
+      padding: 0.8vh 0.8vw;
+      border-radius: 10px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+    }
+    .agent-icon {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .agent-name { font-size: clamp(11px, 0.72vw, 13px); font-weight: 700; }
+    .agent-desc { font-size: clamp(10px, 0.62vw, 11px); color: #94A3B8; }
+
+    /* Stat tiles */
+    .stat-tiles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7vw;
+    }
+    .stat-tile {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 1vh 1vw;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .stat-value {
+      font-size: clamp(20px, 1.7vw, 30px);
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: clamp(9px, 0.58vw, 10px);
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3vh;
+    }
+    .stat-sub {
+      font-size: clamp(9px, 0.58vw, 10px);
+      color: #CBD5E1;
+      margin-top: 0.2vh;
+    }
+
+    /* ════════════════════════
+       RIGHT COLUMN
+       ════════════════════════ */
+    .right {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      padding: 1.8vh 1.8vw;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4vh;
+    }
+
+    .right-header { flex-shrink: 0; }
+    .right-eyebrow {
+      font-size: clamp(9px, 0.6vw, 11px);
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3vh;
+    }
+    .right-title {
+      font-size: clamp(13px, 0.95vw, 17px);
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+
+    /* Agent chips */
+    .chips-row {
+      display: flex;
+      justify-content: center;
+      gap: 1vw;
+      flex-shrink: 0;
+    }
+    .chip {
+      padding: 0.5vh 1.2vw;
+      border-radius: 100px;
+      border: 1px solid #E2E8F0;
+      background: #F8FAFC;
+      font-size: clamp(10px, 0.68vw, 12px);
+      font-weight: 600;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.4s ease;
+    }
+    .chip.lit {
+      background: #EEF2FF;
+      border-color: #C7D2FE;
+      color: #2251FF;
+    }
+
+    /* Connector */
+    .connector {
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Pipeline */
+    .pipeline-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2vh;
+    }
+
+    .pipeline-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Stage */
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1vh;
+      flex: 1;
+      max-width: 160px;
+    }
+
+    .node {
+      width: clamp(56px, 4.2vw, 72px);
+      height: clamp(56px, 4.2vw, 72px);
+      border-radius: 50%;
+      border: 2px solid #E2E8F0;
+      background: #F8FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+    .node svg {
+      width: clamp(20px, 1.5vw, 26px);
+      height: clamp(20px, 1.5vw, 26px);
+      stroke: #94A3B8;
+      transition: stroke 0.4s ease;
+    }
+
+    .stage.active .node {
+      border-color: #2251FF;
+      background: #EEF2FF;
+      box-shadow: 0 0 0 6px rgba(34,81,255,0.1), 0 0 22px rgba(34,81,255,0.25);
+      transform: scale(1.08);
+    }
+    .stage.active .node svg { stroke: #2251FF; }
+
+    .slabel {
+      font-size: clamp(11px, 0.75vw, 13px);
+      font-weight: 700;
+      color: #CBD5E1;
+      text-align: center;
+      transition: color 0.4s ease;
+      letter-spacing: 0.01em;
+    }
+    .stage.active .slabel { color: #0F172A; }
+
+    .sdesc {
+      font-size: clamp(9px, 0.62vw, 11px);
+      color: #E2E8F0;
+      text-align: center;
+      line-height: 1.4;
+      max-width: 120px;
+      transition: color 0.4s ease;
+    }
+    .stage.active .sdesc { color: #94A3B8; }
+
+    /* Arrow between stages */
+    .sarrow {
+      display: flex;
+      align-items: center;
+      padding-bottom: 5.5vh;
+      flex-shrink: 0;
+      opacity: 0.3;
+    }
+
+    /* Return arc */
+    .return-arc { width: 88%; }
+
+    /* ── Bottom bar ── */
+    .bottombar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 0 0.2vw;
+    }
+    .bottombar span { font-size: clamp(10px, 0.62vw, 11px); color: #CBD5E1; }
+  </style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div class="page">
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ══ LEFT ══ -->
+    <div class="left">
+
+      <div class="title-block">
+        <h1>Demo: Reflection Hub<br>with Kedro</h1>
+        <p>
+          A reusable reflection and learning workflow that standardises how AI agents are evaluated,
+          improved, and governed across teams. Built on Kedro, an open-source framework used by over
+          four thousand organisations for production-ready data and AI workflows.
+        </p>
+      </div>
+
+      <div class="scenario-card">
+        <div>
+          <div class="eyebrow">Demo Scenario</div>
+          <div class="scenario-title">Fictional Telco Company</div>
+          <div class="scenario-desc">
+            A fictional telco company with synthetic customer and product data running three AI agents —
+            B2B Sales, Consumer Marketing, and Customer Care — all following the same improvement lifecycle.
+          </div>
+        </div>
+
+        <div class="agent-rows">
+          <div class="agent-row">
+            <div class="agent-icon" style="background:#EEF2FF;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+            </div>
+            <div>
+              <div class="agent-name" style="color:#818CF8;">B2B Sales</div>
+              <div class="agent-desc">Outreach emails to enterprise clients</div>
+            </div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-icon" style="background:#F5F3FF;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+                <line x1="2" y1="20" x2="22" y2="20"/>
+              </svg>
+            </div>
+            <div>
+              <div class="agent-name" style="color:#A78BFA;">Consumer Marketing</div>
+              <div class="agent-desc">Promotional emails to subscribers</div>
+            </div>
+          </div>
+          <div class="agent-row">
+            <div class="agent-icon" style="background:#F0FDFA;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+                <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="agent-name" style="color:#2DD4BF;">Customer Care</div>
+              <div class="agent-desc">Support responses for service issues</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-tiles">
+          <div class="stat-tile">
+            <div class="stat-label">Customers</div>
+            <div class="stat-value" data-target="20">0</div>
+            <div class="stat-sub">synthetic profiles</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Products</div>
+            <div class="stat-value" data-target="15">0</div>
+            <div class="stat-sub">telco catalogue</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Cases / Agent</div>
+            <div class="stat-value" data-target="5">0</div>
+            <div class="stat-sub">per eval run</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Agents</div>
+            <div class="stat-value" data-target="3">0</div>
+            <div class="stat-sub">in portfolio</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ RIGHT ══ -->
+    <div class="right">
+
+      <div class="right-header">
+        <div class="right-eyebrow">Reusable across every agent</div>
+        <div class="right-title">The Improvement Lifecycle</div>
+      </div>
+
+      <!-- Agent chips -->
+      <div class="chips-row">
+        <div class="chip lit" id="chip-0">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+          B2B Sales Agent
+        </div>
+        <div class="chip" id="chip-1">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+          </svg>
+          Consumer Marketing Agent
+        </div>
+        <div class="chip" id="chip-2">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+            <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+          Customer Care Agent
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="connector">
+        <svg width="2" height="18" viewBox="0 0 2 18">
+          <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2251FF" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#2251FF" stop-opacity="0.05"/>
+            </linearGradient>
+          </defs>
+          <line x1="1" y1="0" x2="1" y2="18" stroke="url(#cg)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="pipeline-wrap">
+        <div class="pipeline-row">
+
+          <!-- Generate -->
+          <div class="stage active" id="s0">
+            <div class="node">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                <polyline points="2 17 12 22 22 17"/>
+                <polyline points="2 12 12 17 22 12"/>
+              </svg>
+            </div>
+            <div class="slabel">Generate</div>
+            <div class="sdesc">Runs the AI agent and produces outputs for evaluation</div>
+          </div>
+
+          <div class="sarrow">
+            <svg width="36" height="12" viewBox="0 0 36 12" fill="none">
+              <path d="M0 6H30" stroke="#E2E8F0" stroke-width="1.5"/>
+              <path d="M24 2L31 6L24 10" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- Evaluate -->
+          <div class="stage" id="s1">
+            <div class="node">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.4-4.4"/>
+                <path d="M8 11h6M11 8v6"/>
+              </svg>
+            </div>
+            <div class="slabel">Evaluate</div>
+            <div class="sdesc">Measures performance against business and quality criteria</div>
+          </div>
+
+          <div class="sarrow">
+            <svg width="36" height="12" viewBox="0 0 36 12" fill="none">
+              <path d="M0 6H30" stroke="#E2E8F0" stroke-width="1.5"/>
+              <path d="M24 2L31 6L24 10" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- Scout -->
+          <div class="stage" id="s2">
+            <div class="node">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <div class="slabel">Scout</div>
+            <div class="sdesc">Detects recurring issues: tone drift, policy drift or rubric misses</div>
+          </div>
+
+          <div class="sarrow">
+            <svg width="36" height="12" viewBox="0 0 36 12" fill="none">
+              <path d="M0 6H30" stroke="#E2E8F0" stroke-width="1.5"/>
+              <path d="M24 2L31 6L24 10" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- Reflect -->
+          <div class="stage" id="s3">
+            <div class="node">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <div class="slabel">Reflect</div>
+            <div class="sdesc">Generates targeted recommendations: prompt or skill updates, tool changes, or workflow changes</div>
+          </div>
+
+          <div class="sarrow">
+            <svg width="36" height="12" viewBox="0 0 36 12" fill="none">
+              <path d="M0 6H30" stroke="#E2E8F0" stroke-width="1.5"/>
+              <path d="M24 2L31 6L24 10" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- Apply -->
+          <div class="stage" id="s4">
+            <div class="node">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="slabel">Apply</div>
+            <div class="sdesc">Approves, versions, and applies changes through a governed process</div>
+          </div>
+
+        </div>
+
+        <!-- Return arc -->
+        <svg class="return-arc" height="32" viewBox="0 0 800 32" preserveAspectRatio="none" fill="none">
+          <path d="M 36 5 C 36 26, 764 26, 764 5"
+            stroke="#E2E8F0" stroke-width="1.5"
+            stroke-dasharray="6 5" fill="none"/>
+          <path d="M 42 11 L 36 5 L 42 0"
+            stroke="#CBD5E1" stroke-width="1.5"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Particles ──
+  const pc = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const d = document.createElement('div');
+    d.className = 'particle';
+    const sz = Math.random() * 5 + 3;
+    Object.assign(d.style, {
+      left:      Math.random() * 100 + '%',
+      top:       Math.random() * 100 + '%',
+      width:     sz + 'px',
+      height:    sz + 'px',
+      animation: `drift ${(Math.random() * 10 + 8).toFixed(1)}s ${(Math.random() * 8).toFixed(1)}s ease-in-out infinite`,
+    });
+    pc.appendChild(d);
+  }
+
+  // ── Counter animation ──
+  function countUp(el, target, dur) {
+    const t0 = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+      if (p < 1) requestAnimationFrame(tick);
+    })(performance.now());
+  }
+  document.querySelectorAll('.stat-value[data-target]').forEach((el, i) => {
+    setTimeout(() => countUp(el, +el.dataset.target, 1200), 300 + i * 180);
+  });
+
+  // ── Pipeline stage sequencer — hover-activated ──
+  const stages = [0,1,2,3,4].map(i => document.getElementById('s'+i));
+  const chips  = [0,1,2].map(i => document.getElementById('chip-'+i));
+  let activeStage = 0;
+
+  function activateStage(idx) {
+    stages[activeStage].classList.remove('active');
+    activeStage = idx;
+    stages[activeStage].classList.add('active');
+  }
+
+  stages.forEach((el, idx) => {
+    el.addEventListener('mouseenter', () => activateStage(idx));
+  });
+</script>
+</body>
+</html>

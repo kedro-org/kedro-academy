@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ab4f869f-af55-5de1-a1f2-c27a7977e1d9",
+    "input": {
+      "case_id": "regression_001",
+      "customer_id": "Mohammed Al-Rashid",
+      "product_id": "top-up-credit"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge missing top-up credit",
+          "check or restore credit action",
+          "24-hour processing context"
+        ],
+        "forbidden_mentions": [
+          "claim top-up was not received",
+          "ask customer to top up again without checking",
+          "fake case numbers"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case targets the need for a concrete next step and timeline, which was missing in the original response."
+      }
+    }
+  },
+  {
+    "id": "1e0e6963-b873-514f-aefe-a396430e032a",
+    "input": {
+      "case_id": "regression_002",
+      "customer_id": "Sophie Hartley",
+      "product_id": "5G-signal"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "acknowledge signal issue",
+          "network check or engineer visit",
+          "timeline for resolution"
+        ],
+        "forbidden_mentions": [
+          "dismiss as device fault without checking",
+          "promise specific fix date",
+          "blame customer's location"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case focuses on providing a clear resolution path and timeline, which was lacking in the original response."
+      }
+    }
+  }
+]

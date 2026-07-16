@@ -1,0 +1,12 @@
+{
+  "case_id": "case_004",
+  "customer_id": "cust_014",
+  "product_id": "prod_007",
+  "subject": "Upgrade Your Plan for More Value, Priya!",
+  "body": "Hi Priya,\n\nWe hope you're enjoying your Motorola Moto G! As a valued customer on our current plan, we wanted to share an exciting upgrade opportunity tailored just for you.\n\nIntroducing our Essential 20GB plan! For just \u00a318 a month, you\u2019ll receive:\n- 20GB of 4G/5G data, perfect for your browsing, social media, and streaming needs.\n- Unlimited calls and texts, so you can stay connected without worrying about extra charges.\n- 3GB of EU roaming included, making it easier to stay in touch while traveling.\n\nThis plan offers great value for everyday use, ensuring you have plenty of data to support your lifestyle.\n\nReady to upgrade? Click here to make the switch today!\n\nBest regards,\nYour Telco Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:36:35.458489+00:00"
+}

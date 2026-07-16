@@ -636,7 +636,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -654,7 +654,7 @@ wheels = [
 
 [[package]]
 name = "fastapi"
-version = "0.136.1"
+version = "0.139.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
@@ -663,9 +663,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/45/c130091c2dfa061bbfe3150f2a5091ef1adf149f2a8d2ae769ecaf6e99a2/fastapi-0.136.1.tar.gz", hash = "sha256:7af665ad7acfa0a3baf8983d393b6b471b9da10ede59c60045f49fbc89a0fa7f", size = 397448, upload-time = "2026-04-23T16:49:44.046Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/95/d3f0ae10836324a2eab98a52b61210ac609f08200bf4bb0dc8132d32f78a/fastapi-0.139.2.tar.gz", hash = "sha256:333145a6891e9b5b3cfceb69baf817e8240cde4d4588ae5a10bf56ffacb6255e", size = 423428, upload-time = "2026-07-16T15:06:17.912Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/ff/2e4eca3ade2c22fe1dea7043b8ee9dabe47753349eb1b56a202de8af6349/fastapi-0.136.1-py3-none-any.whl", hash = "sha256:a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f", size = 117683, upload-time = "2026-04-23T16:49:42.437Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/c7/cb03251d9dfb177246a9809a76f189d21df32dbd4a845951881d11323b7f/fastapi-0.139.2-py3-none-any.whl", hash = "sha256:b9ad015a835173d59865e2f5d8296fbc2b317bf56a2ba1a5bfbdd03de2fd4b1c", size = 130234, upload-time = "2026-07-16T15:06:19.557Z" },
 ]
 
 [[package]]
@@ -865,7 +865,7 @@ name = "importlib-metadata"
 version = "9.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp" },
+    { name = "zipp", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a9/01/15bb152d77b21318514a96f43af312635eb2500c96b55398d020c93d86ea/importlib_metadata-9.0.0.tar.gz", hash = "sha256:a4f57ab599e6a2e3016d7595cfd72eb4661a5106e787a95bcc90c7105b831efc", size = 56405, upload-time = "2026-03-20T06:42:56.999Z" }
 wheels = [
@@ -1363,7 +1363,7 @@ requires-dist = [
     { name = "jupyterlab", specifier = ">=3.0" },
     { name = "kedro", specifier = "~=1.3.1" },
     { name = "kedro-datasets", extras = ["json-jsondataset", "langchain-chatopenaidataset", "langfuse", "partitions-partitioneddataset", "text-textdataset", "yaml-yamldataset"], specifier = "~=9.3.0" },
-    { name = "kedro-viz", specifier = ">=12.4.0" },
+    { name = "kedro-viz", editable = "../../kedro-viz/package" },
     { name = "langfuse", specifier = ">=3.14.0" },
     { name = "notebook" },
     { name = "openai", specifier = ">=1.40" },
@@ -1395,8 +1395,7 @@ wheels = [
 
 [[package]]
 name = "kedro-viz"
-version = "12.4.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../../kedro-viz/package" }
 dependencies = [
     { name = "aiofiles" },
     { name = "click-default-group" },
@@ -1419,10 +1418,42 @@ dependencies = [
     { name = "watchfiles" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/8c/b878a919f07e1851377590dc37d113d3855a72ee915ae2fc9b6ff217162b/kedro_viz-12.4.0.tar.gz", hash = "sha256:c4ccc28b14395aff68fdf55d3c4edf8a2811eed9cd2667fe96c06a8cbcdd824f", size = 3160243, upload-time = "2026-05-27T16:39:37.678Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/a0/b57c15e8f981e281dbf17c09535c79c2e5fc2854b40d14b2279ef9aec1a0/kedro_viz-12.4.0-py3-none-any.whl", hash = "sha256:6ba49c5cd40c345666c0859221f13df9babf4e3d6203fcabc071985ed6480d6b", size = 3224450, upload-time = "2026-05-27T16:39:35.781Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "adlfs", marker = "extra == 'azure'", specifier = ">=2021.4" },
+    { name = "aiofiles", specifier = ">=22.1.0" },
+    { name = "click-default-group" },
+    { name = "fastapi", specifier = ">=0.100.0,<0.200.0" },
+    { name = "fsspec", specifier = ">=2021.4" },
+    { name = "gcsfs", marker = "extra == 'gcp'", specifier = ">=2021.4" },
+    { name = "ipython", specifier = ">=7.0.0,<9.0" },
+    { name = "kedro", specifier = ">=1.0.0" },
+    { name = "kedro-telemetry", specifier = ">=0.6.0" },
+    { name = "linkchecker", marker = "extra == 'docs'", specifier = ">=10.2.1" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.1" },
+    { name = "mkdocs-autorefs", marker = "extra == 'docs'", specifier = ">=1.4.1" },
+    { name = "mkdocs-get-deps", marker = "extra == 'docs'", specifier = ">=0.2.0" },
+    { name = "mkdocs-llmstxt", marker = "extra == 'docs'" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.6.11" },
+    { name = "mkdocs-material-extensions", marker = "extra == 'docs'", specifier = ">=1.3.1" },
+    { name = "mkdocs-mermaid2-plugin", marker = "extra == 'docs'", specifier = ">=1.2.1" },
+    { name = "mkdocstrings", marker = "extra == 'docs'", specifier = ">=0.29.1" },
+    { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = ">=0.29.1" },
+    { name = "networkx", specifier = ">=2.5" },
+    { name = "orjson", specifier = ">=3.9,<4.0" },
+    { name = "packaging", specifier = ">=23.0" },
+    { name = "pandas", specifier = ">=1.3" },
+    { name = "pathspec", specifier = ">=0.12.1" },
+    { name = "plotly", specifier = ">=4.0" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "s3fs", marker = "extra == 'aws'", specifier = ">=2021.4" },
+    { name = "secure", specifier = ">=2.0.1" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0,<1.0" },
+    { name = "watchfiles", specifier = ">=0.24.0" },
+    { name = "werkzeug", specifier = ">=3.0.0" },
 ]
+provides-extras = ["aws", "azure", "docs", "gcp"]
 
 [[package]]
 name = "langchain"
@@ -2258,7 +2289,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "(python_full_version < '3.11' and sys_platform == 'emscripten') or (python_full_version < '3.11' and sys_platform == 'win32') or (sys_platform != 'emscripten' and sys_platform != 'win32')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
@@ -2349,15 +2380,15 @@ wheels = [
 
 [[package]]
 name = "plotly"
-version = "6.7.0"
+version = "6.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "narwhals" },
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/7f/0f100df1172aadf88a929a9dbb902656b0880ba4b960fe5224867159d8f4/plotly-6.7.0.tar.gz", hash = "sha256:45eea0ff27e2a23ccd62776f77eb43aa1ca03df4192b76036e380bb479b892c6", size = 6911286, upload-time = "2026-04-09T20:36:45.738Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/96/07/795c79dbce40c39bece88e69d049babbd23ffa95b5d117f248db8ea03abb/plotly-6.9.0.tar.gz", hash = "sha256:967ad33e8c704fed051800d11d985eb206a9c795c14206b30a6f463ed9c67d0d", size = 6919903, upload-time = "2026-07-09T14:55:59.982Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/ad/cba91b3bcf04073e4d1655a5c1710ef3f457f56f7d1b79dcc3d72f4dd912/plotly-6.7.0-py3-none-any.whl", hash = "sha256:ac8aca1c25c663a59b5b9140a549264a5badde2e057d79b8c772ae2920e32ff0", size = 9898444, upload-time = "2026-04-09T20:36:39.812Z" },
+    { url = "https://files.pythonhosted.org/packages/24/18/d8544811ab076f876c4892b3714f5b0dad335e1dc33aef826df431b8325d/plotly-6.9.0-py3-none-any.whl", hash = "sha256:36bebe2f1bb13884774fe61689c329071446f6ce4a8927fb1f0d6fb24f581236", size = 9909646, upload-time = "2026-07-09T14:55:55.421Z" },
 ]
 
 [[package]]

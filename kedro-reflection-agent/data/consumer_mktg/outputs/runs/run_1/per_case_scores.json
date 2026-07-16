@@ -1,0 +1,352 @@
+[
+  {
+    "case_id": "case_005",
+    "trace_id": "d72e733bd8c3e1e74a5b6ec3ae7bfa73",
+    "dataset_run_id": "0f9d3fb3-08b9-4cda-bd13-c52d7ce2c3db",
+    "output": {
+      "case_id": "case_005",
+      "subject": "Exclusive Upgrade Offer Just for You, Tom!",
+      "body": "Hi Tom,\n\nAs a valued subscriber for over 7 years, we appreciate your loyalty and want to offer you an exciting upgrade opportunity! \n\nWith your current plan and your iPhone 14, you can enhance your experience with the Apple Watch S9 for just \u00a322 a month. This smartwatch is designed to keep you connected and informed, featuring advanced health and fitness tracking, ECG and blood oxygen monitoring, and even Crash Detection and Emergency SOS. It's the perfect companion to help you stay on top of your health and safety.\n\nDon\u2019t miss out on this chance to elevate your tech game! \n\nReady to upgrade? Click here to learn more and secure your Apple Watch S9 today!\n\nBest regards,\nYour Telco Team",
+      "prompt_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 693 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "offer_relevance",
+        "value": 0.8,
+        "comment": "The offer is relevant as it cross-sells the Apple Watch to a Premium Unlimited subscriber, but it doesn't explicitly mention the Unlimited 5G plan.",
+        "metadata": null
+      },
+      {
+        "name": "personalisation",
+        "value": 0.9,
+        "comment": "The message is personalized with the subscriber's name, tenure, and references their iPhone 14, making it highly specific.",
+        "metadata": null
+      },
+      {
+        "name": "urgency_cta",
+        "value": 0.7,
+        "comment": "The CTA is clear with 'Click here to learn more,' but it lacks the expected 'call' action and urgency is moderate.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is friendly and engaging, aligning well with the rubric's expected tone.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.8,
+        "comment": "The message avoids forbidden mentions but includes medical claims like 'ECG and blood oxygen monitoring,' which are not allowed.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.911111111111111,
+    "passing": false
+  },
+  {
+    "case_id": "case_004",
+    "trace_id": "d2090ab5d702135a9a961e074b17d5bd",
+    "dataset_run_id": "0f9d3fb3-08b9-4cda-bd13-c52d7ce2c3db",
+    "output": {
+      "case_id": "case_004",
+      "subject": "Upgrade Your Plan for More Value, Priya!",
+      "body": "Hi Priya,\n\nWe hope you're enjoying your Motorola Moto G! As a valued customer on our current plan, we wanted to share an exciting upgrade opportunity tailored just for you.\n\nIntroducing our Essential 20GB plan! For just \u00a318 a month, you\u2019ll receive:\n- 20GB of 4G/5G data, perfect for your browsing, social media, and streaming needs.\n- Unlimited calls and texts, so you can stay connected without worrying about extra charges.\n- 3GB of EU roaming included, making it easier to stay in touch while traveling.\n\nThis plan offers great value for everyday use, ensuring you have plenty of data to support your lifestyle.\n\nReady to upgrade? Click here to make the switch today!\n\nBest regards,\nYour Telco Team",
+      "prompt_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 701 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "offer_relevance",
+        "value": 1.0,
+        "comment": "The offer is a logical step-up from a Budget Prepaid plan to the Essential 20GB plan, matching the rubric's guidance.",
+        "metadata": null
+      },
+      {
+        "name": "personalisation",
+        "value": 0.5,
+        "comment": "The message mentions Priya's device but lacks specific references to her current Prepaid plan or tenure, making it partially personalized.",
+        "metadata": null
+      },
+      {
+        "name": "urgency_cta",
+        "value": 0.5,
+        "comment": "The CTA 'Click here to make the switch today!' is clear but does not match the rubric's expected 'reply' CTA, and lacks urgency.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is friendly and benefit-led, aligning well with the rubric's expected tone.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.5,
+        "comment": "The message does not mention 'no-contract or rolling option' as required, and lacks any forbidden mentions, but fails to fully comply with rubric requirements.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8333333333333334,
+    "passing": false
+  },
+  {
+    "case_id": "case_003",
+    "trace_id": "6e2d1b48e8b56df414ad397894b24439",
+    "dataset_run_id": "0f9d3fb3-08b9-4cda-bd13-c52d7ce2c3db",
+    "output": {
+      "case_id": "case_003",
+      "subject": "Upgrade Your Device for an Enhanced Experience, Mohammed!",
+      "body": "Hello Mohammed Al-Rashid,\n\nWe hope you\u2019re enjoying your Samsung Galaxy S24 on your current plan! As a valued customer for over 5 years, we want to offer you an exclusive opportunity to upgrade to the latest Samsung Galaxy S24 model.\n\nWith its Snapdragon 8 Gen 3 processor, stunning 6.8-inch Dynamic AMOLED display, and a remarkable 200MP main camera, this premium device is designed to elevate your mobile experience. Plus, the all-day battery life with 45W charging ensures you stay connected without interruptions.\n\nGiven your monthly data usage of 28GB, this upgrade not only enhances your device but also aligns perfectly with your lifestyle.\n\nReady to take your mobile experience to the next level? Click here to explore your upgrade options today!\n\nBest regards,\n[Your Company Name] Customer Care Team",
+      "prompt_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 807 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "offer_relevance",
+        "value": 0.0,
+        "comment": "The offer is irrelevant as it suggests upgrading to a device the subscriber already owns, the Samsung Galaxy S24.",
+        "metadata": null
+      },
+      {
+        "name": "personalisation",
+        "value": 0.6,
+        "comment": "The message references Mohammed's name, tenure, and data usage, but incorrectly assumes he doesn't already have the Samsung Galaxy S24.",
+        "metadata": null
+      },
+      {
+        "name": "urgency_cta",
+        "value": 0.3,
+        "comment": "The CTA is to 'explore your upgrade options' rather than the expected 'demo', and lacks urgency.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 0.8,
+        "comment": "The tone is friendly and benefit-led, aligning well with the expected tone.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.8,
+        "comment": "The message accurately describes the device features and avoids forbidden mentions, but incorrectly states the subscriber doesn't own the device.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.7222222222222222,
+    "passing": false
+  },
+  {
+    "case_id": "case_002",
+    "trace_id": "498ce0b1d20cd04d2a4df125ba991ed3",
+    "dataset_run_id": "0f9d3fb3-08b9-4cda-bd13-c52d7ce2c3db",
+    "output": {
+      "case_id": "case_002",
+      "subject": "Upgrade Your Plan for Unlimited 5G Benefits!",
+      "body": "Hi Sophie,\n\nWe hope you're enjoying your Samsung Galaxy A54 and your current plan! As a valued customer with us for over a year, we wanted to share an exciting upgrade opportunity tailored just for you.\n\nWith our new Unlimited 5G plan, you can enjoy the freedom of unlimited data, allowing you to stream, game, and work from anywhere without worrying about data limits. Plus, you'll get unlimited calls and texts, 10GB of EU roaming included, and priority network access for a seamless experience.\n\nThis premium plan is available for just \u00a355 a month. It\u2019s a fantastic way to enhance your mobile experience while ensuring you stay connected.\n\nReady to make the switch? Click here to upgrade today!\n\nBest regards,\nThe Team",
+      "prompt_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 721 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "offer_relevance",
+        "value": 0.8,
+        "comment": "The offer is relevant as it suggests upgrading from a capped plan to Unlimited 5G, but it doesn't explicitly mention the current Essential 20GB plan.",
+        "metadata": null
+      },
+      {
+        "name": "personalisation",
+        "value": 0.6,
+        "comment": "The message references Sophie's tenure and device, but lacks specific mention of her current plan or data usage patterns.",
+        "metadata": null
+      },
+      {
+        "name": "urgency_cta",
+        "value": 0.5,
+        "comment": "The CTA is clear but does not match the expected 'call' action, and lacks appropriate urgency.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 0.9,
+        "comment": "The tone is friendly and benefit-led, aligning well with the rubric's expected tone.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.7,
+        "comment": "The message avoids forbidden mentions but lacks required mentions of the current plan and data usage limits.",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8333333333333334,
+    "passing": false
+  },
+  {
+    "case_id": "case_001",
+    "trace_id": "a787ed315a3d3c8fdffcf6937d5117ab",
+    "dataset_run_id": "0f9d3fb3-08b9-4cda-bd13-c52d7ce2c3db",
+    "output": {
+      "case_id": "case_001",
+      "subject": "Upgrade to the iPhone 15 Pro, James!",
+      "body": "Hi James,\n\nAs a valued premium subscriber with us for over 3 years, we appreciate your loyalty! We noticed that you\u2019re currently using the iPhone 12 and regularly enjoy a data usage of 45GB per month on your plan.\n\nWe\u2019re excited to offer you an upgrade to the new iPhone 15 Pro for just \u00a355 a month. This device features the powerful A17 Pro chip, a stunning 48MP main camera with 3x optical zoom, and a ProMotion 120Hz always-on display. Plus, with its titanium build and all-day battery life, it\u2019s designed to enhance your mobile experience.\n\nDon\u2019t miss out on this opportunity to elevate your device and enjoy the ultimate iPhone experience!\n\nReady to upgrade? Click here to get started today!\n\nBest regards,\nYour Telco Team",
+      "prompt_version": 1,
+      "trace_id": null
+    },
+    "evaluations": [
+      {
+        "name": "subject_present",
+        "value": 1.0,
+        "comment": "Subject is non-empty.",
+        "metadata": null
+      },
+      {
+        "name": "length_in_range",
+        "value": 1.0,
+        "comment": "Body is 727 chars (within [300, 2000]).",
+        "metadata": null
+      },
+      {
+        "name": "no_fake_skus",
+        "value": 1.0,
+        "comment": "No SKU-shaped tokens outside known product names.",
+        "metadata": null
+      },
+      {
+        "name": "cta_present",
+        "value": 1.0,
+        "comment": "Body contains a recognisable call-to-action.",
+        "metadata": null
+      },
+      {
+        "name": "offer_relevance",
+        "value": 0.8,
+        "comment": "The offer is relevant as it pitches the iPhone 15 Pro, which is a logical upgrade from the iPhone 12, but it doesn't mention the device plan or trade-in options.",
+        "metadata": null
+      },
+      {
+        "name": "personalisation",
+        "value": 0.9,
+        "comment": "The message is personalized with James's name, tenure, current device, and data usage, making it highly specific to him.",
+        "metadata": null
+      },
+      {
+        "name": "urgency_cta",
+        "value": 0.5,
+        "comment": "The CTA 'Click here to get started today!' lacks the expected trial offer and doesn't create urgency effectively.",
+        "metadata": null
+      },
+      {
+        "name": "tone",
+        "value": 1.0,
+        "comment": "The tone is friendly and appreciative, aligning well with the rubric's expected tone.",
+        "metadata": null
+      },
+      {
+        "name": "compliance",
+        "value": 0.8,
+        "comment": "The message avoids forbidden mentions and provides accurate specs, but it misses required mentions like 'trade-in or monthly plan' and 'current usage near data limit.'",
+        "metadata": null
+      }
+    ],
+    "mean_score": 0.8888888888888888,
+    "passing": false
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "case_id": "case_002",
+  "customer_id": "cust_012",
+  "product_id": "prod_007",
+  "subject": "Assistance with Your 5G Signal Issue",
+  "body": "Dear Sophie Hartley,\n\nThank you for reaching out regarding the 5G signal issue you are experiencing at your home address. I understand how frustrating it can be when the service you expect is not available, especially when our coverage checker indicates that 5G should be accessible in your area.\n\nTo address this, I will escalate your concern to our technical team for further investigation into the network coverage in your location. They will look into any potential issues that may be affecting your 5G connectivity.\n\nAs a next step, I recommend checking your device settings to ensure that 5G is enabled. Additionally, if you could provide me with your exact address, it would help our team in pinpointing the issue more effectively.\n\nThank you for your patience as we work to resolve this matter. Please feel free to reach out if you have any further questions or concerns.\n\nWarm regards,\n\n[Your Name]  \nCustomer Care Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:40:08.857686+00:00"
+}

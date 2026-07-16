@@ -1,0 +1,12 @@
+{
+  "case_id": "case_001",
+  "customer_id": "cust_011",
+  "product_id": "prod_011",
+  "subject": "Upgrade to the iPhone 15 Pro, James!",
+  "body": "Hi James,\n\nAs a valued premium subscriber with us for over 3 years, we appreciate your loyalty! We noticed that you\u2019re currently using the iPhone 12 and regularly enjoy a data usage of 45GB per month on your plan.\n\nWe\u2019re excited to offer you an upgrade to the new iPhone 15 Pro for just \u00a355 a month. This device features the powerful A17 Pro chip, a stunning 48MP main camera with 3x optical zoom, and a ProMotion 120Hz always-on display. Plus, with its titanium build and all-day battery life, it\u2019s designed to enhance your mobile experience.\n\nDon\u2019t miss out on this opportunity to elevate your device and enjoy the ultimate iPhone experience!\n\nReady to upgrade? Click here to get started today!\n\nBest regards,\nYour Telco Team",
+  "trace_id": null,
+  "prompt_version": 1,
+  "model_name": "gpt-4o-mini",
+  "run_id": "run_1",
+  "generated_at": "2026-07-16T22:36:24.427220+00:00"
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "2005496e-b728-5196-9de9-8bce25924436",
+    "input": {
+      "case_id": "regression_001",
+      "customer_id": "Mohammed Al-Rashid",
+      "product_id": "Samsung Galaxy S24"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "Family Bundle context",
+          "Samsung Galaxy S24 features",
+          "monthly plan option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed delivery dates",
+          "made-up specs"
+        ],
+        "expected_cta": "demo",
+        "expected_tone": "friendly",
+        "notes": "This case targets the issue of incorrect personalization and offer relevance by ensuring the message accurately reflects the subscriber's current device and plan."
+      }
+    }
+  },
+  {
+    "id": "6f842297-6681-5723-8444-b1eca143c51c",
+    "input": {
+      "case_id": "regression_002",
+      "customer_id": "Priya",
+      "product_id": "Essential 20GB"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "current Prepaid plan",
+          "benefit of Essential 20GB contract",
+          "no-contract or rolling option"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "lock-in language",
+          "guaranteed speeds"
+        ],
+        "expected_cta": "reply",
+        "expected_tone": "friendly",
+        "notes": "This case focuses on ensuring the CTA matches the expected action and incorporates urgency, addressing the lack of urgency in previous messages."
+      }
+    }
+  },
+  {
+    "id": "4d295e7f-01c3-5350-bdc7-e738099090c7",
+    "input": {
+      "case_id": "regression_003",
+      "customer_id": "Sophie",
+      "product_id": "Unlimited 5G"
+    },
+    "expected_output": {
+      "rubric": {
+        "required_mentions": [
+          "current Essential 20GB plan",
+          "data usage approaching limit",
+          "Unlimited 5G benefit"
+        ],
+        "forbidden_mentions": [
+          "fake pricing",
+          "guaranteed 5G everywhere",
+          "unnecessary urgency"
+        ],
+        "expected_cta": "call",
+        "expected_tone": "friendly",
+        "notes": "This case aims to improve personalization by accurately referencing the subscriber's current plan and data usage patterns."
+      }
+    }
+  }
+]
