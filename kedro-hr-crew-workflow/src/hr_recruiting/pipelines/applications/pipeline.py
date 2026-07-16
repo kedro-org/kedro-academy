@@ -1,0 +1,58 @@
+"""Applications pipeline - agentic processing with CrewAI."""
+
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline.llm_context import llm_context_node
+
+from hr_recruiting.pipelines.applications.nodes import (
+    create_application,
+    parse_raw_resume,
+    run_resume_parsing_crew,
+)
+
+
+def create_pipeline() -> Pipeline:
+    """Create applications pipeline with agentic processing."""
+    return Pipeline(
+        [
+            # Parse raw resume (extract text only - deterministic)
+            node(
+                func=parse_raw_resume,
+                inputs="raw_resume",
+                outputs="parsed_raw_resume",
+                name="parse_raw_resume",
+            ),
+            # Create context for resume parser agent
+            llm_context_node(
+                outputs="resume_parser_context",
+                llm="llm_crew_ai",
+                prompts=[
+                    "resume_parser_agent_system_prompt",
+                    "resume_parsing_user_prompt",
+                ],
+                tools=[],
+                name="create_resume_parser_context",
+            ),
+            # Run crew execution with context
+            node(
+                func=run_resume_parsing_crew,
+                inputs=[
+                    "resume_parser_context",
+                    "parsed_raw_resume",
+                ],
+                outputs=["normalized_candidate_profile", "evidence_snippets"],
+                name="run_resume_parsing_crew",
+                tags=["agentic"],
+            ),
+            # Create Application object from candidate profile, job metadata, and evidence snippets
+            node(
+                func=create_application,
+                inputs=[
+                    "normalized_candidate_profile",
+                    "job_metadata",
+                    "evidence_snippets",
+                ],
+                outputs="application",
+                name="create_application",
+            ),
+        ]
+    )

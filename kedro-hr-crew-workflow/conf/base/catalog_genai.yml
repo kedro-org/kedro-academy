@@ -1,0 +1,59 @@
+# GenAI Configuration
+# This file contains all agentic/LLM-related dataset configurations
+
+# LLM Model Client for CrewAI
+llm_crew_ai:
+  type: hr_recruiting.datasets.crew_model_client.CrewAILLMDataset
+  model: gpt-4o-mini
+  kwargs:
+    temperature: 0.1
+  credentials: openai
+
+# Prompt Datasets
+# All prompts use LangChain PromptDataset
+# Following CrewAI pattern: agents.yaml (system prompts) and tasks.yaml (user prompts)
+
+# Prompt Datasets organized by pipeline
+# Screening Pipeline Prompts
+requirements_matcher_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/screening/requirements_matcher_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+requirements_matching_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/screening/requirements_matching_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_evaluator_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/screening/resume_evaluator_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_evaluation_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/screening/resume_evaluation_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+# Applications Pipeline Prompts
+resume_parser_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/applications/resume_parser_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
+
+resume_parsing_user_prompt:
+  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  filepath: data/prompts/applications/resume_parsing_user_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
