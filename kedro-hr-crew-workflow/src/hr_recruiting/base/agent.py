@@ -53,7 +53,7 @@ class BaseAgent(ABC, Generic[T]):
         if isinstance(system_prompt, dict):
             prompt_data = system_prompt
         elif hasattr(system_prompt, "dataset") and hasattr(system_prompt.dataset, "load"):
-            # Try to load the underlying dataset if it's a LangChainPromptDataset
+            # Try to load the underlying dataset if it's a PromptDataset wrapper
             try:
                 prompt_data = system_prompt.dataset.load()
             except Exception:

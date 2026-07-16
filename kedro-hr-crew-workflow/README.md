@@ -57,15 +57,16 @@ Building production-ready AI agent systems requires more than just agent orchest
 
 **Problem**: Prompts hardcoded in code require deployments to update, making experimentation difficult.
 
-**Solution**: Kedro's PromptDatasets store prompts as YAML files separate from code.
+**Solution**: Kedro's [`PromptDataset`](https://docs.kedro.org/projects/kedro-datasets/en/kedro-datasets-9.5.0/api/kedro_datasets_experimental/langchain.PromptDataset/) (from `kedro-datasets` 9.5+) stores prompts as YAML files separate from code and loads them as LangChain `ChatPromptTemplate` objects.
 
 ```yaml
 # data/prompts/screening/resume_evaluator_agent_system_prompt.yml
-role: Senior HR Analyst
-goal: Evaluate candidate qualifications against job requirements
-backstory: |
-  You are an experienced HR professional who excels at assessing
-  candidate fit based on evidence and job requirements...
+messages:
+  - role: system
+    content: |
+      role: Senior HR Recruiting Specialist and Candidate Evaluator
+      goal: Interpret pre-computed match scores and requirement evidence...
+      backstory: You are an experienced HR recruiting specialist...
 ```
 
 **Benefits**:
@@ -528,6 +529,15 @@ llm_crew_ai:
   kwargs:
     temperature: 0.1
   credentials: openai
+
+# Prompts are loaded via kedro-datasets experimental PromptDataset
+# Requires: kedro-datasets[langchain-promptdataset]~=9.5.0
+resume_evaluator_agent_system_prompt:
+  type: kedro_datasets_experimental.langchain.PromptDataset
+  filepath: data/prompts/screening/resume_evaluator_agent_system_prompt.yml
+  template: ChatPromptTemplate
+  dataset:
+    type: yaml.YAMLDataset
 ```
 
 ### Credentials

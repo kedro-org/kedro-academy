@@ -10,34 +10,34 @@ llm_crew_ai:
   credentials: openai
 
 # Prompt Datasets
-# All prompts use LangChain PromptDataset
+# All prompts use kedro-datasets experimental PromptDataset
 # Following CrewAI pattern: agents.yaml (system prompts) and tasks.yaml (user prompts)
 
 # Prompt Datasets organized by pipeline
 # Screening Pipeline Prompts
 requirements_matcher_agent_system_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/screening/requirements_matcher_agent_system_prompt.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 requirements_matching_user_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/screening/requirements_matching_user_prompt.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 resume_evaluator_agent_system_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/screening/resume_evaluator_agent_system_prompt.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 resume_evaluation_user_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/screening/resume_evaluation_user_prompt.yml
   template: ChatPromptTemplate
   dataset:
@@ -45,14 +45,14 @@ resume_evaluation_user_prompt:
 
 # Applications Pipeline Prompts
 resume_parser_agent_system_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/applications/resume_parser_agent_system_prompt.yml
   template: ChatPromptTemplate
   dataset:
     type: yaml.YAMLDataset
 
 resume_parsing_user_prompt:
-  type: kedro_datasets_experimental.langchain.LangChainPromptDataset
+  type: kedro_datasets_experimental.langchain.PromptDataset
   filepath: data/prompts/applications/resume_parsing_user_prompt.yml
   template: ChatPromptTemplate
   dataset:
