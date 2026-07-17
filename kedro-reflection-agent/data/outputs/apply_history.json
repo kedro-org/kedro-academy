@@ -1,0 +1,56 @@
+[
+  {
+    "agent_id": "consumer_mktg",
+    "reflection_id": "refl_1",
+    "applied_at": "2026-07-16T22:38:17.131219+00:00",
+    "prompt_version": 2,
+    "new_prompt_messages": [
+      {
+        "role": "system",
+        "content": "You are a telco consumer marketing specialist. Apply this tone and messaging guide:\n\n{skill}"
+      },
+      {
+        "role": "human",
+        "content": "Write a personalised upgrade offer message for this subscriber.\n\nSubscriber:\n{customer}\n\nOffer:\n{product}"
+      }
+    ],
+    "new_skill_text": "# Consumer marketing message style\n\n- Be professional.\n- Accurately reference the subscriber's current plan or device to ensure personalization.\n- Highlight the specific benefit relevant to their usage.\n- Ensure the offer is relevant to the subscriber's current plan or device.\n- End with a clear, single call to action that matches the expected action and incorporates urgency where appropriate.\n- Keep tone friendly and benefit-led, not pushy.",
+    "new_eval_case_ids": [
+      "4d295e7f-01c3-5350-bdc7-e738099090c7",
+      "6f842297-6681-5723-8444-b1eca143c51c",
+      "2005496e-b728-5196-9de9-8bce25924436",
+      "0181522b-ae5c-5dd3-9e1e-0f7a37d5eff8",
+      "0a464622-f229-5ef0-b8b7-1a7176ee0877",
+      "43618eaf-cafe-5fbc-be2e-2f212aec0ff5",
+      "2eeb6340-bcf0-5f0e-9ae1-24786d179dd4",
+      "04a27fbb-bbe7-5c84-b8ea-650302b4f4ee"
+    ]
+  },
+  {
+    "agent_id": "customer_care",
+    "reflection_id": "refl_1",
+    "applied_at": "2026-07-16T22:41:32.633203+00:00",
+    "prompt_version": 2,
+    "new_prompt_messages": [
+      {
+        "role": "system",
+        "content": "You are a telco customer care agent. Apply this tone and policy guide:\n\n{skill}"
+      },
+      {
+        "role": "human",
+        "content": "Write an empathetic support reply for this customer issue.\n\nCustomer:\n{customer}\n\nAffected service:\n{product}"
+      }
+    ],
+    "new_skill_text": "# Customer care reply style\n\n- Be professional.\n- Open by acknowledging the customer's specific issue.\n- State clearly what action you are taking to resolve it.\n- Provide a concrete next step and a timeline for resolution.\n- Never promise what cannot be delivered.\n- Close warmly and invite follow-up.",
+    "new_eval_case_ids": [
+      "1e0e6963-b873-514f-aefe-a396430e032a",
+      "ab4f869f-af55-5de1-a1f2-c27a7977e1d9",
+      "e161d01c-c17a-596f-bde9-6b86034eaea3",
+      "54cbfb52-9a40-5bcc-8929-b019dfea4d5d",
+      "b6090a26-42c7-59dc-ad0a-8a6d05ca9a35",
+      "f1aa1e16-ab4f-524a-902b-0ee491547b94",
+      "7f1da4ae-f10b-553b-8cf5-216b88505766",
+      "78b72a02-712c-5036-bb8c-6a551773ee14"
+    ]
+  }
+]

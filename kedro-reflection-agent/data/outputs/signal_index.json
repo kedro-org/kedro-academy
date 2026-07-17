@@ -1,0 +1,38 @@
+[
+  {
+    "signal_type": "low_pass_rate",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_1",
+    "created_at": "2026-07-16T22:37:24.779752+00:00"
+  },
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_1",
+    "created_at": "2026-07-16T22:37:24.780858+00:00"
+  },
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_1",
+    "created_at": "2026-07-16T22:37:24.781243+00:00"
+  },
+  {
+    "signal_type": "low_pass_rate",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_2",
+    "created_at": "2026-07-16T22:39:01.567939+00:00"
+  },
+  {
+    "signal_type": "tone_drift",
+    "agent_id": "consumer_mktg",
+    "run_id": "run_2",
+    "created_at": "2026-07-16T22:39:01.569336+00:00"
+  },
+  {
+    "signal_type": "low_pass_rate",
+    "agent_id": "customer_care",
+    "run_id": "run_1",
+    "created_at": "2026-07-16T22:40:57.978413+00:00"
+  }
+]

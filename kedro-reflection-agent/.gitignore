@@ -18,7 +18,7 @@ conf/**/*credentials*
 #     and need to be committed.
 #   - data/outputs/  is the only place pipelines write to. Ignore everything
 #     under it except the .gitkeep files that preserve the folder shape.
-data/outputs/**
+# data/outputs/** #for demo
 !data/outputs/**/.gitkeep
 !data/outputs/.gitkeep
 
