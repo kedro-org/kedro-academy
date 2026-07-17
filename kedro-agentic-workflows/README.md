@@ -484,6 +484,6 @@ These are wired into pipelines via [`llm_context_node`](src/kedro_agentic_workfl
 
 ### Recommendation
 
-Start with parameters if you are prototyping solo and want minimal setup. Move to datasets when you need versioned prompts, observability integration, credential isolation, or provider switching — which is typically when you move toward production or team collaboration.
+Start with parameters if you are prototyping and want minimal setup. Move to datasets when you need versioned prompts, observability integration, credential isolation, or provider switching — which is typically when you move toward production or team collaboration.
 
 Note that this project already uses both side by side: `user_id`, `docs_matches`, `intent_prompt_version`, and `model_name` live in [`parameters.yml`](conf/base/parameters.yml) as simple runtime values, while LLMs, prompts, and tracers are catalog datasets. The `${runtime_params:...}` resolver bridges the two — for example, `model_name` is a parameter that feeds into the `llm` dataset's `model` kwarg, and `intent_prompt_version` selects which prompt version to load from Langfuse/Opik.
