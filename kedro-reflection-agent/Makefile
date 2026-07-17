@@ -1,4 +1,4 @@
-.PHONY: install seed test app viz reset run-cycle setup
+.PHONY: install seed test app viz reset run-cycle setup demo-slides
 
 UV        ?= uv
 PYTHON    ?= uv run python
@@ -28,6 +28,10 @@ reset: seed
 
 app:
 	$(STREAMLIT) run app/main.py
+
+## Serve intro/outro demo slides (clean localhost URLs for screen recording)
+demo-slides:
+	$(PYTHON) docs/video/serve.py
 
 viz:
 	$(KEDRO) viz run --params agent_id=$(agent)
