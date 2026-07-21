@@ -1,4 +1,4 @@
-from typing import Any, NoReturn, Optional
+from typing import Any, NoReturn
 
 from kedro.io import AbstractDataset, DatasetError
 from crewai.llm import LLM
@@ -42,8 +42,8 @@ class CrewAILLMDataset(AbstractDataset[None, CrewAILLMFactory]):
     def __init__(
         self,
         model: str,
-        credentials: Optional[dict[str, str]] = None,
-        kwargs: Optional[dict[str, Any]] = None,
+        credentials: dict[str, str] | None = None,
+        kwargs: dict[str, Any] | None = None,
     ):
         self.model = model
         self.credentials = credentials or {}
