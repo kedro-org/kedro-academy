@@ -12,10 +12,7 @@ from typing import Any
 from crewai.tools import tool
 
 from hr_recruiting.base.utils import get_model_dump
-from hr_recruiting.pipelines.screening.helper import (
-    calculate_scoring_result,
-    match_requirements_to_snippets,
-)
+from hr_recruiting.pipelines.screening.helper import match_requirements_to_snippets
 from hr_recruiting.pipelines.screening.models import (
     RequirementsMatchingMetadata,
     RequirementsMatchingResult,
@@ -129,37 +126,3 @@ def build_requirements_matcher_tool(
         )
 
     return requirements_matcher_tool
-
-
-def build_scoring_tool(
-    scoring_config: dict[str, Any],
-) -> Any:
-    """Build scoring tool from datasets.
-
-    Args:
-        scoring_config: Scoring configuration with weights and bounds
-
-    Returns:
-        CrewAI tool object
-    """
-    @tool("Scoring Tool")
-    def scoring_tool(
-        match_results_data: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Calculate weighted match score based on requirement matches.
-
-        This tool calculates the overall match score and must-have coverage based on
-        match results from the Requirements Matcher. The match_results_data should
-        include both the match_results list and metadata with total requirement counts.
-
-        Args:
-            match_results_data: Dictionary from requirements_matcher tool output containing:
-                - match_results: List of match results (each with requirement, requirement_type, snippet_ids, confidence)
-                - metadata: Dictionary with total_must_have_requirements and total_nice_to_have_requirements
-
-        Returns:
-            Dictionary with match_score (0-100), must_have_coverage (0-1), and breakdown
-        """
-        return calculate_scoring_result(match_results_data, scoring_config)
-
-    return scoring_tool
