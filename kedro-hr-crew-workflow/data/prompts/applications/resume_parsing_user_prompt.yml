@@ -12,10 +12,10 @@ messages:
       agent: resume_parser
       
       Raw Resume Text:
-      {{raw_resume_text}}
+      {raw_resume_text}
       
       Candidate ID:
-      {{candidate_id}}
+      {candidate_id}
       
       CRITICAL RULES - READ CAREFULLY:
       - ONLY extract information that is EXPLICITLY stated in the provided resume text above
@@ -54,12 +54,12 @@ messages:
          - Each work history entry (source: "work_history", snippet_id format: "work_1", "work_2", etc.)
          - Each education entry (source: "education", snippet_id format: "edu_1", "edu_2", etc.)
       7. CRITICAL for evidence snippets text field - EXTRACT EXACTLY AS WRITTEN:
-         - For work history snippets: Format as "{Role} at {Company} | {Duration}: {Description}"
+         - For work history snippets: Format as "{{Role}} at {{Company}} | {{Duration}}: {{Description}}"
            * Use the EXACT description text from the resume - preserve ALL punctuation, sentence breaks, and formatting
            * If the resume has periods at the end of sentences, keep them. If it doesn't, don't add them
            * If sentences are separated by periods in the resume, keep them separated. If they're on separate lines, join them with periods
            * Copy the description text character-by-character from the resume - do not reformat or restructure
-         - For education snippets: Format as "{Degree} from {Institution} | {Year}: {Field/Coursework}"
+         - For education snippets: Format as "{{Degree}} from {{Institution}} | {{Year}}: {{Field/Coursework}}"
            * If the resume includes labels like "Minor:", "Relevant Coursework:", "Coursework:", etc., preserve them EXACTLY as written
            * Include the label text exactly as it appears (e.g., "Minor: Computer Science" not just "Computer Science")
            * Preserve all punctuation and formatting from the original resume text
@@ -73,4 +73,4 @@ messages:
       Return ONLY valid JSON with "candidate_profile" and "evidence_snippets" keys. Do not include any explanatory text, only the JSON.
       
       Output Schema:
-      {{output_schema}}
+      {output_schema}
