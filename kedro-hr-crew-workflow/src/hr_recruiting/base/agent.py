@@ -9,6 +9,8 @@ from typing import Any, Generic, TypeVar
 from crewai import Agent
 from kedro.pipeline.llm_context import LLMContext
 
+from hr_recruiting.datasets.crew_model_client import CrewAILLMFactory
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound="BaseAgent")
@@ -122,9 +124,9 @@ class BaseAgent(ABC, Generic[T]):
         # Create CrewAI Agent
         # CrewAI uses role, goal, backstory to structure the agent
         # The system prompt content is used as backstory
-        # Note: llm may be a factory (callable) due to pickle constraints, so call it if needed
+        # Note: llm may be a CrewAILLMFactory due to pickle constraints
         llm = self._llm_context.llm
-        if callable(llm) and not hasattr(llm, "call"):
+        if isinstance(llm, CrewAILLMFactory):
             llm = llm()
 
         self._agent = Agent(
