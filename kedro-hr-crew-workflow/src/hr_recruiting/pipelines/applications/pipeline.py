@@ -38,6 +38,7 @@ def create_pipeline() -> Pipeline:
                 inputs=[
                     "resume_parser_context",
                     "parsed_raw_resume",
+                    "params:crew_config",
                 ],
                 outputs=["normalized_candidate_profile", "evidence_snippets"],
                 name="run_resume_parsing_crew",

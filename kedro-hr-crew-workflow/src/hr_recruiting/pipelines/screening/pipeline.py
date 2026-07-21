@@ -54,6 +54,7 @@ def create_pipeline() -> Pipeline:
                     "requirements_matcher_context",
                     "resume_evaluator_context",
                     "scoring_config",
+                    "params:crew_config",
                 ],
                 outputs="screening_result",
                 name="orchestrate_screening_crew",

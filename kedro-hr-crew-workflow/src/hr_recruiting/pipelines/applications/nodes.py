@@ -47,6 +47,7 @@ def parse_raw_resume(raw_resume_doc: Any) -> dict[str, Any]:
 def run_resume_parsing_crew(
     resume_parser_context: LLMContext,
     parsed_resume: dict[str, Any],
+    crew_config: dict[str, Any],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Run CrewAI crew for resume parsing and normalization.
     
@@ -69,15 +70,15 @@ def run_resume_parsing_crew(
     )
 
     # Create crew
-    crew = Crew(
+    parsing_crew = Crew(
         agents=[resume_parser_agent],
         tasks=[task],
-        verbose=True,
-        tracing=False,
+        verbose=crew_config["verbose"],
+        tracing=crew_config["tracing"],
     )
 
     # Execute crew with retry logic for connection errors
-    result = execute_crew_with_retry(crew)
+    result = execute_crew_with_retry(parsing_crew)
 
     # Extract and structure results (already validated against ResumeParsingOutput model)
     parsing_result = extract_resume_parsing_result(result)

@@ -13,3 +13,8 @@ resume_id: "${runtime_params:resume_id, ds}"
 # Evidence extraction
 evidence:
   max_snippet_length: 200
+
+# CrewAI runtime options (toggle without code changes)
+crew_config:
+  verbose: true
+  tracing: false
