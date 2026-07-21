@@ -2,6 +2,7 @@
 
 import inspect
 import json
+import logging
 import re
 import textwrap
 import time
@@ -13,6 +14,8 @@ from kedro.pipeline.preview_contract import TextPreview
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
+
+logger = logging.getLogger(__name__)
 
 def get_document_id(doc: Document, id_name: str = "document_id") -> str:
     """Extract document ID from document properties (title or subject).
@@ -124,7 +127,12 @@ def execute_crew_with_retry(
             return crew.kickoff()
         except (ConnectionError, ConnectionResetError, OSError) as e:
             if attempt < max_retries - 1:
-                print(f"Connection error (attempt {attempt + 1}/{max_retries}): {e}. Retrying...")  # noqa: T201
+                logger.warning(
+                    "Connection error (attempt %s/%s): %s. Retrying...",
+                    attempt + 1,
+                    max_retries,
+                    e,
+                )
                 time.sleep(2 ** attempt)  # Exponential backoff
             else:
                 raise
