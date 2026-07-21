@@ -399,3 +399,91 @@ Based on the information we found regarding your issue: You have two claims. The
 
 If you have any further questions, feel free to ask.
 ```
+
+## 🔀 Datasets vs Parameters for Prompts and LLMs
+
+A common question is: *"Why use Kedro datasets for prompts and LLM configs when I could just put them in `parameters.yml`?"*
+
+Both approaches work. Plain parameters require no extra setup and are already supported — you can put prompt text and model settings in `parameters.yml` today and access them via `params:` in your pipeline. The GenAI datasets in this project exist because they provide capabilities that parameters structurally cannot.
+
+### The parameters approach (already works)
+
+Nothing stops you from defining prompts and model config as parameters:
+
+```yaml
+# conf/base/parameters.yml
+system_prompt: "You are a helpful insurance assistant. Classify the user's intent..."
+model_name: "gpt-4o"
+temperature: 0.0
+```
+
+Your node then receives raw values and must construct LLM clients and prompt objects manually:
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+def detect_intent(system_prompt: str, model_name: str, temperature: float, ...):
+    llm = ChatOpenAI(model=model_name, temperature=temperature)
+    prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ...])
+    chain = prompt | llm
+    ...
+```
+
+This is fine for quick prototyping and solo experiments.
+
+### The datasets approach (what this project uses)
+
+This project treats LLMs and prompts as catalog entries — typed datasets that return ready-to-use objects. For example, `conf/base/catalog_genai_config.yml` defines:
+
+```yaml
+llm:
+  type: langchain.ChatOpenAIDataset
+  kwargs:
+    model: ${runtime_params:model_name, gpt-4o}
+    temperature: 0.0
+  credentials: openai
+
+tool_prompt:
+  type: kedro_datasets_experimental.langchain.PromptDataset
+  filepath: data/response_generation/prompts/tool.txt
+  template: PromptTemplate
+  dataset:
+    type: text.TextDataset
+```
+
+And `conf/langfuse/catalog_genai_config.yml` adds provider-specific prompt tracking:
+
+```yaml
+intent_prompt:
+  type: kedro_datasets_experimental.langfuse.PromptDataset
+  filepath: data/intent_detection/prompts/intent_prompt_langfuse.json
+  prompt_name: "intent-classifier"
+  prompt_type: "chat"
+  credentials: langfuse_credentials
+  sync_policy: local
+  mode: sdk
+  load_args:
+    version: ${runtime_params:intent_prompt_version, 1}
+```
+
+These are wired into pipelines via [`llm_context_node`](src/kedro_agentic_workflows/pipelines/intent_detection/pipeline.py), which bundles the LLM and prompts into an [`LLMContext`](https://docs.kedro.org/en/stable/api/kedro.pipeline.LLMContext.html) object. The agent then accesses them as `self.context.llm` and `self.context.prompts["tool_prompt"]` — no manual construction needed.
+
+### When to use which
+
+| Concern | Parameters | Datasets |
+|---|---|---|
+| Setup effort | Minimal — add to `parameters.yml` | Catalog entry + prompt file (+ optional platform sync) |
+| Runtime overrides | Native via `--params` | Via `${runtime_params:...}` resolver (e.g. `model_name`, `intent_prompt_version`) |
+| What your node receives | Raw strings/dicts — you construct the LLM client and prompt objects yourself | Ready-to-use typed objects (`ChatOpenAI`, `PromptTemplate`, `ChatPromptTemplate`) via `LLMContext` |
+| Credential handling | Risk of API keys leaking via `--params` (shell history, logs) | Isolated via `credentials:` — keys never appear in parameter space |
+| Prompt versioning | Git only | Automatic — Kedro dataset versioning + platform-side tracking ([Langfuse](https://langfuse.com/), [Opik](https://www.comet.com/opik)) |
+| Observability integration | None | Native — [`langfuse.PromptDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.PromptDataset/) and [`opik.PromptDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.PromptDataset/) sync prompts to the platform, linking them to traces and evaluations |
+| Provider switching | Manual code changes to swap Langfuse ↔ Opik | `--env` flag, zero code changes (see [Provider switching at a glance](#provider-switching-at-a-glance)) |
+| Evaluation workflows | Must build custom | Built-in with [`langfuse.EvaluationDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/langfuse.EvaluationDataset/) / [`opik.EvaluationDataset`](https://docs.kedro.org/projects/kedro-datasets/en/latest/api/kedro_datasets_experimental/opik.EvaluationDataset/) |
+
+### Recommendation
+
+Start with parameters if you are prototyping and want minimal setup. Move to datasets when you need versioned prompts, observability integration, credential isolation, or provider switching — which is typically when you move toward production or team collaboration.
+
+Note that this project already uses both side by side: `user_id`, `docs_matches`, `intent_prompt_version`, and `model_name` live in [`parameters.yml`](conf/base/parameters.yml) as simple runtime values, while LLMs, prompts, and tracers are catalog datasets. The `${runtime_params:...}` resolver bridges the two — for example, `model_name` is a parameter that feeds into the `llm` dataset's `model` kwarg, and `intent_prompt_version` selects which prompt version to load from Langfuse/Opik.
