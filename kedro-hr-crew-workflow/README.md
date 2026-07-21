@@ -134,7 +134,7 @@ bounds:
 # conf/base/catalog.yml
 screening_result:
   type: json.JSONDataset
-  filepath: data/intermediate/screening/screening_result.json
+  filepath: "data/intermediate/screening/${runtime_params:resume_id}_screening_result.json"
 ```
 
 **Benefits**:
@@ -298,18 +298,22 @@ pip install -e .
 
 # Set up credentials
 cp conf/local/credentials.yml.example conf/local/credentials.yml
-# Edit conf/local/credentials.yml and add your OPENAI_API_KEY 
-# and OPENAI_API_BASE
+# Edit conf/local/credentials.yml and add your OPENAI_API_KEY
+# (base_url is optional — see conf/local/credentials.yml.example)
 ```
 
 ### Run the Pipeline
 
 ```bash
-# Run complete workflow
+# Run complete workflow (defaults to resume_id=ds)
 kedro run
 
-# Visualize pipeline
-kedro viz
+# Process a specific resume
+kedro run --params resume_id=se
+
+# Visualize pipeline (required because catalog paths use resume_id)
+kedro viz run --params resume_id=ds
+# kedro viz run --params resume_id=se
 ```
 
 ## Usage
@@ -340,6 +344,9 @@ kedro run
 
 # Process a specific resume
 kedro run --params resume_id=se
+
+# Toggle CrewAI logging without code changes
+kedro run --params crew_config.verbose=false
 ```
 
 **How it works:**
@@ -547,22 +554,25 @@ Edit `conf/local/credentials.yml`:
 ```yaml
 openai:
   api_key: "${oc.env:OPENAI_API_KEY}"
-  base_url: "${oc.env:OPENAI_API_BASE}"  # Optional: for Azure or proxies
+  # Optional: for Azure OpenAI or API proxies
+  # base_url: "${oc.env:OPENAI_API_BASE}"
 ```
 
 ### Data Paths
 
-Update `conf/base/catalog.yml` for your documents:
+Update `conf/base/catalog.yml` for your documents. Resume-related datasets use `resume_id` at runtime:
 
 ```yaml
 raw_job_posting:
   type: openxml.DocxDataset
-  filepath: data/sample/jobs/my_job_posting.docx
+  filepath: data/sample/jobs/raw_job_posting.docx
 
 raw_resume:
   type: openxml.DocxDataset
-  filepath: data/sample/resumes/candidate_resume.docx
+  filepath: "data/sample/resumes/${runtime_params:resume_id}.docx"
 ```
+
+See `conf/base/parameters.yml` for `resume_id` defaults and `crew_config` (verbose/tracing).
 
 ## Output Data Models
 
@@ -581,13 +591,13 @@ raw_resume:
 
 ## Output Files
 
-After running the pipeline:
+After running the pipeline (with default `resume_id=ds`):
 
 - **`intermediate/jobs/job_metadata.json`** - Structured job metadata
 - **`intermediate/jobs/job_requirements.json`** - Structured job requirements
-- **`intermediate/applications/application.json`** - Application containing parsed candidate information, evidence snippets and job metadata required for screening
-- **`intermediate/screening/screening_result.json`** - AI evaluation with recommendation
-- **`reports/hr_report.docx`** - Professional Word document with:
+- **`intermediate/applications/{resume_id}_application.json`** - Application containing parsed candidate information, evidence snippets and job metadata required for screening
+- **`intermediate/screening/{resume_id}_screening_result.json`** - AI evaluation with recommendation
+- **`reports/{resume_id}_hr_report.docx`** - Professional Word document with:
   - Executive summary
   - Match analysis
   - Candidate strengths and gaps
@@ -600,7 +610,7 @@ After running the pipeline:
 ### Common Issues
 
 - **Missing API Key**: Ensure `OPENAI_API_KEY` is set in `conf/local/credentials.yml`
-- **Document Not Found**: Verify file paths in `conf/base/catalog.yml`
+- **Document Not Found**: Verify `data/sample/resumes/{resume_id}.docx` exists and pass `--params resume_id=...` to `kedro run` and `kedro viz run`
 - **Import Errors**: Run `pip install -e .` to install dependencies
 - **Validation Errors**: Check Pydantic model structure matches your data
 
