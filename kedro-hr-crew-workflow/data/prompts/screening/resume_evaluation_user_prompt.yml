@@ -1,0 +1,36 @@
+# Resume Evaluation Task User Prompt
+# This defines the task configuration following CrewAI pattern (tasks.yaml)
+# Contains: description, expected_output, agent, context
+
+messages:
+  - role: user
+    content: |
+      description: Evaluate candidate {{candidate_name}} for {{job_title}} (application {{application_id}}).
+
+      PRE-COMPUTED SCORES (authoritative — do NOT recalculate or override):
+      - match_score: {{match_score}} (scale 0-100)
+      - must_have_coverage: {{must_have_coverage}} (scale 0.0-1.0, {{must_have_matches}} of {{total_must_have_requirements}} must-have requirements matched)
+
+      Your job is to interpret these scores and the match results below, then provide:
+      1. gaps — missing or weak qualifications (especially unmatched must-have requirements)
+      2. strengths — evidence-backed positives from the match results
+      3. risk_flags — concerns grounded in low-confidence matches or score/coverage patterns
+      4. recommendation — proceed, review, or reject using the STRICT thresholds below
+      5. qa_suggestions — next-step suggestions (empty array [] if recommendation is reject)
+
+      RECOMMENDATION THRESHOLDS (apply in order using the PRE-COMPUTED scores above):
+      STEP 1 — reject if match_score < 70 OR must_have_coverage < 0.70, or multiple must-have matches have confidence < 0.5
+      STEP 2 — proceed if match_score >= 80 AND must_have_coverage >= 0.85 AND every matched must-have has confidence >= 0.6 AND all must-have requirements are matched
+      STEP 3 — otherwise review
+
+      Do not contradict the pre-computed scores in your reasoning. Base recommendation only on {{match_score}} and {{must_have_coverage}}.
+
+      expected_output: A ScreeningEvaluationOutput JSON object with gaps, strengths, risk_flags, recommendation, and qa_suggestions only. recommendation MUST follow the thresholds using the pre-computed scores. qa_suggestions must be an array of strings (use [] when recommendation is reject). Format as valid JSON matching the schema below.
+
+      agent: resume_evaluator
+
+      Match Results from Requirements Matcher:
+      {{match_results}}
+
+      Output Schema:
+      {{output_schema}}
