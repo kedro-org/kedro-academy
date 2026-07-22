@@ -1,0 +1,82 @@
+
+raw_healthcare_data:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/healthcare_dataset.csv
+
+cleaned_healthcare_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/cleaned_healthcare_data.csv
+
+entity_summaries:
+  type: pickle.PickleDataset
+  filepath: data/03_primary/entity_summaries.pkl
+
+knowledge_graph:
+  type: networkx.JSONDataset
+  filepath: data/04_feature/knowledge_graph.json
+
+graph_metadata:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/graph_metadata.csv
+
+rag_documents:
+  type: pickle.PickleDataset
+  filepath: data/05_model_input/rag_documents.pkl
+
+chroma_collection:
+  type: kedro_datasets_experimental.chromadb.ChromaDBDataset
+  collection_name: healthcare_knowledge
+  client_type: persistent
+  client_settings:
+    path: data/06_models/chroma_db
+  metadata:
+    description: "Vector index of healthcare knowledge documents (OpenAI text-embedding-3-small)"
+
+openai_llm:
+  type: graphrag.datasets.OpenAIClientDataset
+
+agent_context:
+  type: MemoryDataset
+  copy_mode: assign
+  metadata:
+    kedro-viz:
+      layer: raw
+
+agent_prompt:
+  type: kedro_datasets_experimental.langchain.PromptDataset
+  filepath: data/prompts/healthcare_agent.json
+  template: ChatPromptTemplate
+  dataset:
+    type: json.JSONDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+agent_report:
+  type: json.JSONDataset
+  filepath: data/08_reporting/agent_report.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+entity_stats:
+  type: pandas.SQLTableDataset
+  table_name: entity_statistics
+  credentials: sqlite_db
+  save_args:
+    if_exists: replace
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# Same file as knowledge_graph — used as input to the graph_update pipeline
+existing_knowledge_graph:
+  type: networkx.JSONDataset
+  filepath: data/04_feature/knowledge_graph.json
+
+updated_graph_metadata:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/updated_graph_metadata.csv
+  metadata:
+    kedro-viz:
+      layer: model_output
