@@ -1,0 +1,5 @@
+sample_questions:
+  - "Which medical conditions have the highest average billing costs, and what medications are most prescribed for them?"
+  - "Which insurance providers cover the most emergency admissions, and for which conditions?"
+  - "Are there any patterns between blood type and medical condition in this dataset?"
+  - "What are the most common test results for cancer patients, and how does this compare to diabetes patients?"
