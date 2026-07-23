@@ -1,0 +1,36 @@
+# Email Templates for HR Candidate Communications
+# These templates are used by the email_draft_tool to generate candidate emails
+
+proceed:
+  subject: "Application Update: {job_title}"
+  body: |
+    Dear {candidate_name},
+
+    Thank you for your interest in the {job_title} position. We are pleased to inform you that your application has progressed to the next stage.
+
+    We look forward to speaking with you soon.
+
+    Best regards,
+    HR Team
+
+review:
+  subject: "Application Update: {job_title}"
+  body: |
+    Dear {candidate_name},
+
+    Thank you for your application for the {job_title} position. We are currently reviewing your application and will be in touch shortly.
+
+    Best regards,
+    HR Team
+
+reject:
+  subject: "Application Update: {job_title}"
+  body: |
+    Dear {candidate_name},
+
+    Thank you for your interest in the {job_title} position. After careful consideration, we have decided to move forward with other candidates whose qualifications more closely match our current needs.
+
+    We appreciate your interest and wish you the best in your job search.
+
+    Best regards,
+    HR Team
