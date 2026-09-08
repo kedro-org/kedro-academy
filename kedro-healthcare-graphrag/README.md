@@ -107,6 +107,7 @@ Add your OpenAI API key to `conf/local/credentials.yml` (gitignored):
 ```yaml
 openai:
   api_key: "sk-..."
+  # base_url: "https://api.openai.com/v1"  # optional; omit to use the OpenAI default
 
 sqlite_db:
   con: "sqlite:///data/07_model_output/healthcare_stats.db"
