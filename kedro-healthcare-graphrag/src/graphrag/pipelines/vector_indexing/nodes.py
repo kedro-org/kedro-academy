@@ -3,7 +3,7 @@ import logging
 
 import networkx as nx
 
-from graphrag.utils import get_openai_api_key
+from graphrag.utils import get_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -112,13 +112,11 @@ def create_rag_documents(entity_summaries: dict, knowledge_graph: nx.Graph) -> l
 
 def embed_documents(documents: list, embedding_model: str) -> dict:
     """Generate embeddings and return a ChromaDBDataset-compatible dict."""
-    from openai import OpenAI
-
     texts = [doc["text"] for doc in documents]
     ids = [doc["id"] for doc in documents]
     metadatas = [doc["metadata"] for doc in documents]
 
-    openai_client = OpenAI(api_key=get_openai_api_key())
+    openai_client = get_openai_client()
     logger.info("Generating embeddings for %d documents with %s...", len(texts), embedding_model)
     response = openai_client.embeddings.create(input=texts, model=embedding_model)
     embeddings = [item.embedding for item in response.data]
