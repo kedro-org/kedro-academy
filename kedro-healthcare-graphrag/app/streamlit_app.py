@@ -379,9 +379,8 @@ def load_agent_tools():
 
 @st.cache_resource
 def load_openai_client():
-    from openai import OpenAI
-    from graphrag.utils import get_openai_api_key
-    return OpenAI(api_key=get_openai_api_key())
+    from graphrag.utils import get_openai_client
+    return get_openai_client()
 
 
 @st.cache_resource
