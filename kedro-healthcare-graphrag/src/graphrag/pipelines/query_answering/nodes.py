@@ -116,8 +116,7 @@ def build_search_tool(knowledge_graph: nx.Graph, chroma_collection) -> Callable:
     Accepts either a dict (as returned by ChromaDBDataset._load) or a live chromadb Collection.
     """
     import chromadb
-    from openai import OpenAI
-    from graphrag.utils import get_openai_api_key
+    from graphrag.utils import get_openai_client
 
     if isinstance(chroma_collection, dict):
         # ChromaDBDataset._load() returns a plain dict — rebuild in-memory from pre-computed embeddings.
@@ -132,7 +131,7 @@ def build_search_tool(knowledge_graph: nx.Graph, chroma_collection) -> Callable:
     else:
         collection = chroma_collection
 
-    openai_client = OpenAI(api_key=get_openai_api_key())
+    openai_client = get_openai_client()
 
     def search_knowledge_base(query: str, n_results: int = 4) -> str:
         return _search_knowledge_base(collection, openai_client, knowledge_graph, query, n_results)
